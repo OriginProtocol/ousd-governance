@@ -20,6 +20,9 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  *   the amount of votes a user has and total votes through standard ERC20 balanceOf/totalSupply
  *   getters.
  * - Supports delegation of votes.
+ *
+ * TODO resolve issues with extending lockup expiry and fromTimestamp
+ * TODO vote boost never goes away after expiry ;(
  */
 
 contract VoteLocker is IVotes {
