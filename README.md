@@ -1,5 +1,5 @@
-## OUSD Governance
+# OUSD Governance
 
-# Running tests
+## Running tests
 
 `forge test`
