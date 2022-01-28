@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.2;
 
+import "./test/console.sol";
+
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -19,7 +21,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * - Implements the interfaces required by OpenZeppelin 4.x governance (VoteLocker) stack and exposes
  *   the amount of votes a user has and total votes through standard ERC20 balanceOf/totalSupply
  *   getters.
- * - Supports delegation of votes.
+ * - Removes vote delegation.
  *
  * TODO resolve issues with extending lockup expiry and fromTimestamp
  * TODO vote boost never goes away after expiry ;(
@@ -43,17 +45,12 @@ contract VoteLocker is IVotes {
         uint224 votes;
     }
 
-    bytes32 private constant _DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
-
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
     /// @notice Minimum lock time
     uint256 public constant MIN_LOCK_TIME = 7 * 86400; // 7 days
     /// @notice Vote boost if locked for maximum duration
-    uint256 public constant MAX_VOTE_BOOST = 4 * 10**18;
-    /// @notice Delegate information
-    mapping(address => address) private _delegates;
+    uint256 public constant MAX_VOTE_MULTIPLE = 4;
     /// @notice Checkpoints for each user
     mapping(address => Checkpoint[]) private _checkpoints;
     /// @notice Stake for each user
@@ -65,8 +62,12 @@ contract VoteLocker is IVotes {
 
     constructor(address _stakingToken) {
         stakingToken = ERC20(_stakingToken);
-        _name = string(bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name())));
-        _symbol = string(bytes.concat(bytes("vl"), bytes(stakingToken.symbol())));
+        _name = string(
+            bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
+        );
+        _symbol = string(
+            bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
+        );
         _decimals = stakingToken.decimals();
     }
 
@@ -102,6 +103,9 @@ contract VoteLocker is IVotes {
      * @dev See {ERC20-totalSupply}.
      */
     function totalSupply() public view virtual returns (uint256) {
+        if (_totalSupplyCheckpoints.length == 0) {
+            return 0;
+        }
         return
             _totalSupplyCheckpoints[_totalSupplyCheckpoints.length - 1].votes;
     }
@@ -140,9 +144,7 @@ contract VoteLocker is IVotes {
     /**
      * @dev Get the address `account` is currently delegating to.
      */
-    function delegates(address account) public view virtual returns (address) {
-        return _delegates[account];
-    }
+    function delegates(address account) public view virtual returns (address) {}
 
     /**
      * @dev Gets the current votes balance for `account`
@@ -170,7 +172,6 @@ contract VoteLocker is IVotes {
 
     /**
      * @dev Retrieve the `totalSupply` at the end of `blockNumber`. Note, this value is the sum of all balances.
-     * It is but NOT the sum of all the delegated votes!
      *
      * Requirements:
      *
@@ -188,10 +189,11 @@ contract VoteLocker is IVotes {
     /**
      * @dev Lookup a value in a list of (sorted) checkpoints.
      */
-    function _checkpointsLookup(
-        Checkpoint[] storage ckpts,
-        uint256 blockNumber
-    ) private view returns (uint256) {
+    function _checkpointsLookup(Checkpoint[] storage ckpts, uint256 blockNumber)
+        private
+        view
+        returns (uint256)
+    {
         // We run a binary search to look for the earliest checkpoint taken after `blockNumber`.
         //
         // During the loop, the index of the wanted checkpoint remains in the range [low-1, high).
@@ -217,24 +219,24 @@ contract VoteLocker is IVotes {
     }
 
     /**
-     * @dev Calculate the votes from a stake and expiry in a checkpoint. Note this does not
-     *      include delegated votes which are accounte for in the `votes` field of the checkpoint.
+     * @dev Calculate the votes from a stake and expiry in a checkpoint.
      */
     function _calculateVotesFromStake(
         uint256 amount,
         uint256 expiry,
         uint256 fromTimestamp
     ) private view returns (uint256) {
-        uint256 lockupProportion = (expiry - fromTimestamp) / MAX_LOCK_TIME;
-        uint256 boost = MAX_VOTE_BOOST * lockupProportion;
-        return amount * boost;
+        uint256 votes =
+            amount + ((expiry - fromTimestamp) * (MAX_VOTE_MULTIPLE - 1) * amount) /
+            MAX_LOCK_TIME;
+        return votes;
     }
 
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
-        _delegate(msg.sender, delegatee);
+        revert("Delegation is not supported");
     }
 
     /**
@@ -259,59 +261,47 @@ contract VoteLocker is IVotes {
     }
 
     /**
-     * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_BOOST and _expiry parameters.
+     * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _expiry parameters.
      */
     function deposit(uint256 amount, uint256 expiry) public virtual {
         require(expiry > block.timestamp, "Expiry must be in the future");
         require(
-            expiry < block.timestamp + MAX_LOCK_TIME,
+            expiry <= block.timestamp + MAX_LOCK_TIME,
             "Expiry must be before maximum lockup time"
         );
         require(
-            expiry > block.timestamp + MIN_LOCK_TIME,
+            expiry >= block.timestamp + MIN_LOCK_TIME,
             "Expiry must be after minimum lockup time"
         );
 
-        Stake memory existingStake = _stakes[msg.sender];
+        // Calculate old votes if user has an initialised stake
+        uint256 oldVotes = _stakes[msg.sender].initialised ? _calculateVotesFromStake(
+            _stakes[msg.sender].amount,
+            _stakes[msg.sender].expiry,
+            _stakes[msg.sender].fromTimestamp
+        ) : 0;
 
-        if (!existingStake.initialised) {
-            existingStake = Stake({
-                initialised: true,
-                fromTimestamp: block.timestamp,
-                amount: SafeCast.toUint224(amount),
-                expiry: expiry
-            });
-        } else {
-            // Update existing stake
-            // TODO allow fromTimestamp unchanged if expiry unchanged?
-            existingStake = Stake({
-                initialised: true,
-                fromTimestamp: block.timestamp,
-                amount: SafeCast.toUint224(existingStake.amount + amount),
-                expiry: expiry
-            });
-        }
+        // Update the stake, amount could be 0 and expiry could be the same
+        _stakes[msg.sender] = Stake({
+            initialised: true,
+            fromTimestamp: block.timestamp,
+            amount: _stakes[msg.sender].amount + SafeCast.toUint224(amount),
+            expiry: expiry
+        });
+
+        // Calculate new votes for updated stake
+        uint256 newVotes = _calculateVotesFromStake(
+            _stakes[msg.sender].amount,
+            _stakes[msg.sender].expiry,
+            block.timestamp
+        );
 
         if (amount > 0) {
             // If amount is 0, this might just be an expiry change
             stakingToken.transferFrom(msg.sender, address(this), amount);
         }
 
-        // Update votes by writing checkpoint
-        uint256 pos = _checkpoints[msg.sender].length;
-        uint256 oldVotes = pos == 0
-            ? 0
-            : _checkpoints[msg.sender][pos - 1].votes;
-        uint256 newVotes = _calculateVotesFromStake(
-            existingStake.amount,
-            existingStake.expiry,
-            block.timestamp
-        );
-        _writeCheckpoint(
-            _checkpoints[msg.sender],
-            _subtract,
-            newVotes - oldVotes
-        );
+        _writeCheckpoint(_checkpoints[msg.sender], _add, newVotes - oldVotes);
 
         // Mint the vote delta
         _mint(msg.sender, newVotes - oldVotes);
@@ -338,6 +328,18 @@ contract VoteLocker is IVotes {
         require(existingStake.amount > 0, "No stake to withdraw");
         require(existingStake.expiry <= block.timestamp, "Lockup not expired");
 
+        uint256 oldVotes = _calculateVotesFromStake(
+            existingStake.amount,
+            existingStake.expiry,
+            existingStake.fromTimestamp
+        );
+
+        uint256 newVotes = _calculateVotesFromStake(
+            existingStake.amount - SafeCast.toUint224(amount),
+            existingStake.expiry,
+            existingStake.fromTimestamp
+        );
+
         existingStake.amount -= SafeCast.toUint224(amount);
 
         if (amount > 0) {
@@ -345,21 +347,7 @@ contract VoteLocker is IVotes {
             stakingToken.transfer(msg.sender, amount);
         }
 
-        // Update votes by writing checkpoint
-        uint256 pos = _checkpoints[msg.sender].length;
-        uint256 oldVotes = pos == 0
-            ? 0
-            : _checkpoints[msg.sender][pos - 1].votes;
-        uint256 newVotes = _calculateVotesFromStake(
-            existingStake.amount,
-            existingStake.expiry,
-            block.timestamp
-        );
-        _writeCheckpoint(
-            _checkpoints[msg.sender],
-            _subtract,
-            oldVotes - newVotes
-        );
+        _writeCheckpoint(_checkpoints[msg.sender], _add, oldVotes - newVotes);
 
         // Burn the vote delta
         _burn(msg.sender, oldVotes - newVotes);
@@ -373,51 +361,8 @@ contract VoteLocker is IVotes {
     }
 
     /**
-     * @dev Change delegation for `delegator` to `delegatee`.
-     *
-     * Emits events {DelegateChanged} and {DelegateVotesChanged}.
+     * @dev Withdraws all tokens from the account.
      */
-    function _delegate(address delegator, address delegatee) internal virtual {
-        address currentDelegate = delegates(delegator);
-        uint256 delegatorBalance = balanceOf(delegator);
-        _delegates[delegator] = delegatee;
-
-        emit DelegateChanged(delegator, currentDelegate, delegatee);
-
-        _moveVotingPower(currentDelegate, delegatee, delegatorBalance);
-    }
-
-    /**
-     * @dev Move voting power from `src` to `dst`
-     *
-     * Emits events {DelegateVotesChanged}.
-     */
-    function _moveVotingPower(
-        address src,
-        address dst,
-        uint256 amount
-    ) private {
-        if (src != dst && amount > 0) {
-            if (src != address(0)) {
-                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
-                    _checkpoints[src],
-                    _subtract,
-                    amount
-                );
-                emit DelegateVotesChanged(src, oldWeight, newWeight);
-            }
-
-            if (dst != address(0)) {
-                (uint256 oldWeight, uint256 newWeight) = _writeCheckpoint(
-                    _checkpoints[dst],
-                    _add,
-                    amount
-                );
-                emit DelegateVotesChanged(dst, oldWeight, newWeight);
-            }
-        }
-    }
-
     function _writeCheckpoint(
         Checkpoint[] storage ckpts,
         function(uint256, uint256) view returns (uint256) op,

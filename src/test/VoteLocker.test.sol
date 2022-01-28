@@ -35,7 +35,16 @@ contract VoteLockerTest is DSTest {
     assertEq(voteLocker.decimals(), 18);
   }
 
-  function testCreateLockup() public {
+  function testCreateMaxLockup() public {
+    governanceToken.approve(address(voteLocker), 100 * 10 ** 18);
+    voteLocker.deposit(100 * 10 ** 18, block.timestamp + (86400 * 4 * 365));
+    assertEq(voteLocker.balanceOf(address(this)), 400 * 10 ** 18);
+  }
+
+  function testCreateMinLockup() public {
+    governanceToken.approve(address(voteLocker), 100 * 10 ** 18);
+    voteLocker.deposit(100 * 10 ** 18, block.timestamp + (86400 * 7));
+    assertEq(voteLocker.balanceOf(address(this)), 100 * 10 ** 18);
   }
 
   function testFailLockupMinimum() public {
@@ -49,23 +58,5 @@ contract VoteLockerTest is DSTest {
   }
 
   function testIncreaseLockupExpiry() public {
-  }
-
-  function testDelegate() public {
-  }
-
-  function testFailWithdrawDelegateTokens() public {
-  }
-
-  function testUndelegate() public {
-  }
-
-  function testFailUndelegateNoDelegation() public {
-  }
-
-  function testTotalSupplyOnDelegate() public {
-  }
-
-  function testTotalSupplyOnUndelegate() public {
   }
 }
