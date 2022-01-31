@@ -13,22 +13,24 @@
     provider
   )
 
-  const proposalCount = governanceContract.proposalCount()
-
-  console.debug('Proposal count:', proposalCount)
-
-  const proposalGets = []
-  const proposalStateGets = []
-  for (const i = 0; i < proposalCount; i++) {
-    proposalGets.push(governanceContract.proposals(i))
-    proposalStateGets.push(governanceContract.state(i))
-  }
+  const proposals = governanceContract.proposalCount().then(async count => {
+    console.debug(`Found ${count.toString()} proposals`)
+    const proposalGets = []
+    const proposalStateGets = []
+    for (let i = 1; i <= count; i++) {
+      proposalGets.push(governanceContract.proposals(i))
+      proposalStateGets.push(governanceContract.state(i))
+    }
+    return {
+      count,
+      proposals: await Promise.all(proposalGets),
+      states: await Promise.all(proposalStateGets)
+    }
+  })
 </script>
 
-{#await Promise.all(proposalGets) then proposals}
-  {#await Promise.all(proposalStateGets) then proposalStates}
-    {#each proposals as proposal, i}
-      <ProposalPreview {proposal} state={proposalStates[i]} />
-    {/each}
-  {/await}
+{#await proposals then proposalData}
+  {#each proposalData.proposals as proposal, i}
+    <ProposalPreview {proposal} state={proposalData.states[i]} />
+  {/each}
 {/await}
