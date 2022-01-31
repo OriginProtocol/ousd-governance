@@ -33,4 +33,5 @@
       {state} Unknown
     {/if}
   </div>
+  <a href="/proposals/{proposal[0]}" class="btn btn-primary">View</a>
 </div>
