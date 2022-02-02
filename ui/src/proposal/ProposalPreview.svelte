@@ -1,26 +1,15 @@
-<style>
-</style>
-
 <script>
-  export let proposal = {}
-  export let state = 0
+  export let proposal = {};
+  export let state = 0;
+  export let index = 0;
 </script>
 
-<div class="pt-4">
-  <div>
-    <strong>Proposal ID:</strong>
+<tr class={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
     {proposal[0].toString()}
-  </div>
-  <div>
-    <strong>Proposer:</strong>
-    {proposal[1]}
-  </div>
-  <div>
-    <strong>Executed:</strong>
-    {proposal[3]}
-  </div>
-  <div>
-    <strong>State:</strong>
+  </td>
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> {proposal[1]} </td>
+  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
     {#if state == 0}
       Pending
     {:else if state == 1}
@@ -32,6 +21,5 @@
     {:else}
       {state} Unknown
     {/if}
-  </div>
-  <a href="/proposals/{proposal[0]}" class="btn btn-primary">View</a>
-</div>
+  </td>
+</tr>
