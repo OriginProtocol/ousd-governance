@@ -1,10 +1,15 @@
 <script>
+  import { goto } from '$app/navigation';
+
   export let proposal = {};
   export let state = 0;
   export let index = 0;
 </script>
 
-<tr class={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+<tr
+  class={(index % 2 === 0 ? 'bg-white' : 'bg-gray-50') + ' cursor-pointer hover:bg-gray-100'}
+  on:click={() => goto(`/proposal/${proposal[0].toString()}`)}
+>
   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
     {proposal[0].toString()}
   </td>
