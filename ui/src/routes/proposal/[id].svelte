@@ -9,6 +9,8 @@
 </script>
 
 <script>
+  import ProposalDetails from '$components/proposal/ProposalDetails.svelte';
+
   export let proposalId;
 </script>
 
@@ -16,5 +18,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-6">
     <h1 class="text-2xl font-semibold text-gray-900">Proposal {proposalId}</h1>
   </div>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8" />
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+    <ProposalDetails {proposalId} />
+  </div>
 </div>
