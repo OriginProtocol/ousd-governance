@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ProposalList from '../../proposal/ProposalList.svelte';
+  import ProposalList from '$components/proposal/ProposalList.svelte';
 </script>
 
 <div class="py-6">

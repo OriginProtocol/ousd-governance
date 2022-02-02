@@ -1,14 +1,7 @@
 <script>
-  import { ethers } from 'ethers';
-  import governanceAbi from '../abi/Governor.js';
-  import ProposalPreview from './ProposalPreview.svelte';
-  import Loading from '../components/Loading.svelte';
-
-  const provider = new ethers.providers.JsonRpcProvider(
-    'https://eth-mainnet.alchemyapi.io/v2/6vvlq0n_hjyPK4myUTJ4PGdD9AXjlPDq'
-  );
-  const governanceAddress = '0x72426BA137DEC62657306b12B1E869d43FeC6eC7';
-  const governanceContract = new ethers.Contract(governanceAddress, governanceAbi, provider);
+  import ProposalPreview from '$components/proposal/ProposalPreview.svelte';
+  import Loading from '$components/Loading.svelte';
+  import { governanceContract } from '$src/stores.js';
 
   const proposals = governanceContract.proposalCount().then(async (count) => {
     console.debug(`Found ${count.toString()} proposals`);

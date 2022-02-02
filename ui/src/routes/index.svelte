@@ -1,5 +1,5 @@
 <script>
-  import VoteStats from '../components/VoteStats.svelte';
+  import VoteStats from '$components/VoteStats.svelte';
 </script>
 
 <div class="py-6">
