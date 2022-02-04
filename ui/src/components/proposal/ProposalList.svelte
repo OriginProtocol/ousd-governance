@@ -1,10 +1,10 @@
 <script>
+  import { goto } from '$app/navigation';
   import ProposalPreview from '$components/proposal/ProposalPreview.svelte';
   import Loading from '$components/Loading.svelte';
   import { governanceContract } from '$src/stores.js';
 
   const proposals = governanceContract.proposalCount().then(async (count) => {
-    console.debug(`Found ${count.toString()} proposals`);
     const proposalGets = [];
     const proposalStateGets = [];
     for (let i = 1; i <= count; i++) {
@@ -22,6 +22,15 @@
 {#await proposals}
   <Loading />
 {:then proposalData}
+  <div class="mb-5">
+    <button
+      type="button"
+      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      on:click={() => goto(`/proposal/new`)}
+    >
+      New Proposal
+    </button>
+  </div>
   <div class="flex flex-col">
     <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
