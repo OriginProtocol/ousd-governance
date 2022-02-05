@@ -223,8 +223,8 @@ contract VoteLocker {
         uint256 expiry,
         uint256 fromTimestamp
     ) private view returns (uint256) {
-        uint256 votes =
-            amount + ((expiry - fromTimestamp) * (MAX_VOTE_MULTIPLE - 1) * amount) /
+        uint256 votes = amount +
+            ((expiry - fromTimestamp) * (MAX_VOTE_MULTIPLE - 1) * amount) /
             MAX_LOCK_TIME;
         return votes;
     }
@@ -272,11 +272,13 @@ contract VoteLocker {
         );
 
         // Calculate old votes if user has an initialised stake
-        uint256 oldVotes = _stakes[msg.sender].initialised ? _calculateVotesFromStake(
-            _stakes[msg.sender].amount,
-            _stakes[msg.sender].expiry,
-            _stakes[msg.sender].fromTimestamp
-        ) : 0;
+        uint256 oldVotes = _stakes[msg.sender].initialised
+            ? _calculateVotesFromStake(
+                _stakes[msg.sender].amount,
+                _stakes[msg.sender].expiry,
+                _stakes[msg.sender].fromTimestamp
+            )
+            : 0;
 
         // Update the stake, amount could be 0 and expiry could be the same
         _stakes[msg.sender] = Stake({

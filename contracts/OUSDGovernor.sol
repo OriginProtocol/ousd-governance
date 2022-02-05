@@ -3,16 +3,15 @@ pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/Governor.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorSettings.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorCountingSimple.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorVotes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorTimelockControl.sol";
-import "./VoteLocker.sol";
 
 contract OUSDGovernor is
     Governor,
     GovernorSettings,
-    GovernorCountingSimple,
+    GovernorCompatibilityBravo,
     GovernorVotes,
     GovernorVotesQuorumFraction,
     GovernorTimelockControl
@@ -29,7 +28,7 @@ contract OUSDGovernor is
         GovernorTimelockControl(_timelock)
     {}
 
-    // The following functions are overrides required by Solidity.
+    // The following functions are overrides require by Solidity.
 
     function votingDelay()
         public
@@ -70,7 +69,7 @@ contract OUSDGovernor is
     function state(uint256 proposalId)
         public
         view
-        override(Governor, GovernorTimelockControl)
+        override(Governor, IGovernor, GovernorTimelockControl)
         returns (ProposalState)
     {
         return super.state(proposalId);
@@ -81,7 +80,11 @@ contract OUSDGovernor is
         uint256[] memory values,
         bytes[] memory calldatas,
         string memory description
-    ) public override(Governor, IGovernor) returns (uint256) {
+    )
+        public
+        override(Governor, GovernorCompatibilityBravo, IGovernor)
+        returns (uint256)
+    {
         return super.propose(targets, values, calldatas, description);
     }
 
@@ -125,7 +128,7 @@ contract OUSDGovernor is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(Governor, GovernorTimelockControl)
+        override(Governor, IERC165, GovernorTimelockControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
