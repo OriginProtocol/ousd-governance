@@ -3,5 +3,6 @@ cache/
 /out/
 ui/public/build/
 __pycache__
+build/*
 
 .DS_Store
