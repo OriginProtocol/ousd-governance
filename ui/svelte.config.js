@@ -1,6 +1,9 @@
 import adapter from '@sveltejs/adapter-auto';
 import preprocess from 'svelte-preprocess';
 import { resolve } from 'path';
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
+import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
+import { build } from 'esbuild';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -15,11 +18,28 @@ const config = {
     target: '#svelte',
 
     vite: {
+      define: {
+        Buffer: {},
+        global: {}
+      },
       resolve: {
         alias: {
           $src: resolve('./src'),
           $components: resolve('./src/components')
         }
+      },
+      build: {
+        define: {
+          global: 'globalThis'
+        },
+        plugins: [
+          NodeGlobalsPolyfillPlugin({
+            process: true,
+            buffer: true,
+            define: { 'process.env.NODE_ENV': '"production"' } // https://github.com/evanw/esbuild/issues/660
+          }),
+          NodeModulesPolyfillPlugin()
+        ]
       }
     }
   }

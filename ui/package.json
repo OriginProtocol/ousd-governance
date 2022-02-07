@@ -29,9 +29,15 @@
   },
   "type": "module",
   "dependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+    "@walletconnect/web3-provider": "^1.7.1",
     "autoprefixer": "^10.4.2",
     "ethers": "^5.5.3",
     "postcss": "^8.4.5",
-    "tailwindcss": "^3.0.18"
+    "svelte-web3": "^3.3.4",
+    "tailwindcss": "^3.0.18",
+    "walletlink": "^2.4.6",
+    "web3modal": "^1.9.5"
   }
 }

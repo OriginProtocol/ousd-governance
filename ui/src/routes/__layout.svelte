@@ -2,6 +2,8 @@
   import '../app.css';
   import { page } from '$app/stores';
 
+  import Web3Button from '$components/Web3Button.svelte';
+
   let activeClass =
     'bg-indigo-800 text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md';
   let inactiveClass =
@@ -94,6 +96,13 @@
   </div>
 
   <div class="md:pl-64 flex flex-col flex-1">
+    <div
+      class="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200"
+    >
+      <div class="flex items-right">
+        <Web3Button />
+      </div>
+    </div>
     <slot />
   </div>
 </div>
