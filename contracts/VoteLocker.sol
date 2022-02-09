@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.2;
 
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/utils/math/Math.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/token/ERC20/ERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/utils/math/SafeCast.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/utils/cryptography/ECDSA.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/Math.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @title VoteLocker

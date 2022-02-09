@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/Governor.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorSettings.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorVotes.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.4.2/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/Governor.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorSettings.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorVotes.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
+
 
 contract OUSDGovernor is
     Governor,
@@ -14,7 +16,8 @@ contract OUSDGovernor is
     GovernorCompatibilityBravo,
     GovernorVotes,
     GovernorVotesQuorumFraction,
-    GovernorTimelockControl
+    GovernorTimelockControl,
+    GovernorPreventLateQuorum
 {
     constructor(ERC20Votes _token, TimelockController _timelock)
         Governor("OUSDGovernor")
