@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
-import { addressesContracts, governanceContract } from "constants";
+import { contracts, governanceContract } from "constants";
+import { truncateEthAddress } from "utils/index";
 
 export const ProposalActionsTable = ({ proposalActions }) => {
   const decodeCalldata = (signature: string, calldata: string) => {
@@ -18,10 +19,10 @@ export const ProposalActionsTable = ({ proposalActions }) => {
   };
 
   const addressContractName = (address: String) => {
-    if (addressesContracts[address]) {
-      return addressesContracts[address];
-    }
-    return address;
+    return (
+      contracts.find((c) => c.address === address)?.name ||
+      truncateEthAddress(address)
+    );
   };
 
   return (
