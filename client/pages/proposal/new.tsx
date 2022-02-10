@@ -1,24 +1,26 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
-import { abi } from "constants/index";
+import { contracts } from "constants/index";
+import { abort } from "process";
 
 const ProposalNew: NextPage = () => {
+  const router = useRouter();
   const [proposalActions, setProposalActions] = useState<string[]>([]);
-  const [displayAddActionForm, setDisplayAddActionForm] =
-    useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-6">
         <h1 className="text-2xl font-semibold text-gray-900">New Proposal</h1>
       </div>
-      {displayAddActionForm ? (
-        <ProposalActionAddForm />
-      ) : proposalActions.length === 0 ? (
-        <ProposalActionsTableEmpty
-          onClickAdd={() => setDisplayAddActionForm(true)}
-        />
+      <ProposalActionAddModal
+        modalOpen={modalOpen}
+        onModalClose={() => setModalOpen(false)}
+      />
+      {proposalActions.length === 0 ? (
+        <ProposalActionsTableEmpty onClickAdd={() => setModalOpen(true)} />
       ) : (
         <>Actions</>
       )}
@@ -26,69 +28,174 @@ const ProposalNew: NextPage = () => {
   );
 };
 
-export const ProposalActionAddForm = () => {
-  const [selectedContract, setSelectedContract] = useState<string>("");
-  const [selectedFunction, setSelectedFunction] = useState<string>("");
+export const ProposalActionAddModal = ({
+  modalOpen,
+  onModalClose,
+  onAddAction,
+}) => {
+  const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [contractAddress, setContractAddress] = useState<string>("");
+  const [contractAbi, setContractAbi] = useState<string>("");
+  const [contractFunction, setContractFunction] = useState<string>("");
 
-  const selectedContractFunctions =
-    selectedContract &&
-    abi[selectedContract] &&
-    abi[selectedContract].filter(
+  return (
+    <div
+      id="proposal-add-modal"
+      className={`modal ${modalOpen && "modal-open"}`}
+    >
+      <div className="modal-box">
+        <ul className="steps steps-vertical md:steps-horizontal w-full mb-5">
+          <li className="step step-primary">Contract</li>
+          <li className={`step ${step === 1 && "step-primary"}`}>
+            Function and Inputs
+          </li>
+          <li className="step">Done</li>
+        </ul>
+        {step === 0 && (
+          <ProposalActionAddContract
+            onSelectContract={setContractAddress}
+            onSelectAbi={setContractAbi}
+          />
+        )}
+        {step === 1 && <ProposalActionAddFunction />}
+        <div className="modal-action">
+          <a
+            href="#"
+            onClick={() => (step < 2 ? setStep(step + 1) : onAddAction())}
+            className="btn btn-primary"
+          >
+            {step < 2 ? "Next" : "Done"}
+          </a>
+          <a href="" onClick={onModalClose} className="btn">
+            Close
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ProposalActionAddContract = ({
+  onSelectContract,
+  onSelectAbi,
+}) => {
+  const [isCustomContract, setIsCustomContract] = useState(false);
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="py-4">
+        {isCustomContract ? (
+          <>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Contract address</span>
+              </label>
+              <input type="text" className="input input-bordered" />
+            </div>
+            <div className="form-control w-full mt-2">
+              <label className="label">
+                <span className="label-text">ABI</span>
+              </label>
+              <textarea
+                className="textarea h-24 textarea-bordered"
+                placeholder="ABI"
+              ></textarea>
+            </div>
+          </>
+        ) : (
+          contracts && (
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Select contract</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                onChange={(event) => {
+                  onSelectContract(event.target.value);
+                  onSelectAbi(
+                    contracts.find((c) => c.address === event.target.value)?.abi
+                  );
+                }}
+              >
+                <option disabled={true}>Contract</option>
+                {contracts.map(({ name, address }) => (
+                  <option key={address} value={address}>
+                    {name} {address}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )
+        )}
+      </div>
+      <div className="divider">Or</div>
+      <div className="text-center py-4">
+        {isCustomContract ? (
+          <a
+            href="#"
+            className="link link-primary"
+            onClick={() => setIsCustomContract(false)}
+          >
+            Select from known contracts
+          </a>
+        ) : (
+          <a
+            href="#"
+            className="link link-primary"
+            onClick={() => setIsCustomContract(true)}
+          >
+            Enter address and ABI manually
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const ProposalActionAddFunction = ({
+  contractAbi,
+  selectedFunction,
+  onSelectFunction,
+}) => {
+  const contractFunctions =
+    contractAbi &&
+    contractAbi.filter(
       ({ type, stateMutability }) =>
         type === "function" && stateMutability.includes("payable")
     );
 
-  const inputsForSelectedFunction =
-    selectedFunction &&
-    abi[selectedContract] &&
-    abi[selectedContract].find(({ name }) => name === selectedFunction)?.inputs;
+  const inputsForFunction =
+    contractFunctions &&
+    contractFunctions.find(({ name }) => name === selectedFunction)?.inputs;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      {abi && (
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Choose contract</span>
-          </label>
-          <select
-            className="select select-bordered w-full max-w-xs"
-            onChange={(event) => setSelectedContract(event.target.value)}
-          >
-            <option disabled={true}>Contract</option>
-            {Object.entries(abi).map(([name]) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-      {selectedContractFunctions && (
-        <div className="form-control w-full mt-2">
-          <label className="label">
-            <span className="label-text">Function</span>
-          </label>
-          <select
-            className="select select-bordered w-full max-w-lg"
-            onChange={(event) => setSelectedFunction(event.target.value)}
-          >
-            <option disabled={true}>Choose function</option>
-            {selectedContractFunctions.map(({ name, inputs }) => (
+    <>
+      <div className="form-control w-full mt-2">
+        <label className="label">
+          <span className="label-text">Function</span>
+        </label>
+        <select
+          className="select select-bordered w-full"
+          onChange={(event) => onSelectFunction(event.target.value)}
+          disabled={!selectedFunction}
+        >
+          <option disabled={true}>Choose function</option>
+          {contractFunctions &&
+            contractFunctions.map(({ name, inputs }) => (
               <option key={name} value={name}>
                 {name}(
                 {inputs.map(({ name, type }) => `${type} ${name}`).join(", ")})
               </option>
             ))}
-          </select>
-        </div>
-      )}
-      {inputsForSelectedFunction && (
+        </select>
+      </div>
+      {inputsForFunction && (
         <div className="form-control w-full mt-2">
           <label className="label">
             <span className="label-text">Inputs</span>
           </label>
           <div className="flex flex-wrap">
-            {inputsForSelectedFunction.map(({ name, type }) => (
+            {inputsForFunction.map(({ name, type }) => (
               <div className="w-full sm:w-1/2 md:w-1/3 px-3 mb-6" key={name}>
                 <label className="label">
                   <span className="label-text">{name}</span>
@@ -103,7 +210,7 @@ export const ProposalActionAddForm = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
