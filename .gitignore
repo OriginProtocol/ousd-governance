@@ -1,7 +1,5 @@
 node_modules/
 cache/
-/out/
-ui/public/build/
 __pycache__
 build/*
 
