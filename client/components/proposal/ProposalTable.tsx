@@ -1,37 +1,9 @@
-import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Loading } from "components/Loading";
-import { governanceContract } from "constants/index";
 
-export const ProposalTable = () => {
+export const ProposalTable = ({ proposalData }) => {
   const router = useRouter();
-  const [proposalData, setProposalData] = useState({
-    loading: true,
-    count: 0,
-    proposals: [],
-    states: [],
-  });
-
-  useEffect(() => {
-    const loadProposals = async () => {
-      const count = await governanceContract.proposalCount();
-      const proposalGets = [];
-      const proposalStateGets = [];
-      for (let i = 1; i <= count; i++) {
-        proposalGets.push(governanceContract.proposals(i));
-        proposalStateGets.push(governanceContract.state(i));
-      }
-      setProposalData({
-        loading: false,
-        count,
-        proposals: await Promise.all(proposalGets),
-        states: await Promise.all(proposalStateGets),
-      });
-    };
-    loadProposals();
-  }, []);
-
-  if (proposalData.loading) return <Loading />;
+  if (!proposalData || proposalData?.loading) return <Loading />;
 
   return (
     <table className="table table-zebra w-full">
@@ -43,10 +15,11 @@ export const ProposalTable = () => {
         </tr>
       </thead>
       <tbody>
-        {proposalData.proposals.map((proposal, index) => (
+        {proposalData?.proposals.map((proposal, index) => (
           <tr
+            key={index}
             className="hover cursor-pointer"
-            onClick={() => router.push(`/proposal/${proposal.id}`)}
+            onClick={() => router.push(`/proposal/${proposal[0]}`)}
           >
             <td>{proposal[0].toString()}</td>
             <td>{proposal[1]} </td>

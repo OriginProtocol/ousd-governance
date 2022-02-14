@@ -1,28 +1,39 @@
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-
-import { ProposalTable } from "@/components/proposal/ProposalTable";
+import { loadProposals } from "utils/index";
+import type { ProposalDataType } from "pages/index";
+import { Loading } from "components/Loading";
+import { ProposalTable } from "components/proposal/ProposalTable";
+import { PageTitle } from "components/PageTitle";
 
 const Proposal: NextPage = () => {
   const router = useRouter();
 
+  const [proposalData, setProposalData] = useState<ProposalDataType>() || [
+    { count: 0, proposals: [], states: [] },
+  ];
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await loadProposals();
+      setProposalData(data);
+      setLoading(false);
+    };
+    load();
+  }, [setProposalData]);
+
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Proposals</h1>
-      </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <div className="mb-5">
-          <button
-            className="btn btn-primary"
-            onClick={() => router.push("/proposal/new")}
-          >
-            New Proposal
-          </button>
-        </div>
-
-        <ProposalTable />
-      </div>
+      <PageTitle>Proposals</PageTitle>
+      <button
+        className="btn btn-primary mb-5"
+        onClick={() => router.push("/proposal/new")}
+      >
+        New Proposal
+      </button>
+      {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
     </>
   );
 };

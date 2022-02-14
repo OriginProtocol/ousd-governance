@@ -24,3 +24,6 @@ export const governanceContract = new ethers.Contract(
   governor.abi,
   provider
 );
+
+export const governanceTokenAddress =
+  "0x8207c1ffc5b6804f6024322ccf34f29c3541ae26";

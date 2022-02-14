@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import type { NextPage } from "next";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
+import { PageTitle } from "components/PageTitle";
 import { contracts } from "constants/index";
-import { abort } from "process";
+import { truncateEthAddress } from "utils/index";
 
 const ProposalNew: NextPage = () => {
   const router = useRouter();
@@ -12,9 +13,7 @@ const ProposalNew: NextPage = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">New Proposal</h1>
-      </div>
+      <PageTitle>New Proposal</PageTitle>
       <ProposalActionAddModal
         modalOpen={modalOpen}
         onModalClose={() => setModalOpen(false)}
@@ -120,7 +119,7 @@ export const ProposalActionAddContract = ({
                 <option disabled={true}>Contract</option>
                 {contracts.map(({ name, address }) => (
                   <option key={address} value={address}>
-                    {name} {address}
+                    {name} {truncateEthAddress(address)}
                   </option>
                 ))}
               </select>

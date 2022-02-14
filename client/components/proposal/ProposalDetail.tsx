@@ -19,13 +19,9 @@ export const ProposalDetail = ({ proposalId }) => {
 
   return (
     <>
-      <div className="my-10">
-        <ProposalVoteStats />
-      </div>
+      <ProposalVoteStats />
       <SectionTitle>Governance Actions</SectionTitle>
-      <div className="mb-5">
-        <ProposalActionsTable proposalActions={proposalActions} />
-      </div>
+      <ProposalActionsTable proposalActions={proposalActions} />
       <SectionTitle>Justification</SectionTitle>
     </>
   );
