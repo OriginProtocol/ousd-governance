@@ -8,8 +8,7 @@ type Web3DataType = {
 };
 
 type StoreType = Web3DataType & {
-  setState: (state: Web3DataType) => void;
-  resetState: () => void;
+  reset: () => void;
 };
 
 const defaultState: Web3DataType = {
@@ -21,6 +20,5 @@ const defaultState: Web3DataType = {
 
 export const useStore = create<StoreType>((set) => ({
   ...defaultState,
-  setState: (state: Web3DataType) => set(state),
-  resetState: () => set(defaultState),
+  reset: () => set(defaultState),
 }));

@@ -3,7 +3,7 @@ import { providers } from "ethers";
 import { useCallback, useEffect } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
-
+import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
 
 const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
@@ -51,6 +51,8 @@ if (typeof window !== "undefined") {
 export const Web3Button = () => {
   const { provider, web3Provider, address, chainId } = useStore();
 
+  const resetWeb3State = useStore((state) => state.reset);
+
   const connect = useCallback(async function () {
     // This is the initial `provider` that is returned when
     // using web3Modal to connect. Can be MetaMask or WalletConnect.
@@ -65,6 +67,13 @@ export const Web3Button = () => {
     const address = await signer.getAddress();
 
     const network = await web3Provider.getNetwork();
+
+    useStore.setState({
+      provider,
+      web3Provider,
+      address,
+      chainId: network.chainId,
+    });
   }, []);
 
   const disconnect = useCallback(
@@ -73,6 +82,7 @@ export const Web3Button = () => {
       if (provider?.disconnect && typeof provider.disconnect === "function") {
         await provider.disconnect();
       }
+      resetWeb3State();
     },
     [provider]
   );
@@ -84,7 +94,19 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
-  return (
+  return web3Provider ? (
+    <>
+      {address && (
+        <span className="text-muted">{truncateEthAddress(address)}</span>
+      )}
+      <button
+        className="ml-2 btn btn-primary btn-sm rounded-btn"
+        onClick={disconnect}
+      >
+        Disconnect
+      </button>
+    </>
+  ) : (
     <button className="btn btn-primary btn-sm rounded-btn" onClick={connect}>
       Connect
     </button>

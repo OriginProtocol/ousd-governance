@@ -22,7 +22,7 @@ export const ProposalTable = ({ proposalData }) => {
             onClick={() => router.push(`/proposal/${proposal[0]}`)}
           >
             <td>{proposal[0].toString()}</td>
-            <td>{proposal[1]} </td>
+            <td>{proposal[1]}</td>
             <td>
               {proposalData.states[index] == 0 && (
                 <div className="badge badge-info">Pending</div>

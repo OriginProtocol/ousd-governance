@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { contracts, governanceContract } from "constants";
+import { contracts } from "constants";
 import { truncateEthAddress } from "utils/index";
 
 export const ProposalActionsTable = ({ proposalActions }) => {
@@ -8,17 +8,17 @@ export const ProposalActionsTable = ({ proposalActions }) => {
     return ethers.utils.defaultAbiCoder.decode(types.split(","), calldata);
   };
 
-  const functionNameFromSignature = (signature: String) => {
+  const functionNameFromSignature = (signature: string) => {
     return signature.substring(0, signature.indexOf("("));
   };
 
-  const argumentsFromSignature = (signature: String) => {
+  const argumentsFromSignature = (signature: string) => {
     return signature
       .substring(signature.indexOf("(") + 1, signature.indexOf(")"))
       .split(",");
   };
 
-  const addressContractName = (address: String) => {
+  const addressContractName = (address: string) => {
     return (
       contracts.find((c) => c.address === address)?.name ||
       truncateEthAddress(address)
@@ -62,7 +62,7 @@ export const ProposalActionsTable = ({ proposalActions }) => {
                 proposalActions.signatures[index],
                 proposalActions.calldatas[index]
               ).map((decodedData, index) => {
-                return <div key={index}>{decodedData.toString()}</div>;
+                return <div key={index}>{decodedData.tostring()}</div>;
               })}
             </td>
           </tr>
