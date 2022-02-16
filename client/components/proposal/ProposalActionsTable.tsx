@@ -43,6 +43,7 @@ export const ProposalActionsTable = ({ proposalActions }) => {
                 className="link link-primary"
                 href={`https://etherscan.io/address/${target}`}
                 target="_blank"
+                rel="noreferrer"
               >
                 {addressContractName(target)}
               </a>
@@ -62,7 +63,7 @@ export const ProposalActionsTable = ({ proposalActions }) => {
                 proposalActions.signatures[index],
                 proposalActions.calldatas[index]
               ).map((decodedData, index) => {
-                return <div key={index}>{decodedData.tostring()}</div>;
+                return <div key={index}>{decodedData.toString()}</div>;
               })}
             </td>
           </tr>
