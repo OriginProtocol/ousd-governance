@@ -12,7 +12,9 @@ export const ProposalDetail = ({ proposalId }) => {
     const loadProposalActions = async () => {
       setProposalActions(await governanceContract.getActions(proposalId));
     };
-    loadProposalActions();
+    if (proposalId) {
+      loadProposalActions();
+    }
   }, [proposalId]);
 
   if (proposalActions === null) return <Loading />;
