@@ -100,7 +100,9 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
                 ))}
               </select>
               {touched.address && errors.address && (
-                <p className="error">Please select a contract</p>
+                <p className="mt-2 text-sm text-error">
+                  Please select a contract
+                </p>
               )}
             </div>
           )

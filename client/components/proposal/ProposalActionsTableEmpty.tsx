@@ -21,11 +21,7 @@ export const ProposalActionsTableEmpty = ({ onClickAdd = () => {} }) => {
         Get started by adding a new contract call.
       </p>
       <div className="mt-6">
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={onClickAdd}
-        >
+        <button type="button" className="btn btn-primary" onClick={onClickAdd}>
           <svg
             className="-ml-1 mr-2 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
