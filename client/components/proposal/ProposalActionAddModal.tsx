@@ -16,6 +16,12 @@ export const ProposalActionAddModal = ({
   const [address, setAddress] = useState<string>("");
   const [abi, setAbi] = useState<string>("");
 
+  const reset = () => {
+    setStep(0);
+    setAddress("");
+    setAbi("");
+  };
+
   return (
     <div
       id="proposal-add-modal"
@@ -49,6 +55,7 @@ export const ProposalActionAddModal = ({
                 signature: data.signature,
                 calldata: encodeCalldata(signature, Object.values(inputs)),
               });
+              reset();
               onModalClose();
             }}
             onModalClose={onModalClose}
