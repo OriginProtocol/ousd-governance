@@ -1,18 +1,20 @@
+import { ethers } from "ethers";
 import { useState } from "react";
 import { AddActionContractForm } from "components/proposal/AddActionContractForm";
 import { AddActionFunctionForm } from "components/proposal/AddActionFunctionForm";
+import { encodeCalldata } from "utils/index";
 
 export const ProposalActionAddModal = ({
   modalOpen,
   onModalClose,
+  onActionAdd,
 }: {
   modalOpen: boolean;
   onModalClose: Function;
 }) => {
   const [step, setStep] = useState(0);
-  const [, setAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
   const [abi, setAbi] = useState<string>("");
-  const [contractFunction, setContractFunction] = useState<string>("");
 
   return (
     <div
@@ -40,7 +42,13 @@ export const ProposalActionAddModal = ({
           <AddActionFunctionForm
             abi={abi}
             onSubmit={(data) => {
-              setContractFunction(data.contractFunction);
+              // TODO check ordering
+              const { signature, ...inputs } = data;
+              onActionAdd({
+                target: address,
+                signature: data.signature,
+                calldata: encodeCalldata(signature, Object.values(inputs)),
+              });
               onModalClose();
             }}
             onModalClose={onModalClose}

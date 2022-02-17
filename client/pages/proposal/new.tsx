@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { NextPage } from "next";
 import ReactMarkdown from "react-markdown";
+import { ProposalAddActionButton } from "components/proposal/ProposalAddActionButton";
 import { ProposalActionAddModal } from "components/proposal/ProposalActionAddModal";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
@@ -10,10 +11,25 @@ import { contracts } from "constants/index";
 import { truncateEthAddress } from "utils/index";
 
 const ProposalNew: NextPage = () => {
-  const [proposalActions, setProposalActions] = useState<string[]>([]);
+  const [newProposalActions, setNewProposalActions] = useState<Object>([]);
   const [justification, setJustification] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
+
+  const handleAddAction = (action: string) => {
+    setNewProposalActions([...newProposalActions, action]);
+  };
+
+  const proposalActions = {
+    targets: newProposalActions.map((a) => a.target),
+    signatures: newProposalActions.map((a) => a.signature),
+    calldatas: newProposalActions.map((a) => a.calldata),
+  };
+
+  const proposal = {
+    ...proposalActions,
+    description: justification,
+  };
 
   return (
     <>
@@ -56,14 +72,28 @@ const ProposalNew: NextPage = () => {
         </div>
       )}
       <SectionTitle>Governance Actions</SectionTitle>
-      {proposalActions.length === 0 ? (
-        <ProposalActionsTableEmpty onClickAdd={() => setModalOpen(true)} />
+      {newProposalActions.length === 0 ? (
+        <ProposalActionsTableEmpty
+          onClickAdd={() => setModalOpen(true)}
+          onActionAdd={handleAddAction}
+        />
       ) : (
-        <ProposalActionsTable />
+        <>
+          <ProposalAddActionButton
+            className="btn btn-primary btn-sm mb-6"
+            onClick={() => setModalOpen(true)}
+            size="small"
+          />
+          <ProposalActionsTable
+            proposalActions={proposalActions}
+            ephemeral={true}
+          />
+        </>
       )}
       <ProposalActionAddModal
         modalOpen={modalOpen}
         onModalClose={() => setModalOpen(false)}
+        onActionAdd={handleAddAction}
       />
     </>
   );

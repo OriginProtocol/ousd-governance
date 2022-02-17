@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   isUint,
   isAddress,
@@ -6,8 +6,6 @@ import {
   isRequired,
   useForm,
 } from "utils/useForm";
-import { contracts } from "constants/index";
-import { truncateEthAddress } from "utils/index";
 
 export const AddActionFunctionForm = ({
   abi,
@@ -15,24 +13,30 @@ export const AddActionFunctionForm = ({
   onModalClose,
   onPrevious,
 }) => {
-  const [contractFunction, setContractFunction] = useState(null);
+  const [signature, setSignature] = useState(null);
 
-  const contractFunctions = abi.filter(
-    ({ type, stateMutability }) =>
-      type === "function" && stateMutability.includes("payable")
-  );
+  const contractFunctions = abi
+    .filter(
+      ({ type, stateMutability }) =>
+        type === "function" && stateMutability.includes("payable")
+    )
+    .map(({ name, inputs }) => ({
+      name,
+      inputs,
+      signature: `${name}(${inputs.map(({ type }) => type).join(",")})`,
+    }));
 
-  const inputsForFunction =
-    contractFunctions &&
-    contractFunctions.find(({ name }) => name === contractFunction)?.inputs;
+  const inputsForFunction = contractFunctions.find(
+    (c) => c.signature === signature
+  )?.inputs;
 
   const initialState = {
-    contractFunction: "",
+    signature: "",
   };
 
   const validations = [
-    ({ contractFunction }: { contractFunction: string }) =>
-      isRequired(contractFunction) || {
+    ({ signature }: { signature: string }) =>
+      isRequired(signature) || {
         address: "Contract function is required",
       },
   ];
@@ -53,7 +57,7 @@ export const AddActionFunctionForm = ({
               [name]: `${name} is not a valid number`,
             }
           );
-        } else if (type == "addresss[]") {
+        } else if (type == "address[]") {
           return (
             isAddressArray(value) || {
               [name]: `${name} is not a valid address array`,
@@ -91,11 +95,11 @@ export const AddActionFunctionForm = ({
           <span className="label-text">Function</span>
         </label>
         <select
-          name="contractFunction"
+          name="signature"
           className="select select-bordered w-full"
           onChange={(e) => {
             changeHandler(e);
-            setContractFunction(e.target.value);
+            setSignature(e.target.value);
           }}
           defaultValue=""
         >
@@ -103,8 +107,8 @@ export const AddActionFunctionForm = ({
             Choose function
           </option>
           {contractFunctions &&
-            contractFunctions.map(({ name, inputs }) => (
-              <option key={name + inputs} value={name}>
+            contractFunctions.map(({ name, inputs, signature }) => (
+              <option key={signature} value={signature}>
                 {name}(
                 {inputs.map(({ name, type }) => `${type} ${name}`).join(", ")})
               </option>
