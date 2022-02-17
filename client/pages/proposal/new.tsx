@@ -9,15 +9,28 @@ import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
 import { contracts } from "constants/index";
 import { truncateEthAddress } from "utils/index";
+import { useStickyState } from "utils/useStickyState";
 
 const ProposalNew: NextPage = () => {
-  const [newProposalActions, setNewProposalActions] = useState<Object>([]);
-  const [justification, setJustification] = useState<string>("");
+  const [newProposalActions, setNewProposalActions] = useStickyState<Object>(
+    [],
+    "proposalActions"
+  );
+  const [justification, setJustification] = useStickyState<string>(
+    "",
+    "justification"
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
 
   const handleAddAction = (action: string) => {
     setNewProposalActions([...newProposalActions, action]);
+  };
+
+  const handleDeleteAction = (actionIndex: number) => {
+    setNewProposalActions(
+      newProposalActions.filter((_, index) => index !== actionIndex)
+    );
   };
 
   const proposalActions = {
@@ -72,6 +85,10 @@ const ProposalNew: NextPage = () => {
         </div>
       )}
       <SectionTitle>Governance Actions</SectionTitle>
+      <div className="tabs mb-6">
+        <a className="tab tab-lg tab-lifted tab-active">Custom</a>
+        <a className="tab tab-lg tab-lifted">Reallocation</a>
+      </div>{" "}
       {newProposalActions.length === 0 ? (
         <ProposalActionsTableEmpty
           onClickAdd={() => setModalOpen(true)}
@@ -86,6 +103,7 @@ const ProposalNew: NextPage = () => {
           />
           <ProposalActionsTable
             proposalActions={proposalActions}
+            onActionDelete={handleDeleteAction}
             ephemeral={true}
           />
         </>
@@ -95,6 +113,9 @@ const ProposalNew: NextPage = () => {
         onModalClose={() => setModalOpen(false)}
         onActionAdd={handleAddAction}
       />
+      <div className="flex">
+        <button className="btn btn-primary mt-24">Submit Proposal</button>
+      </div>
     </>
   );
 };

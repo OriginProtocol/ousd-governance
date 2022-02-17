@@ -132,7 +132,13 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
         <button className="btn btn-primary" type="submit" disabled={!isValid}>
           Next
         </button>
-        <button onClick={onModalClose} className="btn">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onModalClose();
+          }}
+          className="btn"
+        >
           Close
         </button>
       </div>

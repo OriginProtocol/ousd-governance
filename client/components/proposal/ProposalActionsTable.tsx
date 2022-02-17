@@ -8,21 +8,26 @@ import {
   etherscanLink,
 } from "utils/index";
 
-export const ProposalActionsTable = ({ proposalActions, ephemeral }) => {
+export const ProposalActionsTable = ({
+  proposalActions,
+  ephemeral,
+  onActionDelete,
+}) => {
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
   const [modalOpen, setModalOpen] = useState(false);
-  const onDeleteAction = (actionIndex: number) => {
-    setModalOpen(false);
-  };
+  const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
   return (
     <>
       {ephemeral && (
         <ConfirmDeleteModal
           modalOpen={modalOpen}
-          onConfirm={onDeleteAction}
+          onConfirm={() => {
+            onActionDelete(actionDeleteIndex);
+            setModalOpen(false);
+          }}
           onClose={() => setModalOpen(false)}
         />
       )}
@@ -91,7 +96,10 @@ export const ProposalActionsTable = ({ proposalActions, ephemeral }) => {
                 <td>
                   <button
                     className="btn btn-secondary btn-xs"
-                    onClick={() => setModalOpen(true)}
+                    onClick={() => {
+                      setModalOpen(true);
+                      setActionDeleteIndex(index);
+                    }}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +136,7 @@ export const ConfirmDeleteModal = ({
   onClose: Function;
 }) => {
   return (
-    <div id="confirm-modal" className={`modal ${modalOpen && "model-open"}`}>
+    <div id="confirm-modal" className={`modal ${modalOpen && "modal-open"}`}>
       <div className="modal-box">
         <p className="py-4">Are you sure you want to remove this action?</p>
         <div className="modal-action">
