@@ -41,7 +41,10 @@ export const ProposalActionAddModal = ({
               setAbi(data.abi);
               setStep(1);
             }}
-            onModalClose={onModalClose}
+            onModalClose={() => {
+              reset();
+              onModalClose();
+            }}
           />
         )}
         {step === 1 && (
@@ -58,7 +61,10 @@ export const ProposalActionAddModal = ({
               reset();
               onModalClose();
             }}
-            onModalClose={onModalClose}
+            onModalClose={() => {
+              reset();
+              onModalClose();
+            }}
             onPrevious={() => setStep(0)}
           />
         )}

@@ -59,7 +59,9 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
                 onChange={changeHandler}
               />
               {touched.address && errors.address && (
-                <p className="mt-2 text-sm text-error">{errors.address}</p>
+                <p className="mt-2 text-sm text-error-content">
+                  {errors.address}
+                </p>
               )}
             </div>
             <div className="form-control w-full mt-2">
@@ -74,7 +76,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
                 onChange={changeHandler}
               ></textarea>
               {touched.abi && errors.abi && (
-                <p className="mt-2 text-sm text-error">{errors.abi}</p>
+                <p className="mt-2 text-sm text-error-content">{errors.abi}</p>
               )}
             </div>
           </>
@@ -100,7 +102,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
                 ))}
               </select>
               {touched.address && errors.address && (
-                <p className="mt-2 text-sm text-error">
+                <p className="mt-2 text-sm text-error-content">
                   Please select a contract
                 </p>
               )}

@@ -7,8 +7,7 @@ import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTa
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
-import { contracts } from "constants/index";
-import { truncateEthAddress } from "utils/index";
+import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 
 const ProposalNew: NextPage = () => {
@@ -20,6 +19,11 @@ const ProposalNew: NextPage = () => {
     "",
     "justification"
   );
+  const [isReallocation, setIsReallocation] = useStickyState<boolean>(
+    false,
+    "isReallocation"
+  );
+
   const [modalOpen, setModalOpen] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
 
@@ -29,7 +33,7 @@ const ProposalNew: NextPage = () => {
 
   const handleDeleteAction = (actionIndex: number) => {
     setNewProposalActions(
-      newProposalActions.filter((_, index) => index !== actionIndex)
+      newProposalActions.filter((_, index: number) => index !== actionIndex)
     );
   };
 
@@ -86,26 +90,42 @@ const ProposalNew: NextPage = () => {
       )}
       <SectionTitle>Governance Actions</SectionTitle>
       <div className="tabs mb-6">
-        <a className="tab tab-lg tab-lifted tab-active">Custom</a>
-        <a className="tab tab-lg tab-lifted">Reallocation</a>
+        <a
+          className={`tab tab-lg tab-lifted ${!isReallocation && "tab-active"}`}
+          onClick={() => setIsReallocation(false)}
+        >
+          Custom
+        </a>
+        <a
+          className={`tab tab-lg tab-lifted ${isReallocation && "tab-active"}`}
+          onClick={() => setIsReallocation(true)}
+        >
+          Reallocation
+        </a>
       </div>{" "}
-      {newProposalActions.length === 0 ? (
-        <ProposalActionsTableEmpty
-          onClickAdd={() => setModalOpen(true)}
-          onActionAdd={handleAddAction}
-        />
+      {isReallocation ? (
+        <Reallocation />
       ) : (
         <>
-          <ProposalAddActionButton
-            className="btn btn-primary btn-sm mb-6"
-            onClick={() => setModalOpen(true)}
-            size="small"
-          />
-          <ProposalActionsTable
-            proposalActions={proposalActions}
-            onActionDelete={handleDeleteAction}
-            ephemeral={true}
-          />
+          {newProposalActions.length === 0 ? (
+            <ProposalActionsTableEmpty
+              onClickAdd={() => setModalOpen(true)}
+              onActionAdd={handleAddAction}
+            />
+          ) : (
+            <>
+              <ProposalAddActionButton
+                className="btn btn-primary btn-sm mb-6"
+                onClick={() => setModalOpen(true)}
+                size="small"
+              />
+              <ProposalActionsTable
+                proposalActions={proposalActions}
+                onActionDelete={handleDeleteAction}
+                ephemeral={true}
+              />
+            </>
+          )}
         </>
       )}
       <ProposalActionAddModal
@@ -114,7 +134,14 @@ const ProposalNew: NextPage = () => {
         onActionAdd={handleAddAction}
       />
       <div className="flex">
-        <button className="btn btn-primary mt-24">Submit Proposal</button>
+        <button
+          className="btn btn-primary mt-24"
+          disabled={
+            justification.length === 0 || newProposalActions.length === 0
+          }
+        >
+          Submit Proposal
+        </button>
       </div>
     </>
   );

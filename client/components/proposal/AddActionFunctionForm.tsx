@@ -121,8 +121,8 @@ export const AddActionFunctionForm = ({
             </label>
             <div className="flex flex-wrap">
               {inputsForFunction.map(({ name, type }) => (
-                <>
-                  <div className="w-full px-3 mb-3" key={name}>
+                <div className="w-full px-3 mb-3" key={name}>
+                  <div>
                     <label className="label">
                       <span className="label-text">{name}</span>
                     </label>
@@ -134,10 +134,12 @@ export const AddActionFunctionForm = ({
                       placeholder={type}
                     />
                     {touched[name] && errors[name] && (
-                      <p className="mt-1 text-sm text-error">{errors[name]}</p>
+                      <p className="mt-1 text-sm text-error-content">
+                        {errors[name]}
+                      </p>
                     )}
                   </div>
-                </>
+                </div>
               ))}
             </div>
           </div>
@@ -156,7 +158,13 @@ export const AddActionFunctionForm = ({
         <button className="btn btn-primary" type="submit" disabled={!isValid}>
           Done
         </button>
-        <button onClick={onModalClose} className="btn">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            onModalClose();
+          }}
+          className="btn"
+        >
           Close
         </button>
       </div>
