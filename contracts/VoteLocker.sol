@@ -45,7 +45,7 @@ contract VoteLocker {
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
     /// @notice Minimum lock time
-    uint256 public constant MIN_LOCK_TIME = 7 * 86400; // 7 days
+    uint256 public constant MIN_LOCK_TIME = 30 * 86400; // 30 days
     /// @notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
     /// @notice Checkpoints for each user
@@ -69,37 +69,9 @@ contract VoteLocker {
     }
 
     /**
-     * @dev Returns the name of the token.
-     */
-    function name() public view virtual returns (string memory) {
-        return _name;
-    }
-
-    /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view virtual returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the number of decimals used to get its user representation.
-     * For example, if `decimals` equals `2`, a balance of `505` tokens should
-     * be displayed to a user as `5.05` (`505 / 10 ** 2`).
-     *
-     * Tokens usually opt for a value of 18, imitating the relationship between
-     * Ether and Wei. This is the value {ERC20} uses, unless this function is
-     * overridden;
-     */
-    function decimals() public view virtual returns (uint8) {
-        return _decimals;
-    }
-
-    /**
      * @dev See {ERC20-totalSupply}.
      */
-    function totalSupply() public view virtual returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         if (_totalSupplyCheckpoints.length == 0) {
             return 0;
         }
@@ -110,8 +82,26 @@ contract VoteLocker {
     /**
      * @dev See {ERC20-balanceOf}.
      */
-    function balanceOf(address _account) public view virtual returns (uint256) {
+    function balanceOf(address _account) public view returns (uint256) {
         return getVotes(_account);
+    }
+
+    /**
+     * @dev Snapshots the totalSupply after it has been increased.
+     */
+    function _mint(address account, uint256 amount) internal {
+        require(
+            totalSupply() <= _maxSupply(),
+            "VoteLocker: total supply risks overflowing votes"
+        );
+        _writeCheckpoint(_totalSupplyCheckpoints, _add, amount);
+    }
+
+    /**
+     * @dev Snapshots the totalSupply after it has been decreased.
+     */
+    function _burn(address account, uint256 amount) internal {
+        _writeCheckpoint(_totalSupplyCheckpoints, _subtract, amount);
     }
 
     /**
@@ -307,17 +297,6 @@ contract VoteLocker {
     }
 
     /**
-     * @dev Snapshots the totalSupply after it has been increased.
-     */
-    function _mint(address account, uint256 amount) internal virtual {
-        require(
-            totalSupply() <= _maxSupply(),
-            "VoteLocker: total supply risks overflowing votes"
-        );
-        _writeCheckpoint(_totalSupplyCheckpoints, _add, amount);
-    }
-
-    /**
      * @dev Withdraw tokens from an expired lockup.
      */
     function withdraw(uint256 amount) public {
@@ -353,14 +332,7 @@ contract VoteLocker {
     }
 
     /**
-     * @dev Snapshots the totalSupply after it has been decreased.
-     */
-    function _burn(address account, uint256 amount) internal virtual {
-        _writeCheckpoint(_totalSupplyCheckpoints, _subtract, amount);
-    }
-
-    /**
-     * @dev Withdraws all tokens from the account.
+     * @dev Write a checkpoint to the user specific or total supply checkpoint arrays.
      */
     function _writeCheckpoint(
         Checkpoint[] storage ckpts,

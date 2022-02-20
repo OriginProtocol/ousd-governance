@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/Governor.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorSettings.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
@@ -29,6 +30,7 @@ contract OUSDGovernor is
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4)
         GovernorTimelockControl(_timelock)
+        GovernorPreventLateQuorum(86400 / 15) // ~1 day
     {}
 
     // The following functions are overrides require by Solidity.
@@ -135,5 +137,24 @@ contract OUSDGovernor is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    function proposalDeadline(uint256 proposalId)
+        public
+        view
+        virtual
+        override(Governor, IGovernor, GovernorPreventLateQuorum)
+        returns (uint256)
+    {
+        return super.proposalDeadline(proposalId);
+    }
+
+    function _castVote(
+        uint256 proposalId,
+        address account,
+        uint8 support,
+        string memory reason
+    ) internal virtual override(Governor, GovernorPreventLateQuorum) returns (uint256) {
+        return super._castVote(proposalId, account, support, reason);
     }
 }
