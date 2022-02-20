@@ -32,7 +32,7 @@ export const VoteStats = ({
         <div className="stat-value text-primary">{proposalCount}</div>
       </div>
       <div className="stat">
-        <div className="stat-figure text-info">
+        <div className="stat-figure text-info-content">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -49,12 +49,12 @@ export const VoteStats = ({
           </svg>
         </div>
         <div className="stat-title">Vote Supply</div>
-        <div className="stat-value text-info">
+        <div className="stat-value text-info-content">
           {numeral(totalSupply / 1e18).format("0 a")}
         </div>
       </div>
       <div className="stat">
-        <div className="stat-figure text-success">
+        <div className="stat-figure text-success-content">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -71,7 +71,7 @@ export const VoteStats = ({
           </svg>
         </div>
         <div className="stat-title">Vote Addresses</div>
-        <div className="stat-value text-success">{holderCount}</div>
+        <div className="stat-value text-success-content">{holderCount}</div>
       </div>
     </div>
   );

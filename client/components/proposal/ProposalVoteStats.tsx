@@ -21,7 +21,7 @@ export const ProposalVoteStats = () => {
         <div className="stat-value text-primary">20</div>
       </div>
       <div className="stat">
-        <div className="stat-figure text-success">
+        <div className="stat-figure text-success-content">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -38,10 +38,10 @@ export const ProposalVoteStats = () => {
           </svg>
         </div>
         <div className="stat-title">For</div>
-        <div className="stat-value text-success">2.6M</div>
+        <div className="stat-value text-success-content">2.6M</div>
       </div>
       <div className="stat">
-        <div className="stat-figure text-error">
+        <div className="stat-figure text-error-content">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-6 w-6"
@@ -58,7 +58,7 @@ export const ProposalVoteStats = () => {
           </svg>
         </div>
         <div className="stat-title">Against</div>
-        <div className="stat-value text-error">100</div>
+        <div className="stat-value text-error-content">100</div>
       </div>
       <div className="stat">
         <div className="stat-figure text-neutral">

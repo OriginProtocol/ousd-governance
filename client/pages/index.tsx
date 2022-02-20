@@ -8,6 +8,7 @@ import { Loading } from "components/Loading";
 import { VoteStats } from "components/VoteStats";
 import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
+import { LeaderboardTable } from "components/LeaderboardTable";
 
 export type ProposalDataType = {
   count: BigNumber;
@@ -75,6 +76,8 @@ const Home: NextPage = ({
           }}
         />
       )}
+      <SectionTitle>Top 5 Voters</SectionTitle>
+      <LeaderboardTable limit={5} />
     </div>
   );
 };
