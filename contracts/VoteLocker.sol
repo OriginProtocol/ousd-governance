@@ -236,13 +236,11 @@ contract VoteLocker {
     /**
      * @dev Calculate the votes from a stake and expiry in a checkpoint.
      */
-    function _calculateVotesFromStake(
-        uint256 amount,
-        uint256 expiry,
-        uint256 fromTimestamp
+    function _calculateVotesFromLockup(
+      Stake memory _stake
     ) private view returns (uint256) {
-        uint256 votes = amount +
-            ((expiry - fromTimestamp) * (MAX_VOTE_MULTIPLE - 1) * amount) /
+        uint256 votes = _stake.amount +
+            ((_stake.expiry - _stake.fromTimestamp) * (MAX_VOTE_MULTIPLE) * _stake.amount) /
             MAX_LOCK_TIME;
         return votes;
     }
@@ -290,12 +288,7 @@ contract VoteLocker {
 
         // Calculate old votes if user has an initialised stake
         uint256 oldVotes = _stakes[msg.sender].initialised
-            ? _calculateVotesFromStake(
-                _stakes[msg.sender].amount,
-                _stakes[msg.sender].expiry,
-                _stakes[msg.sender].fromTimestamp
-            )
-            : 0;
+            ? _calculateVotesFromLockup(_stakes[msg.sender]) : 0;
 
         // Update the stake, amount could be 0 and expiry could be the same
         _stakes[msg.sender] = Stake({
@@ -306,11 +299,7 @@ contract VoteLocker {
         });
 
         // Calculate new votes for updated stake
-        uint256 newVotes = _calculateVotesFromStake(
-            _stakes[msg.sender].amount,
-            _stakes[msg.sender].expiry,
-            block.timestamp
-        );
+        uint256 newVotes = _calculateVotesFromLockup(_stakes[msg.sender]);
 
         if (amount > 0) {
             // If amount is 0, this might just be an expiry change
@@ -333,19 +322,9 @@ contract VoteLocker {
         require(existingStake.amount > 0, "No stake to withdraw");
         require(existingStake.expiry <= block.timestamp, "Lockup not expired");
 
-        uint256 oldVotes = _calculateVotesFromStake(
-            existingStake.amount,
-            existingStake.expiry,
-            existingStake.fromTimestamp
-        );
-
-        uint256 newVotes = _calculateVotesFromStake(
-            existingStake.amount - SafeCast.toUint224(amount),
-            existingStake.expiry,
-            existingStake.fromTimestamp
-        );
-
+        uint256 oldVotes = _calculateVotesFromLockup(existingStake);
         existingStake.amount -= SafeCast.toUint224(amount);
+        uint256 newVotes = _calculateVotesFromLockup(existingStake);
 
         if (amount > 0) {
             // Transfer staking token back to sender
