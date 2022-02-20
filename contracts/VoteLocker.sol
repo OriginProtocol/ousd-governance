@@ -278,14 +278,13 @@ contract VoteLocker {
     /**
      * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _expiry parameters.
      */
-    function deposit(uint256 amount, uint256 expiry) public virtual {
-        require(expiry > block.timestamp, "Expiry must be in the future");
+    function lockup(uint256 amount, uint256 expiry_from_now) public virtual {
         require(
-            expiry <= block.timestamp + MAX_LOCK_TIME,
+            expiry_from_now <= MAX_LOCK_TIME,
             "Expiry must be before maximum lockup time"
         );
         require(
-            expiry >= block.timestamp + MIN_LOCK_TIME,
+            expiry_from_now >= MIN_LOCK_TIME,
             "Expiry must be after minimum lockup time"
         );
 
@@ -303,7 +302,7 @@ contract VoteLocker {
             initialised: true,
             fromTimestamp: block.timestamp,
             amount: _stakes[msg.sender].amount + SafeCast.toUint224(amount),
-            expiry: expiry
+            expiry: block.timestamp + expiry_from_now
         });
 
         // Calculate new votes for updated stake
