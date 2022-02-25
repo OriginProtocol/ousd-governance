@@ -10,7 +10,6 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extension
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 
-
 contract OUSDGovernor is
     Governor,
     GovernorSettings,
@@ -154,7 +153,12 @@ contract OUSDGovernor is
         address account,
         uint8 support,
         string memory reason
-    ) internal virtual override(Governor, GovernorPreventLateQuorum) returns (uint256) {
+    )
+        internal
+        virtual
+        override(Governor, GovernorPreventLateQuorum)
+        returns (uint256)
+    {
         return super._castVote(proposalId, account, support, reason);
     }
 }
