@@ -10,6 +10,14 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
 contract VoteLockerCurve {
     using SafeERC20 for ERC20;
 
+    event Deposit(
+        address indexed provider,
+        uint256 amount,
+        uint256 locktime,
+        uint256 ts
+    );
+    event Withdraw(address indexed provider, uint256 value, uint256 ts);
+
     ///@notice ERC20 parameters
     string private _name;
     string private _symbol;
@@ -18,8 +26,6 @@ contract VoteLockerCurve {
     uint256 private constant WEEK = 7 days;
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
-    /// @notice Minimum lock time
-    uint256 public constant MIN_LOCK_TIME = 30 * 86400; // 30 days
     /// @notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
     /// @notice Checkpoints for each user
@@ -140,7 +146,11 @@ contract VoteLockerCurve {
     /**
      * @dev Get the `pos`-th global checkpoint.
      */
-    function globalCheckpoints(uint32 pos) public view returns (Checkpoint memory) {
+    function globalCheckpoints(uint32 pos)
+        public
+        view
+        returns (Checkpoint memory)
+    {
         return _globalCheckpoints[pos];
     }
 
@@ -159,12 +169,15 @@ contract VoteLockerCurve {
         if (currentUserEpoch == 0) {
             return 0;
         }
-        Checkpoint memory lastCheckpoint = _userCheckpoints[_address][currentUserEpoch];
+        Checkpoint memory lastCheckpoint = _userCheckpoints[_address][
+            currentUserEpoch
+        ];
         // Calculate the bias based on the last bias and the slope over the difference
         // in time between the last checkpint timestamp and the current block timetamp;
         lastCheckpoint.bias =
             lastCheckpoint.bias -
-            (lastCheckpoint.slope * SafeCast.toInt128(int256(block.timestamp - lastCheckpoint.ts)));
+            (lastCheckpoint.slope *
+                SafeCast.toInt128(int256(block.timestamp - lastCheckpoint.ts)));
         return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
     }
 
@@ -255,36 +268,17 @@ contract VoteLockerCurve {
         // end is rounded down to week
         _end = _floorToWeek(_end);
 
-        uint256 nextWeek = _floorToWeek(block.timestamp) + WEEK;
-
-        require(
-            _end >= nextWeek,
-            string(
-                bytes.concat(
-                    bytes("End must be at least "),
-                    bytes(Strings.toString(nextWeek))
-                )
-            )
-        );
-
         Lockup memory oldLockup = lockups[msg.sender];
 
         if (oldLockup.end > 0 && _end < oldLockup.end) {
             revert("End must be greater than or equal to the current end");
         }
 
-        _end = max(_end, oldLockup.end);
-
-        if (oldLockup.end == 0) {
-            // This is not an extension of an existing lockup, validate end
-            require(
-                _end - block.timestamp <= MAX_LOCK_TIME,
-                "End must be before maximum lockup time"
-            );
-        }
-
-        // Note: this does allow extending the end of an old lockup by an arbitrary time
-        // which is OK
+        // This is not an extension of an existing lockup, validate end
+        require(
+            _end - block.timestamp <= MAX_LOCK_TIME,
+            "End must be before maximum lockup time"
+        );
 
         // Old lockup amount will be 0 if no existing lockup, if this is an increase of the
         // lockup amount, then _amount can be 0
@@ -305,9 +299,35 @@ contract VoteLockerCurve {
     /**
      * @dev Withdraw tokens from an expired lockup.
      */
-    function withdraw(uint256 amount) public {
-        require(amount > 0, "Amount must be greater than 0");
-        // _writeUserCheckpoint(msg.sender, oldLockup, newLockup);
+    function withdraw() public {
+        Lockup memory oldLockup = Lockup({
+            end: lockups[msg.sender].end,
+            amount: lockups[msg.sender].amount
+        });
+        require(
+            block.timestamp >= oldLockup.end,
+            string(
+                bytes.concat(
+                    bytes("Lockup expires at "),
+                    bytes(Strings.toString(oldLockup.end)),
+                    bytes(", now is "),
+                    bytes(Strings.toString(block.timestamp))
+                )
+            )
+        );
+
+        require(oldLockup.amount > 0, "Lockup has no tokens");
+
+        Lockup memory newLockup = Lockup({end: 0, amount: 0});
+        lockups[msg.sender] = newLockup;
+
+        uint256 amount = SafeCast.toUint256(oldLockup.amount);
+
+        stakingToken.safeTransfer(msg.sender, amount);
+
+        _writeUserCheckpoint(msg.sender, oldLockup, newLockup);
+
+        emit Withdraw(msg.sender, amount, block.timestamp);
     }
 
     /**
@@ -385,15 +405,12 @@ contract VoteLockerCurve {
 
         // Schedule the slope changes
         if (_oldLockup.end > block.timestamp) {
-            oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
-        }
-
-        if (_oldLockup.end > block.timestamp) {
-            // Old lockup has not expired yet
-            // oldSlopeDelta was <something> - userOldPoint.slope, so we cancel that
+            // Old lockup has not expired yet, so this is an adjustment of the slope
+            // oldSlopeDelta was <something> - oldCheckpoint.slope, so we cancel that
             oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
             if (_newLockup.end == _oldLockup.end) {
-                oldSlopeDelta = oldSlopeDelta - newCheckpoint.slope; // It was a new deposit, not extension
+                // It was a new deposit, not extension
+                oldSlopeDelta = oldSlopeDelta - newCheckpoint.slope;
             }
             slopeChanges[_oldLockup.end] = oldSlopeDelta;
         }
@@ -403,7 +420,6 @@ contract VoteLockerCurve {
                 newSlopeDelta = newSlopeDelta - newCheckpoint.slope; // old slope disappeared at this point
                 slopeChanges[_newLockup.end] = newSlopeDelta;
             }
-            // else: we recorded it already in oldSlopeDelta
         }
     }
 
@@ -482,7 +498,7 @@ contract VoteLockerCurve {
                 lastCheckpoint.blk = block.number;
                 break;
             } else {
-              _globalCheckpoints.push(lastCheckpoint);
+                _globalCheckpoints.push(lastCheckpoint);
             }
         }
 
@@ -495,7 +511,11 @@ contract VoteLockerCurve {
      * @param _time Time at which to calculate supply
      * @return totalSupply at given point in time
      */
-    function _supplyAt(Checkpoint memory _checkpoint, uint256 _time) internal view returns (uint256) {
+    function _supplyAt(Checkpoint memory _checkpoint, uint256 _time)
+        internal
+        view
+        returns (uint256)
+    {
         Checkpoint memory lastCheckpoint = _checkpoint;
 
         // Floor the timestamp to weekly interval
@@ -515,7 +535,10 @@ contract VoteLockerCurve {
 
             lastCheckpoint.bias =
                 lastCheckpoint.bias -
-                (lastCheckpoint.slope * SafeCast.toInt128(int256(iterativeTime - lastCheckpoint.ts)));
+                (lastCheckpoint.slope *
+                    SafeCast.toInt128(
+                        int256(iterativeTime - lastCheckpoint.ts)
+                    ));
 
             if (iterativeTime == _time) {
                 break;
