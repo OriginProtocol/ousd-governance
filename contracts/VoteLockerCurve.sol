@@ -1,5 +1,16 @@
 // SPDX-License-Identifier: MIT
 
+// Inspired by the Curve.fi VotingEscrow contract and the mStable Solidity fork.
+//    - Adds compatability with the OpenZeppelin governance stack (4.5.0)
+//    - Removes the separate lockup amount and lockup duration extension functions info
+//      favour of a single upsert function.
+//    - Adds an deprecate mechanism for removing all voting power and allowing users too
+//      withdraw lockups
+//
+// References:
+//   - https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy
+//   - https://github.com/mstable/mStable-contracts/blob/master/contracts/governance/IncentivisedVotingLockup.sol
+
 pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
@@ -22,7 +33,6 @@ contract VoteLockerCurve {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
-
     uint256 private constant WEEK = 7 days;
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
