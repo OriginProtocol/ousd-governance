@@ -207,55 +207,10 @@ contract VoteLockerCurve {
     function getVotes(address _account) public view returns (uint256) {}
 
     /**
-     * @dev Retrieve the number of votes for `account` at the end of `blockNumber`.
-     *
-     * Requirements:
-     *
-     * - `blockNumber` must have been already mined
+     * @dev Gets the current lockup for `_account`
      */
-    function getPastVotes(address account, uint256 blockNumber)
-        public
-        view
-        returns (uint256)
-    {
-        require(blockNumber < block.number, "VoteLocker: block not yet mined");
-        return _userCheckpointsLookup(_userCheckpoints[account], blockNumber);
-    }
-
-    /**
-     * @dev Retrieve the `totalSupply` at the end of `blockNumber`. Note, this value is the sum of all balances.
-     *
-     * Requirements:
-     *
-     * - `blockNumber` must have been already mined
-     */
-    function getPastTotalSupply(uint256 blockNumber)
-        public
-        view
-        returns (uint256)
-    {
-        require(blockNumber < block.number, "VoteLocker: block not yet mined");
-        return _userCheckpointsLookup(_globalCheckpoints, blockNumber);
-    }
-
-    /**
-     * @dev Lookup a value in a list of (sorted) checkpoints.
-     */
-    function _userCheckpointsLookup(
-        Checkpoint[] storage ckpts,
-        uint256 blockNumber
-    ) private view returns (uint256) {
-        // We run a binary search to look for the earliest checkpoint taken after `blockNumber`.
-        //
-        // During the loop, the index of the wanted checkpoint remains in the range [low-1, high).
-        // With each iteration, either `low` or `high` is moved towards the middle of the range to maintain the invariant.
-        // - If the middle checkpoint is after `blockNumber`, we look in [low, mid)
-        // - If the middle checkpoint is before or equal to `blockNumber`, we look in [mid+1, high)
-        // Once we reach a single value (when low == high), we've found the right checkpoint at the index high-1, if not
-        // out of bounds (in which case we're looking too far in the past and the result is 0).
-        // Note that if the latest checkpoint available is exactly for `blockNumber`, we end up with an index that is
-        // past the end of the array, so we technically don't find a checkpoint after `blockNumber`, but it works out
-        // the same.
+    function getLockup(address _account) public view returns (Lockup memory) {
+        return lockups[_account];
     }
 
     /**
@@ -295,27 +250,35 @@ contract VoteLockerCurve {
 
         Lockup memory oldLockup = lockups[msg.sender];
 
+        require(_end > block.timestamp, "End must be greater than the current block timestamp");
         if (oldLockup.end > 0 && _end < oldLockup.end) {
             revert("End must be greater than or equal to the current end");
         }
-
         // This is not an extension of an existing lockup, validate end
         require(
             _end - block.timestamp <= MAX_LOCK_TIME,
             "End must be before maximum lockup time"
         );
+        int128 amount = SafeCast.toInt128(int256(_amount));
+        // Amount extensions
+        require(amount >= oldLockup.amount, "Amount must be greater than or equal to current amount");
+
+        // oldLockup.amount is 0 if no lockup, or something if this is an increase in locked
+        // amount
+        uint256 amountDelta = SafeCast.toUint256(amount - oldLockup.amount);
 
         // Old lockup amount will be 0 if no existing lockup, if this is an increase of the
         // lockup amount, then _amount can be 0
         Lockup memory newLockup = Lockup({
-            amount: oldLockup.amount + SafeCast.toInt128(int256(_amount)),
+            amount: amount,
             end: _end
         });
 
         lockups[msg.sender] = newLockup;
 
-        if (_amount != 0) {
-            stakingToken.safeTransferFrom(msg.sender, address(this), _amount);
+        if (amountDelta > 0) {
+            // Transfer the amount delta
+            stakingToken.safeTransferFrom(msg.sender, address(this), amountDelta);
         }
 
         _writeUserCheckpoint(msg.sender, oldLockup, newLockup);
@@ -580,12 +543,29 @@ contract VoteLockerCurve {
     }
 
     /**
+     * @dev Retrieve the number of votes for `_account` at the end of `_blockNumber`.
+     *
+     * This method is required for compatibility with the OpenZeppelin governance ERC20Votes.
+     *
+     * Requirements:
+     *
+     * - `blockNumber` must have been already mined
+     */
+    function getPastVotes(address _account, uint256 _blockNumber)
+        public
+        view
+        returns (uint256)
+    {
+      return balanceOfAt(_account, _blockNumber);
+    }
+
+    /**
      * @dev Gets a users votingWeight at a given blockNumber
-     * @param _owner User for which to return the balance
+     * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
      * @return uint256 Balance of user
      */
-    function balanceOfAt(address _owner, uint256 _blockNumber)
+    function balanceOfAt(address _account, uint256 _blockNumber)
         public
         view
         returns (uint256)
@@ -594,14 +574,14 @@ contract VoteLockerCurve {
 
         // Get most recent user Checkpoint to block
         uint256 recentUserEpoch = _findEpoch(
-            _userCheckpoints[_owner],
+            _userCheckpoints[_account],
             _blockNumber,
-            userEpoch[_owner] // Max epoch
+            userEpoch[_account] // Max epoch
         );
         if (recentUserEpoch == 0) {
             return 0;
         }
-        Checkpoint memory userPoint = _userCheckpoints[_owner][recentUserEpoch];
+        Checkpoint memory userPoint = _userCheckpoints[_account][recentUserEpoch];
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
@@ -611,7 +591,7 @@ contract VoteLockerCurve {
         );
         Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
 
-        // Calculate delta (block & time) between user Point and target block
+        // Calculate delta (block & time) between checkpoint and target block
         // Allowing us to calculate the average seconds per block between
         // the two points
         uint256 dBlock = 0;
@@ -641,6 +621,23 @@ contract VoteLockerCurve {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * @dev Retrieve the `totalSupply` at the end of `blockNumber`.
+     *
+     * This method is required for compatibility with the OpenZeppelin governance ERC20Votes.
+     *
+     * Requirements:
+     *
+     * - `_blockNumber` must have been already mined
+     */
+    function getPastTotalSupply(uint256 _blockNumber)
+        public
+        view
+        returns (uint256)
+    {
+      return totalSupplyAt(_blockNumber);
     }
 
     /**
