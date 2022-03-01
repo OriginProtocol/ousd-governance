@@ -1,6 +1,6 @@
 import pytest
-from brownie import accounts
-from brownie import OGV, VoteLockerCurve
+import time
+from brownie import OGV, VoteLockerCurve, accounts
 
 @pytest.fixture
 def token():

@@ -641,7 +641,7 @@ contract VoteLockerCurve {
     function totalSupplyAt(uint256 _blockNumber) public view returns (uint256) {
         require(
             _blockNumber <= block.number,
-            "Must pass block number in the past"
+            "Block number is in the future"
         );
 
         // Get most recent global Checkpoint to block
