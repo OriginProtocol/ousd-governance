@@ -9,7 +9,3 @@ def token():
 @pytest.fixture
 def vote_locker(token):
     return accounts[0].deploy(VoteLockerCurve, token)
-
-@pytest.fixture
-def now():
-    return int(time.time())
