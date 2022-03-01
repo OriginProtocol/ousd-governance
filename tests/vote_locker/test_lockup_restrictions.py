@@ -1,5 +1,5 @@
 import brownie
-from ..fixtures import token, vote_locker
+from ..fixtures import token, vote_locker, now
 
 def test_cant_lockup_above_max(vote_locker, token, now):
     token.approve(vote_locker, 100e18)
