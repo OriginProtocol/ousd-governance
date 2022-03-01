@@ -105,7 +105,18 @@ contract VoteLockerCurve {
      * @dev See {ERC20-balanceOf}.
      */
     function balanceOf(address _account) public view returns (uint256) {
-        return getVotes(_account);
+        uint256 currentUserEpoch = userEpoch[_account];
+        if (currentUserEpoch == 0) {
+            return 0;
+        }
+        Checkpoint memory lastCheckpoint = _userCheckpoints[_account][
+            currentUserEpoch
+        ];
+        // Calculate the bias based on the last bias and the slope over the difference
+        // in time between the last checkpint timestamp and the current block timestamp;
+        lastCheckpoint.bias -= (lastCheckpoint.slope *
+            SafeCast.toInt128(int256(block.timestamp - lastCheckpoint.ts)));
+        return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
     }
 
     /**
@@ -120,27 +131,39 @@ contract VoteLockerCurve {
     }
 
     /**
-     * @dev Get the `pos`-th checkpoint for `account`.
+     * @dev Get the `pos`-th checkpoint for `_account`.
      */
-    function checkpoints(address account, uint32 pos)
+    function checkpoints(address _account, uint32 _pos)
         public
         view
         virtual
         returns (Checkpoint memory)
     {
-        return _userCheckpoints[account][pos];
+        return _userCheckpoints[_account][_pos];
     }
 
     /**
-     * @dev Get number of checkpoints for `account`.
+     * @dev Get number of checkpoints for `_account`.
      */
-    function numCheckpoints(address account)
+    function numCheckpoints(address _account)
         public
         view
         virtual
         returns (uint32)
     {
-        return SafeCast.toUint32(_userCheckpoints[account].length);
+        return SafeCast.toUint32(_userCheckpoints[_account].length);
+    }
+
+    /**
+     * @dev Get last checkpoint for `_account`.
+     */
+    function getLastCheckpoint(address _account)
+        public
+        view
+        returns (Checkpoint memory)
+    {
+        return
+            _userCheckpoints[_account][_userCheckpoints[_account].length - 1];
     }
 
     /**
@@ -162,24 +185,16 @@ contract VoteLockerCurve {
     }
 
     /**
-     * @dev Gets the current votes balance for `_address`
+     * @dev Get the last global checkpoint.
      */
-    function getVotes(address _address) public view returns (uint256) {
-        uint256 currentUserEpoch = userEpoch[_address];
-        if (currentUserEpoch == 0) {
-            return 0;
-        }
-        Checkpoint memory lastCheckpoint = _userCheckpoints[_address][
-            currentUserEpoch
-        ];
-        // Calculate the bias based on the last bias and the slope over the difference
-        // in time between the last checkpint timestamp and the current block timetamp;
-        lastCheckpoint.bias =
-            lastCheckpoint.bias -
-            (lastCheckpoint.slope *
-                SafeCast.toInt128(int256(block.timestamp - lastCheckpoint.ts)));
-        return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
+    function getLastGlobalCheckpoint() public view returns (Checkpoint memory) {
+        return _globalCheckpoints[_globalCheckpoints.length - 1];
     }
+
+    /**
+     * @dev Gets the current votes balance for `_account`
+     */
+    function getVotes(address _account) public view returns (uint256) {}
 
     /**
      * @dev Retrieve the number of votes for `account` at the end of `blockNumber`.
@@ -334,14 +349,14 @@ contract VoteLockerCurve {
      * @dev Public function to trigger global checkpoint
      */
     function checkpoint() external {
-        _writeGlobalCheckpoint();
+        _writeGlobalCheckpoint(0, 0);
     }
 
     /**
      *
      */
     function _writeUserCheckpoint(
-        address _address,
+        address _account,
         Lockup memory _oldLockup,
         Lockup memory _newLockup
     ) private returns (uint256 oldWeight, uint256 newWeight) {
@@ -352,6 +367,7 @@ contract VoteLockerCurve {
         int128 newSlopeDelta = 0;
 
         if (_oldLockup.end > block.timestamp && _oldLockup.amount > 0) {
+            // Old checkpoint still active, calculates its slope and bias
             oldCheckpoint.slope =
                 _oldLockup.amount /
                 SafeCast.toInt128(int256(MAX_LOCK_TIME));
@@ -360,6 +376,7 @@ contract VoteLockerCurve {
                 SafeCast.toInt128(int256(_oldLockup.end - block.timestamp));
         }
         if (_newLockup.end > block.timestamp && _newLockup.amount > 0) {
+            // New lockup also active, calculate its slope and bias
             newCheckpoint.slope =
                 _newLockup.amount /
                 SafeCast.toInt128(int256(MAX_LOCK_TIME));
@@ -368,40 +385,32 @@ contract VoteLockerCurve {
                 SafeCast.toInt128(int256(_newLockup.end - block.timestamp));
         }
 
-        uint256 userCurrentEpoch = userEpoch[_address];
+        uint256 userCurrentEpoch = userEpoch[_account];
         if (userCurrentEpoch == 0) {
-            _userCheckpoints[_address].push(oldCheckpoint);
+            // First user epoch, push first checkpoint
+            _userCheckpoints[_account].push(oldCheckpoint);
         }
 
         newCheckpoint.ts = block.timestamp;
         newCheckpoint.blk = block.number;
-        userEpoch[_address] = userCurrentEpoch + 1;
-        _userCheckpoints[_address].push(newCheckpoint);
+        userEpoch[_account] = userCurrentEpoch + 1;
+        // Push second checkpoint
+        _userCheckpoints[_account].push(newCheckpoint);
 
         oldSlopeDelta = slopeChanges[_oldLockup.end];
         if (_newLockup.end != 0) {
             if (_newLockup.end == _oldLockup.end) {
+                // Lockup dates are the same end time, slope delta is the same
                 newSlopeDelta = oldSlopeDelta;
             } else {
                 newSlopeDelta = slopeChanges[_newLockup.end];
             }
         }
 
-        Checkpoint memory lastCheckpoint;
-
-        (lastCheckpoint, ) = _writeGlobalCheckpoint();
-
-        lastCheckpoint.slope = max(
-            lastCheckpoint.slope + newCheckpoint.slope - oldCheckpoint.slope,
-            0
+        _writeGlobalCheckpoint(
+            newCheckpoint.slope - oldCheckpoint.slope,
+            newCheckpoint.bias - oldCheckpoint.bias
         );
-
-        lastCheckpoint.bias = max(
-            lastCheckpoint.bias + newCheckpoint.bias - oldCheckpoint.bias,
-            0
-        );
-
-        _globalCheckpoints.push(lastCheckpoint);
 
         // Schedule the slope changes
         if (_oldLockup.end > block.timestamp) {
@@ -414,10 +423,9 @@ contract VoteLockerCurve {
             }
             slopeChanges[_oldLockup.end] = oldSlopeDelta;
         }
-
         if (_newLockup.end > block.timestamp) {
             if (_newLockup.end > _oldLockup.end) {
-                newSlopeDelta = newSlopeDelta - newCheckpoint.slope; // old slope disappeared at this point
+                newSlopeDelta = newSlopeDelta - newCheckpoint.slope;
                 slopeChanges[_newLockup.end] = newSlopeDelta;
             }
         }
@@ -426,12 +434,9 @@ contract VoteLockerCurve {
     /**
      *
      */
-    function _writeGlobalCheckpoint()
+    function _writeGlobalCheckpoint(int128 userSlopeDelta, int128 userBiasDelta)
         private
-        returns (
-            Checkpoint memory lastCheckpoint,
-            Checkpoint memory initialLastCheckpoint
-        )
+        returns (Checkpoint memory lastCheckpoint)
     {
         if (globalEpoch > 0) {
             lastCheckpoint = _globalCheckpoints[globalEpoch];
@@ -444,9 +449,7 @@ contract VoteLockerCurve {
             });
         }
 
-        uint256 lastCheckpointTimestamp = lastCheckpoint.ts;
-
-        initialLastCheckpoint = Checkpoint({
+        Checkpoint memory initialLastCheckpoint = Checkpoint({
             bias: 0,
             slope: 0,
             ts: lastCheckpoint.ts,
@@ -454,14 +457,14 @@ contract VoteLockerCurve {
         });
 
         uint256 blockSlope = 0; // dblock/dt
-        if (block.timestamp > lastCheckpointTimestamp) {
+        if (block.timestamp > lastCheckpoint.ts) {
+            // Scaled up
             blockSlope =
-                ((block.number - lastCheckpoint.blk) * 1**18) /
-                (block.timestamp - lastCheckpointTimestamp);
+                ((block.number - lastCheckpoint.blk) * 1e18) /
+                (block.timestamp - lastCheckpoint.ts);
         }
 
-        // blockSlope will be 0 if block.timestamp == lastCheckpointTimestamp
-
+        uint256 lastCheckpointTimestamp = lastCheckpoint.ts;
         uint256 iterativeTime = _floorToWeek(lastCheckpointTimestamp);
 
         for (uint256 i = 0; i < 255; i++) {
@@ -487,22 +490,193 @@ contract VoteLockerCurve {
             // The slope should never be below 0 but added for safety
             lastCheckpoint.slope = max(lastCheckpoint.slope + slopeDelta, 0);
             lastCheckpoint.ts = iterativeTime;
+            lastCheckpointTimestamp = iterativeTime;
             lastCheckpoint.blk =
                 initialLastCheckpoint.blk +
                 ((blockSlope * (iterativeTime - initialLastCheckpoint.ts)) /
-                    1) *
-                10**18;
+                    1e18); // Scale back down
 
-            globalEpoch = globalEpoch + 1;
+            globalEpoch += 1;
+
             if (iterativeTime == block.timestamp) {
                 lastCheckpoint.blk = block.number;
+                // Adjust the last checkpoint for any delta from the user
+                lastCheckpoint.slope = max(
+                    lastCheckpoint.slope + userSlopeDelta,
+                    0
+                );
+                lastCheckpoint.bias = max(
+                    lastCheckpoint.bias + userBiasDelta,
+                    0
+                );
+                _globalCheckpoints.push(lastCheckpoint);
                 break;
             } else {
                 _globalCheckpoints.push(lastCheckpoint);
             }
         }
+    }
 
-        return (lastCheckpoint, initialLastCheckpoint);
+    /**
+     * @param _block Find the most recent point history before this block
+     * @param _maxEpoch Maximum epoch
+     */
+    function _findEpoch(
+        Checkpoint[] memory _checkpoints,
+        uint256 _block,
+        uint256 _maxEpoch
+    ) internal view returns (uint256) {
+        uint256 minEpoch = 0;
+        uint256 maxEpoch = _maxEpoch;
+        for (uint256 i = 0; i < 128; i++) {
+            if (minEpoch >= maxEpoch) break;
+            uint256 mid = (minEpoch + maxEpoch + 1) / 2;
+            if (_checkpoints[mid].blk <= _block) {
+                minEpoch = mid;
+            } else {
+                maxEpoch = mid - 1;
+            }
+        }
+        return minEpoch;
+    }
+
+    function findCheckpointsBefore(address _owner, uint256 _blockNumber)
+        public
+        view
+        returns (
+            Checkpoint memory,
+            uint256,
+            Checkpoint memory,
+            uint256
+        )
+    {
+        // Get most recent user Checkpoint to block
+        uint256 recentUserEpoch = _findEpoch(
+            _userCheckpoints[_owner],
+            _blockNumber,
+            userEpoch[_owner] // Max epoch
+        );
+        Checkpoint memory userPoint = _userCheckpoints[_owner][recentUserEpoch];
+
+        // Get most recent global Checkpoint to block
+        uint256 recentGlobalEpoch = _findEpoch(
+            _globalCheckpoints,
+            _blockNumber,
+            globalEpoch
+        );
+        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
+
+        return (userPoint, recentUserEpoch, checkpoint0, recentGlobalEpoch);
+    }
+
+    /**
+     * @dev Gets a users votingWeight at a given blockNumber
+     * @param _owner User for which to return the balance
+     * @param _blockNumber Block at which to calculate balance
+     * @return uint256 Balance of user
+     */
+    function balanceOfAt(address _owner, uint256 _blockNumber)
+        public
+        view
+        returns (uint256)
+    {
+        require(_blockNumber <= block.number, "Block number is in the future");
+
+        // Get most recent user Checkpoint to block
+        uint256 recentUserEpoch = _findEpoch(
+            _userCheckpoints[_owner],
+            _blockNumber,
+            userEpoch[_owner] // Max epoch
+        );
+        if (recentUserEpoch == 0) {
+            return 0;
+        }
+        Checkpoint memory userPoint = _userCheckpoints[_owner][recentUserEpoch];
+
+        // Get most recent global Checkpoint to block
+        uint256 recentGlobalEpoch = _findEpoch(
+            _globalCheckpoints,
+            _blockNumber,
+            globalEpoch // Max epoch
+        );
+        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
+
+        // Calculate delta (block & time) between user Point and target block
+        // Allowing us to calculate the average seconds per block between
+        // the two points
+        uint256 dBlock = 0;
+        uint256 dTime = 0;
+        if (recentGlobalEpoch < globalEpoch) {
+            Checkpoint memory checkpoint1 = _globalCheckpoints[
+                recentGlobalEpoch + 1
+            ];
+            dBlock = checkpoint1.blk - checkpoint0.blk;
+            dTime = checkpoint1.ts - checkpoint0.ts;
+        } else {
+            dBlock = block.number - checkpoint0.blk;
+            dTime = block.timestamp - checkpoint0.ts;
+        }
+
+        // (Deterministically) Estimate the time at which block _blockNumber was mined
+        uint256 blockTime = checkpoint0.ts;
+        if (dBlock != 0) {
+            blockTime += (dTime * (_blockNumber - checkpoint0.blk)) / dBlock;
+        }
+
+        // Current Bias = most recent bias - (slope * time since update)
+        userPoint.bias -= (userPoint.slope *
+            SafeCast.toInt128(int256(blockTime - userPoint.ts)));
+        if (userPoint.bias >= 0) {
+            return SafeCast.toUint256(userPoint.bias);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * @dev Calculates total supply of votingWeight at a given blockNumber
+     * @param _blockNumber Block number at which to calculate total supply
+     * @return totalSupply of voting token weight at the given blockNumber
+     */
+    function totalSupplyAt(uint256 _blockNumber) public view returns (uint256) {
+        require(
+            _blockNumber <= block.number,
+            "Must pass block number in the past"
+        );
+
+        // Get most recent global Checkpoint to block
+        uint256 recentGlobalEpoch = _findEpoch(
+            _globalCheckpoints,
+            _blockNumber,
+            globalEpoch
+        );
+
+        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
+
+        if (checkpoint0.blk > _blockNumber) {
+            return 0;
+        }
+
+        uint256 dTime = 0;
+        if (recentGlobalEpoch < globalEpoch) {
+            Checkpoint memory checkpoint1 = _globalCheckpoints[
+                recentGlobalEpoch + 1
+            ];
+            if (checkpoint0.blk != checkpoint1.blk) {
+                dTime =
+                    ((_blockNumber - checkpoint0.blk) *
+                        (checkpoint1.ts - checkpoint0.ts)) /
+                    (checkpoint1.blk - checkpoint0.blk);
+            }
+        } else if (checkpoint0.blk != block.number) {
+            dTime =
+                ((_blockNumber - checkpoint0.blk) *
+                    (block.timestamp - checkpoint0.ts)) /
+                (block.number - checkpoint0.blk);
+        }
+        // Now dTime contains info on how far are we beyond point
+
+        return _supplyAt(checkpoint0, checkpoint0.ts + dTime);
     }
 
     /**
@@ -549,20 +723,6 @@ contract VoteLockerCurve {
         }
 
         return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
-    }
-
-    /**
-     * @dev Helper addition function for passing to checkpointing functions.
-     */
-    function _add(uint256 a, uint256 b) private pure returns (uint256) {
-        return a + b;
-    }
-
-    /**
-     * @dev Helper subtraction function for passing to checkpointing functions.
-     */
-    function _subtract(uint256 a, uint256 b) private pure returns (uint256) {
-        return a - b;
     }
 
     /**
