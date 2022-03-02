@@ -1,6 +1,6 @@
 import pytest
 import time
-from brownie import Governance, GovernanceToken, VoteLockerCurve, accounts
+from brownie import Governance, GovernanceToken, VoteLockerCurve, Timelock, accounts
 
 @pytest.fixture
 def token():
@@ -13,7 +13,7 @@ def vote_locker(token):
 
 @pytest.fixture
 def timelock_controller():
-    return accounts[0].deploy(Timelock, 86400 * 2, accounts[0], accounts[0])
+    return accounts[0].deploy(Timelock, [accounts[0]], [accounts[0]])
 
 @pytest.fixture
 def governance(vote_locker, timelock_controller):
