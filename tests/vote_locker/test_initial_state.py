@@ -3,7 +3,7 @@ from brownie import accounts
 from ..fixtures import token, vote_locker
 
 def test_name(vote_locker):
-    assert vote_locker.name() == "Vote Locked Origin Governance Token"
+    assert vote_locker.name() == "Vote Locked OUSD Governance"
 
 def test_symbol(vote_locker):
     assert vote_locker.symbol() == "vlOGV"

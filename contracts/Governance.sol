@@ -10,7 +10,7 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extension
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 
-contract OUSDGovernor is
+contract Governance is
     Governor,
     GovernorSettings,
     GovernorCompatibilityBravo,
@@ -20,7 +20,7 @@ contract OUSDGovernor is
     GovernorPreventLateQuorum
 {
     constructor(ERC20Votes _token, TimelockController _timelock)
-        Governor("OUSDGovernor")
+        Governor("OUSD Governance")
         GovernorSettings(
             1, /* 1 block */
             45818, /* 1 week */

@@ -1,5 +1,5 @@
 import brownie
-from brownie import OGV, VoteLockerCurve, accounts, chain
+from brownie import accounts, chain
 
 from ..helpers import floor_week
 from ..fixtures import token, vote_locker
