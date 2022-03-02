@@ -250,7 +250,10 @@ contract VoteLockerCurve {
 
         Lockup memory oldLockup = lockups[msg.sender];
 
-        require(_end > block.timestamp, "End must be greater than the current block timestamp");
+        require(
+            _end > block.timestamp,
+            "End must be greater than the current block timestamp"
+        );
         if (oldLockup.end > 0 && _end < oldLockup.end) {
             revert("End must be greater than or equal to the current end");
         }
@@ -261,7 +264,10 @@ contract VoteLockerCurve {
         );
         int128 amount = SafeCast.toInt128(int256(_amount));
         // Amount extensions
-        require(amount >= oldLockup.amount, "Amount must be greater than or equal to current amount");
+        require(
+            amount >= oldLockup.amount,
+            "Amount must be greater than or equal to current amount"
+        );
 
         // oldLockup.amount is 0 if no lockup, or something if this is an increase in locked
         // amount
@@ -269,16 +275,17 @@ contract VoteLockerCurve {
 
         // Old lockup amount will be 0 if no existing lockup, if this is an increase of the
         // lockup amount, then _amount can be 0
-        Lockup memory newLockup = Lockup({
-            amount: amount,
-            end: _end
-        });
+        Lockup memory newLockup = Lockup({amount: amount, end: _end});
 
         lockups[msg.sender] = newLockup;
 
         if (amountDelta > 0) {
             // Transfer the amount delta
-            stakingToken.safeTransferFrom(msg.sender, address(this), amountDelta);
+            stakingToken.safeTransferFrom(
+                msg.sender,
+                address(this),
+                amountDelta
+            );
         }
 
         _writeUserCheckpoint(msg.sender, oldLockup, newLockup);
@@ -556,7 +563,7 @@ contract VoteLockerCurve {
         view
         returns (uint256)
     {
-      return balanceOfAt(_account, _blockNumber);
+        return balanceOfAt(_account, _blockNumber);
     }
 
     /**
@@ -581,7 +588,9 @@ contract VoteLockerCurve {
         if (recentUserEpoch == 0) {
             return 0;
         }
-        Checkpoint memory userPoint = _userCheckpoints[_account][recentUserEpoch];
+        Checkpoint memory userPoint = _userCheckpoints[_account][
+            recentUserEpoch
+        ];
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
@@ -637,7 +646,7 @@ contract VoteLockerCurve {
         view
         returns (uint256)
     {
-      return totalSupplyAt(_blockNumber);
+        return totalSupplyAt(_blockNumber);
     }
 
     /**
@@ -646,10 +655,7 @@ contract VoteLockerCurve {
      * @return totalSupply of voting token weight at the given blockNumber
      */
     function totalSupplyAt(uint256 _blockNumber) public view returns (uint256) {
-        require(
-            _blockNumber <= block.number,
-            "Block number is in the future"
-        );
+        require(_blockNumber <= block.number, "Block number is in the future");
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
