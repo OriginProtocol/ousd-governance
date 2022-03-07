@@ -27,7 +27,7 @@ contract Governance is
             0
         )
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4)
+        GovernorVotesQuorumFraction(4) // Default quorum numerator is 100, so 4/100 or 4%
         GovernorTimelockControl(_timelock)
         GovernorPreventLateQuorum(86400 / 15) // ~1 day
     {}
