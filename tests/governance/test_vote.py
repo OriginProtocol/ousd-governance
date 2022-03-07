@@ -34,7 +34,7 @@ def test_proposal_can_pass_vote(governance, vote_locker, token, timelock_control
         [governance.address],
         [0],
         ["setVotingDelay(uint256)"],
-        ["0x100"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
         "Set voting delay",
         {"from": accounts[0]},
     )
@@ -64,7 +64,7 @@ def test_proposal_can_fail_vote(governance, vote_locker, token, timelock_control
         [governance.address],
         [0],
         ["setVotingDelay(uint256)"],
-        ["0x100"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
         "Set voting delay",
         {"from": accounts[0]},
     )
@@ -92,7 +92,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(governance, vote_locker
         [governance.address],
         [0],
         ["setVotingDelay(uint256)"],
-        ["0x100"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
         "Set voting delay",
         {"from": accounts[0]},
     )
@@ -105,5 +105,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(governance, vote_locker
     governance.queue(tx.return_value, {"from": alice})
     assert governance.state(tx.return_value) == 5
     chain.sleep(86400 * 2)
+    chain.mine()
     governance.execute(tx.return_value, {"from": alice})
-    assert governance.state(tx.return_value) == 6
+    assert governance.state(tx.return_value) == 7
+    assert governance.votingDelay() == 100
