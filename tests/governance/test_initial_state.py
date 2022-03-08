@@ -25,3 +25,8 @@ def test_quorum(governance, web3):
 
 def test_voting_power(governance, web3):
     assert governance.getVotes(accounts[0], web3.eth.block_number) == 0
+
+
+def test_timelock_min_delay(timelock_controller):
+    assert timelock_controller.getMinDelay() == 86400 * 2
+
