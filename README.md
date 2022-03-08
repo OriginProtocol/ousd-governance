@@ -25,3 +25,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 cd contracts
 brownie test --network hardhat
 ```
+
+## Running a local node
+
+```bash
+npx hardhat node --port 8545
+```
+
+In aonther terminal:
+
+```bash
+brownie run deploy
+```

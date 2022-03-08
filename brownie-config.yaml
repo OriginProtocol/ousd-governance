@@ -1,2 +1,3 @@
 dependencies:
   - OpenZeppelin/openzeppelin-contracts@4.4.2
+dev_deployment_artifacts: true
