@@ -19,6 +19,11 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Install brownie dependencies
+```bash
+brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.0
+```
+
 ## Running contract tests
 
 ```bash
@@ -32,7 +37,7 @@ brownie test --network hardhat
 npx hardhat node --port 8545
 ```
 
-In aonther terminal:
+In another terminal:
 
 ```bash
 brownie run deploy
