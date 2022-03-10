@@ -1,9 +1,4 @@
-export const LeaderboardTable = ({ limit }: { limit: number }) => {
-  const leaderboard = Array(limit).fill({
-    address: "0x0000000000000000000000000000000000000000",
-    votes: 100,
-  });
-
+export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   return (
     <table className="table table-zebra table-compact w-full">
       <thead>
@@ -14,11 +9,11 @@ export const LeaderboardTable = ({ limit }: { limit: number }) => {
         </tr>
       </thead>
       <tbody>
-        {leaderboard.map((item, index) => (
+        {voters.map((voter, index) => (
           <tr>
             <td>{index}</td>
-            <td>{item.address}</td>
-            <td>{item.votes}</td>
+            <td>{voter.address}</td>
+            <td>{voter.votes}</td>
           </tr>
         ))}
       </tbody>

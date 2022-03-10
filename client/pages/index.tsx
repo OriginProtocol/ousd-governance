@@ -9,6 +9,7 @@ import { VoteStats } from "components/VoteStats";
 import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
+import prisma from "lib/prisma";
 
 export type ProposalDataType = {
   count: BigNumber;
@@ -22,35 +23,47 @@ export async function getServerSideProps({ res }: { res: any }) {
     "public, s-maxage=60, stale-while-revalidate=59"
   );
 
-  const response =
-    await fetch(`https://api.ethplorer.io/getTokenInfo/${governanceTokenAddress}?apiKey=freekey
-`);
-  const responseJson = await response.json();
+  const holderCount = await prisma.voter.count();
+  // Limit 5
+  const voters = (await prisma.voter.findMany()).map((v) => ({
+    address: v.address,
+    votes: v.votes.toString(),
+  }));
+
+  const proposalCount = await prisma.proposal.count();
 
   return {
     props: {
-      holderCount: responseJson.holdersCount,
-      totalSupply: responseJson.totalSupply,
+      voters,
+      proposalCount,
+      holderCount,
+      totalSupply: 10,
     },
   };
 }
 
 const Home: NextPage = ({
+  voters,
+  proposalCount,
   holderCount,
   totalSupply,
 }: {
+  voters: Array<{ address: string; votes: string }>;
+  proposalCount: number;
   holderCount: number;
   totalSupply: number;
 }) => {
-  const [proposalData, setProposalData] = useState<ProposalDataType>() || [
-    { count: BigNumber.from(0), proposals: [], states: [] },
-  ];
+  const [proposalData, setProposalData] = useState<ProposalDataType>({
+    count: BigNumber.from(0),
+    proposals: [],
+    states: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const data = await loadProposals();
-      setProposalData(data);
+      // const data = await loadProposals();
+      // setProposalData(data);
       setLoading(false);
     };
     load();
@@ -60,7 +73,7 @@ const Home: NextPage = ({
     <div>
       <PageTitle>Governance Overview</PageTitle>
       <VoteStats
-        proposalCount={proposalData?.count.toNumber()}
+        proposalCount={proposalCount}
         holderCount={holderCount}
         totalSupply={totalSupply}
       />
@@ -77,7 +90,7 @@ const Home: NextPage = ({
         />
       )}
       <SectionTitle>Top 5 Voters</SectionTitle>
-      <LeaderboardTable limit={5} />
+      <LeaderboardTable voters={voters} />
     </div>
   );
 };

@@ -6,33 +6,51 @@ import type { ProposalDataType } from "pages/index";
 import { Loading } from "components/Loading";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { PageTitle } from "components/PageTitle";
+import prisma from "lib/prisma";
 
-const Proposal: NextPage = () => {
+export async function getServerSideProps({ res }: { res: any }) {
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=59"
+  );
+
+  const proposals = await prisma.proposal.findMany();
+
+  return {
+    props: {
+      proposals,
+    },
+  };
+}
+
+const Proposal: NextPage = ({ proposals }) => {
   const router = useRouter();
 
-  const [proposalData, setProposalData] = useState<ProposalDataType>() || [
-    { count: 0, proposals: [], states: [] },
-  ];
+  const [proposalData, setProposalData] = useState<ProposalDataType>({
+    count: proposals.length,
+    proposals: [],
+    states: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const data = await loadProposals();
-      setProposalData(data);
       setLoading(false);
     };
     load();
-  }, [setProposalData]);
+  }, []);
 
   return (
     <>
       <PageTitle>Proposals</PageTitle>
-      <button
-        className="btn btn-primary mb-5"
-        onClick={() => router.push("/proposal/new")}
-      >
-        New Proposal
-      </button>
+      {proposals.length > 0 && (
+        <button
+          className="btn btn-primary mb-5"
+          onClick={() => router.push("/proposal/new")}
+        >
+          New Proposal
+        </button>
+      )}
       {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
     </>
   );

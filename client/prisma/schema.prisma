@@ -1,0 +1,24 @@
+datasource db {
+  url      = env("DATABASE_URL")
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Voter {
+    id                Int @default(autoincrement()) @id
+    address           String
+    // This is storing a uint256
+    votes             Decimal @db.Decimal(78, 0)
+    firstSeenBlock    Int
+    updatedAt         DateTime @default(now())
+    createdAt         DateTime @default(now())
+}
+
+model Proposal {
+    // This is storing a uint256
+    id          Decimal @db.Decimal(78, 0) @unique
+    createdAt   DateTime @default(now())
+}
