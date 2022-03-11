@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "ousd-governance-client",
   "private": true,
   "scripts": {
     "dev": "next dev",

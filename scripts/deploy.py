@@ -2,18 +2,12 @@ import json
 from brownie import *
 from pathlib import Path
 
-# Load OpenZeppelin TimelockController from dependency path
-TimelockController = project.load(
-    Path.home() / ".brownie" / "packages" / config["dependencies"][0]
-).TimelockController
-
-
 def main(output_file=None):
     token = GovernanceToken.deploy({"from": accounts[0]})
     votelock = VoteLockerCurve.deploy(token, {"from": accounts[0]})
     timelock_delay = 86400 * 2  # 48 hours
-    timelock_controller = TimelockController.deploy(
-        timelock_delay, [accounts[0]], [accounts[0]], {"from": accounts[0]}
+    timelock_controller = Timelock.deploy(
+        [accounts[0]], [accounts[0]], {"from": accounts[0]}
     )
     governance = Governance.deploy(votelock, timelock_controller, {"from": accounts[0]})
     # Make the governor the proposer and executor on timelock

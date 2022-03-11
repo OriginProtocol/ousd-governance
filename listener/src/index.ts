@@ -1,7 +1,7 @@
 import Web3 from "web3";
 import EthereumEvents from "ethereum-events";
-import prisma from "../client/lib/prisma.ts";
-import GovernanceContracts from "../client/networks/governance.localhost.json";
+import prisma from "ousd-governance-client/lib/prisma";
+import GovernanceContracts from "ousd-governance-client/networks/governance.localhost.json";
 
 const WEB3_PROVIDER = process.env.WEB3_PROVIDER || "http://localhost:8545";
 
@@ -33,7 +33,20 @@ const web3 = new Web3(WEB3_PROVIDER);
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
 ethereumEvents.on("block.confirmed", (blockNumber, events, done) => {
+  console.log("Got a block");
   console.log(events);
+  done();
 });
 
-ethereumEvents.start(startBlock);
+ethereumEvents.on("block.unconfirmed", (blockNumber, events, done) => {
+  console.log("Unconfirmed block");
+  done();
+});
+
+ethereumEvents.on("error", (err) => {
+  console.log(err);
+});
+
+ethereumEvents.start(0);
+
+console.log("Listener started");
