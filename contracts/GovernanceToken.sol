@@ -10,7 +10,7 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/access/Ownable.sol";
  */
 contract GovernanceToken is ERC20, Ownable {
     constructor() ERC20("OUSD Governance", "OGV") {
-        _mint(msg.sender, 2000000000 * 10**decimals());
+        _mint(msg.sender, 1000000000 * 10**decimals());
     }
 
     function mint(address to, uint256 amount) public onlyOwner {

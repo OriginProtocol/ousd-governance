@@ -21,5 +21,7 @@ def main(output_file=None):
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),
         )
-        with open(output_file, "w") as f:
+        with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
+
+    return (token, votelock, timelock_controller, governance)

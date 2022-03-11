@@ -40,6 +40,7 @@ ethereumEvents.on("block.confirmed", (blockNumber, events, done) => {
 
 ethereumEvents.on("block.unconfirmed", (blockNumber, events, done) => {
   console.log("Unconfirmed block");
+  console.log(events);
   done();
 });
 
@@ -47,6 +48,6 @@ ethereumEvents.on("error", (err) => {
   console.log(err);
 });
 
-ethereumEvents.start(0);
+ethereumEvents.start(1);
 
 console.log("Listener started");
