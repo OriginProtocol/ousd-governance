@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import EthereumEvents from "ethereum-events";
-import prisma from "ousd-governance-client/lib/prisma";
+import prisma, { Prisma } from "ousd-governance-client/lib/prisma";
 import GovernanceContracts from "ousd-governance-client/networks/governance.localhost.json";
 
 const WEB3_PROVIDER = process.env.WEB3_PROVIDER || "http://localhost:8545";
@@ -32,15 +32,19 @@ const web3 = new Web3(WEB3_PROVIDER);
 
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
-ethereumEvents.on("block.confirmed", (blockNumber, events, done) => {
-  console.log("Got a block");
-  console.log(events);
-  done();
-});
-
-ethereumEvents.on("block.unconfirmed", (blockNumber, events, done) => {
-  console.log("Unconfirmed block");
-  console.log(events);
+ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
+  for (const event of events) {
+    if (event.name == "ProposalCreated") {
+      try {
+        await prisma.proposal.create({
+          data: {
+            id: event.values.proposalId,
+          },
+        });
+        console.log("Inserted new proposal");
+      } catch (e) {}
+    }
+  }
   done();
 });
 

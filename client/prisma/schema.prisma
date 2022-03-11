@@ -19,6 +19,6 @@ model Voter {
 
 model Proposal {
     // This is storing a uint256
-    id          Decimal @db.Decimal(78, 0) @unique
+    id          String @unique
     createdAt   DateTime @default(now())
 }
