@@ -16,7 +16,7 @@ const contracts = [
     name: "VoteLockerCurve",
     address: GovernanceContracts.VoteLockerCurve.address,
     abi: GovernanceContracts.VoteLockerCurve.abi,
-    events: ["Lockup"],
+    events: ["LockupCreated"],
   },
 ];
 
@@ -42,6 +42,17 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
           },
         });
         console.log("Inserted new proposal");
+      } catch (e) {}
+    } else {
+      try {
+        await prisma.voter.create({
+          data: {
+            address: event.values.provider,
+            votes: 0,
+            firstSeenBlock: event.blockNumber,
+          },
+        });
+        console.log("Inserted new voter");
       } catch (e) {}
     }
   }

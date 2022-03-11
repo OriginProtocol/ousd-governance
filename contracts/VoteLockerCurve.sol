@@ -21,10 +21,18 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
 contract VoteLockerCurve {
     using SafeERC20 for ERC20;
 
-    event Deposit(
+    event LockupCreated(
         address indexed provider,
-        uint256 amount,
-        uint256 locktime,
+        int128 amount,
+        uint256 end,
+        uint256 ts
+    );
+    event LockupUpdated(
+        address indexed provider,
+        int128 oldAmount,
+        uint256 oldEnd,
+        int128 amount,
+        uint256 end,
         uint256 ts
     );
     event Withdraw(address indexed provider, uint256 value, uint256 ts);
@@ -286,6 +294,25 @@ contract VoteLockerCurve {
                 address(this),
                 amountDelta
             );
+        }
+
+        if (oldLockup.end > 0) {
+            // This is an extension of an existing lockup
+            emit LockupUpdated(
+              msg.sender,
+              oldLockup.amount,
+              oldLockup.end,
+              newLockup.amount,
+              newLockup.end,
+              block.timestamp
+            );
+        } else {
+          emit LockupCreated(
+            msg.sender,
+            newLockup.amount,
+            newLockup.end,
+            block.timestamp
+          );
         }
 
         _writeUserCheckpoint(msg.sender, oldLockup, newLockup);

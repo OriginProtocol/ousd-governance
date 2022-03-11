@@ -9,7 +9,7 @@ generator client {
 
 model Voter {
     id                Int @default(autoincrement()) @id
-    address           String
+    address           String @unique
     // This is storing a uint256
     votes             Decimal @db.Decimal(78, 0)
     firstSeenBlock    Int
