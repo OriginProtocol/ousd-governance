@@ -4,6 +4,7 @@ This is the [OUSD](https://ousd.com) decentralized governance stack.
 
 ```bash
 brownie pm install OpenZeppelin/openzeppelin-contracts@4.5.0
+brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0
 ```
 
 ## Running contract tests
