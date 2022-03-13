@@ -12,13 +12,18 @@ model Voter {
     address           String @unique
     // This is storing a uint256
     votes             Decimal @db.Decimal(78, 0)
-    firstSeenBlock    Int
-    updatedAt         DateTime @default(now())
-    createdAt         DateTime @default(now())
+    firstSeenBlock    Int @map("first_seen_block")
+    updatedAt         DateTime @default(now()) @map("updated_at")
+    createdAt         DateTime @default(now()) @map("created_at")
+
+    @@map("voters")
 }
 
 model Proposal {
+    id          Int @default(autoincrement()) @id
     // This is storing a uint256
-    id          String @unique
-    createdAt   DateTime @default(now())
+    proposalId  String @unique @map("proposal_id")
+    createdAt   DateTime @default(now()) @map("created_at")
+
+    @@map("proposals")
 }
