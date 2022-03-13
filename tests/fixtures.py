@@ -1,9 +1,9 @@
 import pytest
-from brownie import Governance, GovernanceToken, VoteLockerCurve, Timelock, accounts
+from brownie import Governance, OriginDollarGovernance, VoteLockerCurve, Timelock, accounts
 
 @pytest.fixture
 def token():
-    return accounts[0].deploy(GovernanceToken)
+    return accounts[0].deploy(OriginDollarGovernance)
 
 @pytest.fixture
 def vote_locker(token):

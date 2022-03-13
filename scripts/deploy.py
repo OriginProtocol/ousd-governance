@@ -2,8 +2,14 @@ import json
 from brownie import *
 from pathlib import Path
 
+Proxy = project.load(
+    Path.home() / ".brownie" / "packages" / config["dependencies"][0]
+).ERC1967Proxy
+
 def main(output_file=None):
-    token = GovernanceToken.deploy({"from": accounts[0]})
+    token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
+    token_proxy = Proxy.deploy(token_impl.address, token_impl.initialize.encode_input(), {"from": accounts[0]})
+    token = Contract.from_abi("OriginDollarGovernance", token_proxy.address, token_impl.abi)
     votelock = VoteLockerCurve.deploy(token, {"from": accounts[0]})
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
@@ -16,7 +22,7 @@ def main(output_file=None):
 
     if output_file:
         output = dict(
-            GovernanceToken=dict(address=token.address, abi=token.abi),
+            OriginDollarGovernance=dict(address=token.address, abi=token.abi),
             VoteLockerCurve=dict(address=votelock.address, abi=votelock.abi),
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),
