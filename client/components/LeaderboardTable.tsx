@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   return (
     <table className="table table-zebra table-compact w-full">
@@ -13,7 +15,9 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
           <tr>
             <td>{index}</td>
             <td>{voter.address}</td>
-            <td>{voter.votes}</td>
+            <td>
+              {ethers.utils.formatUnits(ethers.BigNumber.from(voter.votes))}
+            </td>
           </tr>
         ))}
       </tbody>
