@@ -17,8 +17,10 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.so
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/OwnableUpgradeable.sol";
 
-contract VoteLockerCurve {
+contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     using SafeERC20 for ERC20;
 
     event LockupCreated(
@@ -41,6 +43,10 @@ contract VoteLockerCurve {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
+    /* note: OpenZeppelin upgrade-able contract don't allow for initialized members except if they are
+     * declared constant. Otherwise it is similar to declaring initial state in constructor. And 
+     * constructors are not supported with upgrade-able contracts.
+     */
     uint256 private constant WEEK = 7 days;
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
@@ -71,7 +77,8 @@ contract VoteLockerCurve {
         uint256 end;
     }
 
-    constructor(address _stakingToken) {
+    function initialize(address _stakingToken) public initializer {
+        __Ownable_init();
         stakingToken = ERC20(_stakingToken);
         _name = string(
             bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))

@@ -10,7 +10,11 @@ def main(output_file=None):
     token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
     token_proxy = Proxy.deploy(token_impl.address, token_impl.initialize.encode_input(), {"from": accounts[0]})
     token = Contract.from_abi("OriginDollarGovernance", token_proxy.address, token_impl.abi)
-    votelock = VoteLockerCurve.deploy(token, {"from": accounts[0]})
+
+    votelock_impl = VoteLockerCurve.deploy({"from": accounts[0]})
+    votelock_proxy = Proxy.deploy(votelock_impl.address, votelock_impl.initialize.encode_input(token), {"from": accounts[0]})
+    votelock = Contract.from_abi("VoteLockerCurve", votelock_proxy.address, token_impl.abi)
+
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
         [accounts[0]], [accounts[0]], {"from": accounts[0]}
