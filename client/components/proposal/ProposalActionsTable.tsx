@@ -12,6 +12,10 @@ export const ProposalActionsTable = ({
   proposalActions,
   ephemeral,
   onActionDelete,
+}: {
+  proposalActions: any;
+  ephemeral?: boolean;
+  onActionDelete?: Function;
 }) => {
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
@@ -21,7 +25,7 @@ export const ProposalActionsTable = ({
 
   return (
     <>
-      {ephemeral && (
+      {ephemeral && onActionDelete && (
         <ConfirmDeleteModal
           modalOpen={modalOpen}
           onConfirm={() => {

@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { Loading } from "components/Loading";
+import { StateTag } from "components/proposal/StateTag";
 
 export const ProposalTable = ({ proposalData }) => {
   const router = useRouter();
@@ -65,21 +66,10 @@ export const ProposalTable = ({ proposalData }) => {
             className="hover cursor-pointer"
             onClick={() => router.push(`/proposal/${proposal[0]}`)}
           >
-            <td>{proposal[0].toString()}</td>
+            <td>{proposal.displayId}</td>
             <td>{proposal[1]}</td>
             <td>
-              {proposalData.states[index] == 0 && (
-                <div className="badge badge-info">Pending</div>
-              )}
-              {proposalData.states[index] == 1 && (
-                <div className="badge badge-warning">Queued</div>
-              )}
-              {proposalData.states[index] == 2 && (
-                <div className="badge badge-error">Expired</div>
-              )}
-              {proposalData.states[index] == 3 && (
-                <div className="badge badge-success">Executed</div>
-              )}
+              <StateTag state={proposalData.states[index]} />
             </td>
           </tr>
         ))}

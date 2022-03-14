@@ -10,7 +10,7 @@ const ProposalPage: NextPage = () => {
 
   return (
     <>
-      <PageTitle>Proposal {proposalId}</PageTitle>
+      <PageTitle>Proposal</PageTitle>
       <ProposalDetail proposalId={proposalId} />
     </>
   );
