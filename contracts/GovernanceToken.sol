@@ -4,14 +4,17 @@ pragma solidity ^0.8.4;
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/OwnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract OriginDollarGovernance is Initializable, ERC20Upgradeable, OwnableUpgradeable {
+/// @custom:security-contact security@originprotocol.com
+contract OriginDollarGovernance is Initializable, ERC20Upgradeable, OwnableUpgradeable, UUPSUpgradeable {
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
     function initialize() initializer public {
         __ERC20_init("Origin Dollar Governance", "OGV");
         __Ownable_init();
+        __UUPSUpgradeable_init();
 
         _mint(msg.sender, 1000000000 * 10 ** decimals());
     }
@@ -19,4 +22,10 @@ contract OriginDollarGovernance is Initializable, ERC20Upgradeable, OwnableUpgra
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        onlyOwner
+        override
+    {}
 }

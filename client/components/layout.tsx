@@ -21,7 +21,7 @@ export default function Layout({ children }: JSX.ElementChildrenAttribute) {
             <a href="/leaderboard" className="btn btn-ghost btn-sm rounded-btn">
               Leaderboard
             </a>
-            <a href="/ve" className="btn btn-ghost btn-sm rounded-btn">
+            <a href="/vote-escrow" className="btn btn-ghost btn-sm rounded-btn">
               Vote Escrow
             </a>
           </div>

@@ -12,7 +12,6 @@ import { LeaderboardTable } from "components/LeaderboardTable";
 import prisma from "lib/prisma";
 
 export type ProposalDataType = {
-  count: BigNumber;
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
   states: Array<number>;
 };
@@ -25,16 +24,30 @@ export async function getServerSideProps({ res }: { res: any }) {
 
   const holderCount = await prisma.voter.count();
   // Limit 5
-  const voters = (await prisma.voter.findMany()).map((v) => ({
+  const voters = (
+    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }] })
+  ).map((v) => ({
     address: v.address,
     votes: v.votes.toString(),
   }));
 
   const proposalCount = await prisma.proposal.count();
 
+  const proposals = (
+    await prisma.proposal.findMany({
+      orderBy: [{ createdAt: "desc" }],
+      take: 5,
+    })
+  ).map((p) => ({
+    id: p.id,
+    proposalId: p.proposalId,
+    createdAt: p.createdAt.toString(),
+  }));
+
   return {
     props: {
       voters,
+      proposals,
       proposalCount,
       holderCount,
       totalSupply: 10,
@@ -44,17 +57,23 @@ export async function getServerSideProps({ res }: { res: any }) {
 
 const Home: NextPage = ({
   voters,
+  proposals,
   proposalCount,
   holderCount,
   totalSupply,
 }: {
   voters: Array<{ address: string; votes: string }>;
+  proposals: Array<{
+    id: number;
+    proposalId: string;
+    updatedAt: string;
+    createdAt: string;
+  }>;
   proposalCount: number;
   holderCount: number;
   totalSupply: number;
 }) => {
   const [proposalData, setProposalData] = useState<ProposalDataType>({
-    count: BigNumber.from(0),
     proposals: [],
     states: [],
   });
@@ -62,12 +81,22 @@ const Home: NextPage = ({
 
   useEffect(() => {
     const load = async () => {
-      // const data = await loadProposals();
-      // setProposalData(data);
+      const data = await loadProposals(proposals.map((p) => p.proposalId));
+      // Augment with human readable ID from the database
+      const dataWithDisplayId = {
+        ...data,
+        proposals: data.proposals.map((d) => ({
+          ...d,
+          displayId: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.id,
+        })),
+      };
+      setProposalData(dataWithDisplayId);
       setLoading(false);
     };
     load();
-  }, [setProposalData]);
+  }, [proposals, setProposalData]);
 
   return (
     <div>
@@ -85,7 +114,6 @@ const Home: NextPage = ({
           proposalData={{
             ...proposalData,
             proposals: proposalData?.proposals.slice(-5).reverse(),
-            states: proposalData?.states.slice(-5).reverse(),
           }}
         />
       )}

@@ -26,7 +26,7 @@ export const governanceContract = new ethers.Contract(
 );
 
 export const governanceTokenAddress =
-  GovernanceContracts.GovernanceToken.address;
+  GovernanceContracts.OriginDollarGovernance.address;
 
 export const governanceTokenContract = new ethers.Contract(
   governanceTokenAddress,

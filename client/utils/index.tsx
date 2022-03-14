@@ -16,16 +16,14 @@ export const truncateEthAddress = (address: string) => {
   return `${match[1]}…${match[2]}`;
 };
 
-export const loadProposals = async () => {
-  const count = await governanceContract.proposalCount();
+export const loadProposals = async (ids: Array<String>) => {
   const proposalGets = [];
   const proposalStateGets = [];
-  for (let i = 1; i <= count; i++) {
-    proposalGets.push(governanceContract.proposals(i));
-    proposalStateGets.push(governanceContract.state(i));
+  for (let id of ids) {
+    proposalGets.push(governanceContract.proposals(id));
+    proposalStateGets.push(governanceContract.state(id));
   }
   return {
-    count,
     proposals: await Promise.all(proposalGets),
     states: await Promise.all(proposalStateGets),
   };
