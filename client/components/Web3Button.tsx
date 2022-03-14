@@ -49,7 +49,7 @@ if (typeof window !== "undefined") {
 }
 
 export const Web3Button = () => {
-  const { provider, web3Provider, address, chainId } = useStore();
+  const { provider, web3Provider, address } = useStore();
 
   const resetWeb3State = useStore((state) => state.reset);
 
@@ -84,7 +84,7 @@ export const Web3Button = () => {
       }
       resetWeb3State();
     },
-    [provider]
+    [provider, resetWeb3State]
   );
 
   // Auto connect to the cached provider
