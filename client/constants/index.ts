@@ -13,12 +13,11 @@ export const contracts = Object.entries(OUSDContracts.contracts).map(
   })
 );
 
-const governor = GovernanceContracts.Governance;
-
 export const provider = new ethers.providers.JsonRpcProvider(
   process.env.WEB3_PROVIDER
 );
 
+const governor = GovernanceContracts.Governance;
 export const governanceContract = new ethers.Contract(
   governor.address,
   governor.abi,
@@ -27,7 +26,6 @@ export const governanceContract = new ethers.Contract(
 
 export const governanceTokenAddress =
   GovernanceContracts.OriginDollarGovernance.address;
-
 export const governanceTokenContract = new ethers.Contract(
   governanceTokenAddress,
   [
@@ -38,4 +36,9 @@ export const governanceTokenContract = new ethers.Contract(
   provider
 );
 
-export const VoteLocker = GovernanceContracts.VoteLockerCurve.address;
+export const voteLockerAddresss = GovernanceContracts.VoteLockerCurve.address;
+export const voteLockerContract = new ethers.Contract(
+  voteLockerAddresss,
+  ["function totalSupply() view returns (uint256)"],
+  provider
+);

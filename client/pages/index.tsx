@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
-import { governanceTokenAddress } from "constants/index";
+import { governanceTokenAddress, voteLockerContract } from "constants/index";
 import { loadProposals } from "utils/index";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { Loading } from "components/Loading";
@@ -32,7 +32,6 @@ export async function getServerSideProps({ res }: { res: any }) {
   }));
 
   const proposalCount = await prisma.proposal.count();
-
   const proposals = (
     await prisma.proposal.findMany({
       orderBy: [{ createdAt: "desc" }],
@@ -44,13 +43,15 @@ export async function getServerSideProps({ res }: { res: any }) {
     createdAt: p.createdAt.toString(),
   }));
 
+  const totalSupply = (await voteLockerContract.totalSupply()).toString();
+
   return {
     props: {
       voters,
       proposals,
       proposalCount,
       holderCount,
-      totalSupply: 10,
+      totalSupply,
     },
   };
 }
@@ -107,16 +108,7 @@ const Home: NextPage = ({
         totalSupply={totalSupply}
       />
       <SectionTitle>Last 5 Proposals</SectionTitle>
-      {loading ? (
-        <Loading />
-      ) : (
-        <ProposalTable
-          proposalData={{
-            ...proposalData,
-            proposals: proposalData?.proposals.slice(-5).reverse(),
-          }}
-        />
-      )}
+      {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
       <SectionTitle>Top 5 Voters</SectionTitle>
       <LeaderboardTable voters={voters} />
     </div>

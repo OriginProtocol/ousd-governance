@@ -14,7 +14,14 @@ export async function getServerSideProps({ res }: { res: any }) {
     "public, s-maxage=60, stale-while-revalidate=59"
   );
 
-  const proposals = await prisma.proposal.findMany();
+  const proposalCount = await prisma.proposal.count();
+  const proposals = (
+    await prisma.proposal.findMany({ orderBy: { createdAt: "desc" } })
+  ).map((p) => ({
+    id: p.id,
+    proposalId: p.proposalId,
+    createdAt: p.createdAt.toString(),
+  }));
 
   return {
     props: {
@@ -23,11 +30,9 @@ export async function getServerSideProps({ res }: { res: any }) {
   };
 }
 
-const Proposal: NextPage = ({ proposals }) => {
+const Proposal: NextPage = ({ proposalCount, proposals }) => {
   const router = useRouter();
-
   const [proposalData, setProposalData] = useState<ProposalDataType>({
-    count: proposals.length,
     proposals: [],
     states: [],
   });
@@ -35,10 +40,22 @@ const Proposal: NextPage = ({ proposals }) => {
 
   useEffect(() => {
     const load = async () => {
+      const data = await loadProposals(proposals.map((p) => p.proposalId));
+      // Augment with human readable ID from the database
+      const dataWithDisplayId = {
+        ...data,
+        proposals: data.proposals.map((d) => ({
+          ...d,
+          displayId: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.id,
+        })),
+      };
+      setProposalData(dataWithDisplayId);
       setLoading(false);
     };
     load();
-  }, []);
+  }, [proposals, setProposalData]);
 
   return (
     <>
