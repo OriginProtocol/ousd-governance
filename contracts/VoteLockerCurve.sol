@@ -77,6 +77,9 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
         uint256 end;
     }
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
     function initialize(address _stakingToken) public initializer {
         __Ownable_init();
         stakingToken = ERC20(_stakingToken);
