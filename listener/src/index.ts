@@ -30,7 +30,8 @@ const contracts = [
 
 const options = {
   pollInterval: 10000, // period between polls in milliseconds (default: 13000)
-  confirmations: 12, // n° of confirmation blocks (default: 12)
+  // Confirmed as soon as we've got it. No real problem with reorgs.
+  confirmations: 0,
   chunkSize: 10000, // n° of blocks to fetch at a time (default: 10000)
   concurrency: 10, // maximum n° of concurrent web3 requests (default: 10)
   backoff: 1000, // retry backoff in milliseconds (default: 1000)
@@ -40,7 +41,7 @@ const web3 = new Web3(WEB3_PROVIDER);
 
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
-ethereumEvents.on("block.unconfirmed", async (blockNumber, events, done) => {
+const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
     if (event.name == "ProposalCreated") {
       try {
@@ -70,6 +71,10 @@ ethereumEvents.on("block.unconfirmed", async (blockNumber, events, done) => {
       }
     }
   }
+};
+
+ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
+  handleEvents(blockNumber, events, done);
   done();
 });
 
@@ -79,6 +84,7 @@ ethereumEvents.on("error", (err) => {
 
 // TODO start this at contract deployment or last checked
 ethereumEvents.start(1);
+
 console.log("Listening for Ethereum events");
 
 // Job to update votes in the voters table
