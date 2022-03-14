@@ -5,16 +5,15 @@ export default function Layout({ children }: JSX.ElementChildrenAttribute) {
     <div className="flex flex-col justify-between max-w-7xl mx-auto md:pt-10 md:px-6 min-h-screen">
       <div className="navbar mb-2 shadow-lg bg-neutral text-neutral-content md:rounded-box">
         <div className="flex-none px-2 mx-2">
-          <img
-            className="w-8 h-8"
-            src="https://ousd.com/images/ousd-coin.svg"
-          />
+          <a href="/">
+            <img
+              className="w-8 h-8"
+              src="https://ousd.com/images/ousd-coin.svg"
+            />
+          </a>
         </div>
         <div className="flex-1 px-2 mx-2">
           <div className="items-stretch">
-            <a href="/" className="btn btn-ghost btn-sm rounded-btn">
-              Overview
-            </a>
             <a href="/proposal" className="btn btn-ghost btn-sm rounded-btn">
               Proposals
             </a>
