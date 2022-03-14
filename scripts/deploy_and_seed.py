@@ -7,8 +7,6 @@ def main(output_file=None):
     (token, votelock, timelock_controller, governance) = run("deploy", args=[output_file])
     for i, account in enumerate(accounts, start=1):
         token.mint(account.address, 100e18, { "from": accounts[0] })
-        print("BALANCE")
-        print(token.balanceOf(account.address))
         token.approve(votelock, 100e18, { "from": account })
         votelock.upsertLockup(100e18, chain.time() + i * 10 * WEEK, { "from": account })
 
