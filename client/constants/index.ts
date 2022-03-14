@@ -39,6 +39,9 @@ export const governanceTokenContract = new ethers.Contract(
 export const voteLockerAddresss = GovernanceContracts.VoteLockerCurve.address;
 export const voteLockerContract = new ethers.Contract(
   voteLockerAddresss,
-  ["function totalSupply() view returns (uint256)"],
+  [
+    "function totalSupply() view returns (uint256)",
+    "function upsertLockup(uint256,uint256)",
+  ],
   provider
 );
