@@ -16,7 +16,7 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
             <td>{index + 1}</td>
             <td>{voter.address}</td>
             <td>
-              {ethers.utils.formatUnits(ethers.BigNumber.from(voter.votes)).}
+              {ethers.utils.formatUnits(ethers.BigNumber.from(voter.votes))}
             </td>
           </tr>
         ))}
