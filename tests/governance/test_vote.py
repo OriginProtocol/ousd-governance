@@ -9,9 +9,10 @@ WEEK = 7 * DAY
 # Mine `amount` blocks using hardhat_mine, defaults to the length of the governance
 # voting period (45818 blocks ~1 week )
 def mine_blocks(web3, amount="0xB2FA"):
-    web3.provider.make_request("hardhat_mine", ["0xB2FA"])
+    web3.provider.make_request("hardhat_mine", [amount])
     # Using hardhat_mine seems to break the 0 base fee
     web3.provider.make_request("hardhat_setNextBlockBaseFeePerGas", ["0x0"])
+    chain.mine()
 
 
 def test_create_proposal(governance):
@@ -31,7 +32,7 @@ def test_proposal_can_pass_vote(governance, vote_locker, token, timelock_control
     alice = accounts[0]
     amount = 1000 * 10 ** 18
     token.approve(vote_locker.address, amount * 10, {"from": alice})
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -48,7 +49,7 @@ def test_proposal_can_pass_vote(governance, vote_locker, token, timelock_control
     proposal = governance.proposals(tx.return_value)
     # Active
     assert governance.state(tx.return_value) == 1
-    web3.provider.make_request("hardhat_mine", ["45818"])
+    mine_blocks(web3)
     # Succeeded
     assert governance.state(tx.return_value) == 4
 
@@ -60,8 +61,8 @@ def test_proposal_can_fail_vote(governance, vote_locker, token, timelock_control
     token.transfer(bob, amount * 2, {"from": accounts[0]})
     token.approve(vote_locker.address, amount * 10, {"from": alice})
     token.approve(vote_locker.address, amount * 10 * 2, {"from": bob})
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
-    vote_locker.upsertLockup(amount * 2, chain[-1].timestamp + WEEK, {"from": bob})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    vote_locker.lockup(amount * 2, chain[-1].timestamp + WEEK, {"from": bob})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -79,7 +80,6 @@ def test_proposal_can_fail_vote(governance, vote_locker, token, timelock_control
     chain.mine()
     # Active
     assert governance.state(tx.return_value) == 1
-    web3.provider.make_request("hardhat_mine", ["45818"])
     mine_blocks(web3)
     # Defeated
     assert governance.state(tx.return_value) == 3
@@ -89,7 +89,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(governance, vote_locker
     alice = accounts[0]
     amount = 1000 * 10 ** 18
     token.approve(vote_locker.address, amount * 10, {"from": alice})
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -98,6 +98,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(governance, vote_locker
         "Set voting delay",
         {"from": accounts[0]},
     )
+    chain.mine()
     governance.castVote(tx.return_value, 1, {"from": alice})
     mine_blocks(web3)
     governance.queue(tx.return_value, {"from": alice})
@@ -112,7 +113,7 @@ def test_late_vote_extends_quorum(governance, vote_locker, token, timelock_contr
     alice = accounts[0]
     amount = 1000 * 10 ** 18
     token.approve(vote_locker.address, amount * 10, {"from": alice})
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -121,7 +122,7 @@ def test_late_vote_extends_quorum(governance, vote_locker, token, timelock_contr
         "Set voting delay",
         {"from": accounts[0]},
     )
-    mine_blocks(web3, "0xB2F0") # 10 less than is required for vote end
+    mine_blocks(web3, "0xB2C8") # 50 less than is required for vote end
     governance.castVote(tx.return_value, 1, {"from": alice})
     proposal = governance.proposals(tx.return_value)
     # Extends for a day beyond the current block

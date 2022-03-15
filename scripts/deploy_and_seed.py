@@ -8,7 +8,7 @@ def main(output_file=None):
     for i, account in enumerate(accounts, start=1):
         token.mint(account.address, 100e18, { "from": accounts[0] })
         token.approve(votelock, 100e18, { "from": account })
-        votelock.upsertLockup(100e18, chain.time() + i * 10 * WEEK, { "from": account })
+        votelock.lockup(100e18, chain.time() + i * 10 * WEEK, { "from": account })
 
     for i in range(0, 10):
         governance.propose(
