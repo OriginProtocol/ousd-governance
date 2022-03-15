@@ -41,7 +41,7 @@ export const voteLockerContract = new ethers.Contract(
   voteLockerAddresss,
   [
     "function totalSupply() view returns (uint256)",
-    "function upsertLockup(uint256,uint256)",
+    "function lockup(uint256,uint256)",
   ],
   provider
 );

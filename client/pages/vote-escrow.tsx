@@ -38,7 +38,7 @@ export default function VoteEscrow({}) {
     const now = (await web3Provider.getBlock()).timestamp;
     const tx = await voteLockerContract
       .connect(await web3Provider.getSigner())
-      .upsertLockup(ethers.utils.parseUnits(amount), now + weeks * 7 * 86400);
+      .lockup(ethers.utils.parseUnits(amount), now + weeks * 7 * 86400);
   };
 
   return (
