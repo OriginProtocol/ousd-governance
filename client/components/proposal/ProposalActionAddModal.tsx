@@ -1,8 +1,9 @@
 import { ethers } from "ethers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddActionContractForm } from "components/proposal/AddActionContractForm";
 import { AddActionFunctionForm } from "components/proposal/AddActionFunctionForm";
 import { encodeCalldata } from "utils/index";
+import { contracts } from "constants/index";
 
 export const ProposalActionAddModal = ({
   modalOpen,
@@ -16,10 +17,21 @@ export const ProposalActionAddModal = ({
   const [address, setAddress] = useState<string>("");
   const [abi, setAbi] = useState<string>("");
 
+  const [isProxy, setIsProxy] = useState<boolean>(false);
+  const [implementationAddress, setImplementationAddress] = useState<string>("");
+  const [implementationAbi, setImplementationAbi] = useState<string>("");
+  const [useImplementation, setUseImplementation] = useState(false);
+
+  const handleUseImplementation = () => setUseImplementation(!useImplementation);
+
   const reset = () => {
     setStep(0);
     setAddress("");
     setAbi("");
+    setIsProxy(false);
+    setImplementationAddress("");
+    setImplementationAbi("");
+    setUseImplementation(false);
   };
 
   return (
@@ -36,6 +48,18 @@ export const ProposalActionAddModal = ({
         </ul>
         {step === 0 && (
           <AddActionContractForm
+            onChange={(data) => {
+              setIsProxy(data.name.includes('Proxy'));
+              const implementationName = data.name.replace('Proxy', '');
+              const implementation = contracts.find((c) => c.name === implementationName);
+              if(implementation){
+                setImplementationAddress(implementation.address);
+                setImplementationAbi(implementation.abi);
+              } else {
+                setImplementationAddress("");
+                setImplementationAbi("");
+              }
+            }}
             onSubmit={(data) => {
               setAddress(data.address);
               setAbi(data.abi);
@@ -54,7 +78,7 @@ export const ProposalActionAddModal = ({
               // TODO check ordering
               const { signature, ...inputs } = data;
               onActionAdd({
-                target: address,
+                target: useImplementation ? implementationAddress : address,
                 signature: data.signature,
                 calldata: encodeCalldata(signature, Object.values(inputs)),
               });
@@ -66,6 +90,11 @@ export const ProposalActionAddModal = ({
               onModalClose();
             }}
             onPrevious={() => setStep(0)}
+            isProxy={isProxy}
+            implementationAddress={implementationAddress}
+            implementationAbi={implementationAbi}
+            useImplementation={useImplementation}
+            handleUseImplementation={handleUseImplementation}
           />
         )}
       </div>

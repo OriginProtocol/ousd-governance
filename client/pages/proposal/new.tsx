@@ -43,6 +43,7 @@ const ProposalNew: NextPage = () => {
     calldatas: newProposalActions.map((a) => a.calldata),
   };
 
+
   const proposal = {
     ...proposalActions,
     description: justification,

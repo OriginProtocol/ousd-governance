@@ -12,10 +12,17 @@ export const AddActionFunctionForm = ({
   onSubmit,
   onModalClose,
   onPrevious,
+  isProxy,
+  implementationAddress,
+  implementationAbi,
+  useImplementation,
+  handleUseImplementation,
 }) => {
   const [signature, setSignature] = useState(null);
 
-  const contractFunctions = abi
+  const abiInUse = useImplementation ? implementationAbi : abi; 
+
+  const contractFunctions = abiInUse
     .filter(
       ({ type, stateMutability }) =>
         type === "function" && stateMutability.includes("payable")
@@ -90,6 +97,27 @@ export const AddActionFunctionForm = ({
 
   return (
     <form onSubmit={submitHandler}>
+      { isProxy && (
+        <>
+        { implementationAddress ? (
+          <div className="form-control w-full mt-2">
+            <span className="text-xs m-1 font-semibold">Contract selected is a proxy</span>
+            <label className="label bg-gray-100 p-3 rounded-lg cursor-pointer" htmlFor="implementation-methods">
+              <span className="label-text">Select from implementation methods</span>
+              <input
+                id="implementation-methods"
+                name="implementation-methods"
+                className="input input-bordered input-xs w-5"
+                type="checkbox"
+                onChange={() => handleUseImplementation()}
+              />
+            </label>
+          </div>
+        ) : (
+          <span className="text-xs m-1 font-semibold">Contract selected is a proxy but no implementation was found</span>
+        )}
+        </>
+      )}
       <div className="form-control w-full my-2">
         <label className="label">
           <span className="label-text">Function</span>

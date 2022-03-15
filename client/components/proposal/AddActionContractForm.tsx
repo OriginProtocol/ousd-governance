@@ -3,7 +3,7 @@ import { isRequired, useForm } from "utils/useForm";
 import { contracts } from "constants/index";
 import { truncateEthAddress } from "utils/index";
 
-export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
+export const AddActionContractForm = ({ onChange, onSubmit, onModalClose }) => {
   const [isCustomContract, setIsCustomContract] = useState(false);
   const initialState = {
     address: "",
@@ -28,6 +28,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
   useEffect(() => {
     if (values.address.length === 42) {
       const contract = contracts.find((c) => c.address === values.address);
+
       if (contract) {
         changeHandler({
           target: {
@@ -35,6 +36,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
             value: contract.abi,
           },
         });
+        onChange(contract);
       }
     }
   }, [values.address]);
