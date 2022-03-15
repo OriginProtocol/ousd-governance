@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AddActionContractForm } from "components/proposal/AddActionContractForm";
 import { AddActionFunctionForm } from "components/proposal/AddActionFunctionForm";
 import { encodeCalldata } from "utils/index";
