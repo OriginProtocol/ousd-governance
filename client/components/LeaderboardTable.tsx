@@ -3,7 +3,7 @@ import { Address } from "components/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   return (
-    <table className="table table-zebra table-compact w-full">
+    <table className="table table-zebra w-full">
       <thead>
         <tr>
           <th>#</th>
