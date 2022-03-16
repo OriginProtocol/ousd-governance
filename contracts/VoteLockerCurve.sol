@@ -152,6 +152,17 @@ contract VoteLockerCurve {
      * @dev See {ERC20-balanceOf}.
      */
     function balanceOf(address _account) public view returns (uint256) {
+        uint256 balance = 0;
+        if (_delegations[_account] == address(0)) {
+            balance += balanceOfAccount(_account);
+        }
+        for (uint256 i = 0; i < _userDelegators[_account].length; i++) {
+            balance += balanceOfAccount(_userDelegators[_account][i]);
+        }
+        return balance;
+    }
+
+    function balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -263,6 +274,13 @@ contract VoteLockerCurve {
     }
 
     /**
+     * @dev Get the addresses `_account` is currently being delegated to. 
+     */
+    function delegators(address _account) public view virtual returns (address[] memory) {
+        return _userDelegators[_account];
+    }
+
+    /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
@@ -280,7 +298,7 @@ contract VoteLockerCurve {
         bytes32 r,
         bytes32 s
     ) public virtual {
-        revert("Delegation by signature is not supported");
+        revert("Delegation by signature is not supported... yet");
         // require(block.timestamp <= end, "Signature expired");
         // address signer = ECDSA.recover(
         //     _hashTypedDataV4(keccak256(abi.encode(_DELEGATION_TYPEHASH, delegatee, nonce, end))),
