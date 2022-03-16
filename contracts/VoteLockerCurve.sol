@@ -20,6 +20,7 @@ import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/cryptography/E
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Counters.sol";
+//import "./console.sol";
 
 //contract VoteLockerCurve is ERC20Permit {
 contract VoteLockerCurve {
@@ -78,10 +79,10 @@ contract VoteLockerCurve {
     mapping(uint256 => int128) public slopeChanges;
 
     /// @notice Delegation mapping: Delegator => delegatee
-    mapping(address => address) private _delegations;
+    mapping(address => DelegateeSnapshot[]) private _delegations;
 
     /// @notice Delegation mapping: delegatee => delegators[]
-    mapping(address => address[]) private _userDelegators;
+    mapping(address => DelegatorsSnapshot[]) private _userDelegators;
 
     /// @notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
@@ -93,6 +94,16 @@ contract VoteLockerCurve {
         int128 slope;
         uint256 ts;
         uint256 blk;
+    }
+
+    struct DelegateeSnapshot {
+        address delegatee;
+        uint256 blockNumber;
+    }
+
+    struct DelegatorsSnapshot {
+        address[] delegators;
+        uint256 blockNumber;
     }
 
     struct Lockup {
@@ -153,11 +164,12 @@ contract VoteLockerCurve {
      */
     function balanceOf(address _account) public view returns (uint256) {
         uint256 balance = 0;
-        if (_delegations[_account] == address(0)) {
+        if (delegates(_account) == address(0)) {
             balance += _balanceOfAccount(_account);
         }
-        for (uint256 i = 0; i < _userDelegators[_account].length; i++) {
-            balance += _balanceOfAccount(_userDelegators[_account][i]);
+        address[] memory currentDelegators = delegators(_account);
+        for (uint256 i = 0; i < currentDelegators.length; i++) {
+            balance += _balanceOfAccount(currentDelegators[i]);
         }
         return balance;
     }
@@ -270,14 +282,64 @@ contract VoteLockerCurve {
      * @dev Get the address `_account` is currently delegating to.
      */
     function delegates(address _account) public view virtual returns (address) {
-        return _delegations[_account];
+        if (_delegations[_account].length == 0) {
+            return address(0);
+        }
+
+        return _delegations[_account][_delegations[_account].length - 1].delegatee;
+    }
+
+    /**
+     * @dev Get the address `_account` was delegating to at a block number.
+     */
+    function delegates(address _account, uint256 blockNumber) public view virtual returns (address) {
+        DelegateeSnapshot[] memory userDelegations = _delegations[_account];
+        if (userDelegations.length == 0) {
+            return address(0);
+        }
+
+        DelegateeSnapshot memory lastValidDelegation;
+        for (uint256 i = 0; i < userDelegations.length; i++) {
+            if (userDelegations[i].blockNumber <= blockNumber) {
+                lastValidDelegation = userDelegations[i];
+            }
+        }
+
+        // check this works even when there is no valid delegation
+        return lastValidDelegation.delegatee;
     }
 
     /**
      * @dev Get the addresses `_account` is currently being delegated to. 
      */
-    function delegators(address _account) public view virtual returns (address[] memory) {
-        return _userDelegators[_account];
+    function delegators(address _account) public view virtual returns (address[] memory _delegators) {
+        if (_userDelegators[_account].length == 0) {
+            _delegators = new address[](0);
+            return _delegators;
+        }
+
+        _delegators = _userDelegators[_account][_userDelegators[_account].length - 1].delegators;
+    }
+
+    /**
+     * @dev Get the addresses `_account` is currently being delegated to at a block number. 
+     */
+    function delegators(address _account, uint256 blockNumber) public view virtual returns (address[] memory _delegators) {
+        DelegatorsSnapshot[] memory usersDelegators = _userDelegators[_account];
+        if (usersDelegators.length == 0) {
+            _delegators = new address[](0);
+            return _delegators;
+        }
+
+        DelegatorsSnapshot memory lastValidDelegatorsSnapshot;
+        for (uint256 i = 0; i < usersDelegators.length; i++) {
+            if (usersDelegators[i].blockNumber <= blockNumber) {
+                lastValidDelegatorsSnapshot = usersDelegators[i];
+            }
+        }
+
+        // check this works even when there is no valid delegation
+        _delegators = lastValidDelegatorsSnapshot.delegators;
     }
 
     /**
@@ -316,26 +378,53 @@ contract VoteLockerCurve {
      * Emits events {DelegateChanged}
      */
     function _delegate(address delegator, address delegatee) internal virtual {
-        address currentDelegate = _delegations[delegator];
-        _delegations[delegator] = delegatee;
-        if (delegatee != address(0)) {
-            _userDelegators[delegatee].push(delegator);
-        }
+        address currentDelegatee = delegates(delegator);
+        _delegations[delegator].push(DelegateeSnapshot({
+            delegatee: delegatee,
+            blockNumber: block.number
+        }));
 
-        if (currentDelegate != address(0)) {
-            address[] memory currentDelegatorsOfDelegatee = _userDelegators[currentDelegate];
-            address[] memory newDelegatorsOfDelegatee = new address[](currentDelegatorsOfDelegatee.length - 1);
+        /* If the current delegatee is being replaced remove the delegator from
+         * the array of that holds delegators of a delegatee
+         */
+        if (currentDelegatee != address(0)) {
+            address[] memory currentDelegators = delegators(currentDelegatee);
+            address[] memory newDelegators = new address[](currentDelegators.length - 1);
+
+            // copy from the previous state and remove 
             uint256 count = 0;
-            for (uint256 i = 0; i < currentDelegatorsOfDelegatee.length; i++) {
-                if (delegator != currentDelegatorsOfDelegatee[i]) {
-                    newDelegatorsOfDelegatee[count] = currentDelegatorsOfDelegatee[i];
-                    count += 1;
+            for (uint256 i = 0; i < currentDelegators.length; i++) {
+                // When copying data over remove the currently delegated address if one exists
+                if (delegator == currentDelegators[i]) {
+                    continue;
                 }
+
+                newDelegators[count] = currentDelegators[i];
+                count += 1;
             }
-            _userDelegators[currentDelegate] = newDelegatorsOfDelegatee;
+
+            _userDelegators[currentDelegatee].push(DelegatorsSnapshot({
+                delegators: newDelegators,
+                blockNumber: block.number
+            }));
         }
 
-        emit DelegateChanged(delegator, currentDelegate, delegatee);
+        // if not a zero address add the delegator to list of delegators of a delegatee
+        if (delegatee != address(0)) {
+            address[] memory currentDelegators = delegators(delegatee);
+            address[] memory newDelegators = new address[](currentDelegators.length + 1);
+
+            for (uint256 i = 0; i < currentDelegators.length; i++) {
+                newDelegators[i] = currentDelegators[i];
+            }
+            newDelegators[newDelegators.length - 1] = delegator;
+            _userDelegators[delegatee].push(DelegatorsSnapshot({
+                delegators: newDelegators,
+                blockNumber: block.number
+            }));
+        }
+
+        emit DelegateChanged(delegator, currentDelegatee, delegatee);
     }
 
     /**
@@ -673,11 +762,14 @@ contract VoteLockerCurve {
         require(_blockNumber <= block.number, "Block number is in the future");
 
         uint256 balance = 0;
-        if (_delegations[_account] == address(0)) {
+
+        if (delegates(_account, _blockNumber) == address(0)) {
             balance += _balanceOfAtAccount(_account, _blockNumber);
         }
-        for (uint256 i = 0; i < _userDelegators[_account].length; i++) {
-            balance += _balanceOfAtAccount(_userDelegators[_account][i], _blockNumber);
+
+        address[] memory activeDelegators = delegators(_account, _blockNumber);
+        for (uint256 i = 0; i < activeDelegators.length; i++) {
+            balance += _balanceOfAtAccount(activeDelegators[i], _blockNumber);
         }
         return balance;
     }

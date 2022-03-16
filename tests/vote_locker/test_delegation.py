@@ -30,41 +30,55 @@ def setup(token, accounts, chain, vote_locker):
 def isolation(fn_isolation):
     pass
 
-def test_delegation(web3, accounts, token, vote_locker):
+def test_delegation(web3, accounts, chain, token, vote_locker):
     alice, bob, mikey = accounts[:3]
     assert vote_locker.delegates(alice) == ZERO_ADDRESS
+    assert vote_locker.delegates(bob) == ZERO_ADDRESS
+    assert vote_locker.delegates(mikey) == ZERO_ADDRESS
+    assert vote_locker.delegators(alice) == []
+    assert vote_locker.delegators(bob) == []
+    assert vote_locker.delegators(mikey) == []
+
     vote_locker.delegate(bob, {"from": alice})
+    chain.mine()
     assert vote_locker.delegates(alice) == bob
     assert vote_locker.delegators(bob) == [alice]
 
     vote_locker.delegate(bob, {"from": mikey})
+    chain.mine()
     assert vote_locker.delegates(mikey) == bob
     assert vote_locker.delegators(bob) == [alice, mikey]
 
     vote_locker.delegate(mikey, {"from": alice})
+    chain.mine()
     assert vote_locker.delegates(alice) == mikey
-    assert vote_locker.delegators(bob) == [mikey]
     assert vote_locker.delegators(mikey) == [alice]
+    assert vote_locker.delegators(bob) == [mikey]
 
     vote_locker.delegate(ZERO_ADDRESS, {"from": alice})
+    chain.mine()
     assert vote_locker.delegates(alice) == ZERO_ADDRESS
     assert vote_locker.delegators(bob) == [mikey]
     assert vote_locker.delegators(mikey) == []
 
-def test_voting_powers_delegated(web3, accounts, token, vote_locker):
+def test_voting_powers_delegated(web3, accounts, chain, token, vote_locker):
     alice, bob, mikey = accounts[:3]
     votig_power_unit = amount // MAXTIME * (WEEK - 2 * H)
 
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit, TOL)
     assert approx(vote_locker.balanceOf(mikey), votig_power_unit, TOL)
     assert approx(vote_locker.balanceOf(bob), votig_power_unit, TOL)
     vote_locker.delegate(mikey, {"from": bob})
+    chain.mine()
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
     assert approx(vote_locker.balanceOf(mikey), votig_power_unit * 2, TOL)
     assert approx(vote_locker.balanceOf(bob), 0, TOL)
     vote_locker.delegate(ZERO_ADDRESS, {"from": bob})
+    chain.mine()
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
     assert approx(vote_locker.balanceOf(mikey), votig_power_unit, TOL)
     assert approx(vote_locker.balanceOf(bob), votig_power_unit, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit, TOL)
     
     
