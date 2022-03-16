@@ -4,7 +4,9 @@
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node ./src/index.ts"
+    "start": "ts-node ./src/index.ts",
+    "prettier:check": "prettier --check 'src/*.{js,jsx,ts,tsx}'",
+    "prettier:fix": "prettier --write 'src/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
     "@prisma/client": "^3.10.0",
