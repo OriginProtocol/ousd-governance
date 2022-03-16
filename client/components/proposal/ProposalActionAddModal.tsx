@@ -81,9 +81,9 @@ export const ProposalActionAddModal = ({
 
                   // If present, populate state
                   if(implementationData) {
-                      setHasImplementationAbi(true);
-                      setAddress(implementationData.address);
-                      setAbi(implementationData.abi)
+                    setHasImplementationAbi(true);
+                    setAddress(implementationData.address);
+                    setAbi(implementationData.abi)
                   } else {
                     setHasImplementationAbi(false);
                     setAddress(address);
