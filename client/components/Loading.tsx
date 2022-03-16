@@ -1,5 +1,7 @@
-export const Loading = ({small}) => {
-  const classNames = !small ? 'inline mr-2 w-8 h-8 text-gray-200 animate-spin fill-blue-600' : 'w-4 h-4 text-gray-200 animate-spin fill-blue-600' ;
+export const Loading = ({ small }) => {
+  const classNames = !small
+    ? "inline mr-2 w-8 h-8 text-gray-200 animate-spin fill-blue-600"
+    : "w-4 h-4 text-gray-200 animate-spin fill-blue-600";
   return (
     <div className="text-center">
       <svg
@@ -20,4 +22,4 @@ export const Loading = ({small}) => {
       </svg>
     </div>
   );
-}
+};

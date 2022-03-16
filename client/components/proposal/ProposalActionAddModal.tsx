@@ -19,7 +19,8 @@ export const ProposalActionAddModal = ({
 
   const [fetchingProxy, setFetchingProxy] = useState(false);
   const [isProxy, setIsProxy] = useState<boolean>(false);
-  const [implementationAddress, setImplementationAddress] = useState<string>("");
+  const [implementationAddress, setImplementationAddress] =
+    useState<string>("");
   const [hasImplementationAbi, setHasImplementationAbi] = useState<string>("");
 
   const reset = () => {
@@ -46,10 +47,7 @@ export const ProposalActionAddModal = ({
         {step === 0 && (
           <AddActionContractForm
             onChange={async (data) => {
-              const {
-                address,
-                abi,
-              } = data;
+              const { address, abi } = data;
 
               // Check contract selected abi for implementation method
               const implementationFunction = abi.find(
@@ -58,32 +56,32 @@ export const ProposalActionAddModal = ({
               );
 
               // If present, call it and get the implementation address
-              if(implementationFunction) {
+              if (implementationFunction) {
                 const proxyContract = new ethers.Contract(
                   address,
                   abi,
-                  mainnetProvider,
+                  mainnetProvider
                 );
 
                 setFetchingProxy(true);
-                const implementationAddress = await proxyContract.implementation();
+                const implementationAddress =
+                  await proxyContract.implementation();
                 setFetchingProxy(false);
 
-                if(implementationAddress) {
+                if (implementationAddress) {
                   setIsProxy(true);
                   setImplementationAddress(implementationAddress);
 
                   // Check that the implementation address exists in our contracts list
                   const implementationData = contracts.find(
-                    ({ address }) => 
-                      address === implementationAddress
+                    ({ address }) => address === implementationAddress
                   );
 
                   // If present, populate state
-                  if(implementationData) {
-                      setHasImplementationAbi(true);
-                      setAddress(implementationData.address);
-                      setAbi(implementationData.abi)
+                  if (implementationData) {
+                    setHasImplementationAbi(true);
+                    setAddress(implementationData.address);
+                    setAbi(implementationData.abi);
                   } else {
                     setHasImplementationAbi(false);
                     setAddress(address);
@@ -116,7 +114,7 @@ export const ProposalActionAddModal = ({
             address={address}
             hasImplementationAbi={hasImplementationAbi}
             onContractChange={(data) => {
-              setAddress(data.address)
+              setAddress(data.address);
               setAbi(data.abi);
             }}
             onSubmit={(data) => {

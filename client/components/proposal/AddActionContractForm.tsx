@@ -119,9 +119,10 @@ export const AddActionContractForm = ({
                   Please select a contract
                 </p>
               )}
-              {!fetchingProxy && (isProxy && !hasImplementationAbi) && (
+              {!fetchingProxy && isProxy && !hasImplementationAbi && (
                 <p className="mt-2 text-sm text-error-content">
-                  Contract is proxy but no implementation found for {truncateEthAddress(implementationAddress)}
+                  Contract is proxy but no implementation found for{" "}
+                  {truncateEthAddress(implementationAddress)}
                 </p>
               )}
             </div>
@@ -149,7 +150,11 @@ export const AddActionContractForm = ({
         )}
       </div>
       <div className="modal-action">
-        <button className="btn btn-primary" type="submit" disabled={!isValid || fetchingProxy}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={!isValid || fetchingProxy}
+        >
           Next
         </button>
         <button

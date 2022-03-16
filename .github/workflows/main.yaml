@@ -24,10 +24,20 @@ jobs:
           key: compiler-cache
 
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
 
       - name: Install NPM dependencies
         run: npm install
+
+      - name: Client linting
+        run: npm install && npm run prettier:check
+        working-directory: client
+
+      - name: Listener linting
+        run: npm install && npm run prettier:check
+        working-directory: listener
 
       - name: Setup Python 3.8
         uses: actions/setup-python@v2

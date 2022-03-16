@@ -111,7 +111,7 @@ export const AddActionFunctionForm = ({
 
   return (
     <form onSubmit={submitHandler}>
-      { hasImplementationAbi && (
+      {hasImplementationAbi && (
         <div className="form-control">
           <label className="label">
             <span className="label-text">Implementation contract</span>
@@ -127,13 +127,10 @@ export const AddActionFunctionForm = ({
             </option>
             {contracts.map(({ name, address: contractAddress }) => {
               return (
-                <option
-                  key={contractAddress}
-                  value={contractAddress}
-                >
+                <option key={contractAddress} value={contractAddress}>
                   {name} {truncateEthAddress(contractAddress)}
                 </option>
-              )
+              );
             })}
           </select>
           {touched.address && errors.address && touched.signature && (
