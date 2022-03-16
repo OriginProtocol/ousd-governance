@@ -2,11 +2,17 @@ import pytest
 from brownie import *
 from pathlib import Path
 
+H = 3600
+DAY = 86400
+WEEK = 7 * DAY
+MAXTIME = 4 * 365 * DAY
+TOL = 120 / WEEK
+
 Proxy = project.load(
     Path.home() / ".brownie" / "packages" / config["dependencies"][0]
 ).ERC1967Proxy
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def token():
     accounts.default = accounts[0]
     token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
@@ -15,7 +21,7 @@ def token():
     return token
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def vote_locker(token):
     return accounts[0].deploy(VoteLockerCurve, token)
 

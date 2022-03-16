@@ -15,11 +15,16 @@ pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
+//import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/cryptography/ECDSA.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Counters.sol";
 
+//contract VoteLockerCurve is ERC20Permit {
 contract VoteLockerCurve {
     using SafeERC20 for ERC20;
+    using Counters for Counters.Counter;
 
     ///@notice Emitted when a lockup is created
     event LockupCreated(
@@ -40,10 +45,17 @@ contract VoteLockerCurve {
     ///@notice Emitted when a user withdraws from an expired lockup
     event Withdraw(address indexed provider, uint256 value, uint256 ts);
 
+
+    ///@notice Emitted when an account changes their delegate.
+    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
+
     ///@notice ERC20 parameters
     string private _name;
     string private _symbol;
     uint8 private _decimals;
+
+    bytes32 private constant _DELEGATION_TYPEHASH =
+        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     uint256 private constant WEEK = 7 days;
     /// @notice Maximum lock time
@@ -65,11 +77,16 @@ contract VoteLockerCurve {
     /// @notice
     mapping(uint256 => int128) public slopeChanges;
 
-    /// @notice Delegation mapping
+    /// @notice Delegation mapping: Delegator => delegatee
     mapping(address => address) private _delegations;
+
+    /// @notice Delegation mapping: delegatee => delegators[]
+    mapping(address => address[]) private _userDelegators;
 
     /// @notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
+
+    mapping(address => Counters.Counter) private _nonces;
 
     struct Checkpoint {
         int128 bias;
@@ -249,8 +266,7 @@ contract VoteLockerCurve {
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
-        // TODO
-        revert("Delegation is not supported");
+        _delegate(msg.sender, delegatee);
     }
 
     /**
@@ -265,7 +281,59 @@ contract VoteLockerCurve {
         bytes32 s
     ) public virtual {
         revert("Delegation by signature is not supported");
+        // require(block.timestamp <= end, "Signature expired");
+        // address signer = ECDSA.recover(
+        //     _hashTypedDataV4(keccak256(abi.encode(_DELEGATION_TYPEHASH, delegatee, nonce, end))),
+        //     v,
+        //     r,
+        //     s
+        // );
+        // require(nonce == _useNonce(signer), "Invalid nonce");
+        // _delegate(signer, delegatee);
     }
+
+    /**
+     * @dev Change delegation for `delegator` to `delegatee`.
+     *
+     * Emits events {DelegateChanged} and {DelegateVotesChanged}.
+     */
+    function _delegate(address delegator, address delegatee) internal virtual {
+        address currentDelegate = _delegations[delegator];
+        _delegations[delegator] = delegatee;
+        _userDelegators[delegatee].push(delegator);
+
+        if (currentDelegate != address(0)) {
+            address[] memory currentDelegatorsOfDelegatee = _userDelegators[currentDelegate];
+            address[] memory newDelegatorsOfDelegatee = new address[](currentDelegatorsOfDelegatee.length - 1);
+            uint256 count = 0;
+            for (uint256 i = 0; i < currentDelegatorsOfDelegatee.length; i++) {
+                if (delegator != currentDelegatorsOfDelegatee[i]) {
+                    newDelegatorsOfDelegatee[count] = currentDelegatorsOfDelegatee[i];
+                    count += 1;
+                }
+            }
+            _userDelegators[currentDelegate] = newDelegatorsOfDelegatee;
+        }
+
+        emit DelegateChanged(delegator, currentDelegate, delegatee);
+    }
+
+    function _writeCheckpoint(
+        Checkpoint[] storage ckpts,
+        function(uint256, uint256) view returns (uint256) op,
+        uint256 delta
+    ) private returns (uint256 oldWeight, uint256 newWeight) {
+        // uint256 pos = ckpts.length;
+        // oldWeight = pos == 0 ? 0 : ckpts[pos - 1].votes;
+        // newWeight = op(oldWeight, delta);
+
+        // if (pos > 0 && ckpts[pos - 1].fromBlock == block.number) {
+        //     ckpts[pos - 1].votes = SafeCast.toUint224(newWeight);
+        // } else {
+        //     ckpts.push(Checkpoint({fromBlock: SafeCast.toUint32(block.number), votes: SafeCast.toUint224(newWeight)}));
+        // }
+    }
+
 
     /**
      * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _end parameters.
@@ -388,30 +456,11 @@ contract VoteLockerCurve {
         Lockup memory _oldLockup,
         Lockup memory _newLockup
     ) private returns (uint256 oldWeight, uint256 newWeight) {
-        Checkpoint memory oldCheckpoint;
-        Checkpoint memory newCheckpoint;
-
         int128 oldSlopeDelta = 0;
         int128 newSlopeDelta = 0;
 
-        if (_oldLockup.end > block.timestamp && _oldLockup.amount > 0) {
-            // Old checkpoint still active, calculates its slope and bias
-            oldCheckpoint.slope =
-                _oldLockup.amount /
-                SafeCast.toInt128(int256(MAX_LOCK_TIME));
-            oldCheckpoint.bias =
-                oldCheckpoint.slope *
-                SafeCast.toInt128(int256(_oldLockup.end - block.timestamp));
-        }
-        if (_newLockup.end > block.timestamp && _newLockup.amount > 0) {
-            // New lockup also active, calculate its slope and bias
-            newCheckpoint.slope =
-                _newLockup.amount /
-                SafeCast.toInt128(int256(MAX_LOCK_TIME));
-            newCheckpoint.bias =
-                newCheckpoint.slope *
-                SafeCast.toInt128(int256(_newLockup.end - block.timestamp));
-        }
+        Checkpoint memory oldCheckpoint = _lockupToCheckpoint(_oldLockup);
+        Checkpoint memory newCheckpoint = _lockupToCheckpoint(_newLockup);
 
         uint256 userCurrentEpoch = userEpoch[_account];
         if (userCurrentEpoch == 0) {
@@ -456,6 +505,24 @@ contract VoteLockerCurve {
                 newSlopeDelta = newSlopeDelta - newCheckpoint.slope;
                 slopeChanges[_newLockup.end] = newSlopeDelta;
             }
+        }
+    }
+
+    /**
+     * Convert lockup data to a checkpoint
+     */
+    function _lockupToCheckpoint(Lockup memory _lockup)
+        private
+        returns (Checkpoint memory _checkpoint)
+    {
+        if (_lockup.end > block.timestamp && _lockup.amount > 0) {
+            // Old checkpoint still active, calculates its slope and bias
+            _checkpoint.slope =
+                _lockup.amount /
+                SafeCast.toInt128(int256(MAX_LOCK_TIME));
+            _checkpoint.bias =
+                _checkpoint.slope *
+                SafeCast.toInt128(int256(_lockup.end - block.timestamp));
         }
     }
 
@@ -648,11 +715,7 @@ contract VoteLockerCurve {
         // Current Bias = most recent bias - (slope * time since update)
         userPoint.bias -= (userPoint.slope *
             SafeCast.toInt128(int256(blockTime - userPoint.ts)));
-        if (userPoint.bias >= 0) {
-            return SafeCast.toUint256(userPoint.bias);
-        } else {
-            return 0;
-        }
+        return SafeCast.toUint256(max(userPoint.bias, 0));
     }
 
     /**
@@ -791,5 +854,31 @@ contract VoteLockerCurve {
      */
     function max(int128 _a, int128 _b) internal pure returns (int128) {
         return _a >= _b ? _a : _b;
+    }
+
+    function _add(uint256 a, uint256 b) private pure returns (uint256) {
+        return a + b;
+    }
+
+    function _subtract(uint256 a, uint256 b) private pure returns (uint256) {
+        return a - b;
+    }
+
+    /**
+     * @dev Consumes a nonce.
+     *
+     * Returns the current value and increments nonce.
+     */
+    function _useNonce(address owner) internal virtual returns (uint256 current) {
+        Counters.Counter storage nonce = _nonces[owner];
+        current = nonce.current();
+        nonce.increment();
+    }
+
+    /**
+     * @dev Returns an address nonce.
+     */
+    function nonces(address owner) public view virtual returns (uint256) {
+        return _nonces[owner].current();
     }
 }
