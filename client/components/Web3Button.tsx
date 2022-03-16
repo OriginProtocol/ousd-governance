@@ -5,8 +5,7 @@ import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
-
-const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
+import { INFURA_ID, mainnetNetworkUrl } from "../constants";
 
 const providerOptions = {
   walletconnect: {
@@ -23,7 +22,7 @@ const providerOptions = {
     },
     options: {
       appName: "Coinbase", // Your app name
-      networkUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
+      networkUrl: mainnetNetworkUrl,
       chainId: 1,
     },
     package: WalletLink,
