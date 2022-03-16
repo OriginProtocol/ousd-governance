@@ -1,0 +1,51 @@
+on: ["push", "pull_request"]
+
+name: main workflow
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # increasing available memory for node reduces issues with ganache crashing
+  # https://nodejs.org/api/cli.html#cli_max_old_space_size_size_in_megabytes
+  NODE_OPTIONS: --max_old_space_size=4096
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Compiler Installations
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.solcx
+            ~/.vvm
+          key: compiler-cache
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      - name: Client linting
+        run: npm install && npm run prettier:check
+        working-directory: client
+
+      - name: Listener linting
+        run: npm install && npm run prettier:check
+        working-directory: listener
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+
+      - name: Run Tests
+        run: brownie test --network hardhat

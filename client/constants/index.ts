@@ -32,6 +32,8 @@ export const governanceTokenContract = new ethers.Contract(
     "function balanceOf(address owner) view returns (uint256)",
     "function decimals() view returns (uint8)",
     "function symbol() view returns (string)",
+    "function approve(address, uint256) returns (bool)",
+    "function allowance(address,address) view returns (uint256)",
   ],
   provider
 );
@@ -42,10 +44,13 @@ export const voteLockerContract = new ethers.Contract(
   [
     "function totalSupply() view returns (uint256)",
     "function lockup(uint256,uint256)",
+    "function getLockup(address) view returns (uint256,uint256)",
   ],
   provider
 );
 
 export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
 export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
-export const mainnetProvider = new ethers.providers.JsonRpcProvider(mainnetNetworkUrl);
+export const mainnetProvider = new ethers.providers.JsonRpcProvider(
+  mainnetNetworkUrl
+);

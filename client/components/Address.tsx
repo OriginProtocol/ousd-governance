@@ -1,0 +1,38 @@
+import { useEffect, useState } from "react";
+import { useStore } from "utils/store";
+
+export const Address = ({ address }: { address: string }) => {
+  const { web3Provider } = useStore();
+  const [addressDisplay, setAddressDisplay] = useState(address);
+
+  useEffect(() => {
+    const loadEns = async () => {
+      try {
+        const ens = await web3Provider.lookupAddress(address);
+        if (ens) {
+          setAddressDisplay(ens);
+        }
+      } catch (error) {}
+    };
+    if (web3Provider) {
+      loadEns();
+    }
+  }, [web3Provider]);
+
+  let explorerPrefix;
+  if (web3Provider?.chainId === 1) {
+    explorerPrefix = "https://etherscan.io/";
+  } else if (web3Provider?.chainId === 4) {
+    explorerPrefix = "https://rinkeby.etherscan.io/";
+  }
+
+  if (explorerPrefix) {
+    return (
+      <a href={`${explorerPrefix}address/${address}`} target="_blank">
+        {addressDisplay}
+      </a>
+    );
+  } else {
+    return <>{addressDisplay}</>;
+  }
+};
