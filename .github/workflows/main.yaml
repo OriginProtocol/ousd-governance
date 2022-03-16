@@ -32,11 +32,11 @@ jobs:
         run: npm install
 
       - name: Client linting
-        run: npm install && npm prettier:check
+        run: npm install && npm run prettier:check
         working-directory: client
 
       - name: Listener linting
-        run: npm install && npm prettier:check
+        run: npm install && npm run prettier:check
         working-directory: listener
 
       - name: Setup Python 3.8
