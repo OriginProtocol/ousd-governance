@@ -32,6 +32,8 @@ export const governanceTokenContract = new ethers.Contract(
     "function balanceOf(address owner) view returns (uint256)",
     "function decimals() view returns (uint8)",
     "function symbol() view returns (string)",
+    "function approve(address, uint256) returns (bool)",
+    "function allowance(address,address) view returns (uint256)",
   ],
   provider
 );
@@ -42,6 +44,7 @@ export const voteLockerContract = new ethers.Contract(
   [
     "function totalSupply() view returns (uint256)",
     "function lockup(uint256,uint256)",
+    "function getLockup(address) view returns (uint256,uint256)",
   ],
   provider
 );
