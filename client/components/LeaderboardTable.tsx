@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { Address } from "components/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   return (
@@ -14,7 +15,9 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
         {voters.map((voter, index) => (
           <tr>
             <td>{index + 1}</td>
-            <td>{voter.address}</td>
+            <td>
+              <Address address={voter.address} />
+            </td>
             <td>
               {ethers.utils.formatUnits(ethers.BigNumber.from(voter.votes))}
             </td>
