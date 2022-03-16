@@ -25,7 +25,7 @@ export async function getServerSideProps({ res }: { res: any }) {
   const holderCount = await prisma.voter.count();
   // Limit 5
   const voters = (
-    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }] })
+    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }], take: 5 })
   ).map((v) => ({
     address: v.address,
     votes: v.votes.toString(),
