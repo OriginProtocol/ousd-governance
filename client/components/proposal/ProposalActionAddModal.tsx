@@ -114,6 +114,7 @@ export const ProposalActionAddModal = ({
           <AddActionFunctionForm
             abi={abi}
             address={address}
+            hasImplementationAbi={hasImplementationAbi}
             onContractChange={(data) => {
               setAddress(data.address)
               setAbi(data.abi);

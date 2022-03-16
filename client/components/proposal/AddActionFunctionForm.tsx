@@ -16,6 +16,7 @@ export const AddActionFunctionForm = ({
   onModalClose,
   onPrevious,
   onContractChange,
+  hasImplementationAbi,
 }) => {
   const [signature, setSignature] = useState(null);
 
@@ -110,36 +111,38 @@ export const AddActionFunctionForm = ({
 
   return (
     <form onSubmit={submitHandler}>
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Implementation contract</span>
-        </label>
-        <select
-          name="address"
-          className="select select-bordered w-full"
-          onChange={changeHandler}
-          defaultValue={values.address}
-        >
-          <option value="" disabled={true}>
-            Select contract
-          </option>
-          {contracts.map(({ name, address: contractAddress }) => {
-            return (
-              <option
-                key={contractAddress}
-                value={contractAddress}
-              >
-                {name} {truncateEthAddress(contractAddress)}
-              </option>
-            )
-          })}
-        </select>
-        {touched.address && errors.address && touched.signature && (
-          <p className="mt-2 text-sm text-error-content">
-            Please select a contract
-          </p>
-        )}
-      </div>
+      { hasImplementationAbi && (
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Implementation contract</span>
+          </label>
+          <select
+            name="address"
+            className="select select-bordered w-full"
+            onChange={changeHandler}
+            defaultValue={values.address}
+          >
+            <option value="" disabled={true}>
+              Select contract
+            </option>
+            {contracts.map(({ name, address: contractAddress }) => {
+              return (
+                <option
+                  key={contractAddress}
+                  value={contractAddress}
+                >
+                  {name} {truncateEthAddress(contractAddress)}
+                </option>
+              )
+            })}
+          </select>
+          {touched.address && errors.address && touched.signature && (
+            <p className="mt-2 text-sm text-error-content">
+              Please select a contract
+            </p>
+          )}
+        </div>
+      )}
       <div className="form-control w-full my-2">
         <label className="label">
           <span className="label-text">Function</span>
