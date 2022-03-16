@@ -7,6 +7,7 @@ DAY = 86400
 WEEK = 7 * DAY
 MAXTIME = 4 * 365 * DAY
 TOL = 120 / WEEK
+ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 Proxy = project.load(
     Path.home() / ".brownie" / "packages" / config["dependencies"][0]

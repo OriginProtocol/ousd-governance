@@ -154,15 +154,15 @@ contract VoteLockerCurve {
     function balanceOf(address _account) public view returns (uint256) {
         uint256 balance = 0;
         if (_delegations[_account] == address(0)) {
-            balance += balanceOfAccount(_account);
+            balance += _balanceOfAccount(_account);
         }
         for (uint256 i = 0; i < _userDelegators[_account].length; i++) {
-            balance += balanceOfAccount(_userDelegators[_account][i]);
+            balance += _balanceOfAccount(_userDelegators[_account][i]);
         }
         return balance;
     }
 
-    function balanceOfAccount(address _account) internal view returns (uint256) {
+    function _balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -313,12 +313,14 @@ contract VoteLockerCurve {
     /**
      * @dev Change delegation for `delegator` to `delegatee`.
      *
-     * Emits events {DelegateChanged} and {DelegateVotesChanged}.
+     * Emits events {DelegateChanged}
      */
     function _delegate(address delegator, address delegatee) internal virtual {
         address currentDelegate = _delegations[delegator];
         _delegations[delegator] = delegatee;
-        _userDelegators[delegatee].push(delegator);
+        if (delegatee != address(0)) {
+            _userDelegators[delegatee].push(delegator);
+        }
 
         if (currentDelegate != address(0)) {
             address[] memory currentDelegatorsOfDelegatee = _userDelegators[currentDelegate];
@@ -335,23 +337,6 @@ contract VoteLockerCurve {
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
     }
-
-    function _writeCheckpoint(
-        Checkpoint[] storage ckpts,
-        function(uint256, uint256) view returns (uint256) op,
-        uint256 delta
-    ) private returns (uint256 oldWeight, uint256 newWeight) {
-        // uint256 pos = ckpts.length;
-        // oldWeight = pos == 0 ? 0 : ckpts[pos - 1].votes;
-        // newWeight = op(oldWeight, delta);
-
-        // if (pos > 0 && ckpts[pos - 1].fromBlock == block.number) {
-        //     ckpts[pos - 1].votes = SafeCast.toUint224(newWeight);
-        // } else {
-        //     ckpts.push(Checkpoint({fromBlock: SafeCast.toUint32(block.number), votes: SafeCast.toUint224(newWeight)}));
-        // }
-    }
-
 
     /**
      * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _end parameters.
@@ -687,6 +672,21 @@ contract VoteLockerCurve {
     {
         require(_blockNumber <= block.number, "Block number is in the future");
 
+        uint256 balance = 0;
+        if (_delegations[_account] == address(0)) {
+            balance += _balanceOfAtAccount(_account, _blockNumber);
+        }
+        for (uint256 i = 0; i < _userDelegators[_account].length; i++) {
+            balance += _balanceOfAtAccount(_userDelegators[_account][i], _blockNumber);
+        }
+        return balance;
+    }
+
+    function _balanceOfAtAccount(address _account, uint256 _blockNumber)
+        public
+        view
+        returns (uint256)
+    {
         // Get most recent user Checkpoint to block
         uint256 recentUserEpoch = _findEpoch(
             _userCheckpoints[_account],
