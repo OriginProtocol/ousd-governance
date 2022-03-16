@@ -48,3 +48,7 @@ export const voteLockerContract = new ethers.Contract(
   ],
   provider
 );
+
+export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
+export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
+export const mainnetProvider = new ethers.providers.JsonRpcProvider(mainnetNetworkUrl);
