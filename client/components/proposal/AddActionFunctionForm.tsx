@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   isUint,
   isAddress,
@@ -6,14 +6,25 @@ import {
   isRequired,
   useForm,
 } from "utils/useForm";
+import { contracts } from "constants/index";
+import { truncateEthAddress } from "utils/index";
 
 export const AddActionFunctionForm = ({
   abi,
+  address,
   onSubmit,
   onModalClose,
   onPrevious,
+  onContractChange,
+  hasImplementationAbi,
 }) => {
   const [signature, setSignature] = useState(null);
+
+  const initialState = {
+    signature: "",
+    address,
+    abi,
+  };
 
   const contractFunctions = abi
     .filter(
@@ -30,11 +41,11 @@ export const AddActionFunctionForm = ({
     (c) => c.signature === signature
   )?.inputs;
 
-  const initialState = {
-    signature: "",
-  };
-
   const validations = [
+    ({ address }: { address: string }) =>
+      isRequired(address) || { address: "Contract address is required" },
+    ({ abi }: { abi: string }) =>
+      isRequired(abi) || { abi: "Contract ABI is required" },
     ({ signature }: { signature: string }) =>
       isRequired(signature) || {
         address: "Contract function is required",
@@ -88,8 +99,47 @@ export const AddActionFunctionForm = ({
     reset,
   } = useForm(initialState, validations, onSubmit);
 
+  useEffect(() => {
+    if (values.address.length === 42) {
+      const contract = contracts.find((c) => c.address === values.address);
+
+      if (contract) {
+        onContractChange(contract);
+      }
+    }
+  }, [values.address]);
+
   return (
     <form onSubmit={submitHandler}>
+      {hasImplementationAbi && (
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Implementation contract</span>
+          </label>
+          <select
+            name="address"
+            className="select select-bordered w-full"
+            onChange={changeHandler}
+            defaultValue={values.address}
+          >
+            <option value="" disabled={true}>
+              Select contract
+            </option>
+            {contracts.map(({ name, address: contractAddress }) => {
+              return (
+                <option key={contractAddress} value={contractAddress}>
+                  {name} {truncateEthAddress(contractAddress)}
+                </option>
+              );
+            })}
+          </select>
+          {touched.address && errors.address && touched.signature && (
+            <p className="mt-2 text-sm text-error-content">
+              Please select a contract
+            </p>
+          )}
+        </div>
+      )}
       <div className="form-control w-full my-2">
         <label className="label">
           <span className="label-text">Function</span>
