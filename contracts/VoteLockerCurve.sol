@@ -55,14 +55,17 @@ contract VoteLockerCurve {
     string private _symbol;
     uint8 private _decimals;
 
-    bytes32 private constant _DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
-
     uint256 private constant WEEK = 7 days;
     /// @notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
     /// @notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
+    /// @notice Maximum number of delegators per account
+    uint256 private constant MAX_DELEGATORS = 100;
+    /* @notice Minimum amount of voting power a delegator must hold in order
+     * for it to not be cleaned up by the `cleanUpWeakDelegators`
+     */
+    uint256 private constant MIN_DELEGATED_AMOUNT = 1;
 
     /// @notice Checkpoints for each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
@@ -160,7 +163,9 @@ contract VoteLockerCurve {
     }
 
     /**
-     * @dev See {ERC20-balanceOf}.
+     * @dev See {ERC20-balanceOf}. This function considers voting power when `_account`
+     * is delegating its votes to another (no self voting power) and having other
+     * account's delegate their voting power to it. 
      */
     function balanceOf(address _account) public view returns (uint256) {
         uint256 balance = 0;
@@ -174,6 +179,10 @@ contract VoteLockerCurve {
         return balance;
     }
 
+    /**
+     * Function considers voting power only from token lockup - user Checkpoints. Ignoring
+     * delegation.
+     */
     function _balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
@@ -360,16 +369,7 @@ contract VoteLockerCurve {
         bytes32 r,
         bytes32 s
     ) public virtual {
-        revert("Delegation by signature is not supported... yet");
-        // require(block.timestamp <= end, "Signature expired");
-        // address signer = ECDSA.recover(
-        //     _hashTypedDataV4(keccak256(abi.encode(_DELEGATION_TYPEHASH, delegatee, nonce, end))),
-        //     v,
-        //     r,
-        //     s
-        // );
-        // require(nonce == _useNonce(signer), "Invalid nonce");
-        // _delegate(signer, delegatee);
+        revert("Delegation by signature is not supported...");
     }
 
     /**
@@ -378,38 +378,27 @@ contract VoteLockerCurve {
      * Emits events {DelegateChanged}
      */
     function _delegate(address delegator, address delegatee) internal virtual {
+        if (delegatee != address(0)) {
+            require(delegators(delegatee).length < MAX_DELEGATORS, 'Maximum number of delegators reached.');
+        }
         address currentDelegatee = delegates(delegator);
-        _delegations[delegator].push(DelegateeSnapshot({
-            delegatee: delegatee,
-            blockNumber: block.number
-        }));
 
         /* If the current delegatee is being replaced remove the delegator from
          * the array of that holds delegators of a delegatee
          */
-        if (currentDelegatee != address(0)) {
-            address[] memory currentDelegators = delegators(currentDelegatee);
-            address[] memory newDelegators = new address[](currentDelegators.length - 1);
-
-            // copy from the previous state and remove 
-            uint256 count = 0;
-            for (uint256 i = 0; i < currentDelegators.length; i++) {
-                // When copying data over remove the currently delegated address if one exists
-                if (delegator == currentDelegators[i]) {
-                    continue;
-                }
-
-                newDelegators[count] = currentDelegators[i];
-                count += 1;
-            }
-
-            _userDelegators[currentDelegatee].push(DelegatorsSnapshot({
-                delegators: newDelegators,
-                blockNumber: block.number
-            }));
-        }
-
+        removeDelegator(delegator, currentDelegatee);
         // if not a zero address add the delegator to list of delegators of a delegatee
+        addDelegator(delegator, delegatee);
+
+        emit DelegateChanged(delegator, currentDelegatee, delegatee);
+    }
+
+    function addDelegator(address delegatorToAdd, address delegatee) internal virtual {
+        _delegations[delegatorToAdd].push(DelegateeSnapshot({
+            delegatee: delegatee,
+            blockNumber: block.number
+        }));
+
         if (delegatee != address(0)) {
             address[] memory currentDelegators = delegators(delegatee);
             address[] memory newDelegators = new address[](currentDelegators.length + 1);
@@ -417,15 +406,58 @@ contract VoteLockerCurve {
             for (uint256 i = 0; i < currentDelegators.length; i++) {
                 newDelegators[i] = currentDelegators[i];
             }
-            newDelegators[newDelegators.length - 1] = delegator;
+            newDelegators[newDelegators.length - 1] = delegatorToAdd;
             _userDelegators[delegatee].push(DelegatorsSnapshot({
                 delegators: newDelegators,
                 blockNumber: block.number
             }));
         }
+    }  
 
-        emit DelegateChanged(delegator, currentDelegatee, delegatee);
+    function removeDelegator(address delegatorToRemove, address delegatee) internal virtual {
+        if (delegatee != address(0)) {
+            address[] memory currentDelegators = delegators(delegatee);
+            address[] memory newDelegators = new address[](currentDelegators.length - 1);
+
+            // copy from the previous state and remove 
+            uint256 count = 0;
+            for (uint256 i = 0; i < currentDelegators.length; i++) {
+                // When copying data over remove the currently delegated address if one exists
+                if (delegatorToRemove == currentDelegators[i]) {
+                    continue;
+                }
+
+                newDelegators[count] = currentDelegators[i];
+                count += 1;
+            }
+
+            _userDelegators[delegatee].push(DelegatorsSnapshot({
+                delegators: newDelegators,
+                blockNumber: block.number
+            }));
+        }
     }
+
+    /**
+     * @dev Remove delegator link from delegators that don't hold much voting power anymore
+     */
+    function cleanUpWeakDelegators(address delegatee) public virtual {
+        require(delegatee != address(0), 'Delegatee must be a non zero address');
+        address[] memory _delegators = delegators(delegatee);
+
+        for (uint256 i = 0; i < _delegators.length; i++) {
+            if (_balanceOfAccount(_delegators[i]) < MIN_DELEGATED_AMOUNT * decimals()) {
+                address currentDelegatee = delegates(_delegators[i]);
+                emit DelegateChanged(_delegators[i], currentDelegatee, address(0));
+                removeDelegator(_delegators[i], delegatee);
+                _delegations[_delegators[i]].push(DelegateeSnapshot({
+                    delegatee: address(0),
+                    blockNumber: block.number
+                }));
+            }
+        }
+    }
+
 
     /**
      * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _end parameters.
