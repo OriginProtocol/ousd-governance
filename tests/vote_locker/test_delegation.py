@@ -32,6 +32,7 @@ def isolation(fn_isolation):
 
 def test_delegation(web3, accounts, chain, token, vote_locker):
     alice, bob, mikey = accounts[:3]
+    initial_block_number = chain.height
     assert vote_locker.delegates(alice) == ZERO_ADDRESS
     assert vote_locker.delegates(bob) == ZERO_ADDRESS
     assert vote_locker.delegates(mikey) == ZERO_ADDRESS
@@ -54,12 +55,25 @@ def test_delegation(web3, accounts, chain, token, vote_locker):
     assert vote_locker.delegates(alice) == mikey
     assert vote_locker.delegators(mikey) == [alice]
     assert vote_locker.delegators(bob) == [mikey]
+    block_number = chain.height
 
     vote_locker.delegate(ZERO_ADDRESS, {"from": alice})
     chain.mine()
     assert vote_locker.delegates(alice) == ZERO_ADDRESS
     assert vote_locker.delegators(bob) == [mikey]
     assert vote_locker.delegators(mikey) == []
+    chain.mine()
+
+    assert vote_locker.delegates(alice, block_number) == mikey
+    assert vote_locker.delegators(mikey, block_number) == [alice]
+    assert vote_locker.delegators(bob, block_number) == [mikey]
+
+    assert vote_locker.delegates(alice, initial_block_number) == ZERO_ADDRESS
+    assert vote_locker.delegates(bob, initial_block_number) == ZERO_ADDRESS
+    assert vote_locker.delegates(mikey, initial_block_number) == ZERO_ADDRESS
+    assert vote_locker.delegators(alice, initial_block_number) == []
+    assert vote_locker.delegators(bob, initial_block_number) == []
+    assert vote_locker.delegators(mikey, initial_block_number) == []
 
 def test_redelegation(accounts, chain, vote_locker):
     alice, bob = accounts[:2]

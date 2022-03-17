@@ -15,17 +15,13 @@ pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
-//import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/cryptography/ECDSA.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Counters.sol";
 //import "./console.sol";
 
-//contract VoteLockerCurve is ERC20Permit {
 contract VoteLockerCurve {
     using SafeERC20 for ERC20;
-    using Counters for Counters.Counter;
 
     ///@notice Emitted when a lockup is created
     event LockupCreated(
@@ -63,7 +59,8 @@ contract VoteLockerCurve {
     /// @notice Maximum number of delegators per account
     uint256 private constant MAX_DELEGATORS = 100;
     /* @notice Minimum amount of voting power a delegator must hold in order
-     * for it to not be cleaned up by the `cleanUpWeakDelegators`
+     * for it to not be cleaned up by the `cleanUpWeakDelegators`. Denominated in 
+     * units (gets multiplied by token's decimals)
      */
     uint256 private constant MIN_DELEGATED_AMOUNT = 1;
 
@@ -89,8 +86,6 @@ contract VoteLockerCurve {
 
     /// @notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
-
-    mapping(address => Counters.Counter) private _nonces;
 
     struct Checkpoint {
         int128 bias;
@@ -164,8 +159,8 @@ contract VoteLockerCurve {
 
     /**
      * @dev See {ERC20-balanceOf}. This function considers voting power when `_account`
-     * is delegating its votes to another (no self voting power) and having other
-     * account's delegate their voting power to it. 
+     * is delegating its votes to another (loses self locked up token voting power) and 
+     * increases voting power when other account's delegate their to it. 
      */
     function balanceOf(address _account) public view returns (uint256) {
         uint256 balance = 0;
@@ -314,7 +309,6 @@ contract VoteLockerCurve {
             }
         }
 
-        // check this works even when there is no valid delegation
         return lastValidDelegation.delegatee;
     }
 
@@ -347,7 +341,6 @@ contract VoteLockerCurve {
             }
         }
 
-        // check this works even when there is no valid delegation
         _delegators = lastValidDelegatorsSnapshot.delegators;
     }
 
@@ -379,15 +372,15 @@ contract VoteLockerCurve {
      */
     function _delegate(address delegator, address delegatee) internal virtual {
         if (delegatee != address(0)) {
-            require(delegators(delegatee).length < MAX_DELEGATORS, 'Maximum number of delegators reached.');
+            require(delegators(delegatee).length < MAX_DELEGATORS, 'Maximum number of delegators reached. Call cleanUpWeakDelegators to remove low voting power delegators');
         }
         address currentDelegatee = delegates(delegator);
 
         /* If the current delegatee is being replaced remove the delegator from
-         * the array of that holds delegators of a delegatee
+         * the array that holds delegators of that delegatee
          */
         removeDelegator(delegator, currentDelegatee);
-        // if not a zero address add the delegator to list of delegators of a delegatee
+        // if not a zero address add the delegator to list of delegators of the delegatee
         addDelegator(delegator, delegatee);
 
         emit DelegateChanged(delegator, currentDelegatee, delegatee);
@@ -446,7 +439,7 @@ contract VoteLockerCurve {
         address[] memory _delegators = delegators(delegatee);
 
         for (uint256 i = 0; i < _delegators.length; i++) {
-            if (_balanceOfAccount(_delegators[i]) < MIN_DELEGATED_AMOUNT * decimals()) {
+            if (_balanceOfAccount(_delegators[i]) < MIN_DELEGATED_AMOUNT * 10 ** decimals()) {
                 address currentDelegatee = delegates(_delegators[i]);
                 emit DelegateChanged(_delegators[i], currentDelegatee, address(0));
                 removeDelegator(_delegators[i], delegatee);
@@ -640,7 +633,7 @@ contract VoteLockerCurve {
         returns (Checkpoint memory _checkpoint)
     {
         if (_lockup.end > block.timestamp && _lockup.amount > 0) {
-            // Old checkpoint still active, calculates its slope and bias
+            // Checkpoint still active, calculates its slope and bias
             _checkpoint.slope =
                 _lockup.amount /
                 SafeCast.toInt128(int256(MAX_LOCK_TIME));
@@ -781,7 +774,7 @@ contract VoteLockerCurve {
     }
 
     /**
-     * @dev Gets a users votingWeight at a given blockNumber
+     * @dev Gets a users votingWeight at a given blockNumber - includes delegations
      * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
      * @return uint256 Balance of user
@@ -806,6 +799,12 @@ contract VoteLockerCurve {
         return balance;
     }
 
+    /**
+     * @dev Gets a users votingWeight at a given blockNumber - ignores delegations
+     * @param _account User for which to return the balance
+     * @param _blockNumber Block at which to calculate balance
+     * @return uint256 Balance of user
+     */
     function _balanceOfAtAccount(address _account, uint256 _blockNumber)
         public
         view
@@ -996,31 +995,5 @@ contract VoteLockerCurve {
      */
     function max(int128 _a, int128 _b) internal pure returns (int128) {
         return _a >= _b ? _a : _b;
-    }
-
-    function _add(uint256 a, uint256 b) private pure returns (uint256) {
-        return a + b;
-    }
-
-    function _subtract(uint256 a, uint256 b) private pure returns (uint256) {
-        return a - b;
-    }
-
-    /**
-     * @dev Consumes a nonce.
-     *
-     * Returns the current value and increments nonce.
-     */
-    function _useNonce(address owner) internal virtual returns (uint256 current) {
-        Counters.Counter storage nonce = _nonces[owner];
-        current = nonce.current();
-        nonce.increment();
-    }
-
-    /**
-     * @dev Returns an address nonce.
-     */
-    function nonces(address owner) public view virtual returns (uint256) {
-        return _nonces[owner].current();
     }
 }
