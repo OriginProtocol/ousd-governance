@@ -1,18 +1,7 @@
 from brownie import accounts, chain
 
-from ..helpers import approx
+from ..helpers import approx, mine_blocks, DAY, WEEK
 from ..fixtures import governance, timelock_controller, token, vote_locker
-
-DAY = 86400
-WEEK = 7 * DAY
-
-# Mine `amount` blocks using hardhat_mine, defaults to the length of the governance
-# voting period (45818 blocks ~1 week )
-def mine_blocks(web3, amount="0xB2FA"):
-    web3.provider.make_request("hardhat_mine", [amount])
-    # Using hardhat_mine seems to break the 0 base fee
-    web3.provider.make_request("hardhat_setNextBlockBaseFeePerGas", ["0x0"])
-    chain.mine()
 
 
 def test_create_proposal(governance):
@@ -49,7 +38,7 @@ def test_proposal_can_pass_vote(governance, vote_locker, token, timelock_control
     proposal = governance.proposals(tx.return_value)
     # Active
     assert governance.state(tx.return_value) == 1
-    mine_blocks(web3)
+    mine_blocks(web3, chain)
     # Succeeded
     assert governance.state(tx.return_value) == 4
 
@@ -80,7 +69,7 @@ def test_proposal_can_fail_vote(governance, vote_locker, token, timelock_control
     chain.mine()
     # Active
     assert governance.state(tx.return_value) == 1
-    mine_blocks(web3)
+    mine_blocks(web3, chain)
     # Defeated
     assert governance.state(tx.return_value) == 3
 
@@ -100,7 +89,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(governance, vote_locker
     )
     chain.mine()
     governance.castVote(tx.return_value, 1, {"from": alice})
-    mine_blocks(web3)
+    mine_blocks(web3, chain)
     governance.queue(tx.return_value, {"from": alice})
     assert governance.state(tx.return_value) == 5
     chain.sleep(86400 * 2)

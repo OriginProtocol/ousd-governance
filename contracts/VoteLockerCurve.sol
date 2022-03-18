@@ -15,7 +15,6 @@ pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/cryptography/ECDSA.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
 //import "./console.sol";
@@ -57,7 +56,7 @@ contract VoteLockerCurve {
     /// @notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
     /// @notice Maximum number of delegators per account
-    uint256 private constant MAX_DELEGATORS = 100;
+    uint256 private constant MAX_DELEGATORS = 8;
     /* @notice Minimum amount of voting power a delegator must hold in order
      * for it to not be cleaned up by the `cleanUpWeakDelegators`. Denominated in 
      * units (gets multiplied by token's decimals)
@@ -372,7 +371,7 @@ contract VoteLockerCurve {
      */
     function _delegate(address delegator, address delegatee) internal virtual {
         if (delegatee != address(0)) {
-            require(delegators(delegatee).length < MAX_DELEGATORS, 'Maximum number of delegators reached. Call cleanUpWeakDelegators to remove low voting power delegators');
+            require(delegators(delegatee).length < MAX_DELEGATORS - 1, 'Maximum number of delegators reached. Call cleanUpWeakDelegators to remove low voting power delegators');
         }
         address currentDelegatee = delegates(delegator);
 

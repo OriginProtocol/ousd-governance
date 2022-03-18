@@ -1,6 +1,7 @@
 import pytest
-from ..helpers import approx
-from ..fixtures import token, vote_locker, H, DAY, WEEK, MAXTIME, TOL, ZERO_ADDRESS
+import brownie
+from ..helpers import approx, H, DAY, WEEK, MAXTIME, TOL, mine_blocks
+from ..fixtures import token, governance, timelock_controller, vote_locker
 amount = 1000 * 10 ** 18
 
 @pytest.fixture(scope="module", autouse=True)
@@ -154,6 +155,62 @@ def test_voting_powers_delegated_with_block_height(web3, accounts, chain, token,
 
     assert approx(vote_locker.balanceOfAt(bob, block_number), 0, TOL)
 
+def test_fail_too_many_delegates(chain, accounts, vote_locker, token, web3):
+    delegates = 9
+    alice, bob, mikey = accounts[:3]
+    vote_locker.delegate(alice, {"from": bob})
+    vote_locker.delegate(alice, {"from": mikey})
+
+    for curr_account in accounts[3:delegates]:
+        alice.transfer(curr_account, "0.1 ether")
+        token.transfer(curr_account, amount, {"from": alice})
+        token.approve(vote_locker.address, amount * 10, {"from": curr_account})
+        vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": curr_account})
+
+    for curr_account in accounts[3:delegates - 1]:
+        # make everyone delegate to alice
+        vote_locker.delegate(alice, {"from": curr_account})
+
+    with brownie.reverts("Maximum number of delegators reached. Call cleanUpWeakDelegators to remove low voting power delegators"):
+        vote_locker.delegate(alice, {"from": accounts[delegates - 1]})
+
+def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, timelock_controller, web3):
+    alice, bob, mikey = accounts[:3]
+    vote_locker.delegate(alice, {"from": bob})
+    vote_locker.delegate(alice, {"from": mikey})
+
+    for curr_account in accounts[3:7]:
+        alice.transfer(curr_account, "0.1 ether")
+        token.transfer(curr_account, amount, {"from": alice})
+        token.approve(vote_locker.address, amount * 10, {"from": curr_account})
+        vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": curr_account})
+        # make everyone delegate to alice
+        vote_locker.delegate(alice, {"from": curr_account})
+
+
+    token.approve(vote_locker.address, amount * 10, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    proposal_quorum = governance.quorum(tx.block_number)
+    expected_quorum = vote_locker.totalSupplyAt(tx.block_number) * 0.04
+    assert approx(proposal_quorum, expected_quorum)
+    chain.mine()
+
+    # This can fail with timeout error (if 8 delegates or more). Brownie fails debug_traceTransaction call. Could be that node crashes
+    # or timeout happens: https://github.com/eth-brownie/brownie/blob/3aecd87f47c9c316c85b0b0c6252ff7d900cca74/brownie/network/transaction.py#L634
+    #
+    # About gas cost. Seems that each delegate adds roughly ~50k gas to a cast vote. Which is 
+    # larger than desirable.
+    tx1 = governance.castVote(tx.return_value, 1, {"from": alice})
+
+    assert tx1.gas_used < 600000
 
 
     
