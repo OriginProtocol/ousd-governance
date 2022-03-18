@@ -203,6 +203,7 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
     assert approx(proposal_quorum, expected_quorum)
     chain.mine()
 
+    # When more than ~8 delegates this crashes because:
     # Brownie calls debug_traceTransaction: https://github.com/eth-brownie/brownie/blob/3aecd87f47c9c316c85b0b0c6252ff7d900cca74/brownie/network/transaction.py#L634
     # Hardhat crashes because object to stringify is more that it can handle: https://capture.dropbox.com/MJ4QCk5aEH9ArF9x
     #

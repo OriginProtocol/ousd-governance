@@ -3,7 +3,7 @@
 // Inspired by the Curve.fi VotingEscrow contract and the mStable Solidity fork.
 //    - Adds compatibility with the OpenZeppelin governance stack (4.5.0)
 //    - Removes the separate lockup amount and lockup duration extension functions info
-//      favor of a single function for create or update.
+//      favour of a single function for create or update.
 //    - Adds an deprecate mechanism for removing all voting power and allowing users too
 //      withdraw lockups
 //
