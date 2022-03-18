@@ -203,8 +203,8 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
     assert approx(proposal_quorum, expected_quorum)
     chain.mine()
 
-    # This can fail with timeout error (if 8 delegates or more). Brownie fails debug_traceTransaction call. Could be that node crashes
-    # or timeout happens: https://github.com/eth-brownie/brownie/blob/3aecd87f47c9c316c85b0b0c6252ff7d900cca74/brownie/network/transaction.py#L634
+    # Brownie calls debug_traceTransaction: https://github.com/eth-brownie/brownie/blob/3aecd87f47c9c316c85b0b0c6252ff7d900cca74/brownie/network/transaction.py#L634
+    # Hardhat crashes because object to stringify is more that it can handle: https://capture.dropbox.com/MJ4QCk5aEH9ArF9x
     #
     # About gas cost. Seems that each delegate adds roughly ~50k gas to a cast vote. Which is 
     # larger than desirable.
