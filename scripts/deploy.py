@@ -7,9 +7,7 @@ Proxy = project.load(
 ).ERC1967Proxy
 
 def main(output_file=None):
-    token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
-    token_proxy = Proxy.deploy(token_impl.address, token_impl.initialize.encode_input(), {"from": accounts[0]})
-    token = Contract.from_abi("OriginDollarGovernance", token_proxy.address, token_impl.abi)
+    token = run("deploy_token")
     votelock = VoteLockerCurve.deploy(token, {"from": accounts[0]})
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
