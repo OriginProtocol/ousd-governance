@@ -1,25 +1,78 @@
-import { contracts } from "constants/index";
+import { ethers } from "ethers";
+import { useEffect, useState } from "react";
+import {
+  aaveStrategyContract,
+  compoundStrategyContract,
+  convexStrategyContract,
+} from "constants/index";
 
 export const Reallocation = () => {
-  const aaveStrategy = contracts.find(
-    (contract: { name: string }) => contract.name === "AaveStrategy"
-  );
+  const [aaveStrategyBalances, setAaveStrategyBalances] = useState([]);
+  const [compoundStrategyBalances, setCompoundStrategyBalances] = useState([]);
+  const [convexStrategyBalances, setConvexStrategyBalances] = useState([]);
 
-  const compoundStrategy = contracts.find(
-    (contract: { name: string }) => contract.name === "CompoundStrategy"
-  );
+  const strategies = [
+    {
+      name: "Aave",
+      contract: aaveStrategyContract,
+      balances: aaveStrategyBalances,
+      balanceGetter: () => aaveStrategyBalances,
+      balanceSetter: setAaveStrategyBalances,
+    },
+    {
+      name: "Compound",
+      contract: compoundStrategyContract,
+      balanceGetter: () => compoundStrategyBalances,
+      balanceSetter: setCompoundStrategyBalances,
+    },
+    {
+      name: "Convex",
+      contract: convexStrategyContract,
+      balanceGetter: () => convexStrategyBalances,
+      balanceSetter: setConvexStrategyBalances,
+    },
+  ];
 
-  const convexStrategy = contracts.find(
-    (contract: { name: string }) => contract.name === "ConvexStrategy"
-  );
+  const assets = [
+    {
+      symbol: "DAI",
+      decimals: 18,
+      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    },
+    {
+      symbol: "USDC",
+      decimals: 6,
+      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    },
+    {
+      symbol: "DAI",
+      decimals: 6,
+      address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    },
+  ];
 
-  const assets = {
-    DAI: "",
-    USDC: "",
-    USDT: "",
+  useEffect(() => {
+    const loadStrategyBalances = async () => {
+      for (const strategy of strategies) {
+        strategy.balanceSetter(
+          await Promise.all(
+            Object.values(assets).map((a) =>
+              strategy.contract.checkBalance(a.address)
+            )
+          )
+        );
+      }
+    };
+    loadStrategyBalances();
+  }, []);
+
+  const truncateBalance = (str) => {
+    if (str.includes(".")) {
+      const parts = str.split(".");
+      return parts[0] + "." + parts[1].slice(0, 4);
+    }
+    return str;
   };
-
-  const strategies = [aaveStrategy, compoundStrategy, convexStrategy];
 
   return (
     <>
@@ -31,11 +84,19 @@ export const Reallocation = () => {
           >
             <div className="card-body">
               <h2 className="card-title">{strategy.name}</h2>
-              {Object.keys(assets).map((asset) => (
-                <div>
-                  {(Math.random() * 1000).toFixed(5)} {asset}
-                </div>
-              ))}
+              {assets.map((asset, index) => {
+                const balance =
+                  strategy.balanceGetter && strategy.balanceGetter()[index];
+                if (!balance) return null;
+                return (
+                  <div key={index}>
+                    {asset.symbol}{" "}
+                    {truncateBalance(
+                      ethers.utils.formatUnits(balance, asset.decimals)
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
@@ -77,10 +138,10 @@ export const Reallocation = () => {
             </div>
           </div>
           <div className="w-full">
-            {Object.keys(assets).map((asset) => (
+            {assets.map((asset) => (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">{asset}</span>
+                  <span className="label-text">{asset.symbol}</span>
                 </label>
                 <input type="text" className="input input-bordered" />
               </div>

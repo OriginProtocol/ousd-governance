@@ -13,6 +13,11 @@ export const contracts = Object.entries(OUSDContracts.contracts).map(
   })
 );
 
+export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
+export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
+export const mainnetProvider = new ethers.providers.JsonRpcProvider(
+  mainnetNetworkUrl
+);
 export const provider = new ethers.providers.JsonRpcProvider(
   process.env.WEB3_PROVIDER
 );
@@ -49,8 +54,26 @@ export const voteLockerContract = new ethers.Contract(
   provider
 );
 
-export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
-export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
-export const mainnetProvider = new ethers.providers.JsonRpcProvider(
-  mainnetNetworkUrl
+export const aaveStrategyAddress =
+  OUSDContracts.contracts.AaveStrategyProxy.address;
+export const aaveStrategyContract = new ethers.Contract(
+  aaveStrategyAddress,
+  ["function checkBalance(address) view returns (uint256)"],
+  mainnetProvider
+);
+
+export const compoundStrategyAddress =
+  OUSDContracts.contracts.CompoundStrategyProxy.address;
+export const compoundStrategyContract = new ethers.Contract(
+  compoundStrategyAddress,
+  ["function checkBalance(address) view returns (uint256)"],
+  mainnetProvider
+);
+
+export const convexStrategyAddress =
+  OUSDContracts.contracts.ConvexStrategyProxy.address;
+export const convexStrategyContract = new ethers.Contract(
+  convexStrategyAddress,
+  ["function checkBalance(address) view returns (uint256)"],
+  mainnetProvider
 );
