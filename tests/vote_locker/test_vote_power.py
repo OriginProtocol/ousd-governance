@@ -58,7 +58,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
 
     stages["before_deposits"] = (web3.eth.block_number, chain[-1].timestamp)
 
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
 
     stages["alice_deposit"] = (web3.eth.block_number, chain[-1].timestamp)
 
@@ -108,7 +108,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
     chain.sleep((chain[-1].timestamp // WEEK + 1) * WEEK - chain[-1].timestamp)
     chain.mine()
 
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + 2 * WEEK, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + 2 * WEEK, {"from": alice})
 
     stages["alice_deposit_2"] = (web3.eth.block_number, chain[-1].timestamp)
 
@@ -116,7 +116,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
     assert approx(vote_locker.balanceOf(alice), amount // MAXTIME * 2 * WEEK, TOL)
     assert vote_locker.balanceOf(bob) == 0
 
-    vote_locker.upsertLockup(amount, chain[-1].timestamp + WEEK, {"from": bob})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": bob})
 
     stages["bob_deposit_2"] = (web3.eth.block_number, chain[-1].timestamp)
 

@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
+import { Address } from "components/Address";
 
 export const ProposalTable = ({ proposalData }) => {
   const router = useRouter();
@@ -67,7 +68,9 @@ export const ProposalTable = ({ proposalData }) => {
             onClick={() => router.push(`/proposal/${proposal[0]}`)}
           >
             <td>{proposal.displayId}</td>
-            <td>{proposal[1]}</td>
+            <td>
+              <Address address={proposal[1]} />
+            </td>
             <td>
               <StateTag state={proposalData.states[index]} />
             </td>

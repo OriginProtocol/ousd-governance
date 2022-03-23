@@ -3,7 +3,7 @@
 // Inspired by the Curve.fi VotingEscrow contract and the mStable Solidity fork.
 //    - Adds compatability with the OpenZeppelin governance stack (4.5.0)
 //    - Removes the separate lockup amount and lockup duration extension functions info
-//      favour of a single upsert function.
+//      favour of a single function for create or update.
 //    - Adds an deprecate mechanism for removing all voting power and allowing users too
 //      withdraw lockups
 //
@@ -11,24 +11,27 @@
 //   - https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy
 //   - https://github.com/mstable/mStable-contracts/blob/master/contracts/governance/IncentivisedVotingLockup.sol
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/OwnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract VoteLockerCurve is Initializable, OwnableUpgradeable {
+contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     using SafeERC20 for ERC20;
 
+    ///@notice Emitted when a lockup is created
     event LockupCreated(
         address indexed provider,
         int128 amount,
         uint256 end,
         uint256 ts
     );
+    ///@notice Emitted when an existing lockup is changed
     event LockupUpdated(
         address indexed provider,
         int128 oldAmount,
@@ -37,32 +40,39 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
         uint256 end,
         uint256 ts
     );
+    ///@notice Emitted when a user withdraws from an expired lockup
     event Withdraw(address indexed provider, uint256 value, uint256 ts);
 
     ///@notice ERC20 parameters
     string private _name;
     string private _symbol;
     uint8 private _decimals;
-    /* note: OpenZeppelin upgrade-able contract don't allow for initialized members except if they are
-     * declared constant. Otherwise it is similar to declaring initial state in constructor. And 
-     * constructors are not supported with upgrade-able contracts.
-     */
+
+    ///@notice Definition of a week
     uint256 private constant WEEK = 7 days;
-    /// @notice Maximum lock time
+    ///@notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
-    /// @notice Vote boost if locked for maximum duration
+    ///@notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
-    /// @notice Checkpoints for each user
+
+    ///@notice Checkpoints for each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
     mapping(address => uint256) public userEpoch;
-    /// @notice Global checkpoints
+
+    ///@notice Global checkpoints
     Checkpoint[] private _globalCheckpoints;
     uint256 public globalEpoch;
-    /// @notice Lockup mapping for each user
+
+    ///@notice Lockup mapping for each user
     mapping(address => Lockup) public lockups;
-    /// @notice
+
+    ///@notice
     mapping(uint256 => int128) public slopeChanges;
 
+    ///@notice Delegation mapping
+    mapping(address => address) private _delegations;
+
+    ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
 
     struct Checkpoint {
@@ -77,19 +87,25 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
         uint256 end;
     }
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
+    ///@custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
     function initialize(address _stakingToken) public initializer {
         __Ownable_init();
+        __UUPSUpgradeable_init();
+
         stakingToken = ERC20(_stakingToken);
+
+        // Derive the name and symbol from the staking token
         _name = string(
             bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
         );
         _symbol = string(
             bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
         );
+        // Use the same decimals as the staking token
         _decimals = stakingToken.decimals();
+
         // Push an initial global checkpoint
         _globalCheckpoints.push(
             Checkpoint({
@@ -221,8 +237,13 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
 
     /**
      * @dev Gets the current votes balance for `_account`
+     * This method is required for compatibility with the OpenZeppelin governance ERC20Votes.
+     * @param _account Account to get the votes balance for
+     * @return uint256 Current votes balance for `_account`
      */
-    function getVotes(address _account) public view returns (uint256) {}
+    function getVotes(address _account) public view returns (uint256) {
+        return balanceOf(_account);
+    }
 
     /**
      * @dev Gets the current lockup for `_account`
@@ -232,16 +253,17 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     }
 
     /**
-     * @dev Get the address `account` is currently delegating to.
+     * @dev Get the address `_account` is currently delegating to.
      */
-    function delegates(address account) public view virtual returns (address) {
-        // Contract does not support delegation
+    function delegates(address _account) public view virtual returns (address) {
+        return _delegations[_account];
     }
 
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
+        // TODO
         revert("Delegation is not supported");
     }
 
@@ -262,7 +284,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     /**
      * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _end parameters.
      */
-    function upsertLockup(uint256 _amount, uint256 _end) public virtual {
+    function lockup(uint256 _amount, uint256 _end) public virtual {
         // end is rounded down to week
         _end = _floorToWeek(_end);
 
@@ -309,20 +331,20 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
         if (oldLockup.end > 0) {
             // This is an extension of an existing lockup
             emit LockupUpdated(
-              msg.sender,
-              oldLockup.amount,
-              oldLockup.end,
-              newLockup.amount,
-              newLockup.end,
-              block.timestamp
+                msg.sender,
+                oldLockup.amount,
+                oldLockup.end,
+                newLockup.amount,
+                newLockup.end,
+                block.timestamp
             );
         } else {
-          emit LockupCreated(
-            msg.sender,
-            newLockup.amount,
-            newLockup.end,
-            block.timestamp
-          );
+            emit LockupCreated(
+                msg.sender,
+                newLockup.amount,
+                newLockup.end,
+                block.timestamp
+            );
         }
 
         _writeUserCheckpoint(msg.sender, oldLockup, newLockup);
@@ -370,7 +392,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     }
 
     /**
-     *
+     * @dev Write user checkpoint. User checkpoints are used to calculate the
+     * users vote balance for current and historical blocks.
+     * @param _oldLockup Users lockup prior to the change that triggered the checkpoint
+     * @param _newLockup Users new lockup
      */
     function _writeUserCheckpoint(
         address _account,
@@ -449,7 +474,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     }
 
     /**
-     *
+     * @dev Write a global checkpoints. Global checkpoints are used to calculate the
+     * total supply for current and historical blocks.
+     * @param userSlopeDelta Change in slope that triggered this checkpoint
+     * @param userBiasDelta Change in bias that triggered this checkpoint
      */
     function _writeGlobalCheckpoint(int128 userSlopeDelta, int128 userBiasDelta)
         private
@@ -537,6 +565,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
     /**
      * @param _block Find the most recent point history before this block
      * @param _maxEpoch Maximum epoch
+     * @return uint256 The most recent epoch before the block
      */
     function _findEpoch(
         Checkpoint[] memory _checkpoints,
@@ -555,35 +584,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
             }
         }
         return minEpoch;
-    }
-
-    function findCheckpointsBefore(address _owner, uint256 _blockNumber)
-        public
-        view
-        returns (
-            Checkpoint memory,
-            uint256,
-            Checkpoint memory,
-            uint256
-        )
-    {
-        // Get most recent user Checkpoint to block
-        uint256 recentUserEpoch = _findEpoch(
-            _userCheckpoints[_owner],
-            _blockNumber,
-            userEpoch[_owner] // Max epoch
-        );
-        Checkpoint memory userPoint = _userCheckpoints[_owner][recentUserEpoch];
-
-        // Get most recent global Checkpoint to block
-        uint256 recentGlobalEpoch = _findEpoch(
-            _globalCheckpoints,
-            _blockNumber,
-            globalEpoch
-        );
-        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
-
-        return (userPoint, recentUserEpoch, checkpoint0, recentGlobalEpoch);
     }
 
     /**
@@ -677,6 +677,9 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
      * Requirements:
      *
      * - `_blockNumber` must have been already mined
+     *
+     * @param _blockNumber Block at which to calculate total supply
+     * @return uint256 Total supply at the given block
      */
     function getPastTotalSupply(uint256 _blockNumber)
         public
@@ -777,6 +780,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
 
     /**
      * @dev Floors a timestamp to the nearest weekly increment
+     * @param _t Timestamp to floor
+     * @return uint256 Timestamp floored to nearest weekly increment
      */
     function _floorToWeek(uint256 _t) internal pure returns (uint256) {
         return (_t / WEEK) * WEEK;
@@ -784,15 +789,27 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable {
 
     /**
      * @dev Returns the largest of two numbers.
+     * @param _a First number
+     * @param _b Second number
+     * @return Largest of _a and _b
      */
-    function max(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a >= b ? a : b;
+    function max(uint256 _a, uint256 _b) internal pure returns (uint256) {
+        return _a >= _b ? _a : _b;
     }
 
     /**
-     * @dev Returns the largest of two numbers.
+     * @dev Returns the smallest of two numbers.
+     * @param _a First number
+     * @param _b Second number
+     * @return Smallest of _a and _b
      */
-    function max(int128 a, int128 b) internal pure returns (int128) {
-        return a >= b ? a : b;
+    function max(int128 _a, int128 _b) internal pure returns (int128) {
+        return _a >= _b ? _a : _b;
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 }

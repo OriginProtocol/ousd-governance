@@ -1,13 +1,15 @@
 import pytest
-from brownie import Governance, OriginDollarGovernance, VoteLockerCurve, Timelock, accounts
+from brownie import *
+from pathlib import Path
 
 @pytest.fixture
 def token():
-    return accounts[0].deploy(OriginDollarGovernance)
+    accounts.default = accounts[0]
+    return run("deploy_token")
 
 @pytest.fixture
 def vote_locker(token):
-    return accounts[0].deploy(VoteLockerCurve, token)
+    return run("deploy_vote_locker", "main", (token.address,))
 
 @pytest.fixture
 def timelock_controller():

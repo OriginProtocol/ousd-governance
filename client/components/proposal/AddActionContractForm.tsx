@@ -2,13 +2,23 @@ import { useState, useEffect } from "react";
 import { isRequired, useForm } from "utils/useForm";
 import { contracts } from "constants/index";
 import { truncateEthAddress } from "utils/index";
+import { Loading } from "../Loading";
 
-export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
+export const AddActionContractForm = ({
+  onChange,
+  onSubmit,
+  onModalClose,
+  fetchingProxy,
+  isProxy,
+  hasImplementationAbi,
+  implementationAddress,
+}) => {
   const [isCustomContract, setIsCustomContract] = useState(false);
   const initialState = {
     address: "",
     abi: "",
   };
+
   const validations = [
     ({ address }: { address: string }) =>
       isRequired(address) || { address: "Contract address is required" },
@@ -28,6 +38,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
   useEffect(() => {
     if (values.address.length === 42) {
       const contract = contracts.find((c) => c.address === values.address);
+
       if (contract) {
         changeHandler({
           target: {
@@ -35,6 +46,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
             value: contract.abi,
           },
         });
+        onChange(contract);
       }
     }
   }, [values.address]);
@@ -85,6 +97,7 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Select contract</span>
+                {fetchingProxy && <Loading small />}
               </label>
               <select
                 name="address"
@@ -104,6 +117,12 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
               {touched.address && errors.address && (
                 <p className="mt-2 text-sm text-error-content">
                   Please select a contract
+                </p>
+              )}
+              {!fetchingProxy && isProxy && !hasImplementationAbi && (
+                <p className="mt-2 text-sm text-error-content">
+                  Contract is proxy but no implementation found for{" "}
+                  {truncateEthAddress(implementationAddress)}
                 </p>
               )}
             </div>
@@ -131,7 +150,11 @@ export const AddActionContractForm = ({ onSubmit, onModalClose }) => {
         )}
       </div>
       <div className="modal-action">
-        <button className="btn btn-primary" type="submit" disabled={!isValid}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={!isValid || fetchingProxy}
+        >
           Next
         </button>
         <button

@@ -1,25 +1,18 @@
 import json
 from brownie import *
-from pathlib import Path
 
-Proxy = project.load(
-    Path.home() / ".brownie" / "packages" / config["dependencies"][0]
-).ERC1967Proxy
 
 def main(output_file=None):
-    token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
-    token_proxy = Proxy.deploy(token_impl.address, token_impl.initialize.encode_input(), {"from": accounts[0]})
-    token = Contract.from_abi("OriginDollarGovernance", token_proxy.address, token_impl.abi)
-
-    votelock_impl = VoteLockerCurve.deploy({"from": accounts[0]})
-    votelock_proxy = Proxy.deploy(votelock_impl.address, votelock_impl.initialize.encode_input(token), {"from": accounts[0]})
-    votelock = Contract.from_abi("VoteLockerCurve", votelock_proxy.address, token_impl.abi)
+    token = run("deploy_token")
+    votelock = run("deploy_votelock", "main", (token.address,))
 
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
         [accounts[0]], [accounts[0]], {"from": accounts[0]}
     )
+
     governance = Governance.deploy(votelock, timelock_controller, {"from": accounts[0]})
+
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)
