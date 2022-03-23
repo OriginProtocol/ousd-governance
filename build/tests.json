@@ -1,0 +1,269 @@
+{
+  "contracts": {
+    "ERC1967Proxy": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "Governance": "371c01ddd051fa0374c409a1fd6d3b64403cd0e3",
+    "NonUUPSToken": "f459b7cceb6fd26bb0dece13443cc5db7030a606",
+    "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/AddressUpgradeable": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/ERC20Upgradeable": "f7c016bd65eb06d60c7c41b09feaa71ccf8c416b",
+    "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/StorageSlotUpgradeable": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/Address": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/Counters": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/ECDSA": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/ERC20": "15aeefd481ce94e0891603de0eb35048b803d199",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/Math": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/SafeCast": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/SafeERC20": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/Strings": "1ce946f6a4eaa185320328620ccf999b9e86db7c",
+    "OpenZeppelin/openzeppelin-contracts@4.5.0/TimelockController": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "OriginDollarGovernance": "de52961f564ef8ba446fb431282b552646b0400c",
+    "TestToken": "12de4f0e248336a5e321648660dbf66242b225ad",
+    "Timelock": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "VoteLockerCurve": "18d2543958cafd6bfc49e0ba6c465b275e1af387"
+  },
+  "tests": {
+    "tests/governance/test_initial_state.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": ".......",
+      "sha1": "d6abe561e90ef755c641ea1fd8c91691d52cb927",
+      "txhash": []
+    },
+    "tests/governance/test_vote.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": "......",
+      "sha1": "97616187a221bc734bd8bbe36c050d300d58f1a9",
+      "txhash": []
+    },
+    "tests/test_token.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": "...........",
+      "sha1": "96601915e27d18a837cffb25949f4d1225e60cea",
+      "txhash": [
+        "41c7ae29c52a57e5bba432e0fa1c48ee3d2f261e",
+        "90c210042072b5f13ec553f07ac66bba84e2da07",
+        "c402f4d64f6f1fe3f2b423fa7fc693cd349a3b5a",
+        "f2b05970d8c1a277418d2ba7fcbe1638c5904374"
+      ]
+    },
+    "tests/vote_locker/test_initial_state.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": ".........",
+      "sha1": "af4a6d6d84d9f9aa74706536cc4e4e252d55ac68",
+      "txhash": []
+    },
+    "tests/vote_locker/test_lockup_extensions.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": "....",
+      "sha1": "5d5f7e2451aa2b645700b6c8148ebb6335212ab8",
+      "txhash": [
+        "4c4157773047003f2cd5da68d2c5c1b140ffb01b",
+        "e5faab8553fe359d3deaa8ac45a4be5815615fb2"
+      ]
+    },
+    "tests/vote_locker/test_lockup_restrictions.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": ".",
+      "sha1": "068585d139bebf87e1b55a43af470be742675202",
+      "txhash": [
+        "ef16f12171c7fd0fcbd80d9042c2c9e944187cea"
+      ]
+    },
+    "tests/vote_locker/test_vote_power.py": {
+      "coverage": false,
+      "isolated": false,
+      "results": ".",
+      "sha1": "791f4534204a52e1920d6afc98b32f5489d7df2c",
+      "txhash": []
+    }
+  },
+  "tx": {
+    "41c7ae29c52a57e5bba432e0fa1c48ee3d2f261e": {
+      "ERC1967Proxy": {
+        "1": [
+          [
+            4
+          ],
+          [],
+          []
+        ],
+        "2": [
+          [
+            1,
+            2
+          ],
+          [],
+          []
+        ],
+        "6": [
+          [
+            3
+          ],
+          [],
+          []
+        ]
+      }
+    },
+    "4c4157773047003f2cd5da68d2c5c1b140ffb01b": {
+      "VoteLockerCurve": {
+        "21": [
+          [
+            40,
+            41,
+            42,
+            97
+          ],
+          [
+            138,
+            139
+          ],
+          [
+            137
+          ]
+        ]
+      }
+    },
+    "90c210042072b5f13ec553f07ac66bba84e2da07": {
+      "ERC1967Proxy": {
+        "1": [
+          [
+            4
+          ],
+          [],
+          []
+        ],
+        "2": [
+          [
+            1,
+            2
+          ],
+          [],
+          []
+        ],
+        "6": [
+          [
+            3
+          ],
+          [],
+          []
+        ]
+      }
+    },
+    "c402f4d64f6f1fe3f2b423fa7fc693cd349a3b5a": {
+      "ERC1967Proxy": {
+        "1": [
+          [
+            4
+          ],
+          [],
+          []
+        ],
+        "2": [
+          [
+            1,
+            2
+          ],
+          [],
+          []
+        ],
+        "6": [
+          [
+            3
+          ],
+          [],
+          []
+        ]
+      },
+      "NonUUPSToken": {
+        "18": [
+          [],
+          [],
+          []
+        ]
+      }
+    },
+    "e5faab8553fe359d3deaa8ac45a4be5815615fb2": {
+      "VoteLockerCurve": {
+        "19": [
+          [
+            69,
+            94
+          ],
+          [
+            167
+          ],
+          [
+            168
+          ]
+        ],
+        "21": [
+          [
+            40,
+            41,
+            43,
+            44,
+            97
+          ],
+          [
+            138,
+            141
+          ],
+          [
+            137,
+            139,
+            140
+          ]
+        ]
+      }
+    },
+    "ef16f12171c7fd0fcbd80d9042c2c9e944187cea": {
+      "VoteLockerCurve": {
+        "21": [
+          [
+            40,
+            41,
+            43,
+            97
+          ],
+          [
+            140
+          ],
+          [
+            137,
+            138
+          ]
+        ]
+      }
+    },
+    "f2b05970d8c1a277418d2ba7fcbe1638c5904374": {
+      "ERC1967Proxy": {
+        "1": [
+          [
+            4
+          ],
+          [],
+          []
+        ],
+        "2": [
+          [
+            1,
+            2
+          ],
+          [],
+          []
+        ],
+        "6": [
+          [
+            3
+          ],
+          [],
+          []
+        ]
+      }
+    }
+  }
+}
