@@ -1,0 +1,6 @@
+[default]
+src = 'contracts'
+remappings = [
+  "OpenZeppelin/openzeppelin-contracts@4.5.0/=./lib/openzeppelin-contracts",
+  "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/=./lib/openzeppelin-contracts-upgradeable"
+]

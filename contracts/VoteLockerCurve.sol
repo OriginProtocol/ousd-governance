@@ -11,14 +11,17 @@
 //   - https://github.com/curvefi/curve-dao-contracts/blob/master/contracts/VotingEscrow.vy
 //   - https://github.com/mstable/mStable-contracts/blob/master/contracts/governance/IncentivisedVotingLockup.sol
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/OwnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract VoteLockerCurve {
+contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     using SafeERC20 for ERC20;
 
     ///@notice Emitted when a lockup is created
@@ -45,30 +48,31 @@ contract VoteLockerCurve {
     string private _symbol;
     uint8 private _decimals;
 
+    ///@notice Definition of a week
     uint256 private constant WEEK = 7 days;
-    /// @notice Maximum lock time
+    ///@notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
-    /// @notice Vote boost if locked for maximum duration
+    ///@notice Vote boost if locked for maximum duration
     uint256 public constant MAX_VOTE_MULTIPLE = 4;
 
-    /// @notice Checkpoints for each user
+    ///@notice Checkpoints for each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
     mapping(address => uint256) public userEpoch;
 
-    /// @notice Global checkpoints
+    ///@notice Global checkpoints
     Checkpoint[] private _globalCheckpoints;
     uint256 public globalEpoch;
 
-    /// @notice Lockup mapping for each user
+    ///@notice Lockup mapping for each user
     mapping(address => Lockup) public lockups;
 
-    /// @notice
+    ///@notice
     mapping(uint256 => int128) public slopeChanges;
 
-    /// @notice Delegation mapping
+    ///@notice Delegation mapping
     mapping(address => address) private _delegations;
 
-    /// @notice Token that is locked up in return for vote escrowed token
+    ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
 
     struct Checkpoint {
@@ -83,15 +87,25 @@ contract VoteLockerCurve {
         uint256 end;
     }
 
-    constructor(address _stakingToken) {
+    ///@custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
+
+    function initialize(address _stakingToken) public initializer {
+        __Ownable_init();
+        __UUPSUpgradeable_init();
+
         stakingToken = ERC20(_stakingToken);
+
+        // Derive the name and symbol from the staking token
         _name = string(
             bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
         );
         _symbol = string(
             bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
         );
+        // Use the same decimals as the staking token
         _decimals = stakingToken.decimals();
+
         // Push an initial global checkpoint
         _globalCheckpoints.push(
             Checkpoint({
@@ -792,4 +806,10 @@ contract VoteLockerCurve {
     function max(int128 _a, int128 _b) internal pure returns (int128) {
         return _a >= _b ? _a : _b;
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 }

@@ -1,6 +1,5 @@
 import brownie
 from brownie import *
-from pathlib import Path
 from .fixtures import token
 
 def test_name(token): assert token.name() == "Origin Dollar Governance"

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../GovernanceToken.sol";
+import "../VoteLockerCurve.sol";
 
-contract TestToken is OriginDollarGovernance {
+contract TestVoteLocker is VoteLockerCurve {
     function proof() public {
       revert("Upgraded");
     }

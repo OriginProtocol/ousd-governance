@@ -5,14 +5,11 @@ from pathlib import Path
 @pytest.fixture
 def token():
     accounts.default = accounts[0]
-    token_impl = OriginDollarGovernance.deploy({"from": accounts[0]})
-    token_proxy = ERC1967Proxy.deploy(token_impl.address, token_impl.initialize.encode_input(), {"from": accounts[0]})
-    token = Contract.from_abi("OriginDollarGovernance", token_proxy.address, token_impl.abi)
-    return token
+    return run("deploy_token")
 
 @pytest.fixture
 def vote_locker(token):
-    return accounts[0].deploy(VoteLockerCurve, token)
+    return run("deploy_vote_locker", "main", (token.address,))
 
 @pytest.fixture
 def timelock_controller():
