@@ -3,15 +3,17 @@ from brownie import *
 
 
 def main(output_file=None):
+    # accounts.default = accounts.load("rinkeby_deployer")
+
     token = run("deploy_token")
-    votelock = run("deploy_votelock", "main", (token.address,))
+    votelock = run("deploy_vote_locker", "main", (token.address,))
 
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
-        [accounts[0]], [accounts[0]], {"from": accounts[0]}
+        [accounts[0]], [accounts[0]]
     )
 
-    governance = Governance.deploy(votelock, timelock_controller, {"from": accounts[0]})
+    governance = Governance.deploy(votelock, timelock_controller)
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)

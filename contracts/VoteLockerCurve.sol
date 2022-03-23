@@ -52,8 +52,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     uint256 private constant WEEK = 7 days;
     ///@notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
-    ///@notice Vote boost if locked for maximum duration
-    uint256 public constant MAX_VOTE_MULTIPLE = 4;
 
     ///@notice Checkpoints for each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
@@ -69,9 +67,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ///@notice
     mapping(uint256 => int128) public slopeChanges;
 
-    ///@notice Delegation mapping
-    mapping(address => address) private _delegations;
-
     ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
 
@@ -82,6 +77,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 blk;
     }
 
+    ///@notice Stores token lockup details
     struct Lockup {
         int128 amount;
         uint256 end;
@@ -119,6 +115,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Returns the name of the token.
+     * @return string memory Token name
      */
     function name() public view virtual returns (string memory) {
         return _name;
@@ -127,6 +124,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
+     * @return string memory Token symbol
      */
     function symbol() public view virtual returns (string memory) {
         return _symbol;
@@ -140,6 +138,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * Tokens usually opt for a value of 18, imitating the relationship between
      * Ether and Wei. This is the value {ERC20} uses, unless this function is
      * overridden;
+     * @return uint8 Token decimals
      */
     function decimals() public view virtual returns (uint8) {
         return _decimals;
@@ -176,6 +175,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Get the `pos`-th checkpoint for `_account`.
+     * @return Checkpoint memory
      */
     function checkpoints(address _account, uint32 _pos)
         public
@@ -188,18 +188,20 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Get number of checkpoints for `_account`.
+     * @return uint32
      */
     function numCheckpoints(address _account)
         public
         view
         virtual
-        returns (uint32)
+        returns (uint256)
     {
-        return SafeCast.toUint32(_userCheckpoints[_account].length);
+        return _userCheckpoints[_account].length;
     }
 
     /**
      * @dev Get last checkpoint for `_account`.
+     * @return Checkpoint memory
      */
     function getLastCheckpoint(address _account)
         public
@@ -212,6 +214,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Get the `pos`-th global checkpoint.
+     * @return Checkpoint memory
      */
     function globalCheckpoints(uint32 pos)
         public
@@ -223,6 +226,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Get number of global checkpoints.
+     * @return uint256
      */
     function numGlobalCheckpoints() public view returns (uint256) {
         return _globalCheckpoints.length;
@@ -230,6 +234,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /**
      * @dev Get the last global checkpoint.
+     * @return Checkpoint memory
      */
     function getLastGlobalCheckpoint() public view returns (Checkpoint memory) {
         return _globalCheckpoints[_globalCheckpoints.length - 1];
@@ -255,15 +260,18 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Get the address `_account` is currently delegating to.
      */
-    function delegates(address _account) public view virtual returns (address) {
-        return _delegations[_account];
-    }
+    function delegates(address _account)
+        public
+        view
+        virtual
+        returns (address)
+    {}
 
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
-        // TODO
+        // TODO a future upgrade may support delegation
         revert("Delegation is not supported");
     }
 
@@ -282,7 +290,9 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Deposits staking token and mints new tokens according to the MAX_VOTE_MULTIPLE and _end parameters.
+     * @dev Deposits staking token and mints new veTokens according to the lockup length
+     * @param _amount Amount of staking token to deposit
+     * @param _end Lockup end time
      */
     function lockup(uint256 _amount, uint256 _end) public virtual {
         // end is rounded down to week
@@ -351,7 +361,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Withdraw tokens from an expired lockup.
+     * @dev Withdraw all tokens from an expired lockup.
      */
     function withdraw() public {
         Lockup memory oldLockup = Lockup({
@@ -385,7 +395,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Public function to trigger global checkpoint
+     * @dev Public function to trigger global checkpoint.
      */
     function checkpoint() external {
         _writeGlobalCheckpoint(0, 0);
@@ -401,7 +411,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         address _account,
         Lockup memory _oldLockup,
         Lockup memory _newLockup
-    ) private returns (uint256 oldWeight, uint256 newWeight) {
+    ) private {
         Checkpoint memory oldCheckpoint;
         Checkpoint memory newCheckpoint;
 
@@ -481,8 +491,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      */
     function _writeGlobalCheckpoint(int128 userSlopeDelta, int128 userBiasDelta)
         private
-        returns (Checkpoint memory lastCheckpoint)
     {
+        Checkpoint memory lastCheckpoint;
         if (globalEpoch > 0) {
             lastCheckpoint = _globalCheckpoints[globalEpoch];
         } else {
@@ -563,6 +573,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
+     * @dev Binary search to find epoch closest to block.
      * @param _block Find the most recent point history before this block
      * @param _maxEpoch Maximum epoch
      * @return uint256 The most recent epoch before the block
@@ -736,7 +747,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Calculates total supply of votingWeight at a given time _t
      * @param _checkpoint Most recent point before time _t
      * @param _time Time at which to calculate supply
-     * @return totalSupply at given point in time
+     * @return totalSupply at given time
      */
     function _supplyAt(Checkpoint memory _checkpoint, uint256 _time)
         internal
@@ -781,7 +792,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Floors a timestamp to the nearest weekly increment
      * @param _t Timestamp to floor
-     * @return uint256 Timestamp floored to nearest weekly increment
+     * @return Timestamp floored to nearest weekly increment
      */
     function _floorToWeek(uint256 _t) internal pure returns (uint256) {
         return (_t / WEEK) * WEEK;
