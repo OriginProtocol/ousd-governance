@@ -5,9 +5,7 @@ import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
-
-export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
-export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
+import { INFURA_ID, mainnetNetworkUrl } from "constants/index";
 
 const providerOptions = {
   walletconnect: {

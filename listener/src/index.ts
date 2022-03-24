@@ -4,14 +4,20 @@ import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "ousd-governance-client/lib/prisma";
-import GovernanceContracts from "ousd-governance-client/networks/governance.localhost.json";
+import {
+  CHAIN_CONTRACTS,
+  RPC_URLS,
+} from "ousd-governance-client/constants/index";
+
+const networkId = process.env.NETWORK_ID || 31337;
+const GovernanceContracts = CHAIN_CONTRACTS[networkId];
 
 const logger = winston.createLogger({
   format: winston.format.simple(),
   transports: [new winston.transports.Console()],
 });
 
-const WEB3_PROVIDER = process.env.WEB3_PROVIDER || "http://localhost:8545";
+const WEB3_PROVIDER = RPC_URLS[networkId];
 
 export const governanceTokenContract = new ethers.Contract(
   GovernanceContracts.VoteLockerCurve.address,
