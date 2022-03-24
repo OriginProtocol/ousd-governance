@@ -1,3 +1,3 @@
-release: pushd client && yarn install && yarn build && popd && pushd listener && yarn install && popd
+release: cd client && yarn install && yarn build && cd ../listener && yarn install
 listener: pushd listener && yarn start
 web: pushd client && yarn start
