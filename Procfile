@@ -1,3 +1,3 @@
-release: cd client && yarn install && yarn build && cd ../listener && yarn install
-listener: pushd listener && yarn start
-web: pushd client && yarn start
+release: cd client && npm install && npm run build && cd ../listener && npm install
+listener: cd listener && npm run start
+web: cd client && npm run start
