@@ -1,9 +1,15 @@
+import winston from "winston";
 import Web3 from "web3";
 import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "ousd-governance-client/lib/prisma";
 import GovernanceContracts from "ousd-governance-client/networks/governance.localhost.json";
+
+const logger = winston.createLogger({
+  format: winston.format.simple(),
+  transports: [new winston.transports.Console()],
+});
 
 const WEB3_PROVIDER = process.env.WEB3_PROVIDER || "http://localhost:8545";
 
@@ -50,9 +56,9 @@ const handleEvents = async (blockNumber, events, done) => {
             proposalId: event.values.proposalId,
           },
         });
-        console.log("Inserted new proposal");
+        logger.info("Inserted new proposal");
       } catch (e) {
-        console.warn("Probable duplicate proposal");
+        logger.warn("Probable duplicate proposal");
       }
     } else {
       try {
@@ -65,9 +71,9 @@ const handleEvents = async (blockNumber, events, done) => {
             firstSeenBlock: event.blockNumber,
           },
         });
-        console.log("Inserted new voter");
+        logger.info("Inserted new voter");
       } catch (e) {
-        console.warn("Probable duplicate voter");
+        logger.warn("Probable duplicate voter");
       }
     }
   }
@@ -79,20 +85,20 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 });
 
 ethereumEvents.on("error", (err) => {
-  console.log(err);
+  logger.error(err);
 });
 
 // TODO start this at contract deployment or last checked
 ethereumEvents.start(1);
 
-console.log("Listening for Ethereum events");
+logger.info("Listening for Ethereum events");
 
 // Job to update votes in the voters table
 const rule = new schedule.RecurrenceRule();
 rule.hour = 0;
 
 schedule.scheduleJob(rule, async function () {
-  console.log("Updating vote power");
+  logger.info("Updating vote power");
   const voter = await prisma.voter.findMany();
   for (const v of voter) {
     const votes = await governanceTokenContract.balanceOf(v.address);
@@ -105,7 +111,7 @@ schedule.scheduleJob(rule, async function () {
       });
     }
   }
-  console.log("Vote power updated");
+  logger.info("Vote power updated");
 });
 
 process.on("SIGINT", function () {
