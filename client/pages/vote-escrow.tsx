@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
-import { governanceTokenContract, voteLockerContract } from "constants/index";
 
 const MAX_WEEKS = 52 * 4;
 
 export default function VoteEscrow({}) {
-  const { web3Provider, address } = useStore();
+  const { web3Provider, address, contracts } = useStore();
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -20,11 +19,12 @@ export default function VoteEscrow({}) {
   const [existingEndWeeks, setExistingEndWeeks] = useState(0);
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
+  const { OriginDollarGovernance, VoteLockerCurve } = contracts;
 
   // Load users governance token balance
   useEffect(() => {
     const loadBalance = async () => {
-      const balance = await governanceTokenContract.balanceOf(address);
+      const balance = await OriginDollarGovernance.balanceOf(address);
       setBalance(balance);
     };
     if (web3Provider && address) {
@@ -35,9 +35,9 @@ export default function VoteEscrow({}) {
   // Load the amount of governance token approved by the user for transfer by vl contract
   useEffect(() => {
     const loadApproval = async () => {
-      const approval = await governanceTokenContract.allowance(
+      const approval = await OriginDollarGovernance.allowance(
         address,
-        voteLockerContract.address
+        VoteLockerCurve.address
       );
       setApproval(approval);
     };
@@ -49,7 +49,7 @@ export default function VoteEscrow({}) {
   // Load users existing lockup in case this is an extension
   useEffect(() => {
     const loadExistingLockup = async () => {
-      const lockup = await voteLockerContract.getLockup(address);
+      const lockup = await VoteLockerCurve.getLockup(address);
       setExistingAmount(lockup[0]);
       setExistingEnd(lockup[1]);
     };
@@ -64,7 +64,7 @@ export default function VoteEscrow({}) {
       const now = (await web3Provider.getBlock()).timestamp;
       setExistingEndWeeks(end.sub(now).div(604800).toNumber());
     };
-    if (web3Provider && address && existingEnd) {
+    if (web3Provider && address && existingEnd.gt(0)) {
       lockupEndToWeeks(existingEnd);
     }
   }, [address, existingEnd, web3Provider]);
@@ -94,9 +94,9 @@ export default function VoteEscrow({}) {
   };
 
   const handleApproval = async () => {
-    await governanceTokenContract
-      .connect(await web3Provider.getSigner())
-      .approve(voteLockerContract.address, ethers.utils.parseUnits(amount));
+    await OriginDollarGovernance.connect(
+      await web3Provider.getSigner()
+    ).approve(VoteLockerCurve.address, ethers.utils.parseUnits(amount));
   };
 
   const handleLockup = async () => {
@@ -104,9 +104,10 @@ export default function VoteEscrow({}) {
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
       const end = now + weeks * 7 * 86400;
-      await voteLockerContract
-        .connect(await web3Provider.getSigner())
-        .lockup(ethers.utils.parseUnits(amount), end);
+      await VoteLockerCurve.connect(await web3Provider.getSigner()).lockup(
+        ethers.utils.parseUnits(amount),
+        end
+      );
     }
   };
 

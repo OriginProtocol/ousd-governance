@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { contracts } from "constants/index";
-import { governanceContract } from "constants/index";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -16,7 +15,7 @@ export const truncateEthAddress = (address: string) => {
   return `${match[1]}…${match[2]}`;
 };
 
-export const loadProposals = async (ids: Array<String>) => {
+export const loadProposals = async (governanceContract, ids: Array<String>) => {
   const proposalGets = [];
   const proposalStateGets = [];
   for (let id of ids) {

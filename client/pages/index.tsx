@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
-import { governanceTokenAddress, voteLockerContract } from "constants/index";
 import { loadProposals } from "utils/index";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { Loading } from "components/Loading";
@@ -10,6 +9,7 @@ import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
 import prisma from "lib/prisma";
+import { useStore } from "utils/store";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -43,15 +43,12 @@ export async function getServerSideProps({ res }: { res: any }) {
     createdAt: p.createdAt.toString(),
   }));
 
-  const totalSupply = (await voteLockerContract.totalSupply()).toString();
-
   return {
     props: {
       voters,
       proposals,
       proposalCount,
       holderCount,
-      totalSupply,
     },
   };
 }
@@ -61,7 +58,6 @@ const Home: NextPage = ({
   proposals,
   proposalCount,
   holderCount,
-  totalSupply,
 }: {
   voters: Array<{ address: string; votes: string }>;
   proposals: Array<{
@@ -72,17 +68,21 @@ const Home: NextPage = ({
   }>;
   proposalCount: number;
   holderCount: number;
-  totalSupply: number;
 }) => {
+  const { contracts } = useStore();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
   });
+  const [totalSupply, setTotalSupply] = useState<string>("0");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const data = await loadProposals(proposals.map((p) => p.proposalId));
+      const data = await loadProposals(
+        contracts.Governance,
+        proposals.map((p) => p.proposalId)
+      );
       // Augment with human readable ID from the database
       const dataWithDisplayId = {
         ...data,
@@ -97,7 +97,17 @@ const Home: NextPage = ({
       setLoading(false);
     };
     load();
-  }, [proposals, setProposalData]);
+  }, [proposals, setProposalData, contracts.Governance]);
+
+  useEffect(() => {
+    const loadTotalSupply = async () => {
+      const totalSupply = (
+        await contracts.VoteLockerCurve.totalSupply()
+      ).toString();
+      setTotalSupply(totalSupply);
+    };
+    loadTotalSupply();
+  }, []);
 
   return (
     <div>

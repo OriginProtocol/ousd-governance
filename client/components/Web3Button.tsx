@@ -5,7 +5,9 @@ import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
-import { INFURA_ID, mainnetNetworkUrl } from "../constants";
+
+export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
+export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
 
 const providerOptions = {
   walletconnect: {
@@ -53,8 +55,6 @@ export const Web3Button = () => {
   const resetWeb3State = useStore((state) => state.reset);
 
   const connect = useCallback(async function () {
-    // This is the initial `provider` that is returned when
-    // using web3Modal to connect. Can be MetaMask or WalletConnect.
     let provider;
     try {
       provider = await web3Modal.connect();
@@ -63,16 +63,12 @@ export const Web3Button = () => {
       return;
     }
 
-    // We plug the initial `provider` into ethers.js and get back
-    // a Web3Provider. This will add on methods from ethers.js and
-    // event listeners such as `.on()` will be different.
     const web3Provider = new providers.Web3Provider(provider);
-
     const signer = web3Provider.getSigner();
     const address = await signer.getAddress();
-
     const network = await web3Provider.getNetwork();
 
+    // Add contracts
     useStore.setState({
       provider,
       web3Provider,

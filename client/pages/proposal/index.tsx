@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { loadProposals } from "utils/index";
+import { useStore } from "utils/store";
 import type { ProposalDataType } from "pages/index";
 import { Loading } from "components/Loading";
 import { ProposalTable } from "components/proposal/ProposalTable";
@@ -31,6 +32,7 @@ export async function getServerSideProps({ res }: { res: any }) {
 }
 
 const Proposal: NextPage = ({ proposalCount, proposals }) => {
+  const { contracts } = useStore();
   const router = useRouter();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
@@ -40,7 +42,10 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
 
   useEffect(() => {
     const load = async () => {
-      const data = await loadProposals(proposals.map((p) => p.proposalId));
+      const data = await loadProposals(
+        contracts.Governance,
+        proposals.map((p) => p.proposalId)
+      );
       // Augment with human readable ID from the database
       const dataWithDisplayId = {
         ...data,
@@ -55,7 +60,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
       setLoading(false);
     };
     load();
-  }, [proposals, setProposalData]);
+  }, [proposals, setProposalData, contracts.Governance]);
 
   return (
     <>

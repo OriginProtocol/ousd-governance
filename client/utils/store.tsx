@@ -5,6 +5,7 @@ type Web3DataType = {
   web3Provider?: any;
   address?: string;
   chainId?: number;
+  contracts: Array<any>;
 };
 
 type StoreType = Web3DataType & {
@@ -16,6 +17,7 @@ const defaultState: Web3DataType = {
   web3Provider: null,
   address: undefined,
   chainId: undefined,
+  contracts: [],
 };
 
 export const useStore = create<StoreType>((set) => ({
