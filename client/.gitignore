@@ -35,6 +35,3 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-
-# build artifacts
-/networks/governance.localhost.json
