@@ -9,8 +9,9 @@ export default function Layout({ children }: JSX.ElementChildrenAttribute) {
         <div className="flex-none px-2 mx-2">
           <Link href="/" passHref>
             <Image
-              className="w-8 h-8"
-              src="https://ousd.com/images/ousd-coin.svg"
+              width="32"
+              height="32"
+              src="/ousd-coin.svg"
               alt="OUSD Governance"
             />
           </Link>
