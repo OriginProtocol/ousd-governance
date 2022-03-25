@@ -1,7 +1,6 @@
 node_modules/
 cache/
 __pycache__
-client/networks/governance.localhost.json
 .DS_Store
 lib/openzeppelin-contracts
 build/contracts
