@@ -9,7 +9,7 @@ python3 -m pip install --user pipx
 python3 -m pipx ensurepath
 ```
 
-*You may need to restart your terminal after installing `pipx`.*
+_You may need to restart your terminal after installing `pipx`._
 
 ```bash
 pipx install eth-brownie
@@ -35,7 +35,7 @@ cd contracts
 brownie test --network hardhat
 ```
 
-*If this command reverts with an error it may be an incompatability with python 3.10. Try python 3.9 instead ([pyenv](https://github.com/pyenv/pyenv) is a good solution for managing multiple python versions).*
+_If this command reverts with an error it may be an incompatability with python 3.10. Try python 3.9 instead ([pyenv](https://github.com/pyenv/pyenv) is a good solution for managing multiple python versions)._
 
 ## Running a local node
 
@@ -49,7 +49,7 @@ In another terminal:
 brownie run deploy main client/networks/governance.localhost.json
 ```
 
-## Running the DApp
+## Running the DApp and listener
 
 First, install the dependencies:
 
@@ -58,9 +58,9 @@ cd client
 yarn install
 ```
 
-Setup postgresql locally and create a database. Set `DATABASE_URL` in your environment. 
+Setup postgresql locally and create a database. Set `DATABASE_URL` in your environment.
 
-*A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`.*
+_A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`._
 
 Push the database and generate a client:
 
@@ -70,7 +70,7 @@ npx prisma db push
 
 Set the `WEB3_PROVIDER` variable in your environment.
 
-*The hardhat RPC default is `http://127.0.0.1:8545`.*
+_The hardhat RPC default is `http://127.0.0.1:8545`._
 
 Then, run the development server:
 
@@ -79,3 +79,5 @@ npm run dev
 # or
 yarn dev
 ```
+
+This will start both the NextJS app and a listener script monitoring your local blockchain for changes.

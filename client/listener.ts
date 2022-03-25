@@ -3,11 +3,8 @@ import Web3 from "web3";
 import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
-import prisma, { Prisma } from "ousd-governance-client/lib/prisma";
-import {
-  CHAIN_CONTRACTS,
-  RPC_URLS,
-} from "ousd-governance-client/constants/index";
+import prisma, { Prisma } from "lib/prisma";
+import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 
 const networkId = process.env.NETWORK_ID || 31337;
 const GovernanceContracts = CHAIN_CONTRACTS[networkId];
