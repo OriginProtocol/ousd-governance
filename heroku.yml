@@ -3,4 +3,7 @@ build:
     web: Dockerfile
 run:
   web: yarn start
-  listener: node .next/server/listener.js
+  listener:
+    command:
+      - node .next/server/listener.js
+    image: web
