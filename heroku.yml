@@ -5,5 +5,5 @@ run:
   web: yarn start
   listener:
     command:
-      - node .next/server/listener.js
+      - yarn start:listener
     image: web
