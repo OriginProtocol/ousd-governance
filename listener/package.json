@@ -5,6 +5,8 @@
   "license": "MIT",
   "scripts": {
     "start": "ts-node ./src/index.ts",
+    "build": "tsc",
+    "start:prod": "node build/index.js",
     "prettier:check": "prettier --check 'src/*.{js,jsx,ts,tsx}'",
     "prettier:fix": "prettier --write 'src/*.{js,jsx,ts,tsx}'"
   },
