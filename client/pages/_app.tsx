@@ -23,23 +23,29 @@ export default function App({ Component, pageProps }) {
         governanceContractDefinitions
       ).map(([name, definition]) => {
         return {
-          [name]: new ethers.Contract(
-            definition.address,
-            definition.abi,
-            provider
-          ),
+          [name]: {
+            ...new ethers.Contract(
+              definition.address,
+              definition.abi,
+              provider
+            ),
+            abi: definition.abi,
+          },
         };
       });
 
       const ousdContracts = Object.entries(OUSDContracts.contracts).map(
         ([name, definition]) => {
           return {
-            [name]: new ethers.Contract(
-              definition.address,
-              definition.abi,
-              // This has to be mainnet, as we are using mainnet OUSD contracts, even in testing
-              mainnetProvider
-            ),
+            [name]: {
+              ...new ethers.Contract(
+                definition.address,
+                definition.abi,
+                // This has to be mainnet, as we are using mainnet OUSD contracts, even in testing
+                mainnetProvider
+              ),
+              abi: definition.abi,
+            },
           };
         }
       );

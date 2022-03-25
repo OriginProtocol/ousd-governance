@@ -1,5 +1,5 @@
 export const ProposalAddActionButton = ({
-  className = "btn btn-primary",
+  className = "btn btn-primary btn-sm",
   onClick,
 }) => {
   return (

@@ -5,47 +5,56 @@ import { useStore } from "utils/store";
 export const Reallocation = () => {
   const { contracts } = useStore();
   const {
-    AaveStrategyContract,
-    CompoundStrategyContract,
-    ConvexStrategyContract,
+    AaveStrategy,
+    AaveStrategyProxy,
+    CompoundStrategy,
+    CompoundStrategyProxy,
+    ConvexStrategy,
+    ConvexStrategyProxy,
   } = contracts;
   const [aaveStrategyBalances, setAaveStrategyBalances] = useState([]);
   const [compoundStrategyBalances, setCompoundStrategyBalances] = useState([]);
   const [convexStrategyBalances, setConvexStrategyBalances] = useState([]);
 
-  const strategies = useMemo(() => {
-    [
+  const strategies = useMemo(
+    () => [
       {
         name: "Aave",
-        contract: AaveStrategyContract,
+        contract: new ethers.Contract(
+          AaveStrategyProxy.address,
+          AaveStrategy.abi,
+          AaveStrategy.provider
+        ),
         balances: aaveStrategyBalances,
         balanceGetter: () => aaveStrategyBalances,
         balanceSetter: setAaveStrategyBalances,
       },
       {
         name: "Compound",
-        contract: CompoundStrategyContract,
+        contract: new ethers.Contract(
+          CompoundStrategyProxy.address,
+          CompoundStrategy.abi,
+          CompoundStrategy.provider
+        ),
         balanceGetter: () => compoundStrategyBalances,
         balanceSetter: setCompoundStrategyBalances,
       },
       {
         name: "Convex",
-        contract: ConvexStrategyContract,
+        contract: new ethers.Contract(
+          ConvexStrategyProxy.address,
+          ConvexStrategy.abi,
+          ConvexStrategy.provider
+        ),
         balanceGetter: () => convexStrategyBalances,
         balanceSetter: setConvexStrategyBalances,
       },
-    ];
-  }, [
-    AaveStrategyContract,
-    CompoundStrategyContract,
-    ConvexStrategyContract,
-    aaveStrategyBalances,
-    compoundStrategyBalances,
-    convexStrategyBalances,
-  ]);
+    ],
+    []
+  );
 
-  const assets = useMemo(() => {
-    [
+  const assets = useMemo(
+    () => [
       {
         symbol: "DAI",
         decimals: 18,
@@ -57,12 +66,13 @@ export const Reallocation = () => {
         address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       },
       {
-        symbol: "DAI",
+        symbol: "USDT",
         decimals: 6,
         address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
       },
-    ];
-  }, []);
+    ],
+    []
+  );
 
   useEffect(() => {
     const loadStrategyBalances = async () => {

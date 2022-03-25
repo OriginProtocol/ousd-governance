@@ -58,7 +58,7 @@ export const typesFromSignature = (signature: string): string[] => {
 
 export const addressContractName = (contracts, address: string): string => {
   return (
-    contracts.find((c) => c.address === address)?.name ||
+    Object.values(contracts).find((c) => c.address === address)?.name ||
     truncateEthAddress(address)
   );
 };
