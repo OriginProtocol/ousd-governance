@@ -17,6 +17,14 @@ export const AddActionFunctionForm = ({
   onPrevious,
   onContractChange,
   hasImplementationAbi,
+}: {
+  abi: Array<any>;
+  address: string;
+  onSubmit: Function;
+  onModalClose: Function;
+  onPrevious: Function;
+  onContractChange: Function;
+  hasImplementationAbi: boolean;
 }) => {
   const { contracts } = useStore();
   const [signature, setSignature] = useState(null);
@@ -29,13 +37,15 @@ export const AddActionFunctionForm = ({
 
   const contractFunctions = abi
     .filter(
-      ({ type, stateMutability }) =>
+      ({ type, stateMutability }: { type: string; stateMutability: string }) =>
         type === "function" && stateMutability.includes("payable")
     )
     .map(({ name, inputs }) => ({
       name,
       inputs,
-      signature: `${name}(${inputs.map(({ type }) => type).join(",")})`,
+      signature: `${name}(${inputs
+        .map(({ type }: { type: string }) => type)
+        .join(",")})`,
     }));
 
   const inputsForFunction = contractFunctions.find(
@@ -102,13 +112,15 @@ export const AddActionFunctionForm = ({
 
   useEffect(() => {
     if (values.address.length === 42) {
-      const contract = contracts.find((c) => c.address === values.address);
+      const contract = Object.values(contracts).find(
+        (c) => c.address === values.address
+      );
 
       if (contract) {
         onContractChange(contract);
       }
     }
-  }, [values.address, onContractChange, contracts]);
+  }, []);
 
   return (
     <form onSubmit={submitHandler}>
@@ -126,10 +138,10 @@ export const AddActionFunctionForm = ({
             <option value="" disabled={true}>
               Select contract
             </option>
-            {contracts.map(({ name, address: contractAddress }) => {
+            {Object.entries(contracts).map(([name, contract]) => {
               return (
-                <option key={contractAddress} value={contractAddress}>
-                  {name} {truncateEthAddress(contractAddress)}
+                <option key={contract.address} value={contract.address}>
+                  {name} {truncateEthAddress(contract.address)}
                 </option>
               );
             })}

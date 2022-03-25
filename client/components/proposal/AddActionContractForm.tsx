@@ -12,6 +12,14 @@ export const AddActionContractForm = ({
   isProxy,
   hasImplementationAbi,
   implementationAddress,
+}: {
+  onChange: Function;
+  onSubmit: Function;
+  onModalClose: Function;
+  fetchingProxy: boolean;
+  isProxy: boolean;
+  hasImplementationAbi: boolean;
+  implementationAddress: string;
 }) => {
   const { contracts } = useStore();
   const [isCustomContract, setIsCustomContract] = useState(false);
@@ -38,7 +46,9 @@ export const AddActionContractForm = ({
 
   useEffect(() => {
     if (values.address.length === 42) {
-      const contract = contracts.find((c) => c.address === values.address);
+      const contract = Object.values(contracts).find(
+        (c) => c.address === values.address
+      );
 
       if (contract) {
         changeHandler({
@@ -50,9 +60,9 @@ export const AddActionContractForm = ({
         onChange(contract);
       }
     }
-  }, [values.address, changeHandler, onChange, contracts]);
+  }, [values.address]);
 
-  useEffect(reset, [isCustomContract, reset]);
+  useEffect(reset, [isCustomContract]);
 
   return (
     <form onSubmit={submitHandler}>
@@ -109,9 +119,9 @@ export const AddActionContractForm = ({
                 <option value="" disabled={true}>
                   Select contract
                 </option>
-                {contracts.map(({ name, address }) => (
-                  <option key={address} value={address}>
-                    {name} {truncateEthAddress(address)}
+                {Object.entries(contracts).map(([name, contract]) => (
+                  <option key={contract.address} value={contract.address}>
+                    {name} {truncateEthAddress(contract.address)}
                   </option>
                 ))}
               </select>

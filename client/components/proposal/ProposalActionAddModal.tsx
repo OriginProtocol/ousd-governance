@@ -50,26 +50,18 @@ export const ProposalActionAddModal = ({
         </ul>
         {step === 0 && (
           <AddActionContractForm
-            onChange={async (data) => {
-              const { address, abi } = data;
-
+            onChange={async (contract: any) => {
+              const { abi, address } = contract;
               // Check contract selected abi for implementation method
               const implementationFunction = abi.find(
-                ({ type, name }) =>
+                ({ type, name }: { type: string; name: string }) =>
                   type === "function" && name === "implementation"
               );
 
               // If present, call it and get the implementation address
               if (implementationFunction) {
-                const proxyContract = new ethers.Contract(
-                  address,
-                  abi,
-                  new ethers.providers.Web3Provider(mainnetNetworkUrl)
-                );
-
                 setFetchingProxy(true);
-                const implementationAddress =
-                  await proxyContract.implementation();
+                const implementationAddress = await contract.implementation();
                 setFetchingProxy(false);
 
                 if (implementationAddress) {
@@ -77,15 +69,15 @@ export const ProposalActionAddModal = ({
                   setImplementationAddress(implementationAddress);
 
                   // Check that the implementation address exists in our contracts list
-                  const implementationData = contracts.find(
+                  const implementationContract = Object.values(contracts).find(
                     ({ address }) => address === implementationAddress
                   );
 
                   // If present, populate state
-                  if (implementationData) {
+                  if (implementationContract) {
                     setHasImplementationAbi(true);
-                    setAddress(implementationData.address);
-                    setAbi(implementationData.abi);
+                    setAddress(implementationContract.address);
+                    setAbi(implementationContract.abi);
                   } else {
                     setHasImplementationAbi(false);
                     setAddress(address);

@@ -31,7 +31,7 @@ export const ProposalTable = ({ proposalData }) => {
           No proposals have been created
         </h3>
         <div className="mt-6">
-          <Link href="/proposals/new" passHref>
+          <Link href="/proposal/new" passHref>
             <a className="btn btn-primary btn-sm">
               <svg
                 className="-ml-1 mr-2 h-5 w-5"
