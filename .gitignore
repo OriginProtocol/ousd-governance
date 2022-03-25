@@ -5,3 +5,5 @@ __pycache__
 lib/openzeppelin-contracts
 build/contracts
 build/tests.json
+listener/build
+client/networks/governance.localhost.json
