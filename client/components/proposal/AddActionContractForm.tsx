@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { isRequired, useForm } from "utils/useForm";
-import { contracts } from "constants/index";
 import { truncateEthAddress } from "utils/index";
 import { Loading } from "../Loading";
+import { useStore } from "utils/store";
 
 export const AddActionContractForm = ({
   onChange,
@@ -13,6 +13,7 @@ export const AddActionContractForm = ({
   hasImplementationAbi,
   implementationAddress,
 }) => {
+  const { contracts } = useStore();
   const [isCustomContract, setIsCustomContract] = useState(false);
   const initialState = {
     address: "",
@@ -49,9 +50,9 @@ export const AddActionContractForm = ({
         onChange(contract);
       }
     }
-  }, [values.address]);
+  }, [values.address, changeHandler, onChange, contracts]);
 
-  useEffect(reset, [isCustomContract]);
+  useEffect(reset, [isCustomContract, reset]);
 
   return (
     <form onSubmit={submitHandler}>

@@ -21,7 +21,7 @@ export const ProposalActionsTable = ({
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-  const { web3Provider } = useStore();
+  const { web3Provider, contracts } = useStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
@@ -65,10 +65,10 @@ export const ProposalActionsTable = ({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {addressContractName(target)}
+                    {addressContractName(contracts, target)}
                   </a>
                 ) : (
-                  <>{addressContractName(target)}</>
+                  <>{addressContractName(contracts, target)}</>
                 )}
               </td>
               <td>

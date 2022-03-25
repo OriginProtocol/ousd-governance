@@ -30,7 +30,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadBalance();
     }
-  }, [address, web3Provider]);
+  }, [address, web3Provider, OriginDollarGovernance]);
 
   // Load the amount of governance token approved by the user for transfer by vl contract
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadApproval();
     }
-  }, [address, web3Provider]);
+  }, [address, web3Provider, OriginDollarGovernance, VoteLockerCurve.address]);
 
   // Load users existing lockup in case this is an extension
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadExistingLockup();
     }
-  }, [address, web3Provider]);
+  }, [address, web3Provider, VoteLockerCurve]);
 
   // Calculate the number of weeks to existing lockup end (if one exists)
   useEffect(() => {

@@ -17,7 +17,7 @@ export const Address = ({ address }: { address: string }) => {
     if (web3Provider) {
       loadEns();
     }
-  }, [web3Provider]);
+  }, [web3Provider, address]);
 
   let explorerPrefix;
   if (web3Provider?.chainId === 1) {
@@ -28,7 +28,11 @@ export const Address = ({ address }: { address: string }) => {
 
   if (explorerPrefix) {
     return (
-      <a href={`${explorerPrefix}address/${address}`} target="_blank">
+      <a
+        href={`${explorerPrefix}address/${address}`}
+        target="_blank"
+        rel="noreferrer"
+      >
         {addressDisplay}
       </a>
     );

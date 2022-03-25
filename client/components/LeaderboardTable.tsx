@@ -13,7 +13,7 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
       </thead>
       <tbody>
         {voters.map((voter, index) => (
-          <tr>
+          <tr key={index}>
             <td>{index + 1}</td>
             <td>
               <Address address={voter.address} />

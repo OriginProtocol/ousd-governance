@@ -3,7 +3,8 @@ import { useState } from "react";
 import { AddActionContractForm } from "components/proposal/AddActionContractForm";
 import { AddActionFunctionForm } from "components/proposal/AddActionFunctionForm";
 import { encodeCalldata } from "utils/index";
-import { contracts, mainnetProvider } from "constants/index";
+import { useStore } from "utils/store";
+import { mainnetNetworkUrl } from "constants/index";
 
 export const ProposalActionAddModal = ({
   modalOpen,
@@ -12,7 +13,9 @@ export const ProposalActionAddModal = ({
 }: {
   modalOpen: boolean;
   onModalClose: Function;
+  onActionAdd: Function;
 }) => {
+  const { contracts } = useStore();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState<string>("");
   const [abi, setAbi] = useState<string>("");
@@ -21,7 +24,8 @@ export const ProposalActionAddModal = ({
   const [isProxy, setIsProxy] = useState<boolean>(false);
   const [implementationAddress, setImplementationAddress] =
     useState<string>("");
-  const [hasImplementationAbi, setHasImplementationAbi] = useState<string>("");
+  const [hasImplementationAbi, setHasImplementationAbi] =
+    useState<boolean>(false);
 
   const reset = () => {
     setStep(0);
@@ -60,7 +64,7 @@ export const ProposalActionAddModal = ({
                 const proxyContract = new ethers.Contract(
                   address,
                   abi,
-                  mainnetProvider
+                  new ethers.providers.Web3Provider(mainnetNetworkUrl)
                 );
 
                 setFetchingProxy(true);

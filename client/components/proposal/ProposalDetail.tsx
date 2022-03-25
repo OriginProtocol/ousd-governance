@@ -6,7 +6,7 @@ import { ProposalParameters } from "components/proposal/ProposalParameters";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
 
-export const ProposalDetail = ({ proposalId }) => {
+export const ProposalDetail = ({ proposalId }: { proposalId: Number }) => {
   const { contracts } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const [proposal, setProposal] = useState(null);
@@ -22,7 +22,7 @@ export const ProposalDetail = ({ proposalId }) => {
     if (proposalId) {
       loadProposal();
     }
-  }, [proposalId]);
+  }, [proposalId, Governance]);
 
   if (proposal === null || proposalActions === null) return <Loading />;
 

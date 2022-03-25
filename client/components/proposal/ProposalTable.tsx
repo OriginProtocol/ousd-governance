@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
+import Link from "next/link";
 
 export const ProposalTable = ({ proposalData }) => {
   const router = useRouter();
@@ -30,22 +31,24 @@ export const ProposalTable = ({ proposalData }) => {
           No proposals have been created
         </h3>
         <div className="mt-6">
-          <a href="/proposal/new" className="btn btn-primary btn-sm">
-            <svg
-              className="-ml-1 mr-2 h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              />
-            </svg>
-            Create Proposal
-          </a>
+          <Link href="/proposals/new" passHref>
+            <a className="btn btn-primary btn-sm">
+              <svg
+                className="-ml-1 mr-2 h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                />
+              </svg>
+              Create Proposal
+            </a>
+          </Link>
         </div>
       </div>
     );

@@ -1,4 +1,4 @@
-export const Loading = ({ small }) => {
+export const Loading = ({ small = false }) => {
   const classNames = !small
     ? "inline mr-2 w-8 h-8 text-gray-200 animate-spin fill-blue-600"
     : "w-4 h-4 text-gray-200 animate-spin fill-blue-600";

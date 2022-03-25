@@ -6,7 +6,7 @@ import {
   isRequired,
   useForm,
 } from "utils/useForm";
-import { contracts } from "constants/index";
+import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
 
 export const AddActionFunctionForm = ({
@@ -18,6 +18,7 @@ export const AddActionFunctionForm = ({
   onContractChange,
   hasImplementationAbi,
 }) => {
+  const { contracts } = useStore();
   const [signature, setSignature] = useState(null);
 
   const initialState = {
@@ -107,7 +108,7 @@ export const AddActionFunctionForm = ({
         onContractChange(contract);
       }
     }
-  }, [values.address]);
+  }, [values.address, onContractChange, contracts]);
 
   return (
     <form onSubmit={submitHandler}>

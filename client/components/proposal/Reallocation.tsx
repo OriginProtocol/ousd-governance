@@ -1,55 +1,68 @@
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
-import {
-  aaveStrategyContract,
-  compoundStrategyContract,
-  convexStrategyContract,
-} from "constants/index";
+import { useEffect, useMemo, useState } from "react";
+import { useStore } from "utils/store";
 
 export const Reallocation = () => {
+  const { contracts } = useStore();
+  const {
+    AaveStrategyContract,
+    CompoundStrategyContract,
+    ConvexStrategyContract,
+  } = contracts;
   const [aaveStrategyBalances, setAaveStrategyBalances] = useState([]);
   const [compoundStrategyBalances, setCompoundStrategyBalances] = useState([]);
   const [convexStrategyBalances, setConvexStrategyBalances] = useState([]);
 
-  const strategies = [
-    {
-      name: "Aave",
-      contract: aaveStrategyContract,
-      balances: aaveStrategyBalances,
-      balanceGetter: () => aaveStrategyBalances,
-      balanceSetter: setAaveStrategyBalances,
-    },
-    {
-      name: "Compound",
-      contract: compoundStrategyContract,
-      balanceGetter: () => compoundStrategyBalances,
-      balanceSetter: setCompoundStrategyBalances,
-    },
-    {
-      name: "Convex",
-      contract: convexStrategyContract,
-      balanceGetter: () => convexStrategyBalances,
-      balanceSetter: setConvexStrategyBalances,
-    },
-  ];
+  const strategies = useMemo(() => {
+    [
+      {
+        name: "Aave",
+        contract: AaveStrategyContract,
+        balances: aaveStrategyBalances,
+        balanceGetter: () => aaveStrategyBalances,
+        balanceSetter: setAaveStrategyBalances,
+      },
+      {
+        name: "Compound",
+        contract: CompoundStrategyContract,
+        balanceGetter: () => compoundStrategyBalances,
+        balanceSetter: setCompoundStrategyBalances,
+      },
+      {
+        name: "Convex",
+        contract: ConvexStrategyContract,
+        balanceGetter: () => convexStrategyBalances,
+        balanceSetter: setConvexStrategyBalances,
+      },
+    ];
+  }, [
+    AaveStrategyContract,
+    CompoundStrategyContract,
+    ConvexStrategyContract,
+    aaveStrategyBalances,
+    compoundStrategyBalances,
+    convexStrategyBalances,
+  ]);
 
-  const assets = [
-    {
-      symbol: "DAI",
-      decimals: 18,
-      address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-    },
-    {
-      symbol: "USDC",
-      decimals: 6,
-      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    },
-    {
-      symbol: "DAI",
-      decimals: 6,
-      address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    },
-  ];
+  const assets = useMemo(() => {
+    [
+      {
+        symbol: "DAI",
+        decimals: 18,
+        address: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+      },
+      {
+        symbol: "USDC",
+        decimals: 6,
+        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      },
+      {
+        symbol: "DAI",
+        decimals: 6,
+        address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+      },
+    ];
+  }, []);
 
   useEffect(() => {
     const loadStrategyBalances = async () => {
@@ -64,7 +77,7 @@ export const Reallocation = () => {
       }
     };
     loadStrategyBalances();
-  }, []);
+  }, [assets, strategies]);
 
   const truncateBalance = (str) => {
     if (str.includes(".")) {
@@ -113,7 +126,7 @@ export const Reallocation = () => {
                   Strategy to reallocate from
                 </option>
                 {strategies.map((strategy) => (
-                  <option>{strategy.name}</option>
+                  <option key={strategy.name}>{strategy.name}</option>
                 ))}
               </select>
             </div>
@@ -126,7 +139,7 @@ export const Reallocation = () => {
                   Strategy to reallocate to
                 </option>
                 {strategies.map((strategy) => (
-                  <option>{strategy.name}</option>
+                  <option key={strategy.name}>{strategy.name}</option>
                 ))}
               </select>
             </div>
@@ -139,7 +152,7 @@ export const Reallocation = () => {
           </div>
           <div className="w-full">
             {assets.map((asset) => (
-              <div className="form-control">
+              <div className="form-control" key={asset.symbol}>
                 <label className="label">
                   <span className="label-text">{asset.symbol}</span>
                 </label>

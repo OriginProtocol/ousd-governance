@@ -107,7 +107,7 @@ const Home: NextPage = ({
       setTotalSupply(totalSupply);
     };
     loadTotalSupply();
-  }, []);
+  }, [contracts.VoteLockerCurve]);
 
   return (
     <div>

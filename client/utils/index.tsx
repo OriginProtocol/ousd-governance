@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { contracts } from "constants/index";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -57,7 +56,7 @@ export const typesFromSignature = (signature: string): string[] => {
   return typesString.split(",");
 };
 
-export const addressContractName = (address: string): string => {
+export const addressContractName = (contracts, address: string): string => {
   return (
     contracts.find((c) => c.address === address)?.name ||
     truncateEthAddress(address)
