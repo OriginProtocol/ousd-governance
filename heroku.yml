@@ -4,6 +4,7 @@ build:
 release:
   command:
     - npx prisma migrate deploy
+  image: web
 run:
   web: yarn start
   listener:
