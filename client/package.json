@@ -1,6 +1,12 @@
 {
   "name": "ousd-governance-client",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/originprotocol/ousd-governance",
+  "bugs": {
+    "url": "https://github.com/originprotocol/ousd-governance/issues",
+    "email": "security@originprotocol.com"
+  },
   "scripts": {
     "dev:web": "next dev",
     "dev:listener": "wait-on .next/server/listener.js && nodemon .next/server/listener.js",
