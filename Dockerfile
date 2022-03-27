@@ -5,6 +5,7 @@ RUN yarn install
 
 FROM node:lts as builder
 WORKDIR /client
+ENV NEXT_PUBLIC_NETWORK_ID 4
 COPY ./client .
 COPY --from=dependencies /client/node_modules ./node_modules
 RUN yarn add @swc/cli @swc/core
