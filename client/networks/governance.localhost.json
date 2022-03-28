@@ -1,6 +1,6 @@
 {
   "OriginDollarGovernance": {
-    "address": "0x32FAFF5fc315fE0BF8B53f6A3C003d8c8eA08d72",
+    "address": "0x7e4bd0e6B1066C181665a1589526c2EF16Ad32A7",
     "abi": [
       {
         "inputs": [],
@@ -447,7 +447,7 @@
     ]
   },
   "VoteLockerCurve": {
-    "address": "0x4e0cEEA1F36f176b30c810A44683CF833C9cc90E",
+    "address": "0x5734f768029D67A56B2E79DEFEf20bEaBf14c931",
     "abi": [
       {
         "inputs": [],
@@ -1303,7 +1303,7 @@
     ]
   },
   "TimelockController": {
-    "address": "0x0dc28B42543642F5Cdd8b08e8e86236De1AB00f0",
+    "address": "0x1395cA44EA04E9550276C69C65a606e34583e3e2",
     "abi": [
       {
         "inputs": [
@@ -2044,7 +2044,7 @@
     ]
   },
   "Governance": {
-    "address": "0x3C4559E7C315c5413C6889976bbCcC2bd5AB92F3",
+    "address": "0x3558bF720f296e728405ecf872b1805C23857728",
     "abi": [
       {
         "inputs": [
