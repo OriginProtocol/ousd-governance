@@ -153,14 +153,14 @@ export default function VoteEscrow({}) {
           </div>
           <div className="stat">
             <div className="stat-title">Vote Balance</div>
-            <div className="stat-value">
+            <div className="stat-value text-info-content">
               {truncateBalance(ethers.utils.formatUnits(votePower))}
             </div>
             <div className="stat-desc">veOGV</div>
           </div>
           <div className="stat">
             <div className="stat-title">Lockup Balance</div>
-            <div className="stat-value">
+            <div className="stat-value text-success-content">
               {truncateBalance(ethers.utils.formatUnits(existingAmount))}
             </div>
             <div className="stat-desc">OGV</div>
