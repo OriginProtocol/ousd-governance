@@ -7,6 +7,7 @@ import Layout from "../components/layout";
 import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
+import { TransactionListener } from "components/TransactionListener";
 
 export default function App({ Component, pageProps }) {
   const { web3Provider, contracts, chainId } = useStore();
@@ -19,6 +20,12 @@ export default function App({ Component, pageProps }) {
       const networkProvider = new ethers.providers.JsonRpcProvider(
         RPC_URLS[chainId]
       );
+
+      let signer;
+      if (web3Provider) {
+        signer = await web3Provider.getSigner();
+      }
+
       const provider = web3Provider || networkProvider;
       const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
       const governanceContracts = Object.entries(
@@ -29,7 +36,7 @@ export default function App({ Component, pageProps }) {
             ...new ethers.Contract(
               definition.address,
               definition.abi,
-              provider
+              signer || provider
             ),
             abi: definition.abi,
           },
@@ -69,6 +76,7 @@ export default function App({ Component, pageProps }) {
   return (
     <Layout>
       <Component {...pageProps} />
+      <TransactionListener />
     </Layout>
   );
 }

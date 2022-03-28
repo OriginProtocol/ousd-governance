@@ -41,9 +41,9 @@ const providerOptions = {
 let web3Modal: any | undefined;
 if (typeof window !== "undefined") {
   web3Modal = new Web3Modal({
-    network: "mainnet", // optional
+    network: "mainnet",
     cacheProvider: true,
-    providerOptions, // required
+    providerOptions,
   });
 }
 
@@ -100,7 +100,11 @@ export const Web3Button = () => {
   return web3Provider ? (
     <>
       {address && (
-        <span className="text-muted">{truncateEthAddress(address)}</span>
+        <span className="text-muted">
+          {truncateEthAddress(address)}
+          {web3Provider.network.name === "unknown" && " / Localhost"}
+          {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
+        </span>
       )}
       <button
         className="ml-2 btn btn-primary btn-sm rounded-btn"

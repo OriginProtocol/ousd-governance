@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { ethers } from "ethers";
 
 // Captures 0x + 4 characters, then the last 4 characters.
@@ -75,3 +76,11 @@ export const etherscanLink = (address: string) => {
     </a>
   );
 };
+
+export function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}

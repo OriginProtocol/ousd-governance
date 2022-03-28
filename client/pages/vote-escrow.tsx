@@ -7,7 +7,7 @@ import { Disconnected } from "components/Disconnected";
 const MAX_WEEKS = 52 * 4;
 
 export default function VoteEscrow({}) {
-  const { web3Provider, address, contracts } = useStore();
+  const { web3Provider, address, contracts, pendingTransactions } = useStore();
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -94,9 +94,17 @@ export default function VoteEscrow({}) {
   };
 
   const handleApproval = async () => {
-    await OriginDollarGovernance.connect(
-      await web3Provider.getSigner()
-    ).approve(VoteLockerCurve.address, ethers.utils.parseUnits(amount));
+    const transaction = await OriginDollarGovernance.approve(
+      VoteLockerCurve.address,
+      ethers.utils.parseUnits(amount)
+    );
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        { ...transaction, onComplete: "Approval has been made" },
+      ],
+    });
   };
 
   const handleLockup = async () => {
@@ -104,10 +112,16 @@ export default function VoteEscrow({}) {
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
       const end = now + weeks * 7 * 86400;
-      await VoteLockerCurve.connect(await web3Provider.getSigner()).lockup(
+      const transaction = await VoteLockerCurve.lockup(
         ethers.utils.parseUnits(amount),
         end
       );
+      useStore.setState({
+        pendingTransactions: [
+          ...pendingTransactions,
+          { ...transaction, onComplete: "Lockup has been completed" },
+        ],
+      });
     }
   };
 
@@ -155,7 +169,10 @@ export default function VoteEscrow({}) {
               amountError && "input-error"
             }`}
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setAmountError("");
+            }}
           />
           <button
             className="btn"
@@ -186,7 +203,10 @@ export default function VoteEscrow({}) {
               endError && "input-error"
             }`}
             value={weeks}
-            onChange={(e) => setWeeks(e.target.value)}
+            onChange={(e) => {
+              setWeeks(e.target.value);
+              setEndError("");
+            }}
           />
           <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
             Max

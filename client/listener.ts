@@ -17,6 +17,8 @@ const GovernanceContracts = CHAIN_CONTRACTS[networkId];
 if (!networkId) {
   logger.error("No network id specified");
   process.exit(1);
+} else {
+  logger.info(`Listining on network ${networkId}`);
 }
 
 const WEB3_PROVIDER = RPC_URLS[networkId];
