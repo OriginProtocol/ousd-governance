@@ -60,7 +60,11 @@ export const argumentsFromSignature = (signature: string): string[] => {
 };
 
 export const typesFromSignature = (signature: string): string[] => {
-  const typesString = signature.split("(")[1].split(")")[0];
+  try {
+    const typesString = signature.split("(")[1].split(")")[0];
+  } catch (e) {
+    return [];
+  }
   if (typesString.length === 0) return [];
   return typesString.split(",");
 };

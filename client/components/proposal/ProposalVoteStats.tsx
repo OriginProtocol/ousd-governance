@@ -1,5 +1,4 @@
 export const ProposalVoteStats = ({ proposal }) => {
-  console.log(proposal);
   return (
     <div className="w-full shadow stats">
       <div className="stat">

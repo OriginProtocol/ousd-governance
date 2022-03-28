@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { NextPage } from "next";
-import ReactMarkdown from "react-markdown";
+import { toast } from "react-toastify";
 import { ProposalAddActionButton } from "components/proposal/ProposalAddActionButton";
 import { ProposalActionAddModal } from "components/proposal/ProposalActionAddModal";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
@@ -9,15 +9,19 @@ import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
+import { useStore } from "utils/store";
 
 const ProposalNew: NextPage = () => {
+  const { contracts, pendingTransactions } = useStore();
+  const { Governance } = contracts;
+
   const [newProposalActions, setNewProposalActions] = useStickyState<Object>(
     [],
     "proposalActions"
   );
-  const [justification, setJustification] = useStickyState<string>(
+  const [snapshotHash, setSnapshotHash] = useStickyState<string>(
     "",
-    "justification"
+    "snapshotHash"
   );
   const [isReallocation, setIsReallocation] = useStickyState<boolean>(
     false,
@@ -25,7 +29,6 @@ const ProposalNew: NextPage = () => {
   );
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [isPreview, setIsPreview] = useState(false);
 
   const handleAddAction = (action: string) => {
     setNewProposalActions([...newProposalActions, action]);
@@ -37,57 +40,71 @@ const ProposalNew: NextPage = () => {
     );
   };
 
+  const reset = () => {
+    setNewProposalActions([]);
+    setSnapshotHash("");
+    setIsReallocation(false);
+  };
+
   const proposalActions = {
     targets: newProposalActions.map((a) => a.target),
+    values: newProposalActions.map((a) => 0x0),
     signatures: newProposalActions.map((a) => a.signature),
     calldatas: newProposalActions.map((a) => a.calldata),
   };
 
-  const proposal = {
-    ...proposalActions,
-    description: justification,
+  const handleSubmit = async () => {
+    const transaction = await Governance[
+      "propose(address[],uint256[],string[],bytes[],string)"
+    ](
+      proposalActions.targets,
+      proposalActions.values,
+      proposalActions.signatures,
+      proposalActions.calldatas,
+      snapshotHash
+    );
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Proposal has been submitted", {
+              hideProgressBar: true,
+            });
+            reset();
+          },
+        },
+      ],
+    });
   };
 
   return (
     <>
       <PageTitle>New Proposal</PageTitle>
       <div className="-mt-6">
-        <SectionTitle>Justification</SectionTitle>
+        <SectionTitle>Snapshot Proposal</SectionTitle>
       </div>
-      <div className="tabs tabs-boxed mb-2">
-        <a
-          className={`tab ${!isPreview && "tab-active"}`}
-          onClick={() => setIsPreview(false)}
-        >
-          Code
-        </a>
-        <a
-          className={`tab ${isPreview && "tab-active"}`}
-          onClick={() => setIsPreview(true)}
-        >
-          Preview
-        </a>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Hash</span>
+        </label>
+        <input
+          type="text"
+          placeholder="0x0"
+          className="input input-bordered"
+          onChange={(e) => setSnapshotHash(e)}
+        />
       </div>
-      {isPreview ? (
-        <article className="prose p-6 bg-base-200 w-full max-w-full">
-          <ReactMarkdown>{justification}</ReactMarkdown>
-        </article>
-      ) : (
-        <div className="form-control w-full">
-          <textarea
-            className="textarea h-36 w-full textarea-bordered"
-            onChange={(e) => setJustification(e.target.value)}
-            value={justification}
-          ></textarea>
-          <label className="label">
-            <span className="label-text-alt">
-              Please use{" "}
-              <a href="https://www.markdownguide.org/basic-syntax/">Markdown</a>{" "}
-              syntax
-            </span>
-          </label>
-        </div>
-      )}
+      <label className="label">
+        <span className="label-text-alt">
+          For proposals that aren&apos;t simple reallocations, a Snapshot
+          proposal should be used to signal intent before on chain happens. The
+          Snapshot proposal should clearly detail the snapshotHash for the
+          change.
+        </span>
+      </label>
       <SectionTitle>Governance Actions</SectionTitle>
       <div className="tabs mb-6">
         <a
@@ -136,9 +153,8 @@ const ProposalNew: NextPage = () => {
       <div className="flex">
         <button
           className="btn btn-primary mt-24"
-          disabled={
-            justification.length === 0 || newProposalActions.length === 0
-          }
+          disabled={newProposalActions.length === 0}
+          onClick={handleSubmit}
         >
           Submit Proposal
         </button>

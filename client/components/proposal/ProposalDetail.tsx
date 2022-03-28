@@ -6,7 +6,7 @@ import { ProposalParameters } from "components/proposal/ProposalParameters";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
 
-export const ProposalDetail = ({ proposalId }: { proposalId: Number }) => {
+export const ProposalDetail = ({ proposalId }: { proposalId: string }) => {
   const { contracts } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const [proposal, setProposal] = useState(null);

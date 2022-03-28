@@ -18,7 +18,7 @@ if (!networkId) {
   logger.error("No network id specified");
   process.exit(1);
 } else {
-  logger.info(`Listining on network ${networkId}`);
+  logger.info(`Listening on network ${networkId}`);
 }
 
 const WEB3_PROVIDER = RPC_URLS[networkId];
@@ -68,7 +68,7 @@ const handleEvents = async (blockNumber, events, done) => {
         });
         logger.info("Inserted new proposal");
       } catch (e) {
-        logger.warn("Probable duplicate proposal");
+        // Likely duplicate
       }
     } else {
       try {
@@ -83,13 +83,18 @@ const handleEvents = async (blockNumber, events, done) => {
         });
         logger.info("Inserted new voter");
       } catch (e) {
-        logger.warn("Probable duplicate voter");
+        // Likely duplicate
       }
     }
   }
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
+  handleEvents(blockNumber, events, done);
+  done();
+});
+
+ethereumEvents.on("block.unconfirmed", async (blockNumber, events, done) => {
   handleEvents(blockNumber, events, done);
   done();
 });
