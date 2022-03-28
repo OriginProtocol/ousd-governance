@@ -15,6 +15,14 @@ export const truncateEthAddress = (address: string) => {
   return `${match[1]}…${match[2]}`;
 };
 
+export const truncateBalance = (str) => {
+  if (str.includes(".")) {
+    const parts = str.split(".");
+    return parts[0] + "." + parts[1].slice(0, 4);
+  }
+  return str;
+};
+
 export const loadProposals = async (governanceContract, ids: Array<String>) => {
   const proposalGets = [];
   const proposalStateGets = [];

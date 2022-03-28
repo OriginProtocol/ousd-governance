@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
+import { truncateBalance } from "utils/index";
 
 export const Reallocation = () => {
   const { contracts } = useStore();
@@ -88,14 +89,6 @@ export const Reallocation = () => {
     };
     loadStrategyBalances();
   }, [assets, strategies]);
-
-  const truncateBalance = (str) => {
-    if (str.includes(".")) {
-      const parts = str.split(".");
-      return parts[0] + "." + parts[1].slice(0, 4);
-    }
-    return str;
-  };
 
   return (
     <>

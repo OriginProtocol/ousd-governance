@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
+import { truncateBalance } from "utils/index";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -11,6 +12,7 @@ export default function VoteEscrow({}) {
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
   const [balance, setBalance] = useState(0);
+  const [votePower, setVotePower] = useState(0);
   const [approval, setApproval] = useState(0);
   const [existingAmount, setExistingAmount] = useState(
     ethers.BigNumber.from(0)
@@ -31,6 +33,17 @@ export default function VoteEscrow({}) {
       loadBalance();
     }
   }, [address, web3Provider, OriginDollarGovernance]);
+
+  // Load users vote power
+  useEffect(() => {
+    const loadVotePower = async () => {
+      const votePower = await VoteLockerCurve.balanceOf(address);
+      setVotePower(votePower);
+    };
+    if (web3Provider && address) {
+      loadVotePower();
+    }
+  }, [address, web3Provider, VoteLockerCurve]);
 
   // Load the amount of governance token approved by the user for transfer by vl contract
   useEffect(() => {
@@ -132,16 +145,23 @@ export default function VoteEscrow({}) {
       <div className="grid content-center">
         <div className="stats shadow mb-16">
           <div className="stat">
-            <div className="stat-title">Governance Token</div>
+            <div className="stat-title">Balance</div>
             <div className="stat-value text-primary">
-              {ethers.utils.formatUnits(balance)}
+              {truncateBalance(ethers.utils.formatUnits(balance))}
             </div>
             <div className="stat-desc">OGV</div>
           </div>
           <div className="stat">
-            <div className="stat-title">Locked Amount</div>
+            <div className="stat-title">Vote Balance</div>
             <div className="stat-value">
-              {ethers.utils.formatUnits(existingAmount)}
+              {truncateBalance(ethers.utils.formatUnits(votePower))}
+            </div>
+            <div className="stat-desc">veOGV</div>
+          </div>
+          <div className="stat">
+            <div className="stat-title">Lockup Balance</div>
+            <div className="stat-value">
+              {truncateBalance(ethers.utils.formatUnits(existingAmount))}
             </div>
             <div className="stat-desc">OGV</div>
           </div>
