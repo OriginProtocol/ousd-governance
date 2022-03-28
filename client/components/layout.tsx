@@ -8,12 +8,14 @@ export default function Layout({ children }: JSX.ElementChildrenAttribute) {
       <div className="navbar mb-2 shadow-lg bg-neutral text-neutral-content md:rounded-box">
         <div className="flex-none px-2 mx-2">
           <Link href="/" passHref>
-            <Image
-              width="32"
-              height="32"
-              src="/ousd-coin.svg"
-              alt="OUSD Governance"
-            />
+            <a>
+              <Image
+                width="32"
+                height="32"
+                src="/ousd-coin.svg"
+                alt="OUSD Governance"
+              />
+            </a>
           </Link>
         </div>
         <div className="flex-1 px-2 mx-2">

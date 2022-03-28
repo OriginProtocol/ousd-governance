@@ -8,15 +8,17 @@ import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
 
-const chainId = process.env.NEXT_PUBLIC_NETWORK_ID || 31337;
-const mainnetProvider = new ethers.providers.JsonRpcProvider(mainnetNetworkUrl);
-const networkProvider = new ethers.providers.JsonRpcProvider(RPC_URLS[chainId]);
-
 export default function App({ Component, pageProps }) {
-  const { web3Provider, contracts } = useStore();
+  const { web3Provider, contracts, chainId } = useStore();
 
   useEffect(() => {
     const loadContracts = async () => {
+      const mainnetProvider = new ethers.providers.JsonRpcProvider(
+        mainnetNetworkUrl
+      );
+      const networkProvider = new ethers.providers.JsonRpcProvider(
+        RPC_URLS[chainId]
+      );
       const provider = web3Provider || networkProvider;
       const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
       const governanceContracts = Object.entries(
@@ -58,7 +60,7 @@ export default function App({ Component, pageProps }) {
       });
     };
     loadContracts();
-  }, [web3Provider]);
+  }, [web3Provider, chainId]);
 
   if (Object.keys(contracts).length === 0) {
     return <div>Loading...</div>;

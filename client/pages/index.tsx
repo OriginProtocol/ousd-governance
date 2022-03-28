@@ -69,7 +69,7 @@ const Home: NextPage = ({
   proposalCount: number;
   holderCount: number;
 }) => {
-  const { contracts } = useStore();
+  const { contracts, chainId } = useStore();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
@@ -107,7 +107,7 @@ const Home: NextPage = ({
       setTotalSupply(totalSupply);
     };
     loadTotalSupply();
-  }, [contracts.VoteLockerCurve]);
+  }, [contracts]);
 
   return (
     <div>

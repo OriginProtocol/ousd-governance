@@ -6,13 +6,18 @@ import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 
-const networkId = process.env.NEXT_PUBLIC_NETWORK_ID || 31337;
-const GovernanceContracts = CHAIN_CONTRACTS[networkId];
-
 const logger = winston.createLogger({
   format: winston.format.simple(),
   transports: [new winston.transports.Console()],
 });
+
+const networkId = process.env.NETWORK_ID;
+const GovernanceContracts = CHAIN_CONTRACTS[networkId];
+
+if (!networkId) {
+  logger.error("No network id specified");
+  process.exit(1);
+}
 
 const WEB3_PROVIDER = RPC_URLS[networkId];
 

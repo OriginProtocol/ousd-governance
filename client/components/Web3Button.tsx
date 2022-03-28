@@ -61,7 +61,11 @@ export const Web3Button = () => {
       return;
     }
 
-    const web3Provider = new providers.Web3Provider(provider);
+    provider.on("chainChanged", (chainId) => {
+      useStore.setState({ chainId: Number(chainId) });
+    });
+
+    const web3Provider = new providers.Web3Provider(provider, "any");
     const signer = web3Provider.getSigner();
     const address = await signer.getAddress();
     const network = await web3Provider.getNetwork();
