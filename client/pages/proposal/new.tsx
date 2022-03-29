@@ -18,15 +18,12 @@ const ProposalNew: NextPage = () => {
   const { Governance, VoteLockerCurve } = contracts;
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [proposalThreshold, setProposalThreshold] = useState<number>(0);
-  const [newProposalActions, setNewProposalActions] = useStickyState<Object>(
+  const [newProposalActions, setNewProposalActions] = useStickyState(
     [],
     "proposalActions"
   );
-  const [snapshotHash, setSnapshotHash] = useStickyState<string>(
-    "",
-    "snapshotHash"
-  );
-  const [isReallocation, setIsReallocation] = useStickyState<boolean>(
+  const [snapshotHash, setSnapshotHash] = useStickyState("", "snapshotHash");
+  const [isReallocation, setIsReallocation] = useStickyState(
     false,
     "isReallocation"
   );
@@ -131,7 +128,7 @@ const ProposalNew: NextPage = () => {
           type="text"
           placeholder="0x0"
           className="input input-bordered"
-          onChange={(e) => setSnapshotHash(e)}
+          onChange={(e) => setSnapshotHash(e.target.value)}
         />
       </div>
       <label className="label">
