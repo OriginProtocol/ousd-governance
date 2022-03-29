@@ -21,8 +21,6 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/O
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-
-
 contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     using SafeERC20 for ERC20;
 
@@ -69,7 +67,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * is the moment when combined function slope becomes less steep.
      *
      * Each time a global checkpoint is created it takes into account the previous global checkpoint, all
-     * slope changes that happened since then and the change that triggered the global checkpoint creation.
+     * slope changes that happened since then and (user) the change that triggered the global checkpoint creation.
      * This way a Checkpoint structure (bias + slope + time) correctly represents the state of the global
      * voting power amount at the time of its creation. A collection of future slope changes compliments that
      * Checkpoint and defines a global voting power function.
