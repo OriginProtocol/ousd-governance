@@ -519,14 +519,18 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             newCheckpoint.bias - oldCheckpoint.bias
         );
 
-        /* Schedule the slope changes. There would be a possible code simplification where
+        /* Schedule the slope changes. There is a possible code simplification where
          * we always undo the old checkpoint slope change and always apply the new
-         * checkpoint slope change and we don't do that due to gas optimization. 
+         * checkpoint slope change. In the interest of gas optimization the code is 
+         * slightly more complicated.
          */
+
+        // old lockup still active and needs slope change adjustment. 
         if (_oldLockup.end > block.timestamp) {
-            // Old lockup has not expired yet, so this is an adjustment of the slope
-            // oldSlopeDelta was <something> - oldCheckpoint.slope, so we cancel that
+            // this is an adjustment of the slope: oldSlopeDelta was <something> - oldCheckpoint.slope, 
+            // so we cancel/undo that
             oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
+            // gas optimize it so another storage access for _newLockup is not required
             if (_newLockup.end == _oldLockup.end) {
                 // It was a new deposit, not extension
                 oldSlopeDelta = oldSlopeDelta - newCheckpoint.slope;
@@ -534,6 +538,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             slopeChanges[_oldLockup.end] = oldSlopeDelta;
         }
         if (_newLockup.end > block.timestamp) {
+            // (second part of gas optimization) it was an extension
             if (_newLockup.end > _oldLockup.end) {
                 newSlopeDelta = newSlopeDelta - newCheckpoint.slope;
                 slopeChanges[_newLockup.end] = newSlopeDelta;
@@ -580,6 +585,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 lastCheckpointTimestamp = lastCheckpoint.ts;
         uint256 iterativeTime = _floorToWeek(lastCheckpointTimestamp);
 
+        /* Iterate from last global checkpoint in one week interval steps until present
+         * time is reached. Fill in the missing global checkpoints using slopeChanges - which
+         * always pertain only to the latest global checkpoint.
+         */
         for (uint256 i = 0; i < 255; i++) {
             // 5 years
             iterativeTime = iterativeTime + WEEK;
@@ -631,7 +640,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Binary search to find epoch closest to block.
+     * @dev Binary search (bisection) to find epoch closest to block.
      * @param _block Find the most recent point history before this block
      * @param _maxEpoch Maximum epoch
      * @return uint256 The most recent epoch before the block
@@ -676,7 +685,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Gets a users votingWeight at a given blockNumber
      * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
-     * @return uint256 Balance of user
+     * @return uint256 Balance of user voting power.
      */
     function balanceOfAt(address _account, uint256 _blockNumber)
         public
@@ -785,19 +794,29 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
                 recentGlobalEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
+                /* to estimate how much time has passed since the last checkpoint get the number
+                 * of blocks since the last checkpoint. And multiply that by the average time per 
+                 * block of the 2 neighboring checkpoints of said _blockNumber
+                 */
                 dTime =
                     ((_blockNumber - checkpoint0.blk) *
                         (checkpoint1.ts - checkpoint0.ts)) /
                     (checkpoint1.blk - checkpoint0.blk);
             }
         } else if (checkpoint0.blk != block.number) {
+            /* to estimate how much time has passed since the last checkpoint get the number
+             * of blocks since the last checkpoint. And multiply that by the average time per 
+             * block since the last checkpoint and present blockchain state. 
+             */
             dTime =
                 ((_blockNumber - checkpoint0.blk) *
                     (block.timestamp - checkpoint0.ts)) /
                 (block.number - checkpoint0.blk);
         }
-        // Now dTime contains info on how far are we beyond point
+        // if code doesn't enter any of the above if conditions latest _blockNumber was passed
+        // to the function and dTime is correctly set to 0
 
+        // Now dTime contains info on how far are we beyond point
         return _supplyAt(checkpoint0, checkpoint0.ts + dTime);
     }
 
