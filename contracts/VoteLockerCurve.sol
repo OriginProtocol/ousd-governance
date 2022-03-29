@@ -21,6 +21,8 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/O
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+
+
 contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     using SafeERC20 for ERC20;
 
@@ -53,23 +55,76 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ///@notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
 
-    ///@notice Checkpoints for each user
+    /*
+     * Voting power of locked tokens decreases over time in linear fashion. And can be represented
+     * by the initial (at the lock time) voting power (bias) and decrease rate (slope), at some point in time 
+     * (block number / timestamp). Structure holding that information is called a Checkpoint (user
+     * checkpoint more accurately - represented by Alice/Bob function below).
+     * 
+     * When trying to determine the voting power of all accounts at some point in time (e.g. when fetching
+     * total supply) it wouldn't be gas cost effective to loop over all accounts and fetch their voting
+     * power. For that reason we maintain a combined voting power of all users (represented by the Global
+     * function below). The function is represented by a combination of a Checkpoint structure and multiple slope
+     * changes. Slope changes mark when a voting power of one or more users reaches zero since that
+     * is the moment when combined function slope becomes less steep.
+     *
+     * Each time a global checkpoint is created it takes into account the previous global checkpoint, all
+     * slope changes that happened since then and the change that triggered the global checkpoint creation.
+     * This way a Checkpoint structure (bias + slope + time) correctly represents the state of the global
+     * voting power amount at the time of its creation. A collection of future slope changes compliments that
+     * Checkpoint and defines a global voting power function.
+ 
+      Alice:
+      ~~~~~~~
+      ^
+      |     *
+      |     |  \ - normal slope
+      |     |    \ - normal slope
+      +-+---+---+--+--+-> t
+
+      Bob:
+      ~~~~~~~
+      ^
+      |         *
+      |         |  \ - normal slope
+      |         |    \ - normal slope
+      +-+---+---+--+--+-> t
+
+      Global: (Bob & Alice combined):
+      ~~~~~~~
+      ^
+      |         *
+      |     *   | ＼ - steeper slope (Alice + Bob slope)
+      |     |  \|  \ - normal slope (Bob slope)
+      |     |   |    \ - normal slope
+      +-+---+---+--+--+-> t
+    */
+
+    ///@notice Per user Checkpoints defining voting power of each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
+    ///@notice userEpoch important for fetching previous block per user voting power
     mapping(address => uint256) public userEpoch;
 
-    ///@notice Global checkpoints
+    /* @notice Global Checkpoints part of the equation to define combined voting
+     * power of all users.
+     */
     Checkpoint[] private _globalCheckpoints;
+    ///@notice globalEpoch important for fetching previous block combined voting power
     uint256 public globalEpoch;
 
     ///@notice Lockup mapping for each user
     mapping(address => Lockup) public lockups;
 
-    ///@notice
+    /* @notice slopeChanges part of the equation to define combined voting power of
+     * all users. Slope changes always complement only the latest global Checkpoint and are
+     * not used when fetching combined voting power of previous blocks.
+     */    
     mapping(uint256 => int128) public slopeChanges;
 
     ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
 
+    ///@notice Checkpoint structure representing linear voting power decay
     struct Checkpoint {
         int128 bias;
         int128 slope;
@@ -187,7 +242,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Get number of checkpoints for `_account`.
+     * @dev Get the number of checkpoints for `_account`.
      * @return uint32
      */
     function numCheckpoints(address _account)
@@ -295,7 +350,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param _end Lockup end time
      */
     function lockup(uint256 _amount, uint256 _end) public virtual {
-        // end is rounded down to week
+        // end is rounded down to week time resolution
         _end = _floorToWeek(_end);
 
         Lockup memory oldLockup = lockups[msg.sender];
@@ -464,7 +519,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             newCheckpoint.bias - oldCheckpoint.bias
         );
 
-        // Schedule the slope changes
+        /* Schedule the slope changes. There would be a possible code simplification where
+         * we always undo the old checkpoint slope change and always apply the new
+         * checkpoint slope change and we don't do that due to gas optimization. 
+         */
         if (_oldLockup.end > block.timestamp) {
             // Old lockup has not expired yet, so this is an adjustment of the slope
             // oldSlopeDelta was <something> - oldCheckpoint.slope, so we cancel that
