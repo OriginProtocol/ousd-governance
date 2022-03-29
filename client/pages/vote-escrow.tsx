@@ -4,6 +4,7 @@ import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
 import { truncateBalance } from "utils/index";
+import { toast } from "react-toastify";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -21,6 +22,7 @@ export default function VoteEscrow({}) {
   const [existingEndWeeks, setExistingEndWeeks] = useState(0);
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
+  const [reload, setReload] = useState(false);
   const { OriginDollarGovernance, VoteLockerCurve } = contracts;
 
   // Load users governance token balance
@@ -32,7 +34,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadBalance();
     }
-  }, [address, web3Provider, OriginDollarGovernance]);
+  }, [address, web3Provider, OriginDollarGovernance, reload]);
 
   // Load users vote power
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadVotePower();
     }
-  }, [address, web3Provider, VoteLockerCurve]);
+  }, [address, web3Provider, VoteLockerCurve, reload]);
 
   // Load the amount of governance token approved by the user for transfer by vl contract
   useEffect(() => {
@@ -57,7 +59,13 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadApproval();
     }
-  }, [address, web3Provider, OriginDollarGovernance, VoteLockerCurve.address]);
+  }, [
+    address,
+    web3Provider,
+    OriginDollarGovernance,
+    VoteLockerCurve.address,
+    reload,
+  ]);
 
   // Load users existing lockup in case this is an extension
   useEffect(() => {
@@ -69,7 +77,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadExistingLockup();
     }
-  }, [address, web3Provider, VoteLockerCurve]);
+  }, [address, web3Provider, VoteLockerCurve, reload]);
 
   // Calculate the number of weeks to existing lockup end (if one exists)
   useEffect(() => {
@@ -80,7 +88,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address && existingEnd.gt(0)) {
       lockupEndToWeeks(existingEnd);
     }
-  }, [address, existingEnd, web3Provider]);
+  }, [address, existingEnd, web3Provider, reload]);
 
   if (!web3Provider) {
     return <Disconnected />;
@@ -115,7 +123,13 @@ export default function VoteEscrow({}) {
     useStore.setState({
       pendingTransactions: [
         ...pendingTransactions,
-        { ...transaction, onComplete: "Approval has been made" },
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Approval has been made", { hideProgressBar: true }),
+              setReload(!reload);
+          },
+        },
       ],
     });
   };
@@ -132,7 +146,15 @@ export default function VoteEscrow({}) {
       useStore.setState({
         pendingTransactions: [
           ...pendingTransactions,
-          { ...transaction, onComplete: "Lockup has been completed" },
+          {
+            ...transaction,
+            onComplete: () => {
+              toast.success("Approval has been made", {
+                hideProgressBar: true,
+              });
+              setReload(!reload);
+            },
+          },
         ],
       });
     }
@@ -153,14 +175,14 @@ export default function VoteEscrow({}) {
           </div>
           <div className="stat">
             <div className="stat-title">Vote Balance</div>
-            <div className="stat-value">
+            <div className="stat-value text-info-content">
               {truncateBalance(ethers.utils.formatUnits(votePower))}
             </div>
             <div className="stat-desc">veOGV</div>
           </div>
           <div className="stat">
             <div className="stat-title">Lockup Balance</div>
-            <div className="stat-value">
+            <div className="stat-value text-success-content">
               {truncateBalance(ethers.utils.formatUnits(existingAmount))}
             </div>
             <div className="stat-desc">OGV</div>
@@ -246,6 +268,7 @@ export default function VoteEscrow({}) {
         <button
           className="btn btn-primary mt-5 mr-5"
           disabled={
+            // TODO approval should be new amount - already locked
             !amount || !weeks || approval.gte(ethers.utils.parseUnits(amount))
           }
           onClick={handleApproval}
@@ -256,6 +279,7 @@ export default function VoteEscrow({}) {
         <button
           className="btn btn-primary mt-5"
           disabled={
+            // TODO approval should be new amount - already locked
             !amount || !weeks || ethers.utils.parseUnits(amount).gt(approval)
           }
           onClick={handleLockup}

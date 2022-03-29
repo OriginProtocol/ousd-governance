@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { ethers } from "ethers";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
-import ReactMarkdown from "react-markdown";
+import { toast } from "react-toastify";
 import { ProposalAddActionButton } from "components/proposal/ProposalAddActionButton";
 import { ProposalActionAddModal } from "components/proposal/ProposalActionAddModal";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
@@ -9,85 +10,138 @@ import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
+import { useStore } from "utils/store";
+import { truncateBalance } from "utils/index";
 
 const ProposalNew: NextPage = () => {
+  const { address, web3Provider, contracts, pendingTransactions } = useStore();
+  const { Governance, VoteLockerCurve } = contracts;
+  const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
+  const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState<Object>(
     [],
     "proposalActions"
   );
-  const [justification, setJustification] = useStickyState<string>(
+  const [snapshotHash, setSnapshotHash] = useStickyState<string>(
     "",
-    "justification"
+    "snapshotHash"
   );
   const [isReallocation, setIsReallocation] = useStickyState<boolean>(
     false,
     "isReallocation"
   );
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [isPreview, setIsPreview] = useState(false);
+  useEffect(() => {
+    const loadProposalThreshold = async () => {
+      setProposalThreshold(await Governance.proposalThreshold());
+    };
+    loadProposalThreshold();
+  }, [Governance]);
 
+  // Load users vote power
+  useEffect(() => {
+    const loadVotePower = async () => {
+      const votePower = await VoteLockerCurve.balanceOf(address);
+      setVotePower(votePower);
+    };
+    if (web3Provider && address) {
+      loadVotePower();
+    }
+  }, [address, web3Provider, VoteLockerCurve]);
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Handle addition of a proposal action
   const handleAddAction = (action: string) => {
     setNewProposalActions([...newProposalActions, action]);
   };
 
+  // Handle deletion of a proposal action
   const handleDeleteAction = (actionIndex: number) => {
     setNewProposalActions(
       newProposalActions.filter((_, index: number) => index !== actionIndex)
     );
   };
 
+  // Reset the state of the form
+  const reset = () => {
+    setNewProposalActions([]);
+    setSnapshotHash("");
+    setIsReallocation(false);
+  };
+
   const proposalActions = {
     targets: newProposalActions.map((a) => a.target),
+    values: newProposalActions.map((a) => 0x0),
     signatures: newProposalActions.map((a) => a.signature),
     calldatas: newProposalActions.map((a) => a.calldata),
   };
 
-  const proposal = {
-    ...proposalActions,
-    description: justification,
+  // Handle submit of the proposal (i.e. transaction)
+  const handleSubmit = async () => {
+    const transaction = await Governance[
+      "propose(address[],uint256[],string[],bytes[],string)"
+    ](
+      proposalActions.targets,
+      proposalActions.values,
+      proposalActions.signatures,
+      proposalActions.calldatas,
+      snapshotHash
+    );
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Proposal has been submitted", {
+              hideProgressBar: true,
+            });
+            reset();
+          },
+        },
+      ],
+    });
   };
+
+  if (votePower.lt(proposalThreshold)) {
+    return (
+      <div className="text-center pt-5">
+        <h3 className="mt-2 font-medium text-gray-900">
+          Minimum required vote power for a proposal is{" "}
+          {proposalThreshold.toString()} votes. You have{" "}
+          {truncateBalance(ethers.utils.formatUnits(votePower))} votes.
+        </h3>
+      </div>
+    );
+  }
 
   return (
     <>
       <PageTitle>New Proposal</PageTitle>
       <div className="-mt-6">
-        <SectionTitle>Justification</SectionTitle>
+        <SectionTitle>Snapshot Proposal</SectionTitle>
       </div>
-      <div className="tabs tabs-boxed mb-2">
-        <a
-          className={`tab ${!isPreview && "tab-active"}`}
-          onClick={() => setIsPreview(false)}
-        >
-          Code
-        </a>
-        <a
-          className={`tab ${isPreview && "tab-active"}`}
-          onClick={() => setIsPreview(true)}
-        >
-          Preview
-        </a>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Hash</span>
+        </label>
+        <input
+          type="text"
+          placeholder="0x0"
+          className="input input-bordered"
+          onChange={(e) => setSnapshotHash(e)}
+        />
       </div>
-      {isPreview ? (
-        <article className="prose p-6 bg-base-200 w-full max-w-full">
-          <ReactMarkdown>{justification}</ReactMarkdown>
-        </article>
-      ) : (
-        <div className="form-control w-full">
-          <textarea
-            className="textarea h-36 w-full textarea-bordered"
-            onChange={(e) => setJustification(e.target.value)}
-            value={justification}
-          ></textarea>
-          <label className="label">
-            <span className="label-text-alt">
-              Please use{" "}
-              <a href="https://www.markdownguide.org/basic-syntax/">Markdown</a>{" "}
-              syntax
-            </span>
-          </label>
-        </div>
-      )}
+      <label className="label">
+        <span className="label-text-alt">
+          For proposals that aren&apos;t simple reallocations, a Snapshot
+          proposal should be used to signal intent before on chain happens. The
+          Snapshot proposal should clearly detail the justification for the
+          change.
+        </span>
+      </label>
       <SectionTitle>Governance Actions</SectionTitle>
       <div className="tabs mb-6">
         <a
@@ -104,7 +158,7 @@ const ProposalNew: NextPage = () => {
         </a>
       </div>{" "}
       {isReallocation ? (
-        <Reallocation />
+        <Reallocation snapshotHash={snapshotHash} />
       ) : (
         <>
           {newProposalActions.length === 0 ? (
@@ -124,6 +178,15 @@ const ProposalNew: NextPage = () => {
                 onActionDelete={handleDeleteAction}
                 ephemeral={true}
               />
+              <div className="flex">
+                <button
+                  className="btn btn-primary mt-24"
+                  disabled={newProposalActions.length === 0}
+                  onClick={handleSubmit}
+                >
+                  Submit Proposal
+                </button>
+              </div>
             </>
           )}
         </>
@@ -133,16 +196,6 @@ const ProposalNew: NextPage = () => {
         onModalClose={() => setModalOpen(false)}
         onActionAdd={handleAddAction}
       />
-      <div className="flex">
-        <button
-          className="btn btn-primary mt-24"
-          disabled={
-            justification.length === 0 || newProposalActions.length === 0
-          }
-        >
-          Submit Proposal
-        </button>
-      </div>
     </>
   );
 };

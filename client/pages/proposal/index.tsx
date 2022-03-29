@@ -17,7 +17,7 @@ export async function getServerSideProps({ res }: { res: any }) {
 
   const proposalCount = await prisma.proposal.count();
   const proposals = (
-    await prisma.proposal.findMany({ orderBy: { createdAt: "desc" } })
+    await prisma.proposal.findMany({ orderBy: { id: "desc" } })
   ).map((p) => ({
     id: p.id,
     proposalId: p.proposalId,

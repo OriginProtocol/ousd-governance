@@ -18,9 +18,19 @@ export const TransactionListener = () => {
     if (newTransactions.length > 0) {
       newTransactions.forEach((transaction) => {
         web3Provider.once(transaction.hash, (minedTransaction) => {
-          toast.success(transaction.onComplete || "Transaction is completed", {
-            hideProgressBar: true,
-          });
+          if (
+            transaction.onComplete &&
+            typeof transaction.onComplete === "function"
+          ) {
+            transaction.onComplete(minedTransaction);
+          } else {
+            toast.success(
+              transaction.onComplete || "Transaction is completed",
+              {
+                hideProgressBar: true,
+              }
+            );
+          }
         });
         toast.info("Transaction is being mined", { hideProgressBar: true });
       });

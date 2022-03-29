@@ -22,7 +22,7 @@ contract Governance is
         GovernorSettings(
             1, /* 1 block */
             45818, /* 1 week */
-            0
+            2500
         )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4) // Default quorum numerator is 100, so 4/100 or 4%

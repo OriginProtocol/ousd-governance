@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
@@ -28,13 +29,13 @@ export async function getServerSideProps({ res }: { res: any }) {
     await prisma.voter.findMany({ orderBy: [{ votes: "desc" }], take: 5 })
   ).map((v) => ({
     address: v.address,
-    votes: v.votes.toString(),
+    votes: v.votes.toHexadecimal(),
   }));
 
   const proposalCount = await prisma.proposal.count();
   const proposals = (
     await prisma.proposal.findMany({
-      orderBy: [{ createdAt: "desc" }],
+      orderBy: [{ id: "desc" }],
       take: 5,
     })
   ).map((p) => ({
