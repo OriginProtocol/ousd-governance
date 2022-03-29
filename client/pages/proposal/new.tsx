@@ -33,7 +33,6 @@ const ProposalNew: NextPage = () => {
 
   useEffect(() => {
     const loadProposalThreshold = async () => {
-      console.log((await Governance.proposalThreshold()).toString());
       setProposalThreshold(await Governance.proposalThreshold());
     };
     loadProposalThreshold();
