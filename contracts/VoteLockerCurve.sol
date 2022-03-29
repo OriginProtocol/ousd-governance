@@ -53,23 +53,76 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ///@notice Maximum lock time
     uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
 
-    ///@notice Checkpoints for each user
+    /*
+     * Voting power of locked tokens decreases over time in linear fashion. And can be represented
+     * by the initial (at the lock time) voting power (bias) and decrease rate (slope), at some point in time 
+     * (block number / timestamp). Structure holding that information is called a Checkpoint (user
+     * checkpoint more accurately - represented by Alice/Bob function below).
+     * 
+     * When trying to determine the voting power of all accounts at some point in time (e.g. when fetching
+     * total supply) it wouldn't be gas cost effective to loop over all accounts and fetch their voting
+     * power. For that reason we maintain a combined voting power of all users (represented by the Global
+     * function below). The function is represented by a combination of a Checkpoint structure and multiple slope
+     * changes. Slope changes mark when a voting power of one or more users reaches zero since that
+     * is the moment when combined function slope becomes less steep.
+     *
+     * Each time a global checkpoint is created it takes into account the previous global checkpoint, all
+     * slope changes that happened since then and (user) the change that triggered the global checkpoint creation.
+     * This way a Checkpoint structure (bias + slope + time) correctly represents the state of the global
+     * voting power amount at the time of its creation. A collection of future slope changes compliments that
+     * Checkpoint and defines a global voting power function.
+ 
+      Alice:
+      ~~~~~~~
+      ^
+      |     *
+      |     |  \ - normal slope
+      |     |    \ - normal slope
+      +-+---+---+--+--+-> t
+
+      Bob:
+      ~~~~~~~
+      ^
+      |         *
+      |         |  \ - normal slope
+      |         |    \ - normal slope
+      +-+---+---+--+--+-> t
+
+      Global: (Bob & Alice combined):
+      ~~~~~~~
+      ^
+      |         *
+      |     *   | ＼ - steeper slope (Alice + Bob slope)
+      |     |  \|  \ - normal slope (Bob slope)
+      |     |   |    \ - normal slope
+      +-+---+---+--+--+-> t
+    */
+
+    ///@notice Per user Checkpoints defining voting power of each user
     mapping(address => Checkpoint[]) private _userCheckpoints;
+    ///@notice userEpoch important for fetching previous block per user voting power
     mapping(address => uint256) public userEpoch;
 
-    ///@notice Global checkpoints
+    /* @notice Global Checkpoints part of the equation to define combined voting
+     * power of all users.
+     */
     Checkpoint[] private _globalCheckpoints;
+    ///@notice globalEpoch important for fetching previous block combined voting power
     uint256 public globalEpoch;
 
     ///@notice Lockup mapping for each user
     mapping(address => Lockup) public lockups;
 
-    ///@notice
+    /* @notice slopeChanges part of the equation to define combined voting power of
+     * all users. Slope changes always complement only the latest global Checkpoint and are
+     * not used when fetching combined voting power of previous blocks.
+     */    
     mapping(uint256 => int128) public slopeChanges;
 
     ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
 
+    ///@notice Checkpoint structure representing linear voting power decay
     struct Checkpoint {
         int128 bias;
         int128 slope;
@@ -187,7 +240,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Get number of checkpoints for `_account`.
+     * @dev Get the number of checkpoints for `_account`.
      * @return uint32
      */
     function numCheckpoints(address _account)
@@ -295,7 +348,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @param _end Lockup end time
      */
     function lockup(uint256 _amount, uint256 _end) public virtual {
-        // end is rounded down to week
+        // end is rounded down to week time resolution
         _end = _floorToWeek(_end);
 
         Lockup memory oldLockup = lockups[msg.sender];
@@ -464,11 +517,18 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             newCheckpoint.bias - oldCheckpoint.bias
         );
 
-        // Schedule the slope changes
+        /* Schedule the slope changes. There is a possible code simplification where
+         * we always undo the old checkpoint slope change and always apply the new
+         * checkpoint slope change. In the interest of gas optimization the code is 
+         * slightly more complicated.
+         */
+
+        // old lockup still active and needs slope change adjustment. 
         if (_oldLockup.end > block.timestamp) {
-            // Old lockup has not expired yet, so this is an adjustment of the slope
-            // oldSlopeDelta was <something> - oldCheckpoint.slope, so we cancel that
+            // this is an adjustment of the slope: oldSlopeDelta was <something> - oldCheckpoint.slope, 
+            // so we cancel/undo that
             oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
+            // gas optimize it so another storage access for _newLockup is not required
             if (_newLockup.end == _oldLockup.end) {
                 // It was a new deposit, not extension
                 oldSlopeDelta = oldSlopeDelta - newCheckpoint.slope;
@@ -476,6 +536,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             slopeChanges[_oldLockup.end] = oldSlopeDelta;
         }
         if (_newLockup.end > block.timestamp) {
+            // (second part of gas optimization) it was an extension
             if (_newLockup.end > _oldLockup.end) {
                 newSlopeDelta = newSlopeDelta - newCheckpoint.slope;
                 slopeChanges[_newLockup.end] = newSlopeDelta;
@@ -522,6 +583,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 lastCheckpointTimestamp = lastCheckpoint.ts;
         uint256 iterativeTime = _floorToWeek(lastCheckpointTimestamp);
 
+        /* Iterate from last global checkpoint in one week interval steps until present
+         * time is reached. Fill in the missing global checkpoints using slopeChanges - which
+         * always pertain only to the latest global checkpoint.
+         */
         for (uint256 i = 0; i < 255; i++) {
             // 5 years
             iterativeTime = iterativeTime + WEEK;
@@ -573,7 +638,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @dev Binary search to find epoch closest to block.
+     * @dev Binary search (bisection) to find epoch closest to block.
      * @param _block Find the most recent point history before this block
      * @param _maxEpoch Maximum epoch
      * @return uint256 The most recent epoch before the block
@@ -618,7 +683,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Gets a users votingWeight at a given blockNumber
      * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
-     * @return uint256 Balance of user
+     * @return uint256 Balance of user voting power.
      */
     function balanceOfAt(address _account, uint256 _blockNumber)
         public
@@ -727,19 +792,29 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
                 recentGlobalEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
+                /* to estimate how much time has passed since the last checkpoint get the number
+                 * of blocks since the last checkpoint. And multiply that by the average time per 
+                 * block of the 2 neighboring checkpoints of said _blockNumber
+                 */
                 dTime =
                     ((_blockNumber - checkpoint0.blk) *
                         (checkpoint1.ts - checkpoint0.ts)) /
                     (checkpoint1.blk - checkpoint0.blk);
             }
         } else if (checkpoint0.blk != block.number) {
+            /* to estimate how much time has passed since the last checkpoint get the number
+             * of blocks since the last checkpoint. And multiply that by the average time per 
+             * block since the last checkpoint and present blockchain state. 
+             */
             dTime =
                 ((_blockNumber - checkpoint0.blk) *
                     (block.timestamp - checkpoint0.ts)) /
                 (block.number - checkpoint0.blk);
         }
-        // Now dTime contains info on how far are we beyond point
+        // if code doesn't enter any of the above if conditions latest _blockNumber was passed
+        // to the function and dTime is correctly set to 0
 
+        // Now dTime contains info on how far are we beyond point
         return _supplyAt(checkpoint0, checkpoint0.ts + dTime);
     }
 

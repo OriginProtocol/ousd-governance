@@ -1,3 +1,4 @@
+import brownie
 from brownie import accounts, chain
 
 from ..helpers import approx
@@ -15,7 +16,10 @@ def mine_blocks(web3, amount="0xB2FA"):
     chain.mine()
 
 
-def test_create_proposal(governance):
+def test_create_proposal(governance, vote_locker, token):
+    # Proposal threshold is 2500 veOGV
+    token.approve(vote_locker.address, 3000e18)
+    vote_locker.lockup(3000e18, chain[-1].timestamp + WEEK * 52 * 4)
     tx = governance.propose(
         ["0xEA2Ef2e2E5A749D4A66b41Db9aD85a38Aa264cb3"],
         [0],
@@ -25,7 +29,18 @@ def test_create_proposal(governance):
         {"from": accounts[0]},
     )
     proposal_quorum = governance.quorum(tx.block_number)
-    assert proposal_quorum == 0
+    assert approx(proposal_quorum, vote_locker.totalSupplyAt(tx.block_number) * 0.04)
+
+def test_cant_create_proposal_if_below_threshold(governance):
+    with brownie.reverts("GovernorCompatibilityBravo: proposer votes below proposal threshold"):
+        tx = governance.propose(
+            ["0xEA2Ef2e2E5A749D4A66b41Db9aD85a38Aa264cb3"],
+            [0],
+            ["upgradeTo(address)"],
+            [0x00000000000000000000000016156A06BD1BD2D80134EA1EE7E5FAEBDBFA20AA],
+            "Switch to new Convex implementation",
+            {"from": accounts[0]}
+        )
 
 
 def test_proposal_can_pass_vote(governance, vote_locker, token, timelock_controller, web3):

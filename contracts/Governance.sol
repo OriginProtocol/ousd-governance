@@ -2,19 +2,15 @@
 pragma solidity ^0.8.2;
 
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/Governor.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorSettings.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorVotes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 
 contract Governance is
-    Governor,
     GovernorSettings,
     GovernorCompatibilityBravo,
-    GovernorVotes,
     GovernorVotesQuorumFraction,
     GovernorTimelockControl,
     GovernorPreventLateQuorum
@@ -32,43 +28,7 @@ contract Governance is
         GovernorPreventLateQuorum(86400 / 15) // ~1 day
     {}
 
-    // The following functions are overrides require by Solidity.
-
-    function votingDelay()
-        public
-        view
-        override(IGovernor, GovernorSettings)
-        returns (uint256)
-    {
-        return super.votingDelay();
-    }
-
-    function votingPeriod()
-        public
-        view
-        override(IGovernor, GovernorSettings)
-        returns (uint256)
-    {
-        return super.votingPeriod();
-    }
-
-    function quorum(uint256 blockNumber)
-        public
-        view
-        override(IGovernor, GovernorVotesQuorumFraction)
-        returns (uint256)
-    {
-        return super.quorum(blockNumber);
-    }
-
-    function getVotes(address account, uint256 blockNumber)
-        public
-        view
-        override(IGovernor, GovernorVotes)
-        returns (uint256)
-    {
-        return super.getVotes(account, blockNumber);
-    }
+    // The following functions are overrides required by Solidity.
 
     function state(uint256 proposalId)
         public
