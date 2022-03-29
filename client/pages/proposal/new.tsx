@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { ethers } from "ethers";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { toast } from "react-toastify";
 import { ProposalAddActionButton } from "components/proposal/ProposalAddActionButton";
@@ -10,11 +11,13 @@ import { PageTitle } from "components/PageTitle";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
+import { truncateBalance } from "utils/index";
 
 const ProposalNew: NextPage = () => {
-  const { contracts, pendingTransactions } = useStore();
-  const { Governance } = contracts;
-
+  const { address, web3Provider, contracts, pendingTransactions } = useStore();
+  const { Governance, VoteLockerCurve } = contracts;
+  const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
+  const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState<Object>(
     [],
     "proposalActions"
@@ -28,18 +31,40 @@ const ProposalNew: NextPage = () => {
     "isReallocation"
   );
 
+  useEffect(() => {
+    const loadProposalThreshold = async () => {
+      console.log((await Governance.proposalThreshold()).toString());
+      setProposalThreshold(await Governance.proposalThreshold());
+    };
+    loadProposalThreshold();
+  }, [Governance]);
+
+  // Load users vote power
+  useEffect(() => {
+    const loadVotePower = async () => {
+      const votePower = await VoteLockerCurve.balanceOf(address);
+      setVotePower(votePower);
+    };
+    if (web3Provider && address) {
+      loadVotePower();
+    }
+  }, [address, web3Provider, VoteLockerCurve]);
+
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Handle addition of a proposal action
   const handleAddAction = (action: string) => {
     setNewProposalActions([...newProposalActions, action]);
   };
 
+  // Handle deletion of a proposal action
   const handleDeleteAction = (actionIndex: number) => {
     setNewProposalActions(
       newProposalActions.filter((_, index: number) => index !== actionIndex)
     );
   };
 
+  // Reset the state of the form
   const reset = () => {
     setNewProposalActions([]);
     setSnapshotHash("");
@@ -53,6 +78,7 @@ const ProposalNew: NextPage = () => {
     calldatas: newProposalActions.map((a) => a.calldata),
   };
 
+  // Handle submit of the proposal (i.e. transaction)
   const handleSubmit = async () => {
     const transaction = await Governance[
       "propose(address[],uint256[],string[],bytes[],string)"
@@ -79,6 +105,18 @@ const ProposalNew: NextPage = () => {
       ],
     });
   };
+
+  if (votePower.lt(proposalThreshold)) {
+    return (
+      <div className="text-center pt-5">
+        <h3 className="mt-2 font-medium text-gray-900">
+          Minimum required vote power for a proposal is{" "}
+          {proposalThreshold.toString()} votes. You have{" "}
+          {truncateBalance(ethers.utils.formatUnits(votePower))} votes.
+        </h3>
+      </div>
+    );
+  }
 
   return (
     <>

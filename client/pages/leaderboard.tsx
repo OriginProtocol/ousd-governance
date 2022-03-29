@@ -8,7 +8,7 @@ export async function getServerSideProps({ res }: { res: any }) {
     await prisma.voter.findMany({ orderBy: [{ votes: "desc" }] })
   ).map((v) => ({
     address: v.address,
-    votes: v.votes.toString(),
+    votes: v.votes.toHexadecimal(),
   }));
 
   return {
