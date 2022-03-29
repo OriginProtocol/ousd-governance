@@ -139,7 +139,7 @@ const ProposalNew: NextPage = () => {
         <span className="label-text-alt">
           For proposals that aren&apos;t simple reallocations, a Snapshot
           proposal should be used to signal intent before on chain happens. The
-          Snapshot proposal should clearly detail the snapshotHash for the
+          Snapshot proposal should clearly detail the justification for the
           change.
         </span>
       </label>
