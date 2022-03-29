@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Loading } from "components/Loading";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { ProposalVoteStats } from "components/proposal/ProposalVoteStats";
@@ -6,7 +7,13 @@ import { ProposalParameters } from "components/proposal/ProposalParameters";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
 
-export const ProposalDetail = ({ proposalId }: { proposalId: string }) => {
+export const ProposalDetail = ({
+  proposalId,
+  description,
+}: {
+  proposalId: string;
+  description: string;
+}) => {
   const { contracts } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const [proposal, setProposal] = useState(null);
@@ -33,7 +40,17 @@ export const ProposalDetail = ({ proposalId }: { proposalId: string }) => {
       <ProposalParameters proposal={proposal} state={proposalState} />
       <SectionTitle>Governance Actions</SectionTitle>
       <ProposalActionsTable proposalActions={proposalActions} />
-      <SectionTitle>Justification</SectionTitle>
+      {description && (
+        <>
+          <SectionTitle>Signalling Proposal</SectionTitle>
+          <Link
+            href={`https://vote.originprotocol.com/#/proposal/${proposalId}`}
+            passHref
+          >
+            <a target="_blank">{description}</a>
+          </Link>
+        </>
+      )}
     </>
   );
 };

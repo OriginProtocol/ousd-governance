@@ -23,6 +23,7 @@ model Proposal {
     id          Int @default(autoincrement()) @id
     // This is storing a uint256
     proposalId  String @unique @map("proposal_id")
+    description String @default("")
     createdAt   DateTime @default(now()) @map("created_at")
 
     @@map("proposals")

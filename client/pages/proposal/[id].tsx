@@ -1,17 +1,33 @@
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { ProposalDetail } from "components/proposal/ProposalDetail";
 import { PageTitle } from "components/PageTitle";
+import prisma from "lib/prisma";
 
-const ProposalPage: NextPage = () => {
-  const router = useRouter();
+export async function getServerSideProps({
+  res,
+  query,
+}: {
+  res: any;
+  query: any;
+}) {
+  res.setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate");
 
-  const proposalId = router.query.id;
+  const proposal = await prisma.proposal.findUnique({
+    where: { proposalId: query.id },
+  });
 
+  const { proposalId, description } = proposal;
+
+  return {
+    props: { proposalId, description },
+  };
+}
+
+const ProposalPage: NextPage = ({ proposalId, description }) => {
   return (
     <>
       <PageTitle>Proposal</PageTitle>
-      <ProposalDetail proposalId={proposalId} />
+      <ProposalDetail proposalId={proposalId} description={description} />
     </>
   );
 };

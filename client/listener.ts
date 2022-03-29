@@ -64,6 +64,7 @@ const handleEvents = async (blockNumber, events, done) => {
         await prisma.proposal.create({
           data: {
             proposalId: event.values.proposalId,
+            description: event.values.description,
           },
         });
         logger.info("Inserted new proposal");
