@@ -158,7 +158,7 @@ const ProposalNew: NextPage = () => {
         </a>
       </div>{" "}
       {isReallocation ? (
-        <Reallocation />
+        <Reallocation snapshotHash={snapshotHash} />
       ) : (
         <>
           {newProposalActions.length === 0 ? (
@@ -178,6 +178,15 @@ const ProposalNew: NextPage = () => {
                 onActionDelete={handleDeleteAction}
                 ephemeral={true}
               />
+              <div className="flex">
+                <button
+                  className="btn btn-primary mt-24"
+                  disabled={newProposalActions.length === 0}
+                  onClick={handleSubmit}
+                >
+                  Submit Proposal
+                </button>
+              </div>
             </>
           )}
         </>
@@ -187,15 +196,6 @@ const ProposalNew: NextPage = () => {
         onModalClose={() => setModalOpen(false)}
         onActionAdd={handleAddAction}
       />
-      <div className="flex">
-        <button
-          className="btn btn-primary mt-24"
-          disabled={newProposalActions.length === 0}
-          onClick={handleSubmit}
-        >
-          Submit Proposal
-        </button>
-      </div>
     </>
   );
 };

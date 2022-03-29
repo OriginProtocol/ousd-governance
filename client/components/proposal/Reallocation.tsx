@@ -2,57 +2,50 @@ import { ethers } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
+import { toast } from "react-toastify";
 
-export const Reallocation = () => {
-  const { contracts } = useStore();
-  const {
-    AaveStrategy,
-    AaveStrategyProxy,
-    CompoundStrategy,
-    CompoundStrategyProxy,
-    ConvexStrategy,
-    ConvexStrategyProxy,
-  } = contracts;
-  const [aaveStrategyBalances, setAaveStrategyBalances] = useState([]);
-  const [compoundStrategyBalances, setCompoundStrategyBalances] = useState([]);
-  const [convexStrategyBalances, setConvexStrategyBalances] = useState([]);
+export const Reallocation = ({ snapshotHash }) => {
+  const { contracts, pendingTransactions } = useStore();
+  const { Governance } = contracts;
 
-  const strategies = useMemo(
-    () => [
-      {
-        name: "Aave",
-        contract: new ethers.Contract(
-          AaveStrategyProxy.address,
-          AaveStrategy.abi,
-          AaveStrategy.provider
-        ),
-        balances: aaveStrategyBalances,
-        balanceGetter: () => aaveStrategyBalances,
-        balanceSetter: setAaveStrategyBalances,
-      },
-      {
-        name: "Compound",
-        contract: new ethers.Contract(
-          CompoundStrategyProxy.address,
-          CompoundStrategy.abi,
-          CompoundStrategy.provider
-        ),
-        balanceGetter: () => compoundStrategyBalances,
-        balanceSetter: setCompoundStrategyBalances,
-      },
-      {
-        name: "Convex",
-        contract: new ethers.Contract(
-          ConvexStrategyProxy.address,
-          ConvexStrategy.abi,
-          ConvexStrategy.provider
-        ),
-        balanceGetter: () => convexStrategyBalances,
-        balanceSetter: setConvexStrategyBalances,
-      },
-    ],
-    []
+  const [fromStrategy, setFromStrategy] = useState<string>("");
+  const [toStrategy, setToStrategy] = useState<string>("");
+  const [daiAmount, setDaiAmount] = useState(ethers.BigNumber.from(0));
+  const [usdcAmount, setUsdcAmount] = useState(ethers.BigNumber.from(0));
+  const [usdtAmount, setUsdtAmount] = useState(ethers.BigNumber.from(0));
+  const [maxLoss, setMaxLoss] = useState(ethers.BigNumber.from(0));
+
+  const ProxiedAaveStrategy = new ethers.Contract(
+    contracts.AaveStrategyProxy.address,
+    contracts.AaveStrategy.abi,
+    contracts.AaveStrategy.provider
   );
+
+  const ProxiedCompoundStrategy = new ethers.Contract(
+    contracts.CompoundStrategyProxy.address,
+    contracts.CompoundStrategy.abi,
+    contracts.CompoundStrategy.provider
+  );
+
+  const ProxiedConvexStrategy = new ethers.Contract(
+    contracts.ConvexStrategyProxy.address,
+    contracts.ConvexStrategy.abi,
+    contracts.ConvexStrategy.provider
+  );
+
+  const proxiedContracts = [
+    ProxiedAaveStrategy,
+    ProxiedCompoundStrategy,
+    ProxiedConvexStrategy,
+  ];
+
+  const amounts = [daiAmount, usdcAmount, usdtAmount];
+
+  const strategies = [
+    { name: "Aave", address: contracts.AaveStrategyProxy.address },
+    { name: "Compound", address: contracts.CompoundStrategyProxy.address },
+    { name: "Convex", address: contracts.ConvexStrategyProxy.address },
+  ];
 
   const assets = useMemo(
     () => [
@@ -75,47 +68,94 @@ export const Reallocation = () => {
     []
   );
 
-  useEffect(() => {
-    const loadStrategyBalances = async () => {
-      for (const strategy of strategies) {
-        strategy.balanceSetter(
-          await Promise.all(
-            Object.values(assets).map((a) =>
-              strategy.contract.checkBalance(a.address)
-            )
-          )
-        );
+  const reset = () => {
+    setFromStrategy("");
+    setToStrategy("");
+    setDaiAmount(ethers.BigNumber.from(0));
+    setUsdcAmount(ethers.BigNumber.from(0));
+    setUsdtAmount(ethers.BigNumber.from(0));
+  };
+
+  const proposalActions = assets
+    .map((asset, i) => {
+      if (toStrategy === "" || fromStrategy === "") {
+        return;
       }
-    };
-    loadStrategyBalances();
-  }, [assets, strategies]);
+      const amount = amounts[i];
+      if (amount.gt(0)) {
+        const fromContract = proxiedContracts.find(
+          (c) => c.address === fromStrategy
+        );
+        if (fromContract === undefined) return;
+        return {
+          targets: [fromStrategy],
+          values: [0],
+          signatures: ["withdraw(address,address,uint256)"],
+          calldatas: [
+            fromContract.interface.encodeFunctionData(
+              fromContract.interface.functions[
+                "withdraw(address,address,uint256)"
+              ],
+              [toStrategy, asset.address, amount]
+            ),
+          ],
+        };
+      }
+    })
+    .filter((a) => a !== undefined);
+
+  const proposal = {
+    targets: proposalActions.map((p) => p.targets),
+    values: proposalActions.map((p) => p.values),
+    signatures: proposalActions.map((p) => p.signatures),
+    calldatas: proposalActions.map((p) => p.calldatas),
+  };
+
+  const handleSubmit = async () => {
+    const transaction = await Governance[
+      "propose(address[],uint256[],string[],bytes[],string)"
+    ](
+      proposal.targets,
+      proposal.values,
+      proposal.signatures,
+      proposal.calldatas,
+      snapshotHash
+    );
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Proposal has been submitted", {
+              hideProgressBar: true,
+            });
+            reset();
+          },
+        },
+      ],
+    });
+  };
 
   return (
     <>
       <div className="grid grid-cols-3 gap-4">
-        {strategies.map((strategy) => (
-          <div
-            className="card w-96 bg-base-100 shadow-xl mr-6"
-            key={strategy.name}
-          >
-            <div className="card-body">
-              <h2 className="card-title">{strategy.name}</h2>
-              {assets.map((asset, index) => {
-                const balance =
-                  strategy.balanceGetter && strategy.balanceGetter()[index];
-                if (!balance) return null;
-                return (
-                  <div key={index}>
-                    {asset.symbol}{" "}
-                    {truncateBalance(
-                      ethers.utils.formatUnits(balance, asset.decimals)
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        <StrategyBalanceCard
+          name="Aave"
+          contract={ProxiedAaveStrategy}
+          assets={assets}
+        />
+        <StrategyBalanceCard
+          name="Compound"
+          contract={ProxiedCompoundStrategy}
+          assets={assets}
+        />
+        <StrategyBalanceCard
+          name="Convex"
+          contract={ProxiedConvexStrategy}
+          assets={assets}
+        />
       </div>
       <div className="mt-12">
         <div className="grid grid-cols-2 gap-12">
@@ -124,12 +164,18 @@ export const Reallocation = () => {
               <label className="label">
                 <span className="label-text">From</span>
               </label>
-              <select className="select w-full select-bordered" defaultValue="">
+              <select
+                className="select w-full select-bordered"
+                defaultValue=""
+                onChange={(e) => setFromStrategy(e.target.value)}
+              >
                 <option value="" disabled={true}>
                   Strategy to reallocate from
                 </option>
                 {strategies.map((strategy) => (
-                  <option key={strategy.name}>{strategy.name}</option>
+                  <option key={strategy.name} value={strategy.address}>
+                    {strategy.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -137,12 +183,18 @@ export const Reallocation = () => {
               <label className="label">
                 <span className="label-text">To</span>
               </label>
-              <select className="select w-full select-bordered" defaultValue="">
+              <select
+                className="select w-full select-bordered"
+                defaultValue=""
+                onChange={(e) => setToStrategy(e.target.value)}
+              >
                 <option value="" disabled={true}>
                   Strategy to reallocate to
                 </option>
                 {strategies.map((strategy) => (
-                  <option key={strategy.name}>{strategy.name}</option>
+                  <option key={strategy.name} value={strategy.address}>
+                    {strategy.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -150,7 +202,12 @@ export const Reallocation = () => {
               <label className="label">
                 <span className="label-text">Max Loss</span>
               </label>
-              <input type="text" className="input input-bordered" value={100} />
+              <input
+                type="text"
+                className="input input-bordered"
+                value={100}
+                onChange={(e) => setMaxLoss(e.target.value)}
+              />
             </div>
           </div>
           <div className="w-full">
@@ -159,12 +216,84 @@ export const Reallocation = () => {
                 <label className="label">
                   <span className="label-text">{asset.symbol}</span>
                 </label>
-                <input type="text" className="input input-bordered" />
+                <input
+                  type="text"
+                  className="input input-bordered"
+                  onChange={(e) => {
+                    if (asset.symbol === "DAI") {
+                      setDaiAmount(
+                        ethers.utils.parseUnits(e.target.value || "0", 18)
+                      );
+                    } else if (asset.symbol === "USDC") {
+                      setUsdcAmount(
+                        ethers.utils.parseUnits(e.target.value || "0", 6)
+                      );
+                    } else if (asset.symbol === "USDT") {
+                      setUsdtAmount(
+                        ethers.utils.parseUnits(e.target.value || "0", 6)
+                      );
+                    }
+                  }}
+                />
               </div>
             ))}
           </div>
         </div>
       </div>
+      <div className="flex">
+        <button
+          className="btn btn-primary mt-24"
+          onClick={handleSubmit}
+          disabled={proposalActions.length === 0}
+        >
+          Submit Proposal
+        </button>
+      </div>
     </>
+  );
+};
+
+const StrategyBalanceCard = ({
+  name,
+  contract,
+  assets,
+}: {
+  name: string;
+  contract: any;
+  assets: Array<any>;
+}) => {
+  const [balances, setBalances] = useState([]);
+
+  useEffect(() => {
+    const loadBalances = async () => {
+      setBalances(
+        await Promise.all(
+          Object.values(assets).map((a) => contract.checkBalance(a.address))
+        )
+      );
+    };
+    loadBalances();
+  }, [contract, assets]);
+
+  return (
+    <div className="card w-96 mr-6">
+      <div className="card-body">
+        <h2 className="card-title">{name}</h2>
+        {assets.map((asset, index) => {
+          const balance = balances[index];
+          if (!balance) return null;
+          return (
+            <div key={index}>
+              <label className="w-16 inline-block text-gray-400">
+                {asset.symbol}
+              </label>
+              {truncateBalance(
+                ethers.utils.formatUnits(balance, asset.decimals)
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
