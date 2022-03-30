@@ -32,7 +32,7 @@ def test_create_proposal(governance, vote_locker, token):
     assert approx(proposal_quorum, vote_locker.totalSupplyAt(tx.block_number) * 0.04)
 
 def test_cant_create_proposal_if_below_threshold(governance):
-    with brownie.reverts("GovernorCompatibilityBravo: proposer votes below proposal threshold"):
+    with brownie.reverts("Governor: proposer votes below proposal threshold"):
         tx = governance.propose(
             ["0xEA2Ef2e2E5A749D4A66b41Db9aD85a38Aa264cb3"],
             [0],

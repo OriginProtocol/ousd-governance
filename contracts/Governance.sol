@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorSettings.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorTimelockControl.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorSettings.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 
 contract Governance is
     GovernorSettings,
@@ -107,18 +107,19 @@ contract Governance is
     {
         return super.proposalDeadline(proposalId);
     }
-
+    
     function _castVote(
         uint256 proposalId,
         address account,
         uint8 support,
-        string memory reason
+        string memory reason,
+        bytes memory params
     )
         internal
         virtual
         override(Governor, GovernorPreventLateQuorum)
         returns (uint256)
     {
-        return super._castVote(proposalId, account, support, reason);
+        return super._castVote(proposalId, account, support, reason, params);
     }
 }
