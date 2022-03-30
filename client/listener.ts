@@ -47,7 +47,8 @@ const contracts = [
 const options = {
   pollInterval: 10000, // period between polls in milliseconds (default: 13000)
   // Confirmed as soon as we've got it. No real problem with reorgs.
-  confirmations: 0,
+  // Don't use an integer here because it is falsy
+  confirmations: "0",
   chunkSize: 10000, // n° of blocks to fetch at a time (default: 10000)
   concurrency: 10, // maximum n° of concurrent web3 requests (default: 10)
   backoff: 1000, // retry backoff in milliseconds (default: 1000)
@@ -91,12 +92,24 @@ const handleEvents = async (blockNumber, events, done) => {
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
+  logger.info("Got confirmed block");
   handleEvents(blockNumber, events, done);
-  done();
-});
+  const existingLastBlock = await prisma.listener.findFirst();
+  if (existingLastBlock) {
+    await prisma.listener.update({
+      where: { lastSeenBlock: existingLastBlock.lastSeenBlock },
+      data: {
+        lastSeenBlock: blockNumber,
+      },
+    });
+  } else {
+    await prisma.listener.create({
+      data: {
+        lastSeenBlock: blockNumber,
+      },
+    });
+  }
 
-ethereumEvents.on("block.unconfirmed", async (blockNumber, events, done) => {
-  handleEvents(blockNumber, events, done);
   done();
 });
 
@@ -105,7 +118,13 @@ ethereumEvents.on("error", (err) => {
 });
 
 // TODO start this at contract deployment or last checked
-ethereumEvents.start(1);
+prisma.listener.findFirst().then((listener) => {
+  if (listener) {
+    ethereumEvents.start(listener.lastSeenBlock);
+  } else {
+    ethereumEvents.start(0);
+  }
+});
 
 logger.info("Listening for Ethereum events");
 

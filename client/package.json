@@ -10,7 +10,7 @@
   "scripts": {
     "dev:web": "next dev",
     "dev:listener": "wait-on .next/server/listener.js && nodemon .next/server/listener.js",
-    "dev": "rm .next/server/listener.js && npm-run-all -p dev:listener dev:web",
+    "dev": "rm -f .next/server/listener.js && npm-run-all -p dev:listener dev:web",
     "build": "next build",
     "start": "next start",
     "start:listener": "node .next/server/listener.js",

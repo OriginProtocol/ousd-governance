@@ -28,3 +28,9 @@ model Proposal {
 
     @@map("proposals")
 }
+
+model Listener {
+    lastSeenBlock Int @map("last_seen_block") @unique
+
+    @@map("listener")
+}
