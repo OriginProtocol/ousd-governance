@@ -1,77 +1,64 @@
-export const ProposalVoteStats = ({ proposal }) => {
+import { ethers } from "ethers";
+import { truncateBalance } from "utils/index";
+
+export const ProposalVoteStats = ({
+  proposal,
+  votePower,
+  onVote,
+  hasVoted,
+}) => {
   return (
-    <div className="w-full shadow stats">
+    <div className="w-full shadow stats text-center">
       <div className="stat">
-        <div className="stat-figure text-success-content">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-            />
-          </svg>
+        <div className="stat-title">Your Vote Power</div>
+        <div className="stat-value text-primary">
+          {truncateBalance(ethers.utils.formatUnits(votePower))}
         </div>
+      </div>{" "}
+      <div className="stat">
         <div className="stat-title">For</div>
         <div className="stat-value text-success-content">
-          {proposal.forVotes.toString()}
+          {truncateBalance(ethers.utils.formatUnits(proposal.forVotes))}
         </div>
+        {!hasVoted && (
+          <button
+            className="btn btn-sm btn-success w-100 mt-4"
+            disabled={!votePower.gt(0)}
+            onClick={() => onVote(1)}
+          >
+            Vote
+          </button>
+        )}
       </div>
       <div className="stat">
-        <div className="stat-figure text-error-content">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
-            />
-          </svg>
-        </div>
         <div className="stat-title">Against</div>
         <div className="stat-value text-error-content">
-          {proposal.againstVotes.toString()}
+          {truncateBalance(ethers.utils.formatUnits(proposal.againstVotes))}
         </div>
+        {!hasVoted && (
+          <button
+            className="btn btn-sm btn-error w-100 mt-4"
+            disabled={!votePower.gt(0)}
+            onClick={() => onVote(0)}
+          >
+            Vote
+          </button>
+        )}
       </div>
       <div className="stat">
-        <div className="stat-figure text-neutral">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
-            />
-          </svg>
-        </div>
         <div className="stat-title">Abstain</div>
         <div className="stat-value text-neutral">
-          {proposal.abstainVotes.toString()}
+          {truncateBalance(ethers.utils.formatUnits(proposal.abstainVotes))}
         </div>
+        {!hasVoted && (
+          <button
+            className="btn btn-sm w-100 mt-4"
+            disabled={!votePower.gt(0)}
+            onClick={() => onVote(2)}
+          >
+            Vote
+          </button>
+        )}
       </div>
     </div>
   );

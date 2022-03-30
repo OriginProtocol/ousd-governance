@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Loading } from "components/Loading";
@@ -6,6 +7,7 @@ import { ProposalVoteStats } from "components/proposal/ProposalVoteStats";
 import { ProposalParameters } from "components/proposal/ProposalParameters";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
+import { toast } from "react-toastify";
 
 export const ProposalDetail = ({
   proposalId,
@@ -14,10 +16,14 @@ export const ProposalDetail = ({
   proposalId: string;
   description: string;
 }) => {
-  const { contracts } = useStore();
+  const { address, contracts, pendingTransactions } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const [proposal, setProposal] = useState(null);
   const [proposalState, setProposalState] = useState(null);
+  const [quorum, setQuorum] = useState(0);
+  const [reloadProposal, setReloadProposal] = useState(false);
+  const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
+  const [hasVoted, setHasVoted] = useState(false);
   const { Governance } = contracts;
 
   useEffect(() => {
@@ -29,15 +35,70 @@ export const ProposalDetail = ({
     if (proposalId) {
       loadProposal();
     }
-  }, [proposalId, Governance]);
+  }, [proposalId, Governance, reloadProposal]);
+
+  useEffect(() => {
+    const loadVotePower = async () => {
+      setVotePower(await Governance.getVotes(address, proposal.startBlock));
+    };
+    if (address && proposal) {
+      loadVotePower();
+    }
+  }, [address, proposal, Governance]);
+
+  useEffect(() => {
+    const loadHasVoted = async () => {
+      setHasVoted(await Governance.hasVoted(proposalId, address));
+    };
+    if (address && proposal) {
+      loadHasVoted();
+    }
+  }, [address, proposal, Governance, proposalId, reloadProposal]);
+
+  useEffect(() => {
+    const loadQuorum = async () => {
+      setQuorum(await Governance.quorum(proposal.startBlock));
+    };
+    if (proposal) {
+      loadQuorum();
+    }
+  }, [proposal, Governance, proposalId, reloadProposal]);
 
   if (proposal === null || proposalActions === null) return <Loading />;
 
+  const handleVote = async (support: Number) => {
+    const transaction = await Governance.castVote(proposalId, support);
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Vote has been submitted", {
+              hideProgressBar: true,
+            });
+            setReloadProposal(!reloadProposal);
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <>
-      <ProposalVoteStats proposal={proposal} />
+      <ProposalVoteStats
+        proposal={proposal}
+        votePower={votePower}
+        onVote={handleVote}
+        hasVoted={hasVoted}
+      />
       <SectionTitle>Proposal Parameters</SectionTitle>
-      <ProposalParameters proposal={proposal} state={proposalState} />
+      <ProposalParameters
+        proposal={proposal}
+        state={proposalState}
+        quorum={quorum}
+      />
       <SectionTitle>Governance Actions</SectionTitle>
       <ProposalActionsTable proposalActions={proposalActions} />
       {description && (

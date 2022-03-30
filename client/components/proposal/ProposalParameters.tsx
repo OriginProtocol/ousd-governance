@@ -1,9 +1,11 @@
+import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { Address } from "components/Address";
 import { StateTag } from "components/proposal/StateTag";
 import { useStore } from "utils/store";
+import { truncateBalance } from "utils/index";
 
-export const ProposalParameters = ({ proposal, state }) => {
+export const ProposalParameters = ({ proposal, state, quorum }) => {
   const { web3Provider } = useStore();
   const [blockNumber, setBlockNumber] = useState(0);
 
@@ -48,6 +50,12 @@ export const ProposalParameters = ({ proposal, state }) => {
                 value={blocksSinceStart}
                 max={blockDifference}
               ></progress>
+            </dd>
+          </div>
+          <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt className="text-sm font-medium text-gray-400">Quorum</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              {truncateBalance(ethers.utils.formatUnits(quorum))}
             </dd>
           </div>
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
