@@ -105,7 +105,7 @@ export const ProposalDetail = ({
         <>
           <SectionTitle>Signalling Proposal</SectionTitle>
           <Link
-            href={`https://vote.originprotocol.com/#/proposal/${proposalId}`}
+            href={`https://vote.originprotocol.com/#/proposal/${description}`}
             passHref
           >
             <a target="_blank">{description}</a>
