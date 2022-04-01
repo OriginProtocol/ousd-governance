@@ -13,6 +13,7 @@
 
 pragma solidity ^0.8.4;
 
+import "./VoteLocker.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -21,7 +22,7 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/O
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, VoteLocker  {
     using SafeERC20 for ERC20;
 
     ///@notice Emitted when a lockup is created
@@ -47,11 +48,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
-
-    ///@notice Definition of a week
-    uint256 private constant WEEK = 7 days;
-    ///@notice Maximum lock time
-    uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
 
     /*
      * Voting power of locked tokens decreases over time in linear fashion. And can be represented
@@ -103,38 +99,13 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ///@notice userEpoch important for fetching previous block per user voting power
     mapping(address => uint256) public userEpoch;
 
-    /* @notice Global Checkpoints part of the equation to define combined voting
-     * power of all users.
-     */
-    Checkpoint[] private _globalCheckpoints;
-    ///@notice globalEpoch important for fetching previous block combined voting power
-    uint256 public globalEpoch;
+    GroupVotePowerState public totalVotes;
 
     ///@notice Lockup mapping for each user
     mapping(address => Lockup) public lockups;
 
-    /* @notice slopeChanges part of the equation to define combined voting power of
-     * all users. Slope changes always complement only the latest global Checkpoint and are
-     * not used when fetching combined voting power of previous blocks.
-     */    
-    mapping(uint256 => int128) public slopeChanges;
-
     ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
-
-    ///@notice Checkpoint structure representing linear voting power decay
-    struct Checkpoint {
-        int128 bias;
-        int128 slope;
-        uint256 ts;
-        uint256 blk;
-    }
-
-    ///@notice Stores token lockup details
-    struct Lockup {
-        int128 amount;
-        uint256 end;
-    }
 
     ///@custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
@@ -156,7 +127,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         _decimals = stakingToken.decimals();
 
         // Push an initial global checkpoint
-        _globalCheckpoints.push(
+        totalVotes.checkpoints.push(
             Checkpoint({
                 bias: 0,
                 slope: 0,
@@ -219,10 +190,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @dev See {ERC20-totalSupply}.
      */
     function totalSupply() public view returns (uint256) {
-        if (_globalCheckpoints.length == 0) {
+        if (totalVotes.checkpoints.length == 0) {
             return 0;
         }
-        Checkpoint memory lastCheckpoint = _globalCheckpoints[globalEpoch];
+        Checkpoint memory lastCheckpoint = totalVotes.checkpoints[totalVotes.epoch];
         return _supplyAt(lastCheckpoint, block.timestamp);
     }
 
@@ -274,7 +245,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         view
         returns (Checkpoint memory)
     {
-        return _globalCheckpoints[pos];
+        return totalVotes.checkpoints[pos];
     }
 
     /**
@@ -282,7 +253,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @return uint256
      */
     function numGlobalCheckpoints() public view returns (uint256) {
-        return _globalCheckpoints.length;
+        return totalVotes.checkpoints.length;
     }
 
     /**
@@ -290,7 +261,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @return Checkpoint memory
      */
     function getLastGlobalCheckpoint() public view returns (Checkpoint memory) {
-        return _globalCheckpoints[_globalCheckpoints.length - 1];
+        return totalVotes.checkpoints[totalVotes.checkpoints.length - 1];
     }
 
     /**
@@ -451,7 +422,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Public function to trigger global checkpoint.
      */
     function checkpoint() external {
-        _writeGlobalCheckpoint(0, 0);
+        _writeGlobalCheckpoint(0, 0, totalVotes);
     }
 
     /**
@@ -467,9 +438,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     ) private {
         Checkpoint memory oldCheckpoint;
         Checkpoint memory newCheckpoint;
-
-        int128 oldSlopeDelta = 0;
-        int128 newSlopeDelta = 0;
 
         if (_oldLockup.end > block.timestamp && _oldLockup.amount > 0) {
             // Old checkpoint still active, calculates its slope and bias
@@ -496,145 +464,14 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             _userCheckpoints[_account].push(oldCheckpoint);
         }
 
+        userEpoch[_account] = userCurrentEpoch + 1;
+
         newCheckpoint.ts = block.timestamp;
         newCheckpoint.blk = block.number;
-        userEpoch[_account] = userCurrentEpoch + 1;
         // Push second checkpoint
         _userCheckpoints[_account].push(newCheckpoint);
 
-        oldSlopeDelta = slopeChanges[_oldLockup.end];
-        if (_newLockup.end != 0) {
-            if (_newLockup.end == _oldLockup.end) {
-                // Lockup dates are the same end time, slope delta is the same
-                newSlopeDelta = oldSlopeDelta;
-            } else {
-                newSlopeDelta = slopeChanges[_newLockup.end];
-            }
-        }
-
-        _writeGlobalCheckpoint(
-            newCheckpoint.slope - oldCheckpoint.slope,
-            newCheckpoint.bias - oldCheckpoint.bias
-        );
-
-        /* Schedule the slope changes. There is a possible code simplification where
-         * we always undo the old checkpoint slope change and always apply the new
-         * checkpoint slope change. In the interest of gas optimization the code is 
-         * slightly more complicated.
-         */
-
-        // old lockup still active and needs slope change adjustment. 
-        if (_oldLockup.end > block.timestamp) {
-            // this is an adjustment of the slope: oldSlopeDelta was <something> - oldCheckpoint.slope, 
-            // so we cancel/undo that
-            oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
-            // gas optimize it so another storage access for _newLockup is not required
-            if (_newLockup.end == _oldLockup.end) {
-                // It was a new deposit, not extension
-                oldSlopeDelta = oldSlopeDelta - newCheckpoint.slope;
-            }
-            slopeChanges[_oldLockup.end] = oldSlopeDelta;
-        }
-        if (_newLockup.end > block.timestamp) {
-            // (second part of gas optimization) it was an extension
-            if (_newLockup.end > _oldLockup.end) {
-                newSlopeDelta = newSlopeDelta - newCheckpoint.slope;
-                slopeChanges[_newLockup.end] = newSlopeDelta;
-            }
-        }
-    }
-
-    /**
-     * @dev Write a global checkpoints. Global checkpoints are used to calculate the
-     * total supply for current and historical blocks.
-     * @param userSlopeDelta Change in slope that triggered this checkpoint
-     * @param userBiasDelta Change in bias that triggered this checkpoint
-     */
-    function _writeGlobalCheckpoint(int128 userSlopeDelta, int128 userBiasDelta)
-        private
-    {
-        Checkpoint memory lastCheckpoint;
-        if (globalEpoch > 0) {
-            lastCheckpoint = _globalCheckpoints[globalEpoch];
-        } else {
-            lastCheckpoint = Checkpoint({
-                bias: 0,
-                slope: 0,
-                ts: block.timestamp,
-                blk: block.number
-            });
-        }
-
-        Checkpoint memory initialLastCheckpoint = Checkpoint({
-            bias: 0,
-            slope: 0,
-            ts: lastCheckpoint.ts,
-            blk: lastCheckpoint.blk
-        });
-
-        uint256 blockSlope = 0; // dblock/dt
-        if (block.timestamp > lastCheckpoint.ts) {
-            // Scaled up
-            blockSlope =
-                ((block.number - lastCheckpoint.blk) * 1e18) /
-                (block.timestamp - lastCheckpoint.ts);
-        }
-
-        uint256 lastCheckpointTimestamp = lastCheckpoint.ts;
-        uint256 iterativeTime = _floorToWeek(lastCheckpointTimestamp);
-
-        /* Iterate from last global checkpoint in one week interval steps until present
-         * time is reached. Fill in the missing global checkpoints using slopeChanges - which
-         * always pertain only to the latest global checkpoint.
-         */
-        for (uint256 i = 0; i < 255; i++) {
-            // 5 years
-            iterativeTime = iterativeTime + WEEK;
-
-            int128 slopeDelta = 0;
-            if (iterativeTime > block.timestamp) {
-                // Current epoch
-                iterativeTime = block.timestamp;
-            } else {
-                slopeDelta = slopeChanges[iterativeTime];
-            }
-
-            // Calculate the change in bias for the current epoch
-            int128 biasDelta = lastCheckpoint.slope *
-                SafeCast.toInt128(
-                    int256((iterativeTime - lastCheckpointTimestamp))
-                );
-
-            // The bias can be below 0
-            lastCheckpoint.bias = max(lastCheckpoint.bias - biasDelta, 0);
-            // The slope should never be below 0 but added for safety
-            lastCheckpoint.slope = max(lastCheckpoint.slope + slopeDelta, 0);
-            lastCheckpoint.ts = iterativeTime;
-            lastCheckpointTimestamp = iterativeTime;
-            lastCheckpoint.blk =
-                initialLastCheckpoint.blk +
-                ((blockSlope * (iterativeTime - initialLastCheckpoint.ts)) /
-                    1e18); // Scale back down
-
-            globalEpoch += 1;
-
-            if (iterativeTime == block.timestamp) {
-                lastCheckpoint.blk = block.number;
-                // Adjust the last checkpoint for any delta from the user
-                lastCheckpoint.slope = max(
-                    lastCheckpoint.slope + userSlopeDelta,
-                    0
-                );
-                lastCheckpoint.bias = max(
-                    lastCheckpoint.bias + userBiasDelta,
-                    0
-                );
-                _globalCheckpoints.push(lastCheckpoint);
-                break;
-            } else {
-                _globalCheckpoints.push(lastCheckpoint);
-            }
-        }
+        _updateGroupState(_oldLockup, _newLockup, oldCheckpoint, newCheckpoint, totalVotes);
     }
 
     /**
@@ -707,19 +544,19 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
-            _globalCheckpoints,
+            totalVotes.checkpoints,
             _blockNumber,
-            globalEpoch // Max epoch
+            totalVotes.epoch // Max epoch
         );
-        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
+        Checkpoint memory checkpoint0 = totalVotes.checkpoints[recentGlobalEpoch];
 
         // Calculate delta (block & time) between checkpoint and target block
         // Allowing us to calculate the average seconds per block between
         // the two points
         uint256 dBlock = 0;
         uint256 dTime = 0;
-        if (recentGlobalEpoch < globalEpoch) {
-            Checkpoint memory checkpoint1 = _globalCheckpoints[
+        if (recentGlobalEpoch < totalVotes.epoch) {
+            Checkpoint memory checkpoint1 = totalVotes.checkpoints[
                 recentGlobalEpoch + 1
             ];
             dBlock = checkpoint1.blk - checkpoint0.blk;
@@ -775,20 +612,20 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
-            _globalCheckpoints,
+            totalVotes.checkpoints,
             _blockNumber,
-            globalEpoch
+            totalVotes.epoch
         );
 
-        Checkpoint memory checkpoint0 = _globalCheckpoints[recentGlobalEpoch];
+        Checkpoint memory checkpoint0 = totalVotes.checkpoints[recentGlobalEpoch];
 
         if (checkpoint0.blk > _blockNumber) {
             return 0;
         }
 
         uint256 dTime = 0;
-        if (recentGlobalEpoch < globalEpoch) {
-            Checkpoint memory checkpoint1 = _globalCheckpoints[
+        if (recentGlobalEpoch < totalVotes.epoch) {
+            Checkpoint memory checkpoint1 = totalVotes.checkpoints[
                 recentGlobalEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
@@ -843,7 +680,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             }
             // else get most recent slope change
             else {
-                dSlope = slopeChanges[iterativeTime];
+                dSlope = totalVotes.slopeChanges[iterativeTime];
             }
 
             lastCheckpoint.bias =
@@ -862,35 +699,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         }
 
         return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
-    }
-
-    /**
-     * @dev Floors a timestamp to the nearest weekly increment
-     * @param _t Timestamp to floor
-     * @return Timestamp floored to nearest weekly increment
-     */
-    function _floorToWeek(uint256 _t) internal pure returns (uint256) {
-        return (_t / WEEK) * WEEK;
-    }
-
-    /**
-     * @dev Returns the largest of two numbers.
-     * @param _a First number
-     * @param _b Second number
-     * @return Largest of _a and _b
-     */
-    function max(uint256 _a, uint256 _b) internal pure returns (uint256) {
-        return _a >= _b ? _a : _b;
-    }
-
-    /**
-     * @dev Returns the smallest of two numbers.
-     * @param _a First number
-     * @param _b Second number
-     * @return Smallest of _a and _b
-     */
-    function max(int128 _a, int128 _b) internal pure returns (int128) {
-        return _a >= _b ? _a : _b;
     }
 
     function _authorizeUpgrade(address newImplementation)
