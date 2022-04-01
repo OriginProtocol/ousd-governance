@@ -93,12 +93,14 @@ export const ProposalActionsTable = ({
                   const data = decodedData.toString();
 
                   if (type === "address") {
-                    return <div key={i}>{etherscanLink(data)}</div>;
+                    return <div key={i}>{etherscanLink(contracts, data)}</div>;
                   } else if (type === "address[]") {
                     return data
                       .split(",")
                       .map((address) => (
-                        <div key={index}>{etherscanLink(address)}</div>
+                        <div key={index}>
+                          {etherscanLink(contracts, address)}
+                        </div>
                       ));
                   } else {
                     return (

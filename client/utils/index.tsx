@@ -76,7 +76,7 @@ export const addressContractName = (contracts, address: string): string => {
   );
 };
 
-export const etherscanLink = (address: string) => {
+export const etherscanLink = (contracts, address: string) => {
   return (
     <a
       className="link link-primary"
@@ -84,7 +84,7 @@ export const etherscanLink = (address: string) => {
       target="_blank"
       rel="noreferrer"
     >
-      {addressContractName(address)}
+      {addressContractName(contracts, address)}
     </a>
   );
 };
