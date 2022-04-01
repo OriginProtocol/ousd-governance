@@ -27,6 +27,7 @@ const ProposalNew: NextPage = () => {
     false,
     "isReallocation"
   );
+  const [submitDisabled, setSubmitDisabled] = useState(false);
 
   useEffect(() => {
     const loadProposalThreshold = async () => {
@@ -65,6 +66,7 @@ const ProposalNew: NextPage = () => {
     setNewProposalActions([]);
     setSnapshotHash("");
     setIsReallocation(false);
+    setSubmitDisabled(false);
   };
 
   const proposalActions = {
@@ -76,15 +78,24 @@ const ProposalNew: NextPage = () => {
 
   // Handle submit of the proposal (i.e. transaction)
   const handleSubmit = async () => {
-    const transaction = await Governance[
-      "propose(address[],uint256[],string[],bytes[],string)"
-    ](
-      proposalActions.targets,
-      proposalActions.values,
-      proposalActions.signatures,
-      proposalActions.calldatas,
-      snapshotHash
-    );
+    setSubmitDisabled(true);
+
+    let transaction;
+
+    try {
+      transaction = await Governance[
+        "propose(address[],uint256[],string[],bytes[],string)"
+      ](
+        proposalActions.targets,
+        proposalActions.values,
+        proposalActions.signatures,
+        proposalActions.calldatas,
+        snapshotHash
+      );
+    } catch (error) {
+      setSubmitDisabled(false);
+      return;
+    }
 
     useStore.setState({
       pendingTransactions: [
@@ -178,7 +189,7 @@ const ProposalNew: NextPage = () => {
               <div className="flex">
                 <button
                   className="btn btn-primary mt-24"
-                  disabled={newProposalActions.length === 0}
+                  disabled={newProposalActions.length === 0 || submitDisabled}
                   onClick={handleSubmit}
                 >
                   Submit Proposal
