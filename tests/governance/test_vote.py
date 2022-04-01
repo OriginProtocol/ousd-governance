@@ -144,7 +144,27 @@ def test_late_vote_extends_quorum(governance, vote_locker, token, timelock_contr
     assert proposal[4] == (86400 / 15) + web3.eth.block_number
 
 
-def test_timelock_proposal_can_be_cancelled(governance, vote_locker, token, timelock_controller):
-    pass
+def test_timelock_proposal_can_be_cancelled(governance, vote_locker, token, timelock_controller, web3):
+    alice = accounts[0]
+    amount = 1000 * 10 ** 18
+    token.approve(vote_locker.address, amount * 10, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    chain.mine()
+    governance.castVote(tx.return_value, 1, {"from": alice})
+    mine_blocks(web3)
+    governance.queue(tx.return_value, {"from": alice})
+    assert governance.state(tx.return_value) == 5
+    governance.cancel(tx.return_value)
+    chain.mine()
+    # 2 == canceled. See ProposalState enum here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/ae270b0d8931c587a987cf3a36e510906e305214/contracts/governance/IGovernor.sol#L14-L22
+    assert governance.state(tx.return_value) == 2
 
 
