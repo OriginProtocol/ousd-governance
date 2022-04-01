@@ -167,4 +167,59 @@ def test_timelock_proposal_can_be_cancelled(governance, vote_locker, token, time
     # 2 == canceled. See ProposalState enum here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/ae270b0d8931c587a987cf3a36e510906e305214/contracts/governance/IGovernor.sol#L14-L22
     assert governance.state(tx.return_value) == 2
 
+    # can not cancel already cancelled proposal
+    with brownie.reverts("Governor: proposal not active"):
+        governance.cancel(tx.return_value)
+
+def test_timelock_proposal_can_be_cancelled_after_time_passes(governance, vote_locker, token, timelock_controller, web3):
+    alice = accounts[0]
+    amount = 1000 * 10 ** 18
+    token.approve(vote_locker.address, amount * 10, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    chain.mine()
+    governance.castVote(tx.return_value, 1, {"from": alice})
+    mine_blocks(web3)
+    governance.queue(tx.return_value, {"from": alice})
+    assert governance.state(tx.return_value) == 5
+    chain.sleep(86400 * 2)
+    chain.mine()
+    # can be cancelled even when voting is already enabled
+    governance.cancel(tx.return_value)
+    # 2 == canceled. See ProposalState enum here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/ae270b0d8931c587a987cf3a36e510906e305214/contracts/governance/IGovernor.sol#L14-L22
+    assert governance.state(tx.return_value) == 2
+
+def test_timelock_proposal_can_not_be_cancelled_after_is_executed(governance, vote_locker, token, timelock_controller, web3):
+    alice = accounts[0]
+    amount = 1000 * 10 ** 18
+    token.approve(vote_locker.address, amount * 10, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + WEEK, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    chain.mine()
+    governance.castVote(tx.return_value, 1, {"from": alice})
+    mine_blocks(web3)
+    governance.queue(tx.return_value, {"from": alice})
+    assert governance.state(tx.return_value) == 5
+    chain.sleep(86400 * 2)
+    chain.mine()
+    governance.execute(tx.return_value, {"from": alice})
+    assert governance.state(tx.return_value) == 7
+    assert governance.votingDelay() == 100
+    # can not cancel executed proposal
+    with brownie.reverts("Governor: proposal not active"):
+        governance.cancel(tx.return_value)
 
