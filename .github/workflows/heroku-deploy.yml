@@ -8,6 +8,7 @@ on:
 jobs:
   heroku-deploy:
     runs-on: ubuntu-latest
+    environment: Staging
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
