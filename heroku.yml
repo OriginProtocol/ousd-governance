@@ -3,7 +3,7 @@ build:
     web: Dockerfile
 release:
   command:
-    - npx prisma migrate deploy
+    - npx prisma migrate deploy > /dev/null
   image: web
 run:
   web: yarn start

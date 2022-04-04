@@ -16,10 +16,14 @@ pipx install eth-brownie
 ```
 
 ## Install brownie dependencies
+We require OpenZeppelin contract code that is in master and will be released after 4.5.0. Since the release
+tag has not been created yet we need to import them by commit hash. Once newer version of 4.5.0 is released
+we can default to that.
 
 ```bash
-brownie pm install OpenZeppelin/openzeppelin-contracts@4.5.0
-brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0
+
+brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9
+brownie pm install OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458
 ```
 
 ## Install hardhat

@@ -20,4 +20,5 @@ def governance(vote_locker, timelock_controller, web3):
     governance = accounts[0].deploy(Governance, vote_locker, timelock_controller)
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)
+    timelock_controller.grantRole(web3.keccak(text="CANCELLER_ROLE"), governance)
     return governance
