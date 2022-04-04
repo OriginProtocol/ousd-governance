@@ -3,9 +3,8 @@
 pragma solidity ^0.8.4;
 
 import "./BaseVoteLocker.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
-import "./console.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/math/SafeCast.sol";
+import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/Strings.sol";
 
 contract GroupVoteLocker is BaseVoteLocker {
     ///@notice Checkpoint structure representing linear voting power decay
@@ -28,10 +27,12 @@ contract GroupVoteLocker is BaseVoteLocker {
         uint256 epoch;
     }
 
-
-
-    /* @dev
-     * 
+    /* @dev Update the group voting state
+     * @param oldLockup Users lockup prior to the change that triggered the checkpoint
+     * @param newLockup Users new lockup
+     * @param oldCheckpoint checkpoint related to oldLockup
+     * @param newCheckpoint checkpoint related to newLockup
+     * @param groupState group state to be modified
      */
     function _updateGroupState(
         Lockup memory oldLockup,
@@ -89,10 +90,10 @@ contract GroupVoteLocker is BaseVoteLocker {
     }
 
     /**
-     * @dev TODO
+     * @dev Add a checkpoint to the group state
      * @param userSlopeDelta Change in slope that triggered this checkpoint
      * @param userBiasDelta Change in bias that triggered this checkpoint
-     * @param groupState TODO
+     * @param groupState group state to have a checkpoint added
      */
     function _writeGroupCheckpoint(
         int128 userSlopeDelta,
@@ -185,33 +186,42 @@ contract GroupVoteLocker is BaseVoteLocker {
         }
     }
 
-    function totalVotePower(GroupVotePowerState storage votePower) internal view returns (uint256) {
-        if (votePower.checkpoints.length == 0) {
+    /**
+     * @dev Get the total vote power from the group state at the latest block
+     * @param groupState group state to calculate voting power from
+     */
+    function totalVotePower(GroupVotePowerState storage groupState) internal view returns (uint256) {
+        if (groupState.checkpoints.length == 0) {
             return 0;
         }
-        Checkpoint memory lastCheckpoint = votePower.checkpoints[votePower.epoch];
-        return _votePowerAt(votePower, lastCheckpoint, block.timestamp);
+        Checkpoint memory lastCheckpoint = groupState.checkpoints[groupState.epoch];
+        return _votePowerAt(groupState, lastCheckpoint, block.timestamp);
     }
 
-    function totalVotePowerAt(GroupVotePowerState storage votePower, uint256 _blockNumber) internal view returns (uint256) {
+    /**
+     * @dev Get the total vote power from the group state at the specified _blockNumber
+     * @param groupState group state to calculate voting power from
+     * @param _blockNumber block number at which totalVotePower is returned
+     */
+    function totalVotePowerAt(GroupVotePowerState storage groupState, uint256 _blockNumber) internal view returns (uint256) {
         require(_blockNumber <= block.number, "Block number is in the future");
 
         // Get most recent global Checkpoint to block
         uint256 recentGlobalEpoch = _findEpoch(
-            votePower.checkpoints,
+            groupState.checkpoints,
             _blockNumber,
-            votePower.epoch
+            groupState.epoch
         );
 
-        Checkpoint memory checkpoint0 = votePower.checkpoints[recentGlobalEpoch];
+        Checkpoint memory checkpoint0 = groupState.checkpoints[recentGlobalEpoch];
 
         if (checkpoint0.blk > _blockNumber) {
             return 0;
         }
 
         uint256 dTime = 0;
-        if (recentGlobalEpoch < votePower.epoch) {
-            Checkpoint memory checkpoint1 = votePower.checkpoints[
+        if (recentGlobalEpoch < groupState.epoch) {
+            Checkpoint memory checkpoint1 = groupState.checkpoints[
                 recentGlobalEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
@@ -238,10 +248,17 @@ contract GroupVoteLocker is BaseVoteLocker {
         // to the function and dTime is correctly set to 0
 
         // Now dTime contains info on how far are we beyond point
-        return _votePowerAt(votePower, checkpoint0, checkpoint0.ts + dTime);
+        return _votePowerAt(groupState, checkpoint0, checkpoint0.ts + dTime);
     }
 
-    function _votePowerAt(GroupVotePowerState storage votePower, Checkpoint memory _checkpoint, uint256 _time)
+    /**
+     * @dev Calculates voting power at a given time _t
+     * @param groupState group state to calculate voting power from
+     * @param _checkpoint Most recent point before time _t
+     * @param _time Time at which to calculate supply
+     * @return totalSupply at given time
+     */
+    function _votePowerAt(GroupVotePowerState storage groupState, Checkpoint memory _checkpoint, uint256 _time)
         internal
         view
         returns (uint256)
@@ -260,7 +277,7 @@ contract GroupVoteLocker is BaseVoteLocker {
             }
             // else get most recent slope change
             else {
-                dSlope = votePower.slopeChanges[iterativeTime];
+                dSlope = groupState.slopeChanges[iterativeTime];
             }
 
             lastCheckpoint.bias =
@@ -280,22 +297,6 @@ contract GroupVoteLocker is BaseVoteLocker {
 
         return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
     }
-
-    // function getEmptyCheckpoint() internal pure returns (Checkpoint memory) {
-    //     return Checkpoint({
-    //        bias: 0,
-    //        slope: 0,
-    //        ts: 0,
-    //        blk: 0
-    //     });
-    // }
-
-    // function getEmptyLockup() internal pure returns (Lockup memory) {
-    //     return Lockup({
-    //        amount: 0,
-    //        end: 0
-    //     });
-    // }
 
     /**
      * @dev Binary search (bisection) to find epoch closest to block.

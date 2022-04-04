@@ -13,10 +13,9 @@
 
 pragma solidity ^0.8.4;
 
+import "./GroupVoteLocker.sol";
 import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/ERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/utils/SafeERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/Strings.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/access/OwnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -107,9 +106,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     ///@notice Contains group vote information used for totalSupply & totalSupplyAt
     GroupVotePowerState public totalVotes;
 
-    ///@notice Lockup mapping for each user
-    mapping(address => GroupVotePowerState) public userTotalVotesWithDelegation;
-
     /// @notice Delegation mapping where delegator is key and delegatee is value
     mapping(address => address) private _delegations;
 
@@ -181,15 +177,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @dev See {ERC20-balanceOf}.
      */
     function balanceOf(address _account) public view returns (uint256) {
-        return totalVotePower(userTotalVotesWithDelegation[_account]);
-
-    }
-
-    /**
-     * Function considers voting power only from token lockup - user Checkpoints. Ignoring
-     * delegation.
-     */
-    function _balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -303,39 +290,14 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         view
         virtual
         returns (address)
-    {
-        return _delegations[_account]; 
-    }
+    {}
 
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
-        address currentDelegatee = _delegations[msg.sender];
-        uint256 votingPower = _balanceOfAccount(msg.sender);
-        _delegations[msg.sender] = delegatee;
-
-        // use currently has 0 voting power nothing else to do here
-        if (votingPower == 0) {
-            return;
-        }
-
-        // checkpoint exists since votingPower > 0
-        Checkpoint memory lastCheckpoint = getLastCheckpoint(msg.sender);
-
-        // take away voting power from current delegatee or user itself
-        _writeGroupCheckpoint(
-            -lastCheckpoint.slope,
-            -lastCheckpoint.bias,
-            userTotalVotesWithDelegation[currentDelegatee != address(0) ? currentDelegatee : msg.sender]
-        );
-
-        // add voting power to new delegatee or user itself
-        _writeGroupCheckpoint(
-            lastCheckpoint.slope,
-            lastCheckpoint.bias,
-            userTotalVotesWithDelegation[delegatee != address(0) ? delegatee : msg.sender]
-        );
+        // TODO a future upgrade may support delegation
+        revert("Delegation is not supported");
     }
 
     /**
@@ -491,15 +453,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         // Push second checkpoint
         _userCheckpoints[_account].push(newCheckpoint);
         _updateGroupState(_oldLockup, _newLockup, oldCheckpoint, newCheckpoint, totalVotes);
-
-        // also update the delegate user group state or account itself
-        _updateGroupState(
-            _oldLockup,
-            _newLockup,
-            oldCheckpoint,
-            newCheckpoint,
-            userTotalVotesWithDelegation[_delegations[_account] != address(0) ? _delegations[_account] : msg.sender]
-        );
     }
 
     /**
@@ -538,23 +491,12 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     }
 
     /**
-     * @dev TODO:
-     */
-    function balanceOfAt(address _account, uint256 _blockNumber)
-        public
-        view
-        returns (uint256)
-    {
-        return totalVotePowerAt(userTotalVotesWithDelegation[_account], _blockNumber);
-    }
-
-    /**
      * @dev Gets a users votingWeight at a given blockNumber, ignores delegation
      * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
      * @return uint256 Balance of user voting power.
      */
-    function balanceOfAtAccount(address _account, uint256 _blockNumber)
+    function balanceOfAt(address _account, uint256 _blockNumber)
         public
         view
         returns (uint256)
@@ -637,7 +579,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @return totalSupply of voting token weight at the given blockNumber
      */
     function totalSupplyAt(uint256 _blockNumber) public view returns (uint256) {
-        totalVotePowerAt(totalVotes, _blockNumber);
+        return totalVotePowerAt(totalVotes, _blockNumber);
     }
 
     /**
