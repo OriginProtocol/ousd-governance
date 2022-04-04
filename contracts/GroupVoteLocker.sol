@@ -2,15 +2,12 @@
 
 pragma solidity ^0.8.4;
 
+import "./BaseVoteLocker.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/Strings.sol";
+import "./console.sol";
 
-contract VoteLocker {
-    ///@notice Definition of a week
-    uint256 internal constant WEEK = 7 days;
-    ///@notice Maximum lock time
-    uint256 public constant MAX_LOCK_TIME = 4 * 365 * 86400; // 4 years
-
+contract GroupVoteLocker is BaseVoteLocker {
     ///@notice Checkpoint structure representing linear voting power decay
     struct Checkpoint {
         int128 bias;
@@ -30,6 +27,8 @@ contract VoteLocker {
         mapping(uint256 => int128) slopeChanges;
         uint256 epoch;
     }
+
+
 
     /* @dev
      * 
@@ -56,7 +55,7 @@ contract VoteLocker {
             }
         }
 
-        _writeGlobalCheckpoint(
+        _writeGroupCheckpoint(
             newCheckpoint.slope - oldCheckpoint.slope,
             newCheckpoint.bias - oldCheckpoint.bias,
             groupState
@@ -90,13 +89,12 @@ contract VoteLocker {
     }
 
     /**
-     * @dev Write a global checkpoints. Global checkpoints are used to calculate the
-     * total supply for current and historical blocks.
+     * @dev TODO
      * @param userSlopeDelta Change in slope that triggered this checkpoint
      * @param userBiasDelta Change in bias that triggered this checkpoint
      * @param groupState TODO
      */
-    function _writeGlobalCheckpoint(
+    function _writeGroupCheckpoint(
         int128 userSlopeDelta,
         int128 userBiasDelta,
         GroupVotePowerState storage groupState
@@ -187,32 +185,140 @@ contract VoteLocker {
         }
     }
 
-    /**
-     * @dev Floors a timestamp to the nearest weekly increment
-     * @param _t Timestamp to floor
-     * @return Timestamp floored to nearest weekly increment
-     */
-    function _floorToWeek(uint256 _t) internal pure returns (uint256) {
-        return (_t / WEEK) * WEEK;
+    function totalVotePower(GroupVotePowerState storage votePower) internal view returns (uint256) {
+        if (votePower.checkpoints.length == 0) {
+            return 0;
+        }
+        Checkpoint memory lastCheckpoint = votePower.checkpoints[votePower.epoch];
+        return _votePowerAt(votePower, lastCheckpoint, block.timestamp);
     }
 
-    /**
-     * @dev Returns the largest of two numbers.
-     * @param _a First number
-     * @param _b Second number
-     * @return Largest of _a and _b
-     */
-    function max(uint256 _a, uint256 _b) internal pure returns (uint256) {
-        return _a >= _b ? _a : _b;
+    function totalVotePowerAt(GroupVotePowerState storage votePower, uint256 _blockNumber) internal view returns (uint256) {
+        require(_blockNumber <= block.number, "Block number is in the future");
+
+        // Get most recent global Checkpoint to block
+        uint256 recentGlobalEpoch = _findEpoch(
+            votePower.checkpoints,
+            _blockNumber,
+            votePower.epoch
+        );
+
+        Checkpoint memory checkpoint0 = votePower.checkpoints[recentGlobalEpoch];
+
+        if (checkpoint0.blk > _blockNumber) {
+            return 0;
+        }
+
+        uint256 dTime = 0;
+        if (recentGlobalEpoch < votePower.epoch) {
+            Checkpoint memory checkpoint1 = votePower.checkpoints[
+                recentGlobalEpoch + 1
+            ];
+            if (checkpoint0.blk != checkpoint1.blk) {
+                /* to estimate how much time has passed since the last checkpoint get the number
+                 * of blocks since the last checkpoint. And multiply that by the average time per 
+                 * block of the 2 neighboring checkpoints of said _blockNumber
+                 */
+                dTime =
+                    ((_blockNumber - checkpoint0.blk) *
+                        (checkpoint1.ts - checkpoint0.ts)) /
+                    (checkpoint1.blk - checkpoint0.blk);
+            }
+        } else if (checkpoint0.blk != block.number) {
+            /* to estimate how much time has passed since the last checkpoint get the number
+             * of blocks since the last checkpoint. And multiply that by the average time per 
+             * block since the last checkpoint and present blockchain state. 
+             */
+            dTime =
+                ((_blockNumber - checkpoint0.blk) *
+                    (block.timestamp - checkpoint0.ts)) /
+                (block.number - checkpoint0.blk);
+        }
+        // if code doesn't enter any of the above if conditions latest _blockNumber was passed
+        // to the function and dTime is correctly set to 0
+
+        // Now dTime contains info on how far are we beyond point
+        return _votePowerAt(votePower, checkpoint0, checkpoint0.ts + dTime);
     }
 
+    function _votePowerAt(GroupVotePowerState storage votePower, Checkpoint memory _checkpoint, uint256 _time)
+        internal
+        view
+        returns (uint256)
+    {
+        Checkpoint memory lastCheckpoint = _checkpoint;
+
+        // Floor the timestamp to weekly interval
+        uint256 iterativeTime = _floorToWeek(lastCheckpoint.ts);
+        // Iterate through all weeks between _checkpoint & _time to account for slope changes
+        for (uint256 i = 0; i < 255; i++) {
+            iterativeTime = iterativeTime + WEEK;
+            int128 dSlope = 0;
+            // If week end is after timestamp, then truncate & leave dSlope to 0
+            if (iterativeTime > _time) {
+                iterativeTime = _time;
+            }
+            // else get most recent slope change
+            else {
+                dSlope = votePower.slopeChanges[iterativeTime];
+            }
+
+            lastCheckpoint.bias =
+                lastCheckpoint.bias -
+                (lastCheckpoint.slope *
+                    SafeCast.toInt128(
+                        int256(iterativeTime - lastCheckpoint.ts)
+                    ));
+
+            if (iterativeTime == _time) {
+                break;
+            }
+
+            lastCheckpoint.slope = lastCheckpoint.slope + dSlope;
+            lastCheckpoint.ts = iterativeTime;
+        }
+
+        return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
+    }
+
+    // function getEmptyCheckpoint() internal pure returns (Checkpoint memory) {
+    //     return Checkpoint({
+    //        bias: 0,
+    //        slope: 0,
+    //        ts: 0,
+    //        blk: 0
+    //     });
+    // }
+
+    // function getEmptyLockup() internal pure returns (Lockup memory) {
+    //     return Lockup({
+    //        amount: 0,
+    //        end: 0
+    //     });
+    // }
+
     /**
-     * @dev Returns the smallest of two numbers.
-     * @param _a First number
-     * @param _b Second number
-     * @return Smallest of _a and _b
+     * @dev Binary search (bisection) to find epoch closest to block.
+     * @param _block Find the most recent point history before this block
+     * @param _maxEpoch Maximum epoch
+     * @return uint256 The most recent epoch before the block
      */
-    function max(int128 _a, int128 _b) internal pure returns (int128) {
-        return _a >= _b ? _a : _b;
+    function _findEpoch(
+        Checkpoint[] memory _checkpoints,
+        uint256 _block,
+        uint256 _maxEpoch
+    ) internal view returns (uint256) {
+        uint256 minEpoch = 0;
+        uint256 maxEpoch = _maxEpoch;
+        for (uint256 i = 0; i < 128; i++) {
+            if (minEpoch >= maxEpoch) break;
+            uint256 mid = (minEpoch + maxEpoch + 1) / 2;
+            if (_checkpoints[mid].blk <= _block) {
+                minEpoch = mid;
+            } else {
+                maxEpoch = mid - 1;
+            }
+        }
+        return minEpoch;
     }
 }

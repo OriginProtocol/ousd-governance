@@ -1,13 +1,7 @@
 # Copied from https://github.com/curvefi/curve-dao-contracts/blob/master/tests/integration/VotingEscrow/test_voting_escrow.py
 
-from ..helpers import approx
+from ..helpers import approx, H, DAY, WEEK, MAXTIME, TOL
 from ..fixtures import token, vote_locker
-
-H = 3600
-DAY = 86400
-WEEK = 7 * DAY
-MAXTIME = 4 * 365 * DAY
-TOL = 120 / WEEK
 
 
 def test_voting_powers(web3, chain, accounts, token, vote_locker):

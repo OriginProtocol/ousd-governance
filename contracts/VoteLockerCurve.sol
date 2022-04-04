@@ -13,7 +13,7 @@
 
 pragma solidity ^0.8.4;
 
-import "./VoteLocker.sol";
+import "./GroupVoteLocker.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/ERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.5.0/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -22,7 +22,7 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/access/O
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.5.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
-contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, VoteLocker  {
+contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, GroupVoteLocker  {
     using SafeERC20 for ERC20;
 
     ///@notice Emitted when a lockup is created
@@ -43,6 +43,9 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     );
     ///@notice Emitted when a user withdraws from an expired lockup
     event Withdraw(address indexed provider, uint256 value, uint256 ts);
+
+    ///@notice Emitted when an account changes their delegate.
+    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
     ///@notice ERC20 parameters
     string private _name;
@@ -99,10 +102,17 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     ///@notice userEpoch important for fetching previous block per user voting power
     mapping(address => uint256) public userEpoch;
 
+    ///@notice Lockup mapping for each user
+    mapping(address => Lockup) public lockups;
+
+    ///@notice Contains group vote information used for totalSupply & totalSupplyAt
     GroupVotePowerState public totalVotes;
 
     ///@notice Lockup mapping for each user
-    mapping(address => Lockup) public lockups;
+    mapping(address => GroupVotePowerState) public userTotalVotesWithDelegation;
+
+    /// @notice Delegation mapping where delegator is key and delegatee is value
+    mapping(address => address) private _delegations;
 
     ///@notice Token that is locked up in return for vote escrowed token
     ERC20 stakingToken;
@@ -172,6 +182,15 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @dev See {ERC20-balanceOf}.
      */
     function balanceOf(address _account) public view returns (uint256) {
+        return totalVotePower(userTotalVotesWithDelegation[_account]);
+
+    }
+
+    /**
+     * Function considers voting power only from token lockup - user Checkpoints. Ignoring
+     * delegation.
+     */
+    function _balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -190,11 +209,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @dev See {ERC20-totalSupply}.
      */
     function totalSupply() public view returns (uint256) {
-        if (totalVotes.checkpoints.length == 0) {
-            return 0;
-        }
-        Checkpoint memory lastCheckpoint = totalVotes.checkpoints[totalVotes.epoch];
-        return _supplyAt(lastCheckpoint, block.timestamp);
+        return totalVotePower(totalVotes);
     }
 
     /**
@@ -289,14 +304,39 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         view
         virtual
         returns (address)
-    {}
+    {
+        return _delegations[_account]; 
+    }
 
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) public virtual {
-        // TODO a future upgrade may support delegation
-        revert("Delegation is not supported");
+        address currentDelegatee = _delegations[msg.sender];
+        uint256 votingPower = _balanceOfAccount(msg.sender);
+        _delegations[msg.sender] = delegatee;
+
+        // use currently has 0 voting power nothing else to do here
+        if (votingPower == 0) {
+            return;
+        }
+
+        // checkpoint exists since votingPower > 0
+        Checkpoint memory lastCheckpoint = getLastCheckpoint(msg.sender);
+
+        // take away voting power from current delegatee or user itself
+        _writeGroupCheckpoint(
+            -lastCheckpoint.slope,
+            -lastCheckpoint.bias,
+            userTotalVotesWithDelegation[currentDelegatee != address(0) ? currentDelegatee : msg.sender]
+        );
+
+        // add voting power to new delegatee or user itself
+        _writeGroupCheckpoint(
+            lastCheckpoint.slope,
+            lastCheckpoint.bias,
+            userTotalVotesWithDelegation[delegatee != address(0) ? delegatee : msg.sender]
+        );
     }
 
     /**
@@ -422,7 +462,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @dev Public function to trigger global checkpoint.
      */
     function checkpoint() external {
-        _writeGlobalCheckpoint(0, 0, totalVotes);
+        _writeGroupCheckpoint(0, 0, totalVotes);
     }
 
     /**
@@ -436,27 +476,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         Lockup memory _oldLockup,
         Lockup memory _newLockup
     ) private {
-        Checkpoint memory oldCheckpoint;
-        Checkpoint memory newCheckpoint;
-
-        if (_oldLockup.end > block.timestamp && _oldLockup.amount > 0) {
-            // Old checkpoint still active, calculates its slope and bias
-            oldCheckpoint.slope =
-                _oldLockup.amount /
-                SafeCast.toInt128(int256(MAX_LOCK_TIME));
-            oldCheckpoint.bias =
-                oldCheckpoint.slope *
-                SafeCast.toInt128(int256(_oldLockup.end - block.timestamp));
-        }
-        if (_newLockup.end > block.timestamp && _newLockup.amount > 0) {
-            // New lockup also active, calculate its slope and bias
-            newCheckpoint.slope =
-                _newLockup.amount /
-                SafeCast.toInt128(int256(MAX_LOCK_TIME));
-            newCheckpoint.bias =
-                newCheckpoint.slope *
-                SafeCast.toInt128(int256(_newLockup.end - block.timestamp));
-        }
+        Checkpoint memory oldCheckpoint = _lockupToCheckpoint(_oldLockup);
+        Checkpoint memory newCheckpoint = _lockupToCheckpoint(_newLockup);
 
         uint256 userCurrentEpoch = userEpoch[_account];
         if (userCurrentEpoch == 0) {
@@ -470,33 +491,34 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         newCheckpoint.blk = block.number;
         // Push second checkpoint
         _userCheckpoints[_account].push(newCheckpoint);
-
         _updateGroupState(_oldLockup, _newLockup, oldCheckpoint, newCheckpoint, totalVotes);
+
+        // also update the delegate user group state or account itself
+        _updateGroupState(
+            _oldLockup,
+            _newLockup,
+            oldCheckpoint,
+            newCheckpoint,
+            userTotalVotesWithDelegation[_delegations[_account] != address(0) ? _delegations[_account] : msg.sender]
+        );
     }
 
     /**
-     * @dev Binary search (bisection) to find epoch closest to block.
-     * @param _block Find the most recent point history before this block
-     * @param _maxEpoch Maximum epoch
-     * @return uint256 The most recent epoch before the block
+     * Convert lockup data to a checkpoint
      */
-    function _findEpoch(
-        Checkpoint[] memory _checkpoints,
-        uint256 _block,
-        uint256 _maxEpoch
-    ) internal view returns (uint256) {
-        uint256 minEpoch = 0;
-        uint256 maxEpoch = _maxEpoch;
-        for (uint256 i = 0; i < 128; i++) {
-            if (minEpoch >= maxEpoch) break;
-            uint256 mid = (minEpoch + maxEpoch + 1) / 2;
-            if (_checkpoints[mid].blk <= _block) {
-                minEpoch = mid;
-            } else {
-                maxEpoch = mid - 1;
-            }
+    function _lockupToCheckpoint(Lockup memory _lockup)
+        private
+        returns (Checkpoint memory _checkpoint)
+    {
+        if (_lockup.end > block.timestamp && _lockup.amount > 0) {
+            // Checkpoint still active, calculates its slope and bias
+            _checkpoint.slope =
+                _lockup.amount /
+                SafeCast.toInt128(int256(MAX_LOCK_TIME));
+            _checkpoint.bias =
+                _checkpoint.slope *
+                SafeCast.toInt128(int256(_lockup.end - block.timestamp));
         }
-        return minEpoch;
     }
 
     /**
@@ -517,12 +539,23 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
     }
 
     /**
-     * @dev Gets a users votingWeight at a given blockNumber
+     * @dev TODO:
+     */
+    function balanceOfAt(address _account, uint256 _blockNumber)
+        public
+        view
+        returns (uint256)
+    {
+        return totalVotePowerAt(userTotalVotesWithDelegation[_account], _blockNumber);
+    }
+
+    /**
+     * @dev Gets a users votingWeight at a given blockNumber, ignores delegation
      * @param _account User for which to return the balance
      * @param _blockNumber Block at which to calculate balance
      * @return uint256 Balance of user voting power.
      */
-    function balanceOfAt(address _account, uint256 _blockNumber)
+    function balanceOfAtAccount(address _account, uint256 _blockNumber)
         public
         view
         returns (uint256)
@@ -575,11 +608,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         // Current Bias = most recent bias - (slope * time since update)
         userPoint.bias -= (userPoint.slope *
             SafeCast.toInt128(int256(blockTime - userPoint.ts)));
-        if (userPoint.bias >= 0) {
-            return SafeCast.toUint256(userPoint.bias);
-        } else {
-            return 0;
-        }
+        
+        return SafeCast.toUint256(max(userPoint.bias, 0));
     }
 
     /**
@@ -608,51 +638,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * @return totalSupply of voting token weight at the given blockNumber
      */
     function totalSupplyAt(uint256 _blockNumber) public view returns (uint256) {
-        require(_blockNumber <= block.number, "Block number is in the future");
-
-        // Get most recent global Checkpoint to block
-        uint256 recentGlobalEpoch = _findEpoch(
-            totalVotes.checkpoints,
-            _blockNumber,
-            totalVotes.epoch
-        );
-
-        Checkpoint memory checkpoint0 = totalVotes.checkpoints[recentGlobalEpoch];
-
-        if (checkpoint0.blk > _blockNumber) {
-            return 0;
-        }
-
-        uint256 dTime = 0;
-        if (recentGlobalEpoch < totalVotes.epoch) {
-            Checkpoint memory checkpoint1 = totalVotes.checkpoints[
-                recentGlobalEpoch + 1
-            ];
-            if (checkpoint0.blk != checkpoint1.blk) {
-                /* to estimate how much time has passed since the last checkpoint get the number
-                 * of blocks since the last checkpoint. And multiply that by the average time per 
-                 * block of the 2 neighboring checkpoints of said _blockNumber
-                 */
-                dTime =
-                    ((_blockNumber - checkpoint0.blk) *
-                        (checkpoint1.ts - checkpoint0.ts)) /
-                    (checkpoint1.blk - checkpoint0.blk);
-            }
-        } else if (checkpoint0.blk != block.number) {
-            /* to estimate how much time has passed since the last checkpoint get the number
-             * of blocks since the last checkpoint. And multiply that by the average time per 
-             * block since the last checkpoint and present blockchain state. 
-             */
-            dTime =
-                ((_blockNumber - checkpoint0.blk) *
-                    (block.timestamp - checkpoint0.ts)) /
-                (block.number - checkpoint0.blk);
-        }
-        // if code doesn't enter any of the above if conditions latest _blockNumber was passed
-        // to the function and dTime is correctly set to 0
-
-        // Now dTime contains info on how far are we beyond point
-        return _supplyAt(checkpoint0, checkpoint0.ts + dTime);
+        totalVotePowerAt(totalVotes, _blockNumber);
     }
 
     /**
@@ -666,39 +652,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         view
         returns (uint256)
     {
-        Checkpoint memory lastCheckpoint = _checkpoint;
-
-        // Floor the timestamp to weekly interval
-        uint256 iterativeTime = _floorToWeek(lastCheckpoint.ts);
-        // Iterate through all weeks between _checkpoint & _time to account for slope changes
-        for (uint256 i = 0; i < 255; i++) {
-            iterativeTime = iterativeTime + WEEK;
-            int128 dSlope = 0;
-            // If week end is after timestamp, then truncate & leave dSlope to 0
-            if (iterativeTime > _time) {
-                iterativeTime = _time;
-            }
-            // else get most recent slope change
-            else {
-                dSlope = totalVotes.slopeChanges[iterativeTime];
-            }
-
-            lastCheckpoint.bias =
-                lastCheckpoint.bias -
-                (lastCheckpoint.slope *
-                    SafeCast.toInt128(
-                        int256(iterativeTime - lastCheckpoint.ts)
-                    ));
-
-            if (iterativeTime == _time) {
-                break;
-            }
-
-            lastCheckpoint.slope = lastCheckpoint.slope + dSlope;
-            lastCheckpoint.ts = iterativeTime;
-        }
-
-        return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
+        return _votePowerAt(totalVotes, _checkpoint, _time);
     }
 
     function _authorizeUpgrade(address newImplementation)
