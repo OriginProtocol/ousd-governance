@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 import "./BaseVoteLocker.sol";
 import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/math/SafeCast.sol";
 import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/Strings.sol";
+import "./console.sol";
 
 contract GroupVoteLocker is BaseVoteLocker {
     ///@notice Checkpoint structure representing linear voting power decay
@@ -112,6 +113,8 @@ contract GroupVoteLocker is BaseVoteLocker {
                 ts: block.timestamp,
                 blk: block.number
             });
+            // Push an initial global checkpoint
+            groupState.checkpoints.push(lastCheckpoint);
         }
 
         Checkpoint memory initialLastCheckpoint = Checkpoint({
@@ -139,7 +142,6 @@ contract GroupVoteLocker is BaseVoteLocker {
         for (uint256 i = 0; i < 255; i++) {
             // 5 years
             iterativeTime = iterativeTime + WEEK;
-
             int128 slopeDelta = 0;
             if (iterativeTime > block.timestamp) {
                 // Current epoch
@@ -205,24 +207,28 @@ contract GroupVoteLocker is BaseVoteLocker {
      */
     function totalVotePowerAt(GroupVotePowerState storage groupState, uint256 _blockNumber) internal view returns (uint256) {
         require(_blockNumber <= block.number, "Block number is in the future");
-
+    
         // Get most recent global Checkpoint to block
-        uint256 recentGlobalEpoch = _findEpoch(
+        uint256 recentGroupStateEpoch = _findEpoch(
             groupState.checkpoints,
             _blockNumber,
             groupState.epoch
         );
 
-        Checkpoint memory checkpoint0 = groupState.checkpoints[recentGlobalEpoch];
+        if (recentGroupStateEpoch == 0) {
+            return 0;
+        }
+
+        Checkpoint memory checkpoint0 = groupState.checkpoints[recentGroupStateEpoch];
 
         if (checkpoint0.blk > _blockNumber) {
             return 0;
         }
 
         uint256 dTime = 0;
-        if (recentGlobalEpoch < groupState.epoch) {
+        if (recentGroupStateEpoch < groupState.epoch) {
             Checkpoint memory checkpoint1 = groupState.checkpoints[
-                recentGlobalEpoch + 1
+                recentGroupStateEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
                 /* to estimate how much time has passed since the last checkpoint get the number
