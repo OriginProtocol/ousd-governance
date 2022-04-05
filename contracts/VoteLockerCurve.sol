@@ -130,16 +130,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         );
         // Use the same decimals as the staking token
         _decimals = stakingToken.decimals();
-
-        // Push an initial global checkpoint
-        totalVotes.checkpoints.push(
-            Checkpoint({
-                bias: 0,
-                slope: 0,
-                ts: block.timestamp,
-                blk: block.number
-            })
-        );
     }
 
     /**

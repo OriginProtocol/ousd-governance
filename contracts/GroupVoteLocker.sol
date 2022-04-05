@@ -112,6 +112,8 @@ contract GroupVoteLocker is BaseVoteLocker {
                 ts: block.timestamp,
                 blk: block.number
             });
+            // Push an initial global checkpoint
+            groupState.checkpoints.push(lastCheckpoint);
         }
 
         Checkpoint memory initialLastCheckpoint = Checkpoint({
@@ -207,22 +209,26 @@ contract GroupVoteLocker is BaseVoteLocker {
         require(_blockNumber <= block.number, "Block number is in the future");
 
         // Get most recent global Checkpoint to block
-        uint256 recentGlobalEpoch = _findEpoch(
+        uint256 recentGroupStateEpoch = _findEpoch(
             groupState.checkpoints,
             _blockNumber,
             groupState.epoch
         );
 
-        Checkpoint memory checkpoint0 = groupState.checkpoints[recentGlobalEpoch];
+        if (recentGroupStateEpoch == 0) {
+            return 0;
+        }
+
+        Checkpoint memory checkpoint0 = groupState.checkpoints[recentGroupStateEpoch];
 
         if (checkpoint0.blk > _blockNumber) {
             return 0;
         }
 
         uint256 dTime = 0;
-        if (recentGlobalEpoch < groupState.epoch) {
+        if (recentGroupStateEpoch < groupState.epoch) {
             Checkpoint memory checkpoint1 = groupState.checkpoints[
-                recentGlobalEpoch + 1
+                recentGroupStateEpoch + 1
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
                 /* to estimate how much time has passed since the last checkpoint get the number
