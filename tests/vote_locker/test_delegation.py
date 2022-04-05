@@ -60,7 +60,6 @@ def test_redelegation(accounts, chain, vote_locker):
 def test_voting_powers_delegated(web3, accounts, chain, token, vote_locker):
     alice, bob, mikey = accounts[:3]
     votig_power_unit = amount // MAXTIME * (WEEK - 2 * H)
-    votig_power_half_unit = votig_power_unit // 2
 
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
     assert approx(vote_locker.balanceOf(alice), votig_power_unit, TOL)
@@ -83,7 +82,7 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
     vote_locker.delegate(alice, {"from": bob})
     vote_locker.delegate(alice, {"from": mikey})
 
-    for curr_account in accounts[3:20]:
+    for curr_account in accounts[3:25]:
         alice.transfer(curr_account, "0.1 ether")
         token.transfer(curr_account, amount, {"from": alice})
         token.approve(vote_locker.address, amount * 10, {"from": curr_account})
@@ -96,7 +95,7 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
     token.approve(vote_locker.address, amount * 10, {"from": alice})
     vote_locker.lockup(amount, chain[-1].timestamp + MAXTIME, {"from": alice})
 
-    # 2 years
+    # 2 years in nr of blocks
     mine_blocks(web3, "0x25c0bc")
     mine_blocks(web3, "0x25c0bc")
 
@@ -117,3 +116,33 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
 
     #print("GAS USED: ", tx1.gas_used)
     assert tx1.gas_used < 700000
+
+def test_delegation_vote_power(governance, chain, accounts, vote_locker, token, timelock_controller, web3):
+    alice, bob, mikey = accounts[:3]
+    votig_power_unit = amount
+
+    for curr_account in accounts[1:10]:
+        alice.transfer(curr_account, "0.1 ether")
+        token.transfer(curr_account, amount, {"from": alice})
+        token.approve(vote_locker.address, amount * 10, {"from": curr_account})
+        vote_locker.lockup(amount, chain[-1].timestamp + MAXTIME, {"from": curr_account})
+        # make everyone delegate to alice
+        vote_locker.delegate(alice, {"from": curr_account})
+
+    token.approve(vote_locker.address, amount, {"from": alice})
+    vote_locker.lockup(amount, chain[-1].timestamp + MAXTIME, {"from": alice})
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10, TOL)
+
+    time_before = chain.time()
+
+    # In dev environment node wont have similar block mining times as on mainnet. To try
+    # to get as close to that as possible simulate 2 year block mining by mining week's worth
+    # of blocks and sleep for a week's worth of time
+    while chain.time() - time_before < YEAR * 2:
+        chain.sleep(WEEK)
+        mine_blocks(web3)
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 2, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 2, TOL)
