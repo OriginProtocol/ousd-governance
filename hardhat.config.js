@@ -12,6 +12,7 @@ module.exports = {
       accounts: {
         mnemonic:
           "there reopen orchard damage width skirt resource clap device idle tag twelve",
+        count: 100
       },
     },
   },

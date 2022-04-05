@@ -2,12 +2,12 @@ import pytest
 from brownie import *
 from pathlib import Path
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def token():
     accounts.default = accounts[0]
     return run("deploy_token")
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def vote_locker(token):
     return run("deploy_vote_locker", "main", (token.address,))
 
