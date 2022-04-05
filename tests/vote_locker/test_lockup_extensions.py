@@ -1,9 +1,14 @@
+import pytest
 import brownie
 from brownie import accounts, chain
 
 from ..helpers import floor_week
 from ..fixtures import token, vote_locker
 
+@pytest.fixture(autouse=True)
+def isolation(fn_isolation):
+    pass
+    
 def test_extend_lockup_expiry(vote_locker, token):
     lock_amount = 100e18
     token.approve(vote_locker, lock_amount)

@@ -1,8 +1,11 @@
 # Copied from https://github.com/curvefi/curve-dao-contracts/blob/master/tests/integration/VotingEscrow/test_voting_escrow.py
-
+import pytest
 from ..helpers import approx, H, DAY, WEEK, MAXTIME, TOL
 from ..fixtures import token, vote_locker
 
+@pytest.fixture(autouse=True)
+def isolation(fn_isolation):
+    pass
 
 def test_voting_powers(web3, chain, accounts, token, vote_locker):
     """
@@ -216,7 +219,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
     w_total = vote_locker.totalSupplyAt(stages["bob_deposit_2"][0])
     w_alice = vote_locker.balanceOfAt(alice, stages["bob_deposit_2"][0])
     w_bob = vote_locker.balanceOfAt(bob, stages["bob_deposit_2"][0])
-    assert w_total == w_alice + w_bob
+    assert approx(w_total, w_alice + w_bob, TOL)
     assert approx(w_total, amount // MAXTIME * 3 * WEEK, TOL)
     assert approx(w_alice, amount // MAXTIME * 2 * WEEK, TOL)
 
@@ -225,7 +228,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
         w_alice = vote_locker.balanceOfAt(alice, block)
         w_bob = vote_locker.balanceOfAt(bob, block)
         w_total = vote_locker.totalSupplyAt(block)
-        assert w_total == w_alice + w_bob
+        assert approx(w_total, w_alice + w_bob, TOL)
         dt = t - t0
         error_1h = H / (
             2 * WEEK - i * DAY
@@ -236,7 +239,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
     w_total = vote_locker.totalSupplyAt(stages["bob_withdraw_1"][0])
     w_alice = vote_locker.balanceOfAt(alice, stages["bob_withdraw_1"][0])
     w_bob = vote_locker.balanceOfAt(bob, stages["bob_withdraw_1"][0])
-    assert w_total == w_alice
+    assert approx(w_total, w_alice, TOL)
     assert approx(w_total, amount // MAXTIME * (WEEK - 2 * H), TOL)
     assert w_bob == 0
 
@@ -245,7 +248,7 @@ def test_voting_powers(web3, chain, accounts, token, vote_locker):
         w_alice = vote_locker.balanceOfAt(alice, block)
         w_bob = vote_locker.balanceOfAt(bob, block)
         w_total = vote_locker.totalSupplyAt(block)
-        assert w_total == w_alice
+        assert approx(w_total, w_alice, TOL)
         assert w_bob == 0
         dt = t - t0
         error_1h = H / (

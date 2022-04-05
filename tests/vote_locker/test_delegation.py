@@ -69,14 +69,14 @@ def test_voting_powers_delegated(web3, accounts, chain, token, vote_locker):
     vote_locker.delegate(mikey, {"from": bob})
     chain.mine()
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
-    assert approx(vote_locker.balanceOf(mikey), votig_power_unit * 2, TOL*20)
-    assert approx(vote_locker.balanceOf(bob), 0, TOL*20)
+    assert approx(vote_locker.balanceOf(mikey), votig_power_unit * 2, TOL)
+    assert approx(vote_locker.balanceOf(bob), 0, TOL)
     vote_locker.delegate(ZERO_ADDRESS, {"from": bob})
     chain.mine()
     assert approx(vote_locker.totalSupply(), votig_power_unit * 3, TOL)
     assert approx(vote_locker.balanceOf(mikey), votig_power_unit, TOL)
-    assert approx(vote_locker.balanceOf(bob), votig_power_unit, TOL*300)
-    assert approx(vote_locker.balanceOf(alice), votig_power_unit, TOL*300)
+    assert approx(vote_locker.balanceOf(bob), votig_power_unit, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit, TOL)
 
 def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, timelock_controller, web3):
     alice, bob, mikey = accounts[:3]
@@ -115,5 +115,5 @@ def test_delegation_gas_usage(governance, chain, accounts, vote_locker, token, t
 
     tx1 = governance.castVote(tx.return_value, 1, {"from": alice})
 
-    print("GAS USED: ", tx1.gas_used)
+    #print("GAS USED: ", tx1.gas_used)
     assert tx1.gas_used < 700000

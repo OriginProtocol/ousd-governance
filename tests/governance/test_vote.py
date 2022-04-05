@@ -1,3 +1,4 @@
+import pytest
 import brownie
 from brownie import accounts, chain
 
@@ -6,6 +7,11 @@ from ..fixtures import governance, timelock_controller, token, vote_locker
 
 DAY = 86400
 WEEK = 7 * DAY
+
+# achieves isolation between different test function runs
+@pytest.fixture(autouse=True)
+def isolation(fn_isolation):
+    pass
 
 def test_create_proposal(governance, vote_locker, token):
     # Proposal threshold is 2500 veOGV

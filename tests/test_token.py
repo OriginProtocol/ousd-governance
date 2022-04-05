@@ -1,7 +1,13 @@
+import pytest
 import brownie
 from brownie import *
 from .fixtures import token
 
+# achieves isolation between different test function runs
+@pytest.fixture(autouse=True)
+def isolation(fn_isolation):
+    pass
+    
 def test_name(token): assert token.name() == "Origin Dollar Governance"
 
 def test_symbol(token):
