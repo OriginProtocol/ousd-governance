@@ -1,19 +1,11 @@
 import brownie
 from brownie import accounts, chain
 
-from ..helpers import approx
+from ..helpers import approx, mine_blocks
 from ..fixtures import governance, timelock_controller, token, vote_locker
 
 DAY = 86400
 WEEK = 7 * DAY
-
-# Mine `amount` blocks using hardhat_mine, defaults to the length of the governance
-# voting period (45818 blocks ~1 week )
-def mine_blocks(web3, amount="0xB2FA"):
-    web3.provider.make_request("hardhat_mine", [amount])
-    # Using hardhat_mine seems to break the 0 base fee
-    web3.provider.make_request("hardhat_setNextBlockBaseFeePerGas", ["0x0"])
-    chain.mine()
 
 
 def test_create_proposal(governance, vote_locker, token):

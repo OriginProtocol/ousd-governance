@@ -55,10 +55,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     /*
      * Voting power of locked tokens decreases over time in linear fashion. And can be represented
-     * by the initial (at the lock time) voting power (bias) and decrease rate (slope), at some point in time 
+     * by the initial (at the lock time) voting power (bias) and decrease rate (slope), at some point in time
      * (block number / timestamp). Structure holding that information is called a Checkpoint (user
      * checkpoint more accurately - represented by Alice/Bob function below).
-     * 
+     *
      * When trying to determine the voting power of all accounts at some point in time (e.g. when fetching
      * total supply) it wouldn't be gas cost effective to loop over all accounts and fetch their voting
      * power. For that reason we maintain a combined voting power of all users (represented by the Global
@@ -71,7 +71,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * This way a Checkpoint structure (bias + slope + time) correctly represents the state of the global
      * voting power amount at the time of its creation. A collection of future slope changes compliments that
      * Checkpoint and defines a global voting power function.
- 
+
       Alice:
       ~~~~~~~
       ^
@@ -116,7 +116,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     /* @notice slopeChanges part of the equation to define combined voting power of
      * all users. Slope changes always complement only the latest global Checkpoint and are
      * not used when fetching combined voting power of previous blocks.
-     */    
+     */
     mapping(uint256 => int128) public slopeChanges;
 
     ///@notice Token that is locked up in return for vote escrowed token
@@ -423,14 +423,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         });
         require(
             block.timestamp >= oldLockup.end,
-            string(
-                bytes.concat(
-                    bytes("Lockup expires at "),
-                    bytes(Strings.toString(oldLockup.end)),
-                    bytes(", now is "),
-                    bytes(Strings.toString(block.timestamp))
-                )
-            )
+            "Lockup must be expired"
         );
 
         require(oldLockup.amount > 0, "Lockup has no tokens");
@@ -519,13 +512,13 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
         /* Schedule the slope changes. There is a possible code simplification where
          * we always undo the old checkpoint slope change and always apply the new
-         * checkpoint slope change. In the interest of gas optimization the code is 
+         * checkpoint slope change. In the interest of gas optimization the code is
          * slightly more complicated.
          */
 
-        // old lockup still active and needs slope change adjustment. 
+        // old lockup still active and needs slope change adjustment.
         if (_oldLockup.end > block.timestamp) {
-            // this is an adjustment of the slope: oldSlopeDelta was <something> - oldCheckpoint.slope, 
+            // this is an adjustment of the slope: oldSlopeDelta was <something> - oldCheckpoint.slope,
             // so we cancel/undo that
             oldSlopeDelta = oldSlopeDelta + oldCheckpoint.slope;
             // gas optimize it so another storage access for _newLockup is not required
@@ -793,7 +786,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             ];
             if (checkpoint0.blk != checkpoint1.blk) {
                 /* to estimate how much time has passed since the last checkpoint get the number
-                 * of blocks since the last checkpoint. And multiply that by the average time per 
+                 * of blocks since the last checkpoint. And multiply that by the average time per
                  * block of the 2 neighboring checkpoints of said _blockNumber
                  */
                 dTime =
@@ -803,8 +796,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             }
         } else if (checkpoint0.blk != block.number) {
             /* to estimate how much time has passed since the last checkpoint get the number
-             * of blocks since the last checkpoint. And multiply that by the average time per 
-             * block since the last checkpoint and present blockchain state. 
+             * of blocks since the last checkpoint. And multiply that by the average time per
+             * block since the last checkpoint and present blockchain state.
              */
             dTime =
                 ((_blockNumber - checkpoint0.blk) *
