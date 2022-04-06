@@ -2,11 +2,8 @@ import pytest
 import brownie
 from brownie import accounts, chain
 
-from ..helpers import approx, mine_blocks
+from ..helpers import approx, mine_blocks, DAY, WEEK
 from ..fixtures import governance, timelock_controller, token, vote_locker
-
-DAY = 86400
-WEEK = 7 * DAY
 
 # achieves isolation between different test function runs
 @pytest.fixture(autouse=True)

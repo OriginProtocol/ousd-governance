@@ -24,8 +24,8 @@ def floor_week(timestamp):
 # 0x597d0 ~ 2 month
 # 0x12e05e ~ 6 month
 # 0x25c0bc ~ 1 year
-def mine_blocks(web3, amount="0xB2FA"):
-    web3.provider.make_request("hardhat_mine", [amount])
+def mine_blocks(web3, amount="0xB2FA", interval="0x1"):
+    result = web3.provider.make_request("hardhat_mine", [amount, interval])
     # Using hardhat_mine seems to break the 0 base fee
     web3.provider.make_request("hardhat_setNextBlockBaseFeePerGas", ["0x0"])
     chain.mine()
