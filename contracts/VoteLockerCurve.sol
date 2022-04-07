@@ -176,7 +176,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * Function considers voting power only from token lockup - user Checkpoints. Ignoring
      * delegation.
      */
-    function _balanceOfAccount(address _account) internal returns (uint256) {
+    function _balanceOfAccount(address _account) internal view returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -195,7 +195,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * from the checkpoint creation to the `_timestamp` timestamp
      */
     function _decayCheckpointBias(Checkpoint memory _checkpoint, uint256 _timestamp)
-        internal returns (int128)
+        internal view returns (int128)
     {
         int128 bias = _checkpoint.bias - (_checkpoint.slope *
             SafeCast.toInt128(int256(_timestamp - _checkpoint.ts)));
