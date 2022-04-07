@@ -176,7 +176,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
      * Function considers voting power only from token lockup - user Checkpoints. Ignoring
      * delegation.
      */
-    function _balanceOfAccount(address _account) internal view returns (uint256) {
+    function _balanceOfAccount(address _account) internal returns (uint256) {
         uint256 currentUserEpoch = userEpoch[_account];
         if (currentUserEpoch == 0) {
             return 0;
@@ -184,11 +184,22 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         Checkpoint memory lastCheckpoint = _userCheckpoints[_account][
             currentUserEpoch
         ];
+
         // Calculate the bias based on the last bias and the slope over the difference
         // in time between the last checkpint timestamp and the current block timestamp;
-        lastCheckpoint.bias -= (lastCheckpoint.slope *
-            SafeCast.toInt128(int256(block.timestamp - lastCheckpoint.ts)));
-        return SafeCast.toUint256(max(lastCheckpoint.bias, 0));
+        return SafeCast.toUint256(_decayCheckpointBias(lastCheckpoint, block.timestamp));
+    }
+
+    /**
+     * @dev Reduce the checkpoint bias according to its slope and the time that has passed
+     * from the checkpoint creation to the `_timestamp` timestamp
+     */
+    function _decayCheckpointBias(Checkpoint memory _checkpoint, uint256 _timestamp)
+        internal returns (int128)
+    {
+        int128 bias = _checkpoint.bias - (_checkpoint.slope *
+            SafeCast.toInt128(int256(_timestamp - _checkpoint.ts)));
+        return SafeCast.toInt128(max(bias, 0));
     }
 
     /**
@@ -300,22 +311,26 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable, 
         address currentDelegatee = _delegations[msg.sender];
         uint256 votingPower = _balanceOfAccount(msg.sender);
         _delegations[msg.sender] = delegatee;
+        Lockup memory lastLockup = lockups[msg.sender];
+
         // use currently has 0 voting power nothing else to do here
-        if (votingPower == 0) {
+        if (votingPower == 0 || lastLockup.end < block.timestamp) {
             return;
         }
         // checkpoint exists since votingPower > 0
         Checkpoint memory lastCheckpoint = getLastCheckpoint(msg.sender);
+        int128 decayedBias = _decayCheckpointBias(lastCheckpoint, block.timestamp);
+
         // take away voting power from current delegatee or user itself
         _writeGroupCheckpoint(
             -lastCheckpoint.slope,
-            -lastCheckpoint.bias,
+            -decayedBias,
             userTotalVotesWithDelegation[currentDelegatee != address(0) ? currentDelegatee : msg.sender]
         );
         // add voting power to new delegatee or user itself
         _writeGroupCheckpoint(
             lastCheckpoint.slope,
-            lastCheckpoint.bias,
+            decayedBias,
             userTotalVotesWithDelegation[delegatee != address(0) ? delegatee : msg.sender]
         );
     }

@@ -138,11 +138,48 @@ def test_delegation_vote_power(governance, chain, accounts, vote_locker, token, 
     time_before = chain.time()
 
     # In dev environment node wont have similar block mining times as on mainnet. To try
-    # to get as close to that as possible simulate 2 year block mining by mining week's worth
+    # to get as close to that as possible simulate 1 year block mining by mining week's worth
     # of blocks and sleep for a week's worth of time
-    while chain.time() - time_before < YEAR * 2:
+    while chain.time() - time_before < YEAR:
         chain.sleep(WEEK)
         mine_blocks(web3)
 
-    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 2, TOL)
-    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 2, TOL)
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 4 * 3, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 4 * 3, TOL)
+
+    vote_locker.delegate(ZERO_ADDRESS, {"from": bob})
+    vote_locker.delegate(ZERO_ADDRESS, {"from": mikey})
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 4 * 3, TOL)
+    assert approx(vote_locker.balanceOf(bob), votig_power_unit / 4 * 3, TOL)
+    assert approx(vote_locker.balanceOf(mikey), votig_power_unit / 4 * 3, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 8 / 4 * 3, TOL)
+
+    vote_locker.delegate(alice, {"from": bob})
+    vote_locker.delegate(alice, {"from": mikey})
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 4 * 3, TOL)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 4 * 3, TOL)
+
+    time_before = chain.time()
+
+    while chain.time() - time_before < YEAR:
+        chain.sleep(WEEK)
+        mine_blocks(web3)
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 2, TOL * 1.2)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 2, TOL * 1.2)
+
+    vote_locker.delegate(ZERO_ADDRESS, {"from": bob})
+    vote_locker.delegate(ZERO_ADDRESS, {"from": mikey})
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 2, TOL * 1.2)
+    assert approx(vote_locker.balanceOf(bob), votig_power_unit / 2, TOL * 1.2)
+    assert approx(vote_locker.balanceOf(mikey), votig_power_unit / 2, TOL * 1.2)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 8 / 2, TOL * 1.2)
+
+    vote_locker.delegate(alice, {"from": bob})
+    vote_locker.delegate(alice, {"from": mikey})
+
+    assert approx(vote_locker.totalSupply(), votig_power_unit * 10 / 2, TOL * 1.2)
+    assert approx(vote_locker.balanceOf(alice), votig_power_unit * 10 / 2, TOL * 1.2)
