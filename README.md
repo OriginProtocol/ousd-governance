@@ -72,6 +72,7 @@ Push the database and generate a client:
 npx prisma db push
 ```
 
+Set the `NETWORK_ID` env var to 31337.
 Set the `WEB3_PROVIDER` variable in your environment.
 
 _The hardhat RPC default is `http://127.0.0.1:8545`._

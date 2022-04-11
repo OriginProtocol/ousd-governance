@@ -8,12 +8,15 @@
     "email": "security@originprotocol.com"
   },
   "scripts": {
-    "dev:web": "next dev",
-    "dev:listener": "wait-on .next/server/listener.js && nodemon .next/server/listener.js",
-    "dev": "rm -f .next/server/listener.js && npm-run-all -p dev:listener dev:web",
-    "build": "next build",
-    "start": "next start",
-    "start:listener": "node .next/server/listener.js",
+    "dev:web": "NODE_ENV=dev next dev",
+    "dev:listener": "NODE_ENV=dev wait-on .next/server/listener.js && nodemon .next/server/listener.js",
+    "dev": "NODE_ENV=dev rm -f .next/server/listener.js && npm-run-all -p dev:listener dev:web",
+    "build": "NODE_ENV=prod next build",
+    "start": "NODE_ENV=prod next start",
+    "start:listener": "NODE_ENV=prod node .next/server/listener.js",
+    "build:staging": "NODE_ENV=staging next build",
+    "start:staging": "NODE_ENV=staging next start",
+    "start:listener:staging": "NODE_ENV=staging node .next/server/listener.js",
     "lint": "next lint",
     "prettier:check": "prettier --check '{components,constants,lib,pages,utils}/**/*.{js,jsx,ts,tsx}'",
     "prettier:fix": "prettier --write '{components,constants,lib,pages,utils}/**/*.{js,jsx,ts,tsx}'"

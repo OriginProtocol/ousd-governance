@@ -3,9 +3,10 @@ import { providers } from "ethers";
 import { useCallback, useEffect } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
-import { truncateEthAddress } from "utils/index";
+import { truncateEthAddress, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
 import { INFURA_ID, mainnetNetworkUrl } from "constants/index";
+import { toast } from "react-toastify";
 
 const providerOptions = {
   walletconnect: {
@@ -38,6 +39,12 @@ const providerOptions = {
   },
 };
 
+const networkNameMap = {
+  1: "Mainnet",
+  4: "Rinkeby",
+  31337: "localhost",
+};
+
 let web3Modal: any | undefined;
 if (typeof window !== "undefined") {
   web3Modal = new Web3Modal({
@@ -51,6 +58,8 @@ export const Web3Button = () => {
   const { provider, web3Provider, address } = useStore();
 
   const resetWeb3State = useStore((state) => state.reset);
+
+  const networkInfo = useNetworkInfo();
 
   const connect = useCallback(async function () {
     let provider;
@@ -97,6 +106,25 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
+  if (!networkInfo.correct) {
+    return (
+      <button
+        className="btn btn-primary btn-error btn-sm rounded-btn"
+        onClick={() => {
+          toast.error(
+            `Please connect to ${
+              networkNameMap[networkInfo.envNetwork]
+            } network.`,
+            {
+              hideProgressBar: true,
+            }
+          );
+        }}
+      >
+        Wrong Network
+      </button>
+    );
+  }
   return web3Provider ? (
     <>
       {address && (
