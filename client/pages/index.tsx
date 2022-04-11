@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
-import { loadProposals } from "utils/index";
+import { loadProposals, useNetworkInfo } from "utils/index";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { Loading } from "components/Loading";
 import { VoteStats } from "components/VoteStats";
@@ -70,7 +70,8 @@ const Home: NextPage = ({
   proposalCount: number;
   holderCount: number;
 }) => {
-  const { contracts, chainId } = useStore();
+  const { contracts } = useStore();
+  const networkInfo = useNetworkInfo();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
@@ -97,8 +98,11 @@ const Home: NextPage = ({
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
-    load();
-  }, [proposals, setProposalData, contracts.Governance]);
+
+    if (networkInfo.correct) {
+      load();
+    }
+  }, [proposals, setProposalData, contracts.Governance, networkInfo.correct]);
 
   useEffect(() => {
     const loadTotalSupply = async () => {
@@ -107,8 +111,11 @@ const Home: NextPage = ({
       ).toString();
       setTotalSupply(totalSupply);
     };
-    loadTotalSupply();
-  }, [contracts]);
+
+    if (networkInfo.correct) {
+      loadTotalSupply();
+    }
+  }, [contracts, networkInfo.correct]);
 
   return (
     <div>

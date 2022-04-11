@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
-import { truncateBalance } from "utils/index";
+import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 
 const MAX_WEEKS = 52 * 4;
@@ -24,6 +24,7 @@ export default function VoteEscrow({}) {
   const [endError, setEndError] = useState("");
   const [reload, setReload] = useState(false);
   const { OriginDollarGovernance, VoteLockerCurve } = contracts;
+  const networkInfo = useNetworkInfo();
 
   // Load users governance token balance
   useEffect(() => {
@@ -59,13 +60,7 @@ export default function VoteEscrow({}) {
     if (web3Provider && address) {
       loadApproval();
     }
-  }, [
-    address,
-    web3Provider,
-    OriginDollarGovernance,
-    VoteLockerCurve.address,
-    reload,
-  ]);
+  }, [address, web3Provider, OriginDollarGovernance, VoteLockerCurve, reload]);
 
   // Load users existing lockup in case this is an extension
   useEffect(() => {
