@@ -99,7 +99,7 @@ const Home: NextPage = ({
       setLoading(false);
     };
 
-    if (networkInfo.correct) {
+    if (networkInfo.correct && contracts.Governance) {
       load();
     }
   }, [proposals, setProposalData, contracts.Governance, networkInfo.correct]);
@@ -112,7 +112,7 @@ const Home: NextPage = ({
       setTotalSupply(totalSupply);
     };
 
-    if (networkInfo.correct) {
+    if (networkInfo.correct && contracts.VoteLockerCurve) {
       loadTotalSupply();
     }
   }, [contracts, networkInfo.correct]);
