@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
-import { loadProposals } from "utils/index";
+import { loadProposals, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
 import type { ProposalDataType } from "pages/index";
 import { Loading } from "components/Loading";
@@ -34,6 +34,7 @@ export async function getServerSideProps({ res }: { res: any }) {
 const Proposal: NextPage = ({ proposalCount, proposals }) => {
   const { contracts } = useStore();
   const router = useRouter();
+  const networkInfo = useNetworkInfo();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
@@ -59,8 +60,10 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
-    load();
-  }, [proposals, setProposalData, contracts.Governance]);
+    if (networkInfo.correct && contracts.loaded) {
+      load();
+    }
+  }, [proposals, setProposalData, contracts.Governance, networkInfo]);
 
   return (
     <>

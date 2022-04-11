@@ -5,7 +5,7 @@ type Web3DataType = {
   web3Provider?: any;
   address?: string;
   chainId?: number;
-  contracts: Array<any>;
+  contracts: Object;
   pendingTransactions: Array<any>;
 };
 
@@ -18,7 +18,9 @@ const defaultState: Web3DataType = {
   web3Provider: null,
   address: undefined,
   chainId: 31337,
-  contracts: [],
+  contracts: {
+    loaded: false,
+  },
   pendingTransactions: [],
 };
 

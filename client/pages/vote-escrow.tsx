@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
-import { truncateBalance } from "utils/index";
+import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 
 const MAX_WEEKS = 52 * 4;
@@ -23,61 +23,55 @@ export default function VoteEscrow({}) {
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
   const [reload, setReload] = useState(false);
-  const { OriginDollarGovernance, VoteLockerCurve } = contracts;
+  const networkInfo = useNetworkInfo();
 
   // Load users governance token balance
   useEffect(() => {
     const loadBalance = async () => {
-      const balance = await OriginDollarGovernance.balanceOf(address);
+      const balance = await contracts.OriginDollarGovernance.balanceOf(address);
       setBalance(balance);
     };
-    if (web3Provider && address) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       loadBalance();
     }
-  }, [address, web3Provider, OriginDollarGovernance, reload]);
+  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
 
   // Load users vote power
   useEffect(() => {
     const loadVotePower = async () => {
-      const votePower = await VoteLockerCurve.balanceOf(address);
+      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
       setVotePower(votePower);
     };
-    if (web3Provider && address) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       loadVotePower();
     }
-  }, [address, web3Provider, VoteLockerCurve, reload]);
+  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
 
   // Load the amount of governance token approved by the user for transfer by vl contract
   useEffect(() => {
     const loadApproval = async () => {
-      const approval = await OriginDollarGovernance.allowance(
+      const approval = await contracts.OriginDollarGovernance.allowance(
         address,
-        VoteLockerCurve.address
+        contracts.VoteLockerCurve.address
       );
       setApproval(approval);
     };
-    if (web3Provider && address) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       loadApproval();
     }
-  }, [
-    address,
-    web3Provider,
-    OriginDollarGovernance,
-    VoteLockerCurve.address,
-    reload,
-  ]);
+  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
 
   // Load users existing lockup in case this is an extension
   useEffect(() => {
     const loadExistingLockup = async () => {
-      const lockup = await VoteLockerCurve.getLockup(address);
+      const lockup = await contracts.VoteLockerCurve.getLockup(address);
       setExistingAmount(lockup[0]);
       setExistingEnd(lockup[1]);
     };
-    if (web3Provider && address) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       loadExistingLockup();
     }
-  }, [address, web3Provider, VoteLockerCurve, reload]);
+  }, [address, web3Provider, contracts, networkInfo.correct, reload]);
 
   // Calculate the number of weeks to existing lockup end (if one exists)
   useEffect(() => {
@@ -115,8 +109,8 @@ export default function VoteEscrow({}) {
   };
 
   const handleApproval = async () => {
-    const transaction = await OriginDollarGovernance.approve(
-      VoteLockerCurve.address,
+    const transaction = await contracts.OriginDollarGovernance.approve(
+      contracts.VoteLockerCurve.address,
       ethers.utils.parseUnits(amount)
     );
 
@@ -139,7 +133,7 @@ export default function VoteEscrow({}) {
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
       const end = now + weeks * 7 * 86400;
-      const transaction = await VoteLockerCurve.lockup(
+      const transaction = await contracts.VoteLockerCurve.lockup(
         ethers.utils.parseUnits(amount),
         end
       );
