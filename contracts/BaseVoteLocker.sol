@@ -27,10 +27,10 @@ abstract contract BaseVoteLocker {
     }
 
     /**
-     * @dev Returns the smallest of two numbers.
+     * @dev Returns the largest of two numbers.
      * @param _a First number
      * @param _b Second number
-     * @return Smallest of _a and _b
+     * @return Largest of _a and _b
      */
     function max(int128 _a, int128 _b) internal pure returns (int128) {
         return _a >= _b ? _a : _b;
