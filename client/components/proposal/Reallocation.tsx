@@ -14,38 +14,47 @@ export const Reallocation = ({ snapshotHash }) => {
   const [usdcAmount, setUsdcAmount] = useState(ethers.BigNumber.from(0));
   const [usdtAmount, setUsdtAmount] = useState(ethers.BigNumber.from(0));
   const [maxLoss, setMaxLoss] = useState(ethers.BigNumber.from(0));
+  const amounts = [daiAmount, usdcAmount, usdtAmount];
 
-  const ProxiedAaveStrategy = new ethers.Contract(
-    contracts.AaveStrategyProxy.address,
-    contracts.AaveStrategy.abi,
-    contracts.AaveStrategy.provider
-  );
-
-  const ProxiedCompoundStrategy = new ethers.Contract(
-    contracts.CompoundStrategyProxy.address,
-    contracts.CompoundStrategy.abi,
-    contracts.CompoundStrategy.provider
-  );
-
-  const ProxiedConvexStrategy = new ethers.Contract(
-    contracts.ConvexStrategyProxy.address,
-    contracts.ConvexStrategy.abi,
-    contracts.ConvexStrategy.provider
-  );
-
-  const proxiedContracts = [
+  const {
     ProxiedAaveStrategy,
     ProxiedCompoundStrategy,
     ProxiedConvexStrategy,
-  ];
+    proxiedContracts,
+    strategies
+  } = useMemo(() => {
+    if (!contracts.loaded) {
+      return {}
+    }
 
-  const amounts = [daiAmount, usdcAmount, usdtAmount];
-
-  const strategies = [
-    { name: "Aave", address: contracts.AaveStrategyProxy.address },
-    { name: "Compound", address: contracts.CompoundStrategyProxy.address },
-    { name: "Convex", address: contracts.ConvexStrategyProxy.address },
-  ];
+    return {
+      ProxiedAaveStrategy: new ethers.Contract(
+        contracts.AaveStrategyProxy.address,
+        contracts.AaveStrategy.abi,
+        contracts.AaveStrategy.provider
+      ),
+      ProxiedCompoundStrategy: new ethers.Contract(
+        contracts.CompoundStrategyProxy.address,
+        contracts.CompoundStrategy.abi,
+        contracts.CompoundStrategy.provider
+      ),
+      ProxiedConvexStrategy: new ethers.Contract(
+        contracts.ConvexStrategyProxy.address,
+        contracts.ConvexStrategy.abi,
+        contracts.ConvexStrategy.provider
+      ),
+      proxiedContracts: [
+        ProxiedAaveStrategy,
+        ProxiedCompoundStrategy,
+        ProxiedConvexStrategy,
+      ],
+      strategies: [
+        { name: "Aave", address: contracts.AaveStrategyProxy.address },
+        { name: "Compound", address: contracts.CompoundStrategyProxy.address },
+        { name: "Convex", address: contracts.ConvexStrategyProxy.address },
+      ]
+    }
+  }, [contracts])
 
   const assets = useMemo(
     () => [
@@ -140,7 +149,7 @@ export const Reallocation = ({ snapshotHash }) => {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-4">
+      {contracts.loaded && <div className="grid grid-cols-3 gap-4">
         <StrategyBalanceCard
           name="Aave"
           contract={ProxiedAaveStrategy}
@@ -156,7 +165,7 @@ export const Reallocation = ({ snapshotHash }) => {
           contract={ProxiedConvexStrategy}
           assets={assets}
         />
-      </div>
+      </div>}
       <div className="mt-12">
         <div className="grid grid-cols-2 gap-12">
           <div className="w-full">
@@ -172,7 +181,7 @@ export const Reallocation = ({ snapshotHash }) => {
                 <option value="" disabled={true}>
                   Strategy to reallocate from
                 </option>
-                {strategies.map((strategy) => (
+                {strategies && strategies.map((strategy) => (
                   <option key={strategy.name} value={strategy.address}>
                     {strategy.name}
                   </option>
@@ -191,7 +200,7 @@ export const Reallocation = ({ snapshotHash }) => {
                 <option value="" disabled={true}>
                   Strategy to reallocate to
                 </option>
-                {strategies.map((strategy) => (
+                {strategies && strategies.map((strategy) => (
                   <option key={strategy.name} value={strategy.address}>
                     {strategy.name}
                   </option>
