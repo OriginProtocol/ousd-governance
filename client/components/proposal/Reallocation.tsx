@@ -1,61 +1,19 @@
 import { ethers } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
-import { truncateBalance } from "utils/index";
+import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
 
 export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
-  const { Governance } = contracts;
-
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
   const [daiAmount, setDaiAmount] = useState(ethers.BigNumber.from(0));
   const [usdcAmount, setUsdcAmount] = useState(ethers.BigNumber.from(0));
   const [usdtAmount, setUsdtAmount] = useState(ethers.BigNumber.from(0));
-  const [maxLoss, setMaxLoss] = useState(ethers.BigNumber.from(0));
+  const [maxLoss, setMaxLoss] = useState(ethers.utils.parseUnits('100', 18));
   const amounts = [daiAmount, usdcAmount, usdtAmount];
-
-  const {
-    ProxiedAaveStrategy,
-    ProxiedCompoundStrategy,
-    ProxiedConvexStrategy,
-    proxiedContracts,
-    strategies
-  } = useMemo(() => {
-    if (!contracts.loaded) {
-      return {}
-    }
-
-    return {
-      ProxiedAaveStrategy: new ethers.Contract(
-        contracts.AaveStrategyProxy.address,
-        contracts.AaveStrategy.abi,
-        contracts.AaveStrategy.provider
-      ),
-      ProxiedCompoundStrategy: new ethers.Contract(
-        contracts.CompoundStrategyProxy.address,
-        contracts.CompoundStrategy.abi,
-        contracts.CompoundStrategy.provider
-      ),
-      ProxiedConvexStrategy: new ethers.Contract(
-        contracts.ConvexStrategyProxy.address,
-        contracts.ConvexStrategy.abi,
-        contracts.ConvexStrategy.provider
-      ),
-      proxiedContracts: [
-        ProxiedAaveStrategy,
-        ProxiedCompoundStrategy,
-        ProxiedConvexStrategy,
-      ],
-      strategies: [
-        { name: "Aave", address: contracts.AaveStrategyProxy.address },
-        { name: "Compound", address: contracts.CompoundStrategyProxy.address },
-        { name: "Convex", address: contracts.ConvexStrategyProxy.address },
-      ]
-    }
-  }, [contracts])
-
+  
   const assets = useMemo(
     () => [
       {
@@ -77,74 +35,134 @@ export const Reallocation = ({ snapshotHash }) => {
     []
   );
 
+  const {
+    ProxiedAaveStrategy,
+    ProxiedCompoundStrategy,
+    ProxiedConvexStrategy,
+    proxiedContracts,
+    strategies
+  } = useMemo(() => {
+    if (!contracts.loaded) {
+      return {}
+    }
+
+    const ProxiedAaveStrategy = new ethers.Contract(
+      contracts.AaveStrategyProxy.address,
+      contracts.AaveStrategy.abi,
+      contracts.AaveStrategy.provider
+    );
+    const ProxiedCompoundStrategy = new ethers.Contract(
+      contracts.CompoundStrategyProxy.address,
+      contracts.CompoundStrategy.abi,
+      contracts.CompoundStrategy.provider
+    );
+    const ProxiedConvexStrategy = new ethers.Contract(
+      contracts.ConvexStrategyProxy.address,
+      contracts.ConvexStrategy.abi,
+      contracts.ConvexStrategy.provider
+    );
+
+    const proxiedContracts = [
+      ProxiedAaveStrategy,
+      ProxiedCompoundStrategy,
+      ProxiedConvexStrategy,
+    ];
+
+    return {
+      ProxiedAaveStrategy,
+      ProxiedCompoundStrategy,
+      ProxiedConvexStrategy,
+      proxiedContracts,
+      strategies: [
+        { name: "Aave", address: contracts.AaveStrategyProxy.address },
+        { name: "Compound", address: contracts.CompoundStrategyProxy.address },
+        { name: "Convex", address: contracts.ConvexStrategyProxy.address },
+      ]
+    }
+  }, [contracts])
+
+  const {
+    proposalActions,
+    proposal,
+    handleSubmit
+  } = useMemo(() => {
+    const proposalActions = assets
+      .map((asset, i) => {
+        if (toStrategy === "" || fromStrategy === "") {
+          return;
+        }
+        const amount = amounts[i];
+        if (amount.gt(0)) {
+          const fromContract = proxiedContracts.find(
+            (c) => c.address === fromStrategy
+          );
+          if (fromContract === undefined) return;
+          return {
+            targets: [fromStrategy],
+            values: [0],
+            signatures: ["withdraw(address,address,uint256)"],
+            calldatas: [
+              fromContract.interface.encodeFunctionData(
+                fromContract.interface.functions[
+                  "withdraw(address,address,uint256)"
+                ],
+                [toStrategy, asset.address, amount]
+              ),
+            ],
+          };
+        }
+      })
+      .filter((a) => a !== undefined);
+
+    const handleSubmit = async () => {
+      console.log("proposal", contracts.Governance[
+        "propose(address[],uint256[],string[],bytes[],string)"
+      ])
+      console.log(proposal)
+      const transaction = await contracts.Governance[
+        "propose(address[],uint256[],string[],bytes[],string)"
+      ](
+        proposal.targets,
+        proposal.values,
+        proposal.signatures,
+        proposal.calldatas,
+        snapshotHash
+      );
+
+      useStore.setState({
+        pendingTransactions: [
+          ...pendingTransactions,
+          {
+            ...transaction,
+            onComplete: () => {
+              toast.success("Proposal has been submitted", {
+                hideProgressBar: true,
+              });
+              reset();
+            },
+          },
+        ],
+      });
+    };
+
+    return {
+      proposalActions,
+      proposal: {
+        targets: proposalActions.map((p) => p.targets),
+        values: proposalActions.map((p) => p.values),
+        signatures: proposalActions.map((p) => p.signatures),
+        calldatas: proposalActions.map((p) => p.calldatas),
+      },
+      handleSubmit
+    }
+  }, [contracts, toStrategy, fromStrategy, amounts])
+
   const reset = () => {
     setFromStrategy("");
     setToStrategy("");
     setDaiAmount(ethers.BigNumber.from(0));
     setUsdcAmount(ethers.BigNumber.from(0));
     setUsdtAmount(ethers.BigNumber.from(0));
-  };
-
-  const proposalActions = assets
-    .map((asset, i) => {
-      if (toStrategy === "" || fromStrategy === "") {
-        return;
-      }
-      const amount = amounts[i];
-      if (amount.gt(0)) {
-        const fromContract = proxiedContracts.find(
-          (c) => c.address === fromStrategy
-        );
-        if (fromContract === undefined) return;
-        return {
-          targets: [fromStrategy],
-          values: [0],
-          signatures: ["withdraw(address,address,uint256)"],
-          calldatas: [
-            fromContract.interface.encodeFunctionData(
-              fromContract.interface.functions[
-                "withdraw(address,address,uint256)"
-              ],
-              [toStrategy, asset.address, amount]
-            ),
-          ],
-        };
-      }
-    })
-    .filter((a) => a !== undefined);
-
-  const proposal = {
-    targets: proposalActions.map((p) => p.targets),
-    values: proposalActions.map((p) => p.values),
-    signatures: proposalActions.map((p) => p.signatures),
-    calldatas: proposalActions.map((p) => p.calldatas),
-  };
-
-  const handleSubmit = async () => {
-    const transaction = await Governance[
-      "propose(address[],uint256[],string[],bytes[],string)"
-    ](
-      proposal.targets,
-      proposal.values,
-      proposal.signatures,
-      proposal.calldatas,
-      snapshotHash
-    );
-
-    useStore.setState({
-      pendingTransactions: [
-        ...pendingTransactions,
-        {
-          ...transaction,
-          onComplete: () => {
-            toast.success("Proposal has been submitted", {
-              hideProgressBar: true,
-            });
-            reset();
-          },
-        },
-      ],
-    });
   };
 
   return (
@@ -214,8 +232,12 @@ export const Reallocation = ({ snapshotHash }) => {
               <input
                 type="text"
                 className="input input-bordered"
-                value={100}
-                onChange={(e) => setMaxLoss(e.target.value)}
+                value={truncateBalance(
+                  ethers.utils.formatUnits(maxLoss, 18)
+                )}
+                onChange={(e) => {
+                  setMaxLoss(inputToBigNumber(e.target.value, 18));
+                }}
               />
             </div>
           </div>
@@ -229,18 +251,13 @@ export const Reallocation = ({ snapshotHash }) => {
                   type="text"
                   className="input input-bordered"
                   onChange={(e) => {
+
                     if (asset.symbol === "DAI") {
-                      setDaiAmount(
-                        ethers.utils.parseUnits(e.target.value || "0", 18)
-                      );
+                      setDaiAmount(inputToBigNumber(e.target.value, 18));
                     } else if (asset.symbol === "USDC") {
-                      setUsdcAmount(
-                        ethers.utils.parseUnits(e.target.value || "0", 6)
-                      );
+                      setUsdcAmount(inputToBigNumber(e.target.value, 6));
                     } else if (asset.symbol === "USDT") {
-                      setUsdtAmount(
-                        ethers.utils.parseUnits(e.target.value || "0", 6)
-                      );
+                      setUsdtAmount(inputToBigNumber(e.target.value, 6));
                     }
                   }}
                 />
