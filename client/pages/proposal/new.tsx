@@ -15,7 +15,6 @@ import { truncateBalance } from "utils/index";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
-  const { Governance, VoteLockerCurve } = contracts;
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState(
@@ -31,21 +30,23 @@ const ProposalNew: NextPage = () => {
 
   useEffect(() => {
     const loadProposalThreshold = async () => {
-      setProposalThreshold(await Governance.proposalThreshold());
+      setProposalThreshold(await contracts.Governance.proposalThreshold());
     };
-    loadProposalThreshold();
-  }, [Governance]);
+    if (contracts.loaded) {
+      loadProposalThreshold();
+    }
+  }, [contracts]);
 
   // Load users vote power
   useEffect(() => {
     const loadVotePower = async () => {
-      const votePower = await VoteLockerCurve.balanceOf(address);
+      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
       setVotePower(votePower);
     };
-    if (web3Provider && address) {
+    if (web3Provider && address && contracts.loaded) {
       loadVotePower();
     }
-  }, [address, web3Provider, VoteLockerCurve]);
+  }, [address, web3Provider, contracts]);
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -83,7 +84,7 @@ const ProposalNew: NextPage = () => {
     let transaction;
 
     try {
-      transaction = await Governance[
+      transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
         proposalActions.targets,

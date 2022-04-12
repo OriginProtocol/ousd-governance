@@ -103,7 +103,8 @@ export const AddActionContractForm = ({
             </div>
           </>
         ) : (
-          contracts && contracts.loaded && (
+          contracts &&
+          contracts.loaded && (
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Select contract</span>
