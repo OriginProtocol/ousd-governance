@@ -1,4 +1,10 @@
 {
+  "name": "ousd-governance",
+  "license": "MIT",
+  "homepage": "https://github.com/originprotocol/ousd-governance",
+  "scripts": {
+    "node": "scripts/node.sh fork"
+  },
   "dependencies": {
     "hardhat": "^2.9.1"
   }

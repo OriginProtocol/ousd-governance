@@ -108,6 +108,13 @@ export function useNetworkInfo() {
   };
 }
 
-export function inputToBigNumber(bigNumber: string, decimals: number = 0): BigNumber {
-  return ethers.utils.parseUnits(bigNumber.replace(/[^\d.]/g, ''), decimals);
+export function inputToBigNumber(
+  bigNumber: string,
+  decimals: number = 0
+): BigNumber {
+  const remainingAmount = bigNumber.replace(/[^\d.]/g, "");
+  return ethers.utils.parseUnits(
+    remainingAmount === "" ? "0" : remainingAmount,
+    decimals
+  );
 }

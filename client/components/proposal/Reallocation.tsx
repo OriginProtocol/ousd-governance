@@ -11,9 +11,9 @@ export const Reallocation = ({ snapshotHash }) => {
   const [daiAmount, setDaiAmount] = useState(ethers.BigNumber.from(0));
   const [usdcAmount, setUsdcAmount] = useState(ethers.BigNumber.from(0));
   const [usdtAmount, setUsdtAmount] = useState(ethers.BigNumber.from(0));
-  const [maxLoss, setMaxLoss] = useState(ethers.utils.parseUnits('100', 18));
+  const [maxLoss, setMaxLoss] = useState(ethers.utils.parseUnits("100", 18));
   const amounts = [daiAmount, usdcAmount, usdtAmount];
-  
+
   const assets = useMemo(
     () => [
       {
@@ -40,10 +40,10 @@ export const Reallocation = ({ snapshotHash }) => {
     ProxiedCompoundStrategy,
     ProxiedConvexStrategy,
     proxiedContracts,
-    strategies
+    strategies,
   } = useMemo(() => {
     if (!contracts.loaded) {
-      return {}
+      return {};
     }
 
     const ProxiedAaveStrategy = new ethers.Contract(
@@ -77,48 +77,71 @@ export const Reallocation = ({ snapshotHash }) => {
         { name: "Aave", address: contracts.AaveStrategyProxy.address },
         { name: "Compound", address: contracts.CompoundStrategyProxy.address },
         { name: "Convex", address: contracts.ConvexStrategyProxy.address },
-      ]
-    }
-  }, [contracts])
+      ],
+    };
+  }, [contracts]);
 
-  const {
-    proposalActions,
-    proposal,
-    handleSubmit
-  } = useMemo(() => {
-    const proposalActions = assets
-      .map((asset, i) => {
-        if (toStrategy === "" || fromStrategy === "") {
-          return;
-        }
-        const amount = amounts[i];
-        if (amount.gt(0)) {
-          const fromContract = proxiedContracts.find(
-            (c) => c.address === fromStrategy
-          );
-          if (fromContract === undefined) return;
-          return {
-            targets: [fromStrategy],
-            values: [0],
-            signatures: ["withdraw(address,address,uint256)"],
-            calldatas: [
-              fromContract.interface.encodeFunctionData(
-                fromContract.interface.functions[
-                  "withdraw(address,address,uint256)"
+  const { proposalActions, proposal, handleSubmit } = useMemo(() => {
+    let proposalActions = [];
+
+    if (toStrategy !== "" && fromStrategy !== "") {
+      proposalActions = proposalActions.concat([
+        {
+          targets: [contracts.VaultValueChecker.address],
+          values: [0],
+          signatures: ["takeSnapshot()"],
+          calldatas: [],
+        },
+      ]);
+
+      proposalActions = proposalActions.concat(
+        assets
+          .map((asset, i) => {
+            if (toStrategy === "" || fromStrategy === "") {
+              return;
+            }
+            const amount = amounts[i];
+            if (amount.gt(0)) {
+              const fromContract = proxiedContracts.find(
+                (c) => c.address === fromStrategy
+              );
+              if (fromContract === undefined) return;
+              return {
+                targets: [fromStrategy],
+                values: [0],
+                signatures: ["withdraw(address,address,uint256)"],
+                calldatas: [
+                  fromContract.interface.encodeFunctionData(
+                    fromContract.interface.functions[
+                      "withdraw(address,address,uint256)"
+                    ],
+                    [toStrategy, asset.address, amount]
+                  ),
                 ],
-                [toStrategy, asset.address, amount]
-              ),
-            ],
-          };
-        }
-      })
-      .filter((a) => a !== undefined);
+              };
+            }
+          })
+          .filter((a) => a !== undefined)
+      );
+
+      proposalActions = proposalActions.concat([
+        {
+          targets: [contracts.VaultValueChecker.address],
+          values: [0],
+          signatures: ["checkLoss(int256)"],
+          calldatas: [
+            contracts.VaultValueChecker.interface.encodeFunctionData(
+              contracts.VaultValueChecker.interface.functions[
+                "checkLoss(int256)"
+              ],
+              [maxLoss]
+            ),
+          ],
+        },
+      ]);
+    }
 
     const handleSubmit = async () => {
-      console.log("proposal", contracts.Governance[
-        "propose(address[],uint256[],string[],bytes[],string)"
-      ])
-      console.log(proposal)
       const transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
@@ -153,9 +176,9 @@ export const Reallocation = ({ snapshotHash }) => {
         signatures: proposalActions.map((p) => p.signatures),
         calldatas: proposalActions.map((p) => p.calldatas),
       },
-      handleSubmit
-    }
-  }, [contracts, toStrategy, fromStrategy, amounts])
+      handleSubmit,
+    };
+  }, [contracts, toStrategy, fromStrategy, amounts, maxLoss]);
 
   const reset = () => {
     setFromStrategy("");
@@ -167,23 +190,25 @@ export const Reallocation = ({ snapshotHash }) => {
 
   return (
     <>
-      {contracts.loaded && <div className="grid grid-cols-3 gap-4">
-        <StrategyBalanceCard
-          name="Aave"
-          contract={ProxiedAaveStrategy}
-          assets={assets}
-        />
-        <StrategyBalanceCard
-          name="Compound"
-          contract={ProxiedCompoundStrategy}
-          assets={assets}
-        />
-        <StrategyBalanceCard
-          name="Convex"
-          contract={ProxiedConvexStrategy}
-          assets={assets}
-        />
-      </div>}
+      {contracts.loaded && (
+        <div className="grid grid-cols-3 gap-4">
+          <StrategyBalanceCard
+            name="Aave"
+            contract={ProxiedAaveStrategy}
+            assets={assets}
+          />
+          <StrategyBalanceCard
+            name="Compound"
+            contract={ProxiedCompoundStrategy}
+            assets={assets}
+          />
+          <StrategyBalanceCard
+            name="Convex"
+            contract={ProxiedConvexStrategy}
+            assets={assets}
+          />
+        </div>
+      )}
       <div className="mt-12">
         <div className="grid grid-cols-2 gap-12">
           <div className="w-full">
@@ -199,11 +224,12 @@ export const Reallocation = ({ snapshotHash }) => {
                 <option value="" disabled={true}>
                   Strategy to reallocate from
                 </option>
-                {strategies && strategies.map((strategy) => (
-                  <option key={strategy.name} value={strategy.address}>
-                    {strategy.name}
-                  </option>
-                ))}
+                {strategies &&
+                  strategies.map((strategy) => (
+                    <option key={strategy.name} value={strategy.address}>
+                      {strategy.name}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="form-control">
@@ -218,11 +244,12 @@ export const Reallocation = ({ snapshotHash }) => {
                 <option value="" disabled={true}>
                   Strategy to reallocate to
                 </option>
-                {strategies && strategies.map((strategy) => (
-                  <option key={strategy.name} value={strategy.address}>
-                    {strategy.name}
-                  </option>
-                ))}
+                {strategies &&
+                  strategies.map((strategy) => (
+                    <option key={strategy.name} value={strategy.address}>
+                      {strategy.name}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="form-control">
@@ -232,9 +259,7 @@ export const Reallocation = ({ snapshotHash }) => {
               <input
                 type="text"
                 className="input input-bordered"
-                value={truncateBalance(
-                  ethers.utils.formatUnits(maxLoss, 18)
-                )}
+                value={truncateBalance(ethers.utils.formatUnits(maxLoss, 18))}
                 onChange={(e) => {
                   setMaxLoss(inputToBigNumber(e.target.value, 18));
                 }}
@@ -251,7 +276,6 @@ export const Reallocation = ({ snapshotHash }) => {
                   type="text"
                   className="input input-bordered"
                   onChange={(e) => {
-
                     if (asset.symbol === "DAI") {
                       setDaiAmount(inputToBigNumber(e.target.value, 18));
                     } else if (asset.symbol === "USDC") {
