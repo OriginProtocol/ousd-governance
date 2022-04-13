@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
@@ -8,9 +8,9 @@ export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
-  const [daiAmount, setDaiAmount] = useState(ethers.BigNumber.from(0));
-  const [usdcAmount, setUsdcAmount] = useState(ethers.BigNumber.from(0));
-  const [usdtAmount, setUsdtAmount] = useState(ethers.BigNumber.from(0));
+  const [daiAmount, setDaiAmount] = useState(BigNumber.from(0));
+  const [usdcAmount, setUsdcAmount] = useState(BigNumber.from(0));
+  const [usdtAmount, setUsdtAmount] = useState(BigNumber.from(0));
   const [maxLoss, setMaxLoss] = useState(ethers.utils.parseUnits("100", 18));
   const amounts = [daiAmount, usdcAmount, usdtAmount];
 
@@ -87,10 +87,10 @@ export const Reallocation = ({ snapshotHash }) => {
     if (toStrategy !== "" && fromStrategy !== "") {
       proposalActions = proposalActions.concat([
         {
-          targets: [contracts.VaultValueChecker.address],
-          values: [0],
-          signatures: ["takeSnapshot()"],
-          calldatas: [],
+          target: contracts.VaultValueChecker.address.toLowerCase(),
+          value: BigNumber.from("0"),
+          signature: "takeSnapshot()",
+          calldata: "0x",
         },
       ]);
 
@@ -107,17 +107,15 @@ export const Reallocation = ({ snapshotHash }) => {
               );
               if (fromContract === undefined) return;
               return {
-                targets: [fromStrategy],
-                values: [0],
-                signatures: ["withdraw(address,address,uint256)"],
-                calldatas: [
-                  fromContract.interface.encodeFunctionData(
-                    fromContract.interface.functions[
-                      "withdraw(address,address,uint256)"
-                    ],
-                    [toStrategy, asset.address, amount]
-                  ),
-                ],
+                target: fromStrategy.toLowerCase(),
+                value: BigNumber.from("0"),
+                signature: "withdraw(address,address,uint256)",
+                calldata: fromContract.interface.encodeFunctionData(
+                  fromContract.interface.functions[
+                    "withdraw(address,address,uint256)"
+                  ],
+                  [toStrategy, asset.address, amount]
+                ),
               };
             }
           })
@@ -126,20 +124,25 @@ export const Reallocation = ({ snapshotHash }) => {
 
       proposalActions = proposalActions.concat([
         {
-          targets: [contracts.VaultValueChecker.address],
-          values: [0],
-          signatures: ["checkLoss(int256)"],
-          calldatas: [
-            contracts.VaultValueChecker.interface.encodeFunctionData(
-              contracts.VaultValueChecker.interface.functions[
-                "checkLoss(int256)"
-              ],
-              [maxLoss]
-            ),
-          ],
+          target: contracts.VaultValueChecker.address.toLowerCase(),
+          value: BigNumber.from("0"),
+          signature: "checkLoss(int256)",
+          calldata: contracts.VaultValueChecker.interface.encodeFunctionData(
+            contracts.VaultValueChecker.interface.functions[
+              "checkLoss(int256)"
+            ],
+            [maxLoss]
+          ),
         },
       ]);
     }
+
+    const proposal = {
+      targets: proposalActions.map((p) => p.target),
+      values: proposalActions.map((p) => p.value),
+      signatures: proposalActions.map((p) => p.signature),
+      calldatas: proposalActions.map((p) => p.calldata),
+    };
 
     const handleSubmit = async () => {
       const transaction = await contracts.Governance[
@@ -170,12 +173,7 @@ export const Reallocation = ({ snapshotHash }) => {
 
     return {
       proposalActions,
-      proposal: {
-        targets: proposalActions.map((p) => p.targets),
-        values: proposalActions.map((p) => p.values),
-        signatures: proposalActions.map((p) => p.signatures),
-        calldatas: proposalActions.map((p) => p.calldatas),
-      },
+      proposal,
       handleSubmit,
     };
   }, [contracts, toStrategy, fromStrategy, amounts, maxLoss]);
@@ -183,9 +181,9 @@ export const Reallocation = ({ snapshotHash }) => {
   const reset = () => {
     setFromStrategy("");
     setToStrategy("");
-    setDaiAmount(ethers.BigNumber.from(0));
-    setUsdcAmount(ethers.BigNumber.from(0));
-    setUsdtAmount(ethers.BigNumber.from(0));
+    setDaiAmount(BigNumber.from(0));
+    setUsdcAmount(BigNumber.from(0));
+    setUsdtAmount(BigNumber.from(0));
   };
 
   return (
