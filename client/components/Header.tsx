@@ -46,7 +46,7 @@ const Header: FunctionComponent = () => {
                   <li key={label}>
                     <Link
                       className="text-sm text-white hover:underline"
-                      currentClassName="font-semibold"
+                      currentClassName="font-normal"
                       href={href}
                     >
                       {label}
@@ -90,7 +90,7 @@ const Header: FunctionComponent = () => {
             <li key={label}>
               <Link
                 className="px-6 py-3 block hover:text-gray-700 text-black border-l-4 border-white"
-                currentClassName="font-semibold border-primary"
+                currentClassName="font-normal border-primary"
                 href={href}
                 onClick={() => setMenuIsOpen(false)}
               >

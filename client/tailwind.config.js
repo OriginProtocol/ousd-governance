@@ -22,6 +22,7 @@ const originThemeLegacy = {
 };
 
 const originTheme = {
+  fontFamily: "Lato, sans-serif",
   primary: "#4bbc8a",
   "primary-focus": "#39996e",
   neutral: "#183140",
