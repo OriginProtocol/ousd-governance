@@ -18,3 +18,22 @@ export const CHAIN_CONTRACTS = {
   4: RinkebyGovernanceContracts,
   31337: LocalGovernanceContracts,
 };
+
+export const navItems = [
+  {
+    href: "/",
+    label: "Overview",
+  },
+  {
+    href: "/proposal",
+    label: "Proposal",
+  },
+  {
+    href: "/leaderboard",
+    label: "Leaderboard",
+  },
+  {
+    href: "/vote-escrow",
+    label: "Vote Escrow",
+  },
+];
