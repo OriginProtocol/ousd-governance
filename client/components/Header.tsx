@@ -27,7 +27,7 @@ const Header: FunctionComponent = () => {
 
   return (
     <>
-      <header className="py-6 md:py-8 mb-2 bg-neutral text-neutral-content">
+      <header className="py-6 md:py-8 bg-neutral text-neutral-content">
         <Wrapper>
           <div className="flex items-center justify-between">
             <div className="flex items-center">

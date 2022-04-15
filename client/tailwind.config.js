@@ -26,7 +26,10 @@ const originTheme = {
   primary: "#4bbc8a",
   "primary-focus": "#39996e",
   neutral: "#183140",
+  "neutral-content": "#0d2330",
+  "neutral-focus": "#8293a4",
   "base-100": "#ffffff",
+  "base-200": "#f2f3f5",
   "--btn-text-case": "capitalize",
   "--rounded-btn": "1rem",
 };

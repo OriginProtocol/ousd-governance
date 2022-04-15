@@ -10,8 +10,13 @@ interface LayoutProps {
 const Layout: FunctionComponent<LayoutProps> = ({ children }) => (
   <div className="min-h-screen">
     <Header />
-    <div className="px-4 sm:px-6 md:px-8 py-12 mb-auto">
-      <Wrapper>{children}</Wrapper>
+    <div className="relative">
+      <div className="bg-white pt-4 pb-16">
+        <div className="w-full h-60 bg-neutral absolute top-0 z-0" />
+        <div className="relative z-10">
+          <Wrapper narrow>{children}</Wrapper>
+        </div>
+      </div>
     </div>
     <Footer />
   </div>
