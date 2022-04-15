@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useStore } from "utils/store";
 
 // Captures 0x + 4 characters, then the last 4 characters.
@@ -106,4 +106,15 @@ export function useNetworkInfo() {
     envNetwork: envNetwork,
     correct: envNetwork === chainId,
   };
+}
+
+export function inputToBigNumber(
+  bigNumber: string,
+  decimals: number = 0
+): BigNumber {
+  const remainingAmount = bigNumber.replace(/[^\d.]/g, "");
+  return ethers.utils.parseUnits(
+    remainingAmount === "" ? "0" : remainingAmount,
+    decimals
+  );
 }

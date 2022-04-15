@@ -67,6 +67,7 @@ export default function App({ Component, pageProps }) {
       const contracts = Object.assign(
         ...ousdContracts.concat(governanceContracts)
       );
+
       contracts.loaded = true;
       useStore.setState({
         contracts,
