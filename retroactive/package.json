@@ -12,6 +12,7 @@
   },
   "scripts": {
     "start:curve": "ts-node ./src/curve.ts",
+    "start:convex": "ts-node ./src/convex.ts",
     "prettier:check": "prettier --check 'src/*.{js,jsx,ts,tsx}'",
     "prettier:fix": "prettier --write 'src/*.{js,jsx,ts,tsx}'"
   }
