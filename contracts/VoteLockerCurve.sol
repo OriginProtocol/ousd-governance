@@ -143,17 +143,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
         __UUPSUpgradeable_init();
 
-        stakingToken = ERC20(_stakingToken);
-
-        // Derive the name and symbol from the staking token
-        _name = string(
-            bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
-        );
-        _symbol = string(
-            bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
-        );
-        // Use the same decimals as the staking token
-        _decimals = stakingToken.decimals();
+        setStakingToken(_stakingToken);
 
         // Push an initial global checkpoint
         _globalCheckpoints.push(
@@ -164,6 +154,23 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
                 blk: block.number
             })
         );
+    }
+
+    /**
+     * @notice Sets the staking token
+     * @param _stakingToken Token that is locked up in return for vote escrowed token
+     */
+    function setStakingToken(address _stakingToken) public onlyOwner {
+        stakingToken = ERC20(_stakingToken);
+        // Derive the name and symbol from the staking token
+        _name = string(
+            bytes.concat(bytes("Vote Escrowed"), " ", bytes(stakingToken.name()))
+        );
+        _symbol = string(
+            bytes.concat(bytes("ve"), bytes(stakingToken.symbol()))
+        );
+        // Use the same decimals as the staking token
+        _decimals = stakingToken.decimals();
     }
 
     /**
