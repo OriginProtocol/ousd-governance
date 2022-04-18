@@ -328,28 +328,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     {}
 
     /**
-     * @dev Delegate votes from the sender to `delegatee`.
-     */
-    function delegate(address delegatee) public virtual {
-        // TODO a future upgrade may support delegation
-        revert("Delegation is not supported");
-    }
-
-    /**
-     * @dev Delegates votes from signer to `delegatee`
-     */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 end,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual {
-        revert("Delegation by signature is not supported");
-    }
-
-    /**
      * @dev Deposits staking token and mints new veTokens according to the lockup length
      * @param _amount Amount of staking token to deposit
      * @param _end Lockup end time
@@ -647,7 +625,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         Checkpoint[] memory _checkpoints,
         uint256 _block,
         uint256 _maxEpoch
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 minEpoch = 0;
         uint256 maxEpoch = _maxEpoch;
         for (uint256 i = 0; i < 128; i++) {
