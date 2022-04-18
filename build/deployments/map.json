@@ -1,10 +1,14 @@
 {
   "1": {
     "ERC1967Proxy": [
+      "0xFdb16A6900Ce90Cb27Afec95dc274D27E0d61b87",
       "0x9c354503C38481a7A7a51629142963F98eCC12D0"
     ],
     "OriginDollarGovernance": [
       "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
+    ],
+    "VoteLockerCurve": [
+      "0x88aa574f0Acf17775973eBB786d34ADdB43aD42E"
     ]
   },
   "4": {
