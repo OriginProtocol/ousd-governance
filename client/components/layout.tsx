@@ -13,7 +13,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children }) => (
     <div className="relative">
       <div className="bg-white pt-4 pb-16">
         <div className="w-full h-60 bg-secondary absolute top-0 z-0" />
-        <div className="relative z-10">
+        <div className="relative z-5">
           <Wrapper narrow>{children}</Wrapper>
         </div>
       </div>
