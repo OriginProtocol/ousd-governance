@@ -42,8 +42,7 @@ const ProposalNew: NextPage = () => {
   // Load users vote power
   useEffect(() => {
     const loadVotePower = async () => {
-      // const votePower = await contracts.VoteLockerCurve.balanceOf(address);
-      const votePower = BigNumber.from(2500);
+      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
       setVotePower(votePower);
     };
     if (web3Provider && address && contracts.loaded) {
