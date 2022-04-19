@@ -63,7 +63,13 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
     if (networkInfo.correct && contracts.loaded) {
       load();
     }
-  }, [proposals, setProposalData, contracts.loaded, contracts.Governance, networkInfo.correct]);
+  }, [
+    proposals,
+    setProposalData,
+    contracts.loaded,
+    contracts.Governance,
+    networkInfo.correct,
+  ]);
 
   return (
     <>
