@@ -44,7 +44,7 @@ export const ProposalActionsTable = ({
           onClose={() => setModalOpen(false)}
         />
       )}
-      <table className="table table-zebra table-compact w-full">
+      <table className="table table-zebra w-full">
         <thead>
           <tr>
             <td>Contract</td>
