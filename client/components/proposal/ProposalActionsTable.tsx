@@ -44,103 +44,107 @@ export const ProposalActionsTable = ({
           onClose={() => setModalOpen(false)}
         />
       )}
-      <table className="table table-zebra w-full">
-        <thead>
-          <tr>
-            <td>Contract</td>
-            <td>Function</td>
-            <td>Argument Types</td>
-            <td>Arguments</td>
-            {ephemeral && <td>Actions</td>}
-          </tr>
-        </thead>
-        <tbody>
-          {proposalActions.targets.map((target, index) => (
-            <tr key={index}>
-              <td>
-                {explorerPrefix ? (
-                  <a
-                    className="link link-primary"
-                    href={`${explorerPrefix}address/${target}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {addressContractName(contracts, target)}
-                  </a>
-                ) : (
-                  <>{addressContractName(contracts, target)}</>
-                )}
-              </td>
-              <td>
-                {functionNameFromSignature(proposalActions.signatures[index])}
-              </td>
-              <td>
-                {argumentsFromSignature(proposalActions.signatures[index]).map(
-                  (argument, index) => (
-                    <div key={index}>{argument}</div>
-                  )
-                )}
-              </td>
-              <td>
-                {decodeCalldata(
-                  proposalActions.signatures[index],
-                  proposalActions.calldatas[index]
-                ).map((decodedData, i) => {
-                  const type = typesFromSignature(
-                    proposalActions.signatures[index]
-                  )[i];
-
-                  const data = decodedData.toString();
-
-                  if (type === "address") {
-                    return <div key={i}>{etherscanLink(contracts, data)}</div>;
-                  } else if (type === "address[]") {
-                    return data
-                      .split(",")
-                      .map((address) => (
-                        <div key={index}>
-                          {etherscanLink(contracts, address)}
-                        </div>
-                      ));
-                  } else {
-                    return (
-                      <div key={i}>
-                        {data === MAX_UINT256 ? "uint256(-1)" : data}
-                      </div>
-                    );
-                  }
-                })}
-              </td>
-              {ephemeral && (
-                <td>
-                  <button
-                    className="btn btn-secondary btn-xs"
-                    onClick={() => {
-                      setModalOpen(true);
-                      setActionDeleteIndex(index);
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              )}
+      <div className="overflow-x-auto">
+        <table className="table table-zebra w-full">
+          <thead>
+            <tr>
+              <td>Contract</td>
+              <td>Function</td>
+              <td>Argument Types</td>
+              <td>Arguments</td>
+              {ephemeral && <td>Actions</td>}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {proposalActions.targets.map((target, index) => (
+              <tr key={index}>
+                <td>
+                  {explorerPrefix ? (
+                    <a
+                      className="link link-primary"
+                      href={`${explorerPrefix}address/${target}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {addressContractName(contracts, target)}
+                    </a>
+                  ) : (
+                    <>{addressContractName(contracts, target)}</>
+                  )}
+                </td>
+                <td>
+                  {functionNameFromSignature(proposalActions.signatures[index])}
+                </td>
+                <td>
+                  {argumentsFromSignature(
+                    proposalActions.signatures[index]
+                  ).map((argument, index) => (
+                    <div key={index}>{argument}</div>
+                  ))}
+                </td>
+                <td>
+                  {decodeCalldata(
+                    proposalActions.signatures[index],
+                    proposalActions.calldatas[index]
+                  ).map((decodedData, i) => {
+                    const type = typesFromSignature(
+                      proposalActions.signatures[index]
+                    )[i];
+
+                    const data = decodedData.toString();
+
+                    if (type === "address") {
+                      return (
+                        <div key={i}>{etherscanLink(contracts, data)}</div>
+                      );
+                    } else if (type === "address[]") {
+                      return data
+                        .split(",")
+                        .map((address) => (
+                          <div key={index}>
+                            {etherscanLink(contracts, address)}
+                          </div>
+                        ));
+                    } else {
+                      return (
+                        <div key={i}>
+                          {data === MAX_UINT256 ? "uint256(-1)" : data}
+                        </div>
+                      );
+                    }
+                  })}
+                </td>
+                {ephemeral && (
+                  <td>
+                    <button
+                      className="btn btn-secondary btn-xs"
+                      onClick={() => {
+                        setModalOpen(true);
+                        setActionDeleteIndex(index);
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 };
