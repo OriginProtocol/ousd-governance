@@ -10,6 +10,7 @@ import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
 import Card from "components/Card";
+import CardGroup from "components/CardGroup";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 
@@ -121,7 +122,7 @@ const Home: NextPage = ({
   return (
     <div>
       <PageTitle>Overview</PageTitle>
-      <div className="space-y-5">
+      <CardGroup>
         <VoteStats
           proposalCount={proposalCount}
           holderCount={holderCount}
@@ -139,7 +140,7 @@ const Home: NextPage = ({
           <SectionTitle>Top 5 Voters</SectionTitle>
           <LeaderboardTable voters={voters} />
         </Card>
-      </div>
+      </CardGroup>
     </div>
   );
 };

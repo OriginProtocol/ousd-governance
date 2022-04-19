@@ -140,22 +140,26 @@ export const Reallocation = ({ snapshotHash }) => {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-4">
-        <StrategyBalanceCard
-          name="Aave"
-          contract={ProxiedAaveStrategy}
-          assets={assets}
-        />
-        <StrategyBalanceCard
-          name="Compound"
-          contract={ProxiedCompoundStrategy}
-          assets={assets}
-        />
-        <StrategyBalanceCard
-          name="Convex"
-          contract={ProxiedConvexStrategy}
-          assets={assets}
-        />
+      <div className="overflow-x-auto">
+        <div className="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>&nbsp;</th>
+              <th>Aave</th>
+              <th>Compound</th>
+              <th>Convex</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assets.map((asset, i) => (
+              <StrategyBalanceRow
+                key={i}
+                asset={asset}
+                proxiedContracts={proxiedContracts}
+              />
+            ))}
+          </tbody>
+        </div>
       </div>
       <div className="mt-12">
         <div className="grid grid-cols-2 gap-12">
@@ -253,14 +257,12 @@ export const Reallocation = ({ snapshotHash }) => {
   );
 };
 
-const StrategyBalanceCard = ({
-  name,
-  contract,
-  assets,
+const StrategyBalanceRow = ({
+  asset,
+  proxiedContracts,
 }: {
-  name: string;
-  contract: any;
-  assets: Array<any>;
+  asset: Object<any>;
+  proxiedContracts: Array<any>;
 }) => {
   const [balances, setBalances] = useState([]);
 
@@ -268,32 +270,25 @@ const StrategyBalanceCard = ({
     const loadBalances = async () => {
       setBalances(
         await Promise.all(
-          Object.values(assets).map((a) => contract.checkBalance(a.address))
+          proxiedContracts.map((contract) =>
+            contract.checkBalance(asset.address)
+          )
         )
       );
     };
     loadBalances();
-  }, [contract, assets]);
+  }, [asset, proxiedContracts]);
+
+  const { symbol, decimals } = asset;
 
   return (
-    <div className="card w-96 mr-6">
-      <div className="card-body">
-        <h2 className="card-title">{name}</h2>
-        {assets.map((asset, index) => {
-          const balance = balances[index];
-          if (!balance) return null;
-          return (
-            <div key={index}>
-              <label className="w-16 inline-block text-gray-400">
-                {asset.symbol}
-              </label>
-              {truncateBalance(
-                ethers.utils.formatUnits(balance, asset.decimals)
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <tr>
+      <td className="text-gray-400">{symbol}</td>
+      {balances.map((balance, i) => (
+        <td key={i}>
+          {truncateBalance(ethers.utils.formatUnits(balance, decimals))}
+        </td>
+      ))}
+    </tr>
   );
 };
