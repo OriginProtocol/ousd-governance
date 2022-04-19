@@ -141,7 +141,7 @@ export const Reallocation = ({ snapshotHash }) => {
   return (
     <>
       <div className="overflow-x-auto">
-        <div className="table table-zebra w-full">
+        <table className="table table-zebra w-full">
           <thead>
             <tr>
               <th>&nbsp;</th>
@@ -159,7 +159,7 @@ export const Reallocation = ({ snapshotHash }) => {
               />
             ))}
           </tbody>
-        </div>
+        </table>
       </div>
       <div className="mt-12">
         <div className="grid grid-cols-2 gap-12">
