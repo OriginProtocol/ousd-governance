@@ -1,4 +1,5 @@
 import numeral from "numeraljs";
+import CardGroup from "./CardGroup";
 import Card from "./Card";
 import CardLabel from "./CardLabel";
 import CardStat from "./CardStat";
@@ -13,7 +14,7 @@ export const VoteStats = ({
   totalSupply: number;
 }) => {
   return (
-    <div className="w-full grid sm:grid-cols-3 gap-3">
+    <CardGroup horizontal>
       <div>
         <Card dark tightPadding>
           <div className="space-y-2">
@@ -38,6 +39,6 @@ export const VoteStats = ({
           </div>
         </Card>
       </div>
-    </div>
+    </CardGroup>
   );
 };
