@@ -43,8 +43,11 @@ _If this command reverts with an error it may be an incompatability with python 
 
 ## Running a local node
 
+Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`
+
+Node will be run in forked mode
 ```bash
-npx hardhat node --port 8545
+yarn run node
 ```
 
 In another terminal:

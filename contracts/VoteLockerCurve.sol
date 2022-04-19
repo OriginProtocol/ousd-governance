@@ -143,17 +143,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
         __UUPSUpgradeable_init();
 
-        stakingToken = ERC20(_stakingToken);
-
-        // Derive the name and symbol from the staking token
-        _name = string(
-            bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
-        );
-        _symbol = string(
-            bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
-        );
-        // Use the same decimals as the staking token
-        _decimals = stakingToken.decimals();
+        setStakingToken(_stakingToken);
 
         // Push an initial global checkpoint
         _globalCheckpoints.push(
@@ -164,6 +154,23 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
                 blk: block.number
             })
         );
+    }
+
+    /**
+     * @notice Sets the staking token
+     * @param _stakingToken Token that is locked up in return for vote escrowed token
+     */
+    function setStakingToken(address _stakingToken) public onlyOwner {
+        stakingToken = ERC20(_stakingToken);
+        // Derive the name and symbol from the staking token
+        _name = string(
+            bytes.concat(bytes("Vote Escrowed"), " ", bytes(stakingToken.name()))
+        );
+        _symbol = string(
+            bytes.concat(bytes("ve"), bytes(stakingToken.symbol()))
+        );
+        // Use the same decimals as the staking token
+        _decimals = stakingToken.decimals();
     }
 
     /**
@@ -319,28 +326,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         virtual
         returns (address)
     {}
-
-    /**
-     * @dev Delegate votes from the sender to `delegatee`.
-     */
-    function delegate(address delegatee) public virtual {
-        // TODO a future upgrade may support delegation
-        revert("Delegation is not supported");
-    }
-
-    /**
-     * @dev Delegates votes from signer to `delegatee`
-     */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 end,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual {
-        revert("Delegation by signature is not supported");
-    }
 
     /**
      * @dev Deposits staking token and mints new veTokens according to the lockup length
@@ -640,7 +625,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         Checkpoint[] memory _checkpoints,
         uint256 _block,
         uint256 _maxEpoch
-    ) internal view returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 minEpoch = 0;
         uint256 maxEpoch = _maxEpoch;
         for (uint256 i = 0; i < 128; i++) {
