@@ -28,8 +28,7 @@ main()
         fi
 
         nodeOutput=$(mktemp "${TMPDIR:-/tmp/}$(basename 0).XXX")
-        echo -e "TEST2"
-        echo -e $nodeOutput
+        echo -e "Node logs stored in $nodeOutput"
         # the --no-install is here so npx doesn't download some package on its own if it can not find one in the repo
         FORK=true npx --no-install hardhat node --port 8545 --emoji --show-stack-traces ${params[@]} > $nodeOutput 2>&1 &
 
