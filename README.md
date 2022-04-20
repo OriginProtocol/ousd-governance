@@ -106,7 +106,7 @@ Proposals aren't pushed to the database from the front-end submision handler. In
 
 **Solution:**
 
-Because we [start from the last seen block saved in the database](/clients/listener.ts#121), you may experience issues if this number is out of sync. To quickly solve:
+Because we [start from the last seen block saved in the database](/client/listener.ts#L121), you may experience issues if this number is out of sync. To quickly solve:
 
 1. Comment out the database lookup function
 2. Add `ethereumEvents.start(0)` beneath to ensure a start from the beginning
