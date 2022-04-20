@@ -34,10 +34,12 @@ const originTheme = {
   neutral: "#d8d8d8",
   "neutral-content": "#333333",
   "neutral-focus": "#c2c2c2",
-  "base-100": "#ffffff",
+  "base-100": "#fafbfc",
   "base-200": "#f2f3f5",
+  "base-300": "#cdd7e0",
+  "--border-color": "red",
   "--btn-text-case": "capitalize",
-  "--rounded-btn": "1rem",
+  "--rounded-btn": "0.6125rem",
 };
 
 module.exports = {

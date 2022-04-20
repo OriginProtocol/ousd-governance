@@ -208,94 +208,112 @@ export default function VoteEscrow({}) {
           </div>
         </CardGroup>
         <Card>
-          <label className="label">
-            <span className="label-text">Lockup amount</span>
-          </label>
-          <div className="input-group">
-            <input
-              type="number"
-              min={1}
-              max={balance.toString()}
-              placeholder="Amount"
-              className={`input input-bordered w-full ${
-                amountError && "input-error"
-              }`}
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setAmountError("");
-              }}
-            />
-            <button
-              className="btn"
-              onClick={() =>
-                setAmount(ethers.utils.formatUnits(balance.toString()))
-              }
-            >
-              Max
-            </button>
-          </div>
-          {amountError && (
-            <label className="label">
-              <span className="label-text-alt text-error-content">
-                {amountError}
-              </span>
-            </label>
-          )}
-          <label className="label">
-            <span className="label-text">Lockup length (weeks)</span>
-          </label>
-          <div className="input-group">
-            <input
-              type="number"
-              min="1"
-              max={MAX_WEEKS.toString()}
-              placeholder="Type here"
-              className={`input input-bordered w-full ${
-                endError && "input-error"
-              }`}
-              value={weeks}
-              onChange={(e) => {
-                setWeeks(e.target.value);
-                setEndError("");
-              }}
-            />
-            <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
-              Max
-            </button>
-          </div>
-          {endError && (
-            <label className="label">
-              <span className="label-text-alt text-error-content">
-                {endError}
-              </span>
-            </label>
-          )}
-          {estimatedVotePower && (
-            <div className="mt-5">Estimated votes: {estimatedVotePower}</div>
-          )}
+          <div className="space-y-4">
+            <div>
+              <label className="label">
+                <span className="label-text text-lg font-bold">
+                  Lockup amount
+                </span>
+              </label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  min={1}
+                  max={balance.toString()}
+                  placeholder="Amount"
+                  className={`text-lg input input-bordered w-full border-2 ${
+                    amountError && "input-error"
+                  }`}
+                  value={amount}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setAmountError("");
+                  }}
+                />
+                <button
+                  className="btn"
+                  onClick={() =>
+                    setAmount(ethers.utils.formatUnits(balance.toString()))
+                  }
+                >
+                  Max
+                </button>
+              </div>
+              {amountError && (
+                <label className="label">
+                  <span className="label-text-alt text-error-content">
+                    {amountError}
+                  </span>
+                </label>
+              )}
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text text-lg font-bold">
+                  Lockup length (weeks)
+                </span>
+              </label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  min="1"
+                  max={MAX_WEEKS.toString()}
+                  placeholder="Type here"
+                  className={`text-lg input input-bordered w-full border-2 ${
+                    endError && "input-error"
+                  }`}
+                  value={weeks}
+                  onChange={(e) => {
+                    setWeeks(e.target.value);
+                    setEndError("");
+                  }}
+                />
+                <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
+                  Max
+                </button>
+              </div>
+              {endError && (
+                <label className="label">
+                  <span className="label-text-alt text-error-content">
+                    {endError}
+                  </span>
+                </label>
+              )}
+            </div>
+            {estimatedVotePower && (
+              <div className="pt-2 text-lg">
+                <span className="font-bold pr-2">Estimated votes</span>{" "}
+                {estimatedVotePower}
+              </div>
+            )}
+            <div className="flex py-3">
+              <button
+                className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                disabled={
+                  // TODO approval should be new amount - already locked
+                  !amount ||
+                  !weeks ||
+                  approval.gte(ethers.utils.parseUnits(amount))
+                }
+                onClick={handleApproval}
+              >
+                Approve Transfer
+              </button>
 
-          <button
-            className="btn btn-primary mt-5 mr-5"
-            disabled={
-              // TODO approval should be new amount - already locked
-              !amount || !weeks || approval.gte(ethers.utils.parseUnits(amount))
-            }
-            onClick={handleApproval}
-          >
-            Approve Transfer
-          </button>
-
-          <button
-            className="btn btn-primary mt-5"
-            disabled={
-              // TODO approval should be new amount - already locked
-              !amount || !weeks || ethers.utils.parseUnits(amount).gt(approval)
-            }
-            onClick={handleLockup}
-          >
-            Lockup
-          </button>
+              <button
+                className="btn btn-primary md:btn-lg rounded-full flex-1"
+                disabled={
+                  // TODO approval should be new amount - already locked
+                  !amount ||
+                  !weeks ||
+                  ethers.utils.parseUnits(amount).gt(approval)
+                }
+                onClick={handleLockup}
+              >
+                Lockup
+              </button>
+            </div>
+          </div>
         </Card>
       </CardGroup>
     </>

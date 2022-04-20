@@ -155,7 +155,7 @@ export const Web3Button = () => {
     </div>
   ) : (
     <button
-      className="btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-neutral"
+      className="btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary"
       onClick={connect}
     >
       Connect
