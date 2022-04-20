@@ -10,6 +10,7 @@ import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTa
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
+import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
@@ -116,15 +117,24 @@ const ProposalNew: NextPage = () => {
     });
   };
 
+  if (!web3Provider) {
+    return <Disconnected />;
+  }
+
   if (votePower.lt(proposalThreshold)) {
     return (
-      <div className="text-center pt-5">
-        <h3 className="mt-2 font-medium text-gray-900">
-          Minimum required vote power for a proposal is{" "}
-          {proposalThreshold.toString()} votes. You have{" "}
-          {truncateBalance(ethers.utils.formatUnits(votePower))} votes.
-        </h3>
-      </div>
+      <Card>
+        <div className="text-center">
+          <p className="mt-2 font-medium">
+            Minimum required vote power for a proposal is{" "}
+            {proposalThreshold.toString()} votes.
+            <br />
+            <br />
+            You have {truncateBalance(ethers.utils.formatUnits(votePower))}{" "}
+            votes.
+          </p>
+        </div>
+      </Card>
     );
   }
 

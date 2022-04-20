@@ -7,6 +7,7 @@ import type { ProposalDataType } from "pages/index";
 import { Loading } from "components/Loading";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { PageTitle } from "components/PageTitle";
+import Card from "components/Card";
 import prisma from "lib/prisma";
 
 export async function getServerSideProps({ res }: { res: any }) {
@@ -82,7 +83,13 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
           New Proposal
         </button>
       )}
-      {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
+      {loading ? (
+        <Loading />
+      ) : (
+        <Card>
+          <ProposalTable proposalData={proposalData} />
+        </Card>
+      )}
     </>
   );
 };
