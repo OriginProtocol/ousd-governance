@@ -142,11 +142,11 @@ const ProposalNew: NextPage = () => {
     <>
       <PageTitle>New Proposal</PageTitle>
       <CardGroup>
-        <Card dark>
+        <Card>
           <SectionTitle>Snapshot Proposal</SectionTitle>
           <div className="form-control">
             <label className="label">
-              <span className="label-text text-white">Hash</span>
+              <span className="label-text">Hash</span>
             </label>
             <input
               type="text"
@@ -156,7 +156,7 @@ const ProposalNew: NextPage = () => {
             />
           </div>
           <label className="label">
-            <span className="label-text-alt text-white opacity-80">
+            <span className="label-text-alt opacity-80">
               For proposals that aren&apos;t simple reallocations, a Snapshot
               proposal should be used to signal intent before on chain happens.
               The Snapshot proposal should clearly detail the justification for
