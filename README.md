@@ -89,3 +89,29 @@ yarn dev
 ```
 
 This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
+
+## Gotchas
+
+Here are some places you may come unstuck when setting up locally. If you find any yourself, please document them here to help your fellow engineers:
+
+### 1. How do we populate the database with proposal data post- transaction submission?
+
+**Problem:**
+
+You're adding proposals and the transactions are going through on-chain, but confirmed proposals aren't showing in the UI. You might experience [listener.ts](/client/listener.ts) outputting lots of `info: Got confirmed block` messages, but nothing to confirm the script is picking up `ProposalCreated` events.
+
+**Explanation:**
+
+Proposals aren't pushed to the database from the front-end submision handler. Instead, [listener.ts](/client/listener.ts) monitors your local node, detects when the `ProposalCreated` event is fired, then adds the proposal to the database. However, these events can't be picked up when the starting block number is off in your database.
+
+**Solution:**
+
+Because we [start from the last seen block saved in the database](/clients/listener.ts#121), you may experience issues if this number is out of sync. To quickly solve:
+
+1. Comment out the database lookup function
+2. Add `ethereumEvents.start(0)` beneath to ensure a start from the beginning
+3. Run `yarn run dev`
+4. Revert what you changed
+5. Run `yarn run dev` again
+
+You should now see proposals added to the database when you submit transactions.
