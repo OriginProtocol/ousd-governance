@@ -2,6 +2,10 @@ import { ethers } from "ethers";
 import { Address } from "components/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
+  if (voters.length < 1) {
+    return <p className="text-gray-500 text-sm">No voters yet.</p>;
+  }
+
   return (
     <table className="table w-full">
       <thead>

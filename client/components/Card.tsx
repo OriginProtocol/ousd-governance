@@ -15,7 +15,7 @@ const Card: FunctionComponent<CardProps> = ({
   noPadding,
 }) => {
   const classes = classNames(
-    "overflow-x-auto w-full shadow-lg rounded-lg border",
+    "overflow-x-auto w-full shadow-lg rounded-lg border h-full",
     {
       "bg-secondary-focus text-white border-black": dark,
       "bg-white text-black": !dark,
