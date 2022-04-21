@@ -117,7 +117,7 @@ export const ProposalActionsTable = ({
                 {ephemeral && (
                   <td>
                     <button
-                      className="btn btn-secondary btn-xs"
+                      className="btn btn-muted btn-circle btn-xs"
                       onClick={() => {
                         setModalOpen(true);
                         setActionDeleteIndex(index);
