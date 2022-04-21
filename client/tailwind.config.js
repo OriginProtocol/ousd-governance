@@ -1,26 +1,3 @@
-const originThemeLegacy = {
-  primary: "#007cff",
-  "primary-focus": "#003cff",
-  "primary-content": "#ffffff",
-  secondary: "#6e3bea",
-  "secondary-focus": "#6e0bea",
-  "secondary-content": "#ffffff",
-  accent: "#638298",
-  "accent-focus": "#637298",
-  "accent-content": "#ffffff",
-  neutral: "#244159",
-  "neutral-focus": "#061d2a",
-  "neutral-content": "#ffffff",
-  "base-100": "#ffffff",
-  "base-200": "#f7fbfd",
-  "base-300": "#dbe6eb",
-  "base-content": "#061d2a",
-  info: "#007cff",
-  success: "#00db8d",
-  warning: "#ffc000",
-  error: "#ff0000",
-};
-
 const originTheme = {
   fontFamily: "Lato, sans-serif",
   primary: "#4bbc8a",
@@ -40,6 +17,7 @@ const originTheme = {
   "--border-color": "red",
   "--btn-text-case": "capitalize",
   "--rounded-btn": "0.6125rem",
+  "--rounded-badge": "0.25rem",
 };
 
 module.exports = {
@@ -60,7 +38,7 @@ module.exports = {
     styled: true,
     themes: [
       {
-        originTheme: {
+        'origin-theme': {
           ...require("daisyui/src/colors/themes")["[data-theme=light]"],
           ...originTheme,
         }

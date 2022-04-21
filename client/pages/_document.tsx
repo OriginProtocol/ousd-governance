@@ -3,7 +3,7 @@ import Document, { Html, Head, Main, NextScript } from "next/document";
 class OUSDGovernanceDocument extends Document {
   render(): JSX.Element {
     return (
-      <Html lang="en-GB">
+      <Html lang="en-GB" data-theme="origin-theme">
         <Head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
