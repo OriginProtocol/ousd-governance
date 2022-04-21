@@ -37,6 +37,7 @@ a {
 
 [data-theme="origin-theme"] .badge {
   @apply border;
+  @apply p-1;
 }
 
 [data-theme="origin-theme"] .badge.badge-info {
