@@ -1191,10 +1191,9 @@ ethereum-cryptography@^0.1.3:
     secp256k1 "^4.0.1"
     setimmediate "^1.0.5"
 
-ethereum-events@^0.1.3:
+"ethereum-events@github:AleG94/ethereum-events#8c92ade1d8f489a577399d5d3cd0093ef6c58aa5":
   version "0.1.3"
-  resolved "https://registry.yarnpkg.com/ethereum-events/-/ethereum-events-0.1.3.tgz#270c9a96c9192d57d4772fb4444b6668d855f2b5"
-  integrity sha512-5Y2R54ubc6sQpjrVA0v43DBFIhS3UZlo6guCF+OPxVb1ybYbqP/XGy97vChs7cYL+l+F3X5D2jDiH+hi58AbTQ==
+  resolved "https://codeload.github.com/AleG94/ethereum-events/tar.gz/8c92ade1d8f489a577399d5d3cd0093ef6c58aa5"
   dependencies:
     eth-log-parser "^0.1.0"
     p-limit "^3.0.1"

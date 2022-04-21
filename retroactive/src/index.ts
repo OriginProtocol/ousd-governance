@@ -2,7 +2,14 @@ import fs from "fs";
 import { ethers, BigNumber } from "ethers";
 import EthereumEvents from "ethereum-events";
 import Web3 from "web3";
-import { last } from "lodash";
+import { last, merge } from "lodash";
+
+type BlockHistory = {
+  blockNumber: number;
+  amount: BigNumber;
+};
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const OUSD_POOL_ADDRESS = "0x87650D7bbfC3A9F10587d7778206671719d9910D";
 const OUSD_POOL_DEPLOY_BLOCK = 12860905;
@@ -15,6 +22,17 @@ const CONVEX_POOL_ABI = JSON.parse(
   '[{"inputs":[{"internalType":"uint256","name":"pid_","type":"uint256"},{"internalType":"address","name":"stakingToken_","type":"address"},{"internalType":"address","name":"rewardToken_","type":"address"},{"internalType":"address","name":"operator_","type":"address"},{"internalType":"address","name":"rewardManager_","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"RewardPaid","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Staked","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[{"internalType":"address","name":"_reward","type":"address"}],"name":"addExtraReward","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"clearExtraRewards","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"currentRewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"donate","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"duration","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"earned","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"extraRewards","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"extraRewardsLength","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReward","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"},{"internalType":"bool","name":"_claimExtras","type":"bool"}],"name":"getReward","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"historicalRewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastTimeRewardApplicable","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastUpdateTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"newRewardRatio","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"operator","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"periodFinish","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"pid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_rewards","type":"uint256"}],"name":"queueNewRewards","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"queuedRewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardManager","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardPerTokenStored","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardRate","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rewardToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rewards","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"stake","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakeAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_for","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"stakeFor","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stakingToken","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"userRewardPerTokenPaid","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bool","name":"claim","type":"bool"}],"name":"withdraw","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"claim","type":"bool"}],"name":"withdrawAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"claim","type":"bool"}],"name":"withdrawAllAndUnwrap","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bool","name":"claim","type":"bool"}],"name":"withdrawAndUnwrap","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]'
 );
 
+const OUSD_ADDRESS = "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86";
+const OUSD_DEPLOY_BLOCK = 10884563;
+const OUSD_ABI = JSON.parse(
+  '[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"GovernorshipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"PendingGovernorshipTransfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"totalSupply","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"rebasingCredits","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"rebasingCreditsPerToken","type":"uint256"}],"name":"TotalSupplyUpdatedHighres","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"_totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_owner","type":"address"},{"internalType":"address","name":"_spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_spender","type":"address"},{"internalType":"uint256","name":"_value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_newTotalSupply","type":"uint256"}],"name":"changeSupply","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"claimGovernance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"}],"name":"creditsBalanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"}],"name":"creditsBalanceOfHighres","outputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_spender","type":"address"},{"internalType":"uint256","name":"_subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"governor","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_spender","type":"address"},{"internalType":"uint256","name":"_addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_nameArg","type":"string"},{"internalType":"string","name":"_symbolArg","type":"string"},{"internalType":"address","name":"_vaultAddress","type":"address"}],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"isGovernor","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"isUpgraded","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_account","type":"address"},{"internalType":"uint256","name":"_amount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"nonRebasingCreditsPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"nonRebasingSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rebaseOptIn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"rebaseOptOut","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"rebaseState","outputs":[{"internalType":"enum OUSD.RebaseOptions","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rebasingCredits","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rebasingCreditsHighres","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rebasingCreditsPerToken","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"rebasingCreditsPerTokenHighres","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_to","type":"address"},{"internalType":"uint256","name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_from","type":"address"},{"internalType":"address","name":"_to","type":"address"},{"internalType":"uint256","name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_newGovernor","type":"address"}],"name":"transferGovernance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"vaultAddress","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}]'
+);
+const WOUSD_ADDRESS = "0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62";
+const WOUSD_DEPLOY_BLOCK = 14566204;
+const WOUSD_ABI = JSON.parse(
+  '[{"inputs":[{"internalType":"contract ERC20","name":"underlying_","type":"address"},{"internalType":"string","name":"name_","type":"string"},{"internalType":"string","name":"symbol_","type":"string"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"caller","type":"address"},{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"assets","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"shares","type":"uint256"}],"name":"Deposit","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"GovernorshipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"PendingGovernorshipTransfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"caller","type":"address"},{"indexed":true,"internalType":"address","name":"receiver","type":"address"},{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"assets","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"shares","type":"uint256"}],"name":"Withdraw","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"asset","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"claimGovernance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"shares","type":"uint256"}],"name":"convertToAssets","outputs":[{"internalType":"uint256","name":"assets","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"assets","type":"uint256"}],"name":"convertToShares","outputs":[{"internalType":"uint256","name":"shares","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"assets","type":"uint256"},{"internalType":"address","name":"receiver","type":"address"}],"name":"deposit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"governor","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"isGovernor","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"maxDeposit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"maxMint","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"maxRedeem","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"maxWithdraw","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"shares","type":"uint256"},{"internalType":"address","name":"receiver","type":"address"}],"name":"mint","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"assets","type":"uint256"}],"name":"previewDeposit","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"shares","type":"uint256"}],"name":"previewMint","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"shares","type":"uint256"}],"name":"previewRedeem","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"assets","type":"uint256"}],"name":"previewWithdraw","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"shares","type":"uint256"},{"internalType":"address","name":"receiver","type":"address"},{"internalType":"address","name":"owner","type":"address"}],"name":"redeem","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalAssets","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_newGovernor","type":"address"}],"name":"transferGovernance","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"asset_","type":"address"},{"internalType":"uint256","name":"amount_","type":"uint256"}],"name":"transferToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"assets","type":"uint256"},{"internalType":"address","name":"receiver","type":"address"},{"internalType":"address","name":"owner","type":"address"}],"name":"withdraw","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}]'
+);
+
 const STOP_BLOCK = 14592991;
 const PROGRESS_FILE = "progress.json";
 
@@ -22,13 +40,18 @@ let savedProgress;
 try {
   savedProgress = JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
 } catch (error) {
-  console.log("No progress file, starting from deployment of pool");
+  console.log("No progress file, starting from first deployment");
   savedProgress = {
-    blockNumber: Math.min(OUSD_POOL_DEPLOY_BLOCK, CONVEX_POOL_DEPLOY_BLOCK),
+    blockNumber: Math.min(
+      OUSD_POOL_DEPLOY_BLOCK,
+      CONVEX_POOL_DEPLOY_BLOCK,
+      OUSD_DEPLOY_BLOCK,
+      WOUSD_DEPLOY_BLOCK
+    ),
     curveLiquidity: {},
     convexLiquidity: {},
-    OUSD: {},
-    wOUSD: {},
+    ousdHolders: {},
+    wousdHolders: {},
   };
 }
 
@@ -40,6 +63,8 @@ const options = {
   chunkSize: 10000, // n° of blocks to fetch at a time (default: 10000)
   concurrency: 10, // maximum n° of concurrent web3 requests (default: 10)
   backoff: 1000, // retry backoff in milliseconds (default: 1000)
+  // Note: this flag is the reason for the commit specific dependency in package.json
+  ignoreUnknownEvents: true,
 };
 
 const web3 = new Web3(process.env.PROVIDER_URL);
@@ -48,13 +73,7 @@ const curveContract = {
   name: "OUSD3CRV-f",
   address: OUSD_POOL_ADDRESS,
   abi: OUSD_POOL_ABI,
-  events: [
-    // "AddLiquidity",
-    // "RemoveLiquidity",
-    // "RemoveLiquidityOne",
-    // "RemoveLiquidityImbalance",
-    "Transfer",
-  ],
+  events: ["Transfer"],
 };
 
 const convexContract = {
@@ -64,88 +83,61 @@ const convexContract = {
   events: ["Staked", "Withdrawn"],
 };
 
-const contracts = [curveContract, convexContract];
+const ousdContract = {
+  name: "OUSD",
+  address: OUSD_ADDRESS,
+  abi: OUSD_ABI,
+  events: ["Transfer"],
+};
+
+const wousdContract = {
+  name: "wOUSD",
+  address: WOUSD_ADDRESS,
+  abi: WOUSD_ABI,
+  events: ["Transfer"],
+};
+
+const contracts = [curveContract, convexContract, ousdContract, wousdContract];
 
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
-const curveLiquidity = savedProgress.curveLiquidity;
-const convexLiquidity = savedProgress.convexLiquidity;
-const OUSDHolders = savedProgress.OUSD;
-const wOUSDHolders = savedProgress.wOUSD;
+const { curveLiquidity, convexLiquidity, ousdHolders, wousdHolders } =
+  savedProgress;
+
+const bigNumberify = (value) => {
+  if (BigNumber.isBigNumber(value)) {
+    return value;
+  } else {
+    return BigNumber.from(value);
+  }
+};
 
 // Handler for Curve events
-const handleCurveEvent = async (blockNumber, event) => {
-  /*
-  if (event.name == "AddLiquidity") {
-    // Sum of both OUSD and 3CRV
-    const totalLiquidity = BigNumber.from(event.values.token_amounts[0]).add(
-      BigNumber.from(event.values.token_amounts[1])
-    );
-    if (curveLiquidity[event.from] === undefined) {
-      curveLiquidity[event.from] = [
-        {
-          blockNumber: blockNumber,
-          // Sum of both OUSD and 3CRV
-          amount: totalLiquidity,
-        },
-      ];
-    } else {
-      curveLiquidity[event.from].push({
-        blockNumber: blockNumber,
-        amount: BigNumber.from(last(curveLiquidity[event.from]).amount).add(
-          totalLiquidity
-        ),
-      });
-    }
-  } else if (
-    event.name == "RemoveLiquidity" ||
-    event.name == "RemoveLiquidityImbalance"
-  ) {
-    curveLiquidity[event.from].push({
+const handleCurveTransfer = async (blockNumber, event) => {
+  // Debit sender, unless its the 0 address (i.e. AddLiquidity)
+  if (event.values.sender !== ZERO_ADDRESS) {
+    curveLiquidity[event.values.sender].push({
       blockNumber: blockNumber,
       // Subtract removed liquidity from the last entry
-      amount: BigNumber.from(last(curveLiquidity[event.from]).amount).sub(
-        // Sum of both OUSD and 3CRV
-        BigNumber.from(event.values.token_amounts[0]).add(
-          BigNumber.from(event.values.token_amounts[1])
-        )
-      ),
+      amount: bigNumberify(
+        last(curveLiquidity[event.values.sender]).amount
+      ).sub(bigNumberify(event.values.value)),
     });
-  } else if (event.name == "RemoveLiquidityOne") {
-    curveLiquidity[event.from].push({
+  }
+  if (curveLiquidity[event.values.receiver] === undefined) {
+    curveLiquidity[event.values.receiver] = [
+      {
+        blockNumber: blockNumber,
+        amount: event.values.value,
+      },
+    ];
+  } else {
+    curveLiquidity[event.values.receiver].push({
       blockNumber: blockNumber,
-      // Subtract removed liquidity from the last entry
-      amount: BigNumber.from(last(curveLiquidity[event.from]).amount).sub(
-        BigNumber.from(event.values.token_amount)
-      ),
+      amount: bigNumberify(
+        last(curveLiquidity[event.values.receiver]).amount
+      ).add(bigNumberify(event.values.value)),
     });
-    */
-  if (event.name == "Transfer") {
-    // Debit sender
-    if (event.values.sender !== "0x0000000000000000000000000000000000000000") {
-      curveLiquidity[event.values.sender].push({
-        blockNumber: blockNumber,
-        // Subtract removed liquidity from the last entry
-        amount: BigNumber.from(
-          last(curveLiquidity[event.values.sender]).amount
-        ).sub(BigNumber.from(event.values.value)),
-      });
-    }
-    if (curveLiquidity[event.values.receiver] === undefined) {
-      curveLiquidity[event.values.receiver] = [
-        {
-          blockNumber: blockNumber,
-          amount: event.values.value,
-        },
-      ];
-    } else {
-      curveLiquidity[event.values.receiver].push({
-        blockNumber: blockNumber,
-        amount: BigNumber.from(
-          last(curveLiquidity[event.values.receiver]).amount
-        ).add(BigNumber.from(event.values.value)),
-      });
-    }
   }
 };
 
@@ -158,62 +150,203 @@ const handleConvexEvent = async (blockNumber, event) => {
       convexLiquidity[event.values.user] = [
         {
           blockNumber,
-          amount: BigNumber.from(event.values.amount),
+          amount: bigNumberify(event.values.amount),
         },
       ];
     } else {
       convexLiquidity[event.values.user].push({
         blockNumber,
-        amount: BigNumber.from(
+        amount: bigNumberify(
           last(convexLiquidity[event.values.user]).amount
-        ).add(BigNumber.from(event.values.amount)),
+        ).add(bigNumberify(event.values.amount)),
       });
     }
   } else if (event.name == "Withdrawn") {
     convexLiquidity[event.values.user].push({
       blockNumber,
-      amount: BigNumber.from(
-        last(convexLiquidity[event.values.user]).amount
-      ).sub(BigNumber.from(event.values.amount)),
+      amount: bigNumberify(last(convexLiquidity[event.values.user]).amount).sub(
+        bigNumberify(event.values.amount)
+      ),
     });
+  }
+};
+
+const handleOusdTransfer = async (blockNumber, event) => {
+  // Do nothing on zero value transfers
+  if (event.values.value === "0") return;
+  // Debit sender, unless its the 0 address
+  if (event.values.from !== ZERO_ADDRESS) {
+    if (last(ousdHolders[event.values.from]) === undefined) {
+      console.log(event);
+    }
+    ousdHolders[event.values.from].push({
+      blockNumber: blockNumber,
+      // Subtract removed liquidity from the last entry
+      amount: bigNumberify(last(ousdHolders[event.values.from]).amount).sub(
+        bigNumberify(event.values.value)
+      ),
+    });
+  }
+  if (event.vallues.to !== ZERO_ADDRESS) {
+    if (ousdHolders[event.values.to] === undefined) {
+      ousdHolders[event.values.to] = [
+        {
+          blockNumber: blockNumber,
+          amount: event.values.value,
+        },
+      ];
+    } else {
+      ousdHolders[event.values.to].push({
+        blockNumber: blockNumber,
+        amount: bigNumberify(last(ousdHolders[event.values.to]).amount).add(
+          bigNumberify(event.values.value)
+        ),
+      });
+    }
+  }
+};
+
+const handleWousdTransfer = async (blockNumber, event) => {
+  // Debit sender, unless its the 0 address
+  if (event.values.from !== ZERO_ADDRESS) {
+    wousdHolders[event.values.from].push({
+      blockNumber: blockNumber,
+      // Subtract removed liquidity from the last entry
+      amount: bigNumberify(last(wousdHolders[event.values.from]).amount).sub(
+        bigNumberify(event.values.value)
+      ),
+    });
+  }
+  if (event.values.to !== ZERO_ADDRESS) {
+    if (wousdHolders[event.values.to] === undefined) {
+      wousdHolders[event.values.to] = [
+        {
+          blockNumber: blockNumber,
+          amount: event.values.value,
+        },
+      ];
+    } else {
+      wousdHolders[event.values.to].push({
+        blockNumber: blockNumber,
+        amount: bigNumberify(last(wousdHolders[event.values.to]).amount).add(
+          bigNumberify(event.values.value)
+        ),
+      });
+    }
   }
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
   for (const event of events) {
     if (event.to === curveContract.address) {
-      handleCurveEvent(blockNumber, event);
+      handleCurveTransfer(blockNumber, event);
     } else if (event.to === convexContract.address) {
       handleConvexEvent(blockNumber, event);
+    } else if (event.to === ousdContract.address) {
+      handleOusdTransfer(blockNumber, event);
+    } else if (event.to === wousdContract.address) {
+      handleWousdTransfer(blockNumber, event);
     }
   }
 
   if (blockNumber) {
     process.stdout.write(
-      `${blockNumber} - ${Object.keys(curveLiquidity).length} Curve providers ${
+      `${blockNumber} - ${
+        Object.keys(curveLiquidity).length
+      } Curve providers, ${
         Object.keys(convexLiquidity).length
-      } Convex providers\r`
+      } Convex providers, ${Object.keys(ousdHolders).length} OUSD holders, ${
+        Object.keys(wousdHolders).length
+      } wOUSD holders\r`
     );
   }
 
-  // Save the progress every 10000 blocks
-  if (blockNumber % 10000 === 0) {
+  // Save the progress every 50000 blocks
+  if (blockNumber % 50000 === 0) {
     savedProgress = {
       blockNumber,
       curveLiquidity,
       convexLiquidity,
-      OUSD: OUSDHolders,
-      wOUSD: wOUSDHolders,
+      ousdHolders,
+      wousdHolders,
     };
     fs.writeFileSync(PROGRESS_FILE, JSON.stringify(savedProgress));
   }
 
   if (blockNumber === STOP_BLOCK) {
+    console.log("\n");
     ethereumEvents.stop();
+
+    const curveRewards = rewardScore("curve", curveLiquidity);
+    console.log("Calculating Curve rewards");
+    const convexRewards = rewardScore("convex", convexLiquidity);
+    console.log("Calculating Convex rewards");
+    const ousdHoldersRewards = rewardScore("ousd", ousdHolders);
+    console.log("Calculating OUSD rewards");
+    const wousdHoldersRewards = rewardScore("wousd", wousdHolders);
+    console.log("Calculating wOUSD rewards");
+    const allRewards = merge(
+      {},
+      curveRewards,
+      convexRewards,
+      ousdHoldersRewards,
+      wousdHoldersRewards
+    );
+
+    const csv = Object.entries(allRewards).map(([address, rewards]) => {
+      const total = Object.keys(rewards).reduce((total, reward) => {
+        return total.add(rewards[reward]);
+      }, bigNumberify(0));
+      return `${address},${["curve", "convex", "ousd", "wousd"]
+        .map((key) =>
+          rewards[key] === undefined ? 0 : rewards[key].toString()
+        )
+        .join(",")},${total}`;
+    });
+
+    fs.writeFileSync("retroactive-rewards.csv", csv.join("\n"));
   }
 
   done();
 });
+
+const rewardScore = (desc, addressHistory) => {
+  // Calculate total rewards score by muiltiplying the amount of holdings by the block time held for
+  return Object.entries(addressHistory)
+    .map(
+      ([address, history]: [address: string, history: Array<BlockHistory>]) => {
+        return {
+          address,
+          history,
+          score: history.reduce(
+            (acc, { blockNumber, amount }, currentIndex) => {
+              if (currentIndex > 0) {
+                acc = acc.add(
+                  // Multiply amount by the difference in block numbers
+                  bigNumberify(amount).mul(
+                    blockNumber - history[currentIndex - 1].blockNumber
+                  )
+                );
+              } else if ((currentIndex = history.length - 1)) {
+                // If this is the last history entry, multiple the last seen amount by the difference
+                // in block numbers between the last entry and the current block
+                acc = acc.add(
+                  bigNumberify(amount).mul(STOP_BLOCK - blockNumber)
+                );
+              }
+              return acc;
+            },
+            BigNumber.from(0)
+          ),
+        };
+      }
+    )
+    .reduce(
+      (obj, item) =>
+        Object.assign(obj, { [item.address]: { [desc]: item.score } }),
+      {}
+    );
+};
 
 console.log("Searching for events...");
 
