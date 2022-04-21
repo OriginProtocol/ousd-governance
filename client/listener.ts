@@ -22,11 +22,12 @@ if (!networkId) {
 }
 
 const WEB3_PROVIDER = RPC_URLS[networkId];
+const rpc_provider = new ethers.providers.JsonRpcProvider(WEB3_PROVIDER);
 
 export const governanceTokenContract = new ethers.Contract(
   GovernanceContracts.VoteLockerCurve.address,
   ["function balanceOf(address owner) view returns (uint256)"],
-  new ethers.providers.JsonRpcProvider(WEB3_PROVIDER)
+  rpc_provider
 );
 
 const contracts = [
@@ -118,12 +119,23 @@ ethereumEvents.on("error", (err) => {
 });
 
 // TODO start this at contract deployment or last checked
-prisma.listener.findFirst().then((listener) => {
+prisma.listener.findFirst().then(async (listener) => {
+  let listenBlock:number = 0;
   if (listener) {
-    ethereumEvents.start(listener.lastSeenBlock);
-  } else {
-    ethereumEvents.start(0);
+    if (process.env.NODE_ENV === 'development') {
+      const blockNumber:number = await rpc_provider.getBlockNumber();
+      /* in dev check the chain's blockNumber. If differs too much from stored listener 
+       * amount skip to the current block. The reason is that probably hardhat forked mode
+       * was set to a different blockNumber and it might take too long for the listener to 
+       * catch up
+       */
+      listenBlock = Math.abs(listener.lastSeenBlock - blockNumber) > 200 ? blockNumber : listener.lastSeenBlock;
+    } else {
+      // in production continue where left off last time
+      listener.lastSeenBlock
+    }
   }
+  ethereumEvents.start(listenBlock);
 });
 
 logger.info("Listening for Ethereum events");
