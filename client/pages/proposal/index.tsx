@@ -74,15 +74,17 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
 
   return (
     <>
-      <PageTitle>Proposals</PageTitle>
-      {proposals.length > 0 && (
-        <button
-          className="btn btn-primary mb-5"
-          onClick={() => router.push("/proposal/new")}
-        >
-          New Proposal
-        </button>
-      )}
+      <div className="flex items-end justify-between">
+        <PageTitle>Proposals</PageTitle>
+        {proposals.length > 0 && (
+          <button
+            className="btn btn-primary btn-circle mb-5 text-secondary"
+            onClick={() => router.push("/proposal/new")}
+          >
+            <span className="text-2xl block">+</span>
+          </button>
+        )}
+      </div>
       {loading ? (
         <Loading />
       ) : (
