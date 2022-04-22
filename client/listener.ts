@@ -6,6 +6,7 @@ import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 
+
 const logger = winston.createLogger({
   format: winston.format.simple(),
   transports: [new winston.transports.Console()],

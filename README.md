@@ -64,8 +64,9 @@ First, install the dependencies:
 cd client
 yarn install
 ```
+Copy `client/sample.env` to `client/.env`.
 
-Setup postgresql locally and create a database. Set `DATABASE_URL` in your environment.
+Setup postgresql locally and create a database and update the `DATABASE_URL` in your `client/.env`
 
 _A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`._
 
@@ -75,9 +76,9 @@ Push the database and generate a client:
 npx prisma db push
 ```
 
+(these are already defaults in `client/sample.env`)
 Set the `NETWORK_ID` env var to 31337.
 Set the `WEB3_PROVIDER` variable in your environment.
-
 _The hardhat RPC default is `http://127.0.0.1:8545`._
 
 Then, run the development server:
