@@ -23,12 +23,6 @@ if (!networkId) {
   logger.info(`Listening on network ${networkId}`);
 }
 
-if (process.env.NODE_ENV === 'development' && networkId === '31337') {
-  cleanupDatabase(prisma).then(success => {
-    console.log("All the data pruned from the database");
-  });
-}
-
 const WEB3_PROVIDER = RPC_URLS[networkId];
 const rpc_provider = new ethers.providers.JsonRpcProvider(WEB3_PROVIDER);
 
