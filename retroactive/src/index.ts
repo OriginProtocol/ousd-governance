@@ -187,7 +187,7 @@ const handleOusdTransfer = async (blockNumber, event) => {
       ),
     });
   }
-  if (event.vallues.to !== ZERO_ADDRESS) {
+  if (event.values.to !== ZERO_ADDRESS) {
     if (ousdHolders[event.values.to] === undefined) {
       ousdHolders[event.values.to] = [
         {
