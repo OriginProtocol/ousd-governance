@@ -4,7 +4,6 @@ import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
-import { cleanupDatabase } from "utils/db";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 
 
