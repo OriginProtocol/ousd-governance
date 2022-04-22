@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
+import CardGroup from "components/CardGroup";
+import Card from "components/Card";
+import CardLabel from "components/CardLabel";
+import CardStat from "components/CardStat";
+import CardDescription from "components/CardDescription";
 import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 
@@ -157,130 +162,160 @@ export default function VoteEscrow({}) {
   return (
     <>
       <PageTitle>Vote Escrow</PageTitle>
-
-      <div className="grid content-center">
-        <div className="stats shadow mb-16">
-          <div className="stat">
-            <div className="stat-title">Balance</div>
-            <div className="stat-value text-primary">
-              {truncateBalance(ethers.utils.formatUnits(balance))}
-            </div>
-            <div className="stat-desc">OGV</div>
+      <CardGroup>
+        <CardGroup horizontal fourCol>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Balance</CardLabel>
+                <CardStat>
+                  {truncateBalance(ethers.utils.formatUnits(balance))}
+                </CardStat>
+                <CardDescription>OGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Vote Balance</div>
-            <div className="stat-value text-info-content">
-              {truncateBalance(ethers.utils.formatUnits(votePower))}
-            </div>
-            <div className="stat-desc">veOGV</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Vote Balance</CardLabel>
+                <CardStat>
+                  {truncateBalance(ethers.utils.formatUnits(votePower))}
+                </CardStat>
+                <CardDescription>veOGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Lockup Balance</div>
-            <div className="stat-value text-success-content">
-              {truncateBalance(ethers.utils.formatUnits(existingAmount))}
-            </div>
-            <div className="stat-desc">OGV</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Lockup Balance</CardLabel>
+                <CardStat>
+                  {truncateBalance(ethers.utils.formatUnits(existingAmount))}
+                </CardStat>
+                <CardDescription>OGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Lockup End</div>
-            <div className="stat-value">
-              {existingEndWeeks ? existingEndWeeks : 0}
-            </div>
-            <div className="stat-desc">Weeks</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Lockup End</CardLabel>
+                <CardStat>{existingEndWeeks ? existingEndWeeks : 0}</CardStat>
+                <CardDescription>Weeks</CardDescription>
+              </div>
+            </Card>
           </div>
-        </div>
-      </div>
+        </CardGroup>
+        <Card>
+          <div className="space-y-4">
+            <div>
+              <label className="label">
+                <span className="label-text text-lg font-bold">
+                  Lockup amount
+                </span>
+              </label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  min={1}
+                  max={balance.toString()}
+                  placeholder="Amount"
+                  className={`text-lg input input-bordered w-full border-2 ${
+                    amountError && "input-error"
+                  }`}
+                  value={amount}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setAmountError("");
+                  }}
+                />
+                <button
+                  className="btn"
+                  onClick={() =>
+                    setAmount(ethers.utils.formatUnits(balance.toString()))
+                  }
+                >
+                  Max
+                </button>
+              </div>
+              {amountError && (
+                <label className="label">
+                  <span className="label-text-alt text-error-content">
+                    {amountError}
+                  </span>
+                </label>
+              )}
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text text-lg font-bold">
+                  Lockup length (weeks)
+                </span>
+              </label>
+              <div className="input-group">
+                <input
+                  type="number"
+                  min="1"
+                  max={MAX_WEEKS.toString()}
+                  placeholder="Type here"
+                  className={`text-lg input input-bordered w-full border-2 ${
+                    endError && "input-error"
+                  }`}
+                  value={weeks}
+                  onChange={(e) => {
+                    setWeeks(e.target.value);
+                    setEndError("");
+                  }}
+                />
+                <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
+                  Max
+                </button>
+              </div>
+              {endError && (
+                <label className="label">
+                  <span className="label-text-alt text-error-content">
+                    {endError}
+                  </span>
+                </label>
+              )}
+            </div>
+            {estimatedVotePower && (
+              <div className="pt-2 text-lg">
+                <span className="font-bold pr-2">Estimated votes</span>{" "}
+                {estimatedVotePower}
+              </div>
+            )}
+            <div className="flex py-3">
+              <button
+                className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                disabled={
+                  // TODO approval should be new amount - already locked
+                  !amount ||
+                  !weeks ||
+                  approval.gte(ethers.utils.parseUnits(amount))
+                }
+                onClick={handleApproval}
+              >
+                Approve Transfer
+              </button>
 
-      <div className="max-w-lg mx-auto">
-        <label className="label">
-          <span className="label-text">Lockup amount</span>
-        </label>
-        <div className="input-group">
-          <input
-            type="number"
-            min={1}
-            max={balance.toString()}
-            placeholder="Amount"
-            className={`input input-bordered w-full ${
-              amountError && "input-error"
-            }`}
-            value={amount}
-            onChange={(e) => {
-              setAmount(e.target.value);
-              setAmountError("");
-            }}
-          />
-          <button
-            className="btn"
-            onClick={() =>
-              setAmount(ethers.utils.formatUnits(balance.toString()))
-            }
-          >
-            Max
-          </button>
-        </div>
-        {amountError && (
-          <label className="label">
-            <span className="label-text-alt text-error-content">
-              {amountError}
-            </span>
-          </label>
-        )}
-        <label className="label">
-          <span className="label-text">Lockup length (weeks)</span>
-        </label>
-        <div className="input-group">
-          <input
-            type="number"
-            min="1"
-            max={MAX_WEEKS.toString()}
-            placeholder="Type here"
-            className={`input input-bordered w-full ${
-              endError && "input-error"
-            }`}
-            value={weeks}
-            onChange={(e) => {
-              setWeeks(e.target.value);
-              setEndError("");
-            }}
-          />
-          <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
-            Max
-          </button>
-        </div>
-        {endError && (
-          <label className="label">
-            <span className="label-text-alt text-error-content">
-              {endError}
-            </span>
-          </label>
-        )}
-        {estimatedVotePower && (
-          <div className="mt-5">Estimated votes: {estimatedVotePower}</div>
-        )}
-
-        <button
-          className="btn btn-primary mt-5 mr-5"
-          disabled={
-            // TODO approval should be new amount - already locked
-            !amount || !weeks || approval.gte(ethers.utils.parseUnits(amount))
-          }
-          onClick={handleApproval}
-        >
-          Approve Transfer
-        </button>
-
-        <button
-          className="btn btn-primary mt-5"
-          disabled={
-            // TODO approval should be new amount - already locked
-            !amount || !weeks || ethers.utils.parseUnits(amount).gt(approval)
-          }
-          onClick={handleLockup}
-        >
-          Lockup
-        </button>
-      </div>
+              <button
+                className="btn btn-primary md:btn-lg rounded-full flex-1"
+                disabled={
+                  // TODO approval should be new amount - already locked
+                  !amount ||
+                  !weeks ||
+                  ethers.utils.parseUnits(amount).gt(approval)
+                }
+                onClick={handleLockup}
+              >
+                Lockup
+              </button>
+            </div>
+          </div>
+        </Card>
+      </CardGroup>
     </>
   );
 }

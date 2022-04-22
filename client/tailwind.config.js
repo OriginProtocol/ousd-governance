@@ -1,24 +1,23 @@
 const originTheme = {
-  primary: "#007cff",
-  "primary-focus": "#003cff",
+  fontFamily: "Lato, sans-serif",
+  primary: "#4bbc8a",
   "primary-content": "#ffffff",
-  secondary: "#6e3bea",
-  "secondary-focus": "#6e0bea",
+  "primary-focus": "#39996e",
+  secondary: "#183140",
   "secondary-content": "#ffffff",
-  accent: "#638298",
-  "accent-focus": "#637298",
+  "secondary-focus": "#0d2330",
+  accent: "#4bbc8a",
   "accent-content": "#ffffff",
-  neutral: "#244159",
-  "neutral-focus": "#061d2a",
-  "neutral-content": "#ffffff",
-  "base-100": "#ffffff",
-  "base-200": "#f7fbfd",
-  "base-300": "#dbe6eb",
-  "base-content": "#061d2a",
-  info: "#007cff",
-  success: "#00db8d",
-  warning: "#ffc000",
-  error: "#ff0000",
+  neutral: "#d8d8d8",
+  "neutral-content": "#333333",
+  "neutral-focus": "#c2c2c2",
+  "base-100": "#fafbfc",
+  "base-200": "#f2f3f5",
+  "base-300": "#cdd7e0",
+  "--border-color": "red",
+  "--btn-text-case": "capitalize",
+  "--rounded-btn": "0.6125rem",
+  "--rounded-badge": "0.25rem",
 };
 
 module.exports = {
@@ -27,12 +26,24 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      transitionProperty: {
+        'all': 'all',
+        'right': 'right',
+      },
+    },
   },
   plugins: [require("daisyui"), require("@tailwindcss/typography")],
   daisyui: {
     styled: true,
-    themes: ["light"],
+    themes: [
+      {
+        'origin-theme': {
+          ...require("daisyui/src/colors/themes")["[data-theme=light]"],
+          ...originTheme,
+        }
+      }
+    ],
     base: true,
     utils: true,
     logs: true,

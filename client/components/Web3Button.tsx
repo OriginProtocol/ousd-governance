@@ -125,24 +125,39 @@ export const Web3Button = () => {
       </button>
     );
   }
+
   return web3Provider ? (
-    <>
+    <div className="dropdown relative">
       {address && (
-        <span className="text-muted">
-          {truncateEthAddress(address)}
-          {web3Provider.network.name === "unknown" && " / Localhost"}
-          {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
-        </span>
+        <label
+          tabIndex={0}
+          className="flex items-center space-x-2 p-2 md:px-4 border border-[#bbc9da] text-white rounded-full text-sm leading-none capitalize cursor-pointer"
+        >
+          <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
+          <div className="hidden md:flex">
+            {truncateEthAddress(address)}
+            {web3Provider.network.name === "unknown" && " / Localhost"}
+            {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
+          </div>
+        </label>
       )}
-      <button
-        className="ml-2 btn btn-primary btn-sm rounded-btn"
-        onClick={disconnect}
+      <div
+        tabIndex={0}
+        className="dropdown-content absolute top-full mt-3 right-0 bg-white p-3 md:p-4 rounded-xl border shadow-sm w-36 lg:w-full no-animation"
       >
-        Disconnect
-      </button>
-    </>
+        <button
+          className="btn btn-primary btn-sm rounded-btn w-full"
+          onClick={disconnect}
+        >
+          Disconnect
+        </button>
+      </div>
+    </div>
   ) : (
-    <button className="btn btn-primary btn-sm rounded-btn" onClick={connect}>
+    <button
+      className="btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary"
+      onClick={connect}
+    >
       Connect
     </button>
   );

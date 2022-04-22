@@ -9,6 +9,8 @@ import { VoteStats } from "components/VoteStats";
 import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
+import Card from "components/Card";
+import CardGroup from "components/CardGroup";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 
@@ -119,16 +121,26 @@ const Home: NextPage = ({
 
   return (
     <div>
-      <PageTitle>Governance Overview</PageTitle>
-      <VoteStats
-        proposalCount={proposalCount}
-        holderCount={holderCount}
-        totalSupply={totalSupply}
-      />
-      <SectionTitle>Last 5 Proposals</SectionTitle>
-      {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
-      <SectionTitle>Top 5 Voters</SectionTitle>
-      <LeaderboardTable voters={voters} />
+      <PageTitle>Overview</PageTitle>
+      <CardGroup>
+        <VoteStats
+          proposalCount={proposalCount}
+          holderCount={holderCount}
+          totalSupply={totalSupply}
+        />
+        <Card>
+          <SectionTitle>Last 5 Proposals</SectionTitle>
+          {loading ? (
+            <Loading />
+          ) : (
+            <ProposalTable proposalData={proposalData} />
+          )}
+        </Card>
+        <Card>
+          <SectionTitle>Top 5 Voters</SectionTitle>
+          <LeaderboardTable voters={voters} />
+        </Card>
+      </CardGroup>
     </div>
   );
 };

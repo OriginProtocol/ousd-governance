@@ -55,31 +55,33 @@ export const ProposalTable = ({ proposalData }) => {
   }
 
   return (
-    <table className="table table-zebra w-full">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Proposer</th>
-          <th>State</th>
-        </tr>
-      </thead>
-      <tbody>
-        {proposalData?.proposals.map((proposal, index) => (
-          <tr
-            key={index}
-            className="hover cursor-pointer"
-            onClick={() => router.push(`/proposal/${proposal[0]}`)}
-          >
-            <td>{proposal.displayId}</td>
-            <td>
-              <Address address={proposal[1]} />
-            </td>
-            <td>
-              <StateTag state={proposalData.states[index]} />
-            </td>
+    <div className="overflow-x-auto">
+      <table className="table w-full">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Proposer</th>
+            <th>State</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {proposalData?.proposals.map((proposal, index) => (
+            <tr
+              key={index}
+              className="hover cursor-pointer"
+              onClick={() => router.push(`/proposal/${proposal[0]}`)}
+            >
+              <td>{proposal.displayId}</td>
+              <td>
+                <Address address={proposal[1]} />
+              </td>
+              <td>
+                <StateTag state={proposalData.states[index]} />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };

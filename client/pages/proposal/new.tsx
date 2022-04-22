@@ -1,13 +1,16 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { toast } from "react-toastify";
+import Card from "components/Card";
+import CardGroup from "components/CardGroup";
 import { ProposalAddActionButton } from "components/proposal/ProposalAddActionButton";
 import { ProposalActionAddModal } from "components/proposal/ProposalActionAddModal";
 import { ProposalActionsTableEmpty } from "components/proposal/ProposalActionsTableEmpty";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
+import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
@@ -114,97 +117,116 @@ const ProposalNew: NextPage = () => {
     });
   };
 
+  if (!web3Provider) {
+    return <Disconnected />;
+  }
+
   if (votePower.lt(proposalThreshold)) {
     return (
-      <div className="text-center pt-5">
-        <h3 className="mt-2 font-medium text-gray-900">
-          Minimum required vote power for a proposal is{" "}
-          {proposalThreshold.toString()} votes. You have{" "}
-          {truncateBalance(ethers.utils.formatUnits(votePower))} votes.
-        </h3>
-      </div>
+      <Card>
+        <div className="text-center">
+          <p className="mt-2 font-medium">
+            Minimum required vote power for a proposal is{" "}
+            {proposalThreshold.toString()} votes.
+            <br />
+            <br />
+            You have {truncateBalance(ethers.utils.formatUnits(votePower))}{" "}
+            votes.
+          </p>
+        </div>
+      </Card>
     );
   }
 
   return (
     <>
       <PageTitle>New Proposal</PageTitle>
-      <div className="-mt-6">
-        <SectionTitle>Snapshot Proposal</SectionTitle>
-      </div>
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Hash</span>
-        </label>
-        <input
-          type="text"
-          placeholder="0x0"
-          className="input input-bordered"
-          onChange={(e) => setSnapshotHash(e.target.value)}
-        />
-      </div>
-      <label className="label">
-        <span className="label-text-alt">
-          For proposals that aren&apos;t simple reallocations, a Snapshot
-          proposal should be used to signal intent before on chain happens. The
-          Snapshot proposal should clearly detail the justification for the
-          change.
-        </span>
-      </label>
-      <SectionTitle>Governance Actions</SectionTitle>
-      <div className="tabs mb-6">
-        <a
-          className={`tab tab-lg tab-lifted ${!isReallocation && "tab-active"}`}
-          onClick={() => setIsReallocation(false)}
-        >
-          Custom
-        </a>
-        <a
-          className={`tab tab-lg tab-lifted ${isReallocation && "tab-active"}`}
-          onClick={() => setIsReallocation(true)}
-        >
-          Reallocation
-        </a>
-      </div>{" "}
-      {isReallocation ? (
-        <Reallocation snapshotHash={snapshotHash} />
-      ) : (
-        <>
-          {newProposalActions.length === 0 ? (
-            <ProposalActionsTableEmpty
-              onClickAdd={() => setModalOpen(true)}
-              onActionAdd={handleAddAction}
+      <CardGroup>
+        <Card>
+          <SectionTitle>Snapshot Proposal</SectionTitle>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Hash</span>
+            </label>
+            <input
+              type="text"
+              placeholder="0x0"
+              className="input input-bordered text-black"
+              onChange={(e) => setSnapshotHash(e.target.value)}
             />
+          </div>
+          <label className="label">
+            <span className="label-text-alt opacity-80">
+              For proposals that aren&apos;t simple reallocations, a Snapshot
+              proposal should be used to signal intent before on chain happens.
+              The Snapshot proposal should clearly detail the justification for
+              the change.
+            </span>
+          </label>
+        </Card>
+        <Card>
+          <SectionTitle>Governance Actions</SectionTitle>
+          <div className="tabs mb-6">
+            <a
+              className={`tab tab-lg tab-lifted ${
+                !isReallocation && "tab-active"
+              }`}
+              onClick={() => setIsReallocation(false)}
+            >
+              Custom
+            </a>
+            <a
+              className={`tab tab-lg tab-lifted ${
+                isReallocation && "tab-active"
+              }`}
+              onClick={() => setIsReallocation(true)}
+            >
+              Reallocation
+            </a>
+          </div>{" "}
+          {isReallocation ? (
+            <Reallocation snapshotHash={snapshotHash} />
           ) : (
             <>
-              <ProposalAddActionButton
-                className="btn btn-primary btn-sm mb-6"
-                onClick={() => setModalOpen(true)}
-                size="small"
-              />
-              <ProposalActionsTable
-                proposalActions={proposalActions}
-                onActionDelete={handleDeleteAction}
-                ephemeral={true}
-              />
-              <div className="flex">
-                <button
-                  className="btn btn-primary mt-24"
-                  disabled={newProposalActions.length === 0 || submitDisabled}
-                  onClick={handleSubmit}
-                >
-                  Submit Proposal
-                </button>
-              </div>
+              {newProposalActions.length === 0 ? (
+                <ProposalActionsTableEmpty
+                  onClickAdd={() => setModalOpen(true)}
+                  onActionAdd={handleAddAction}
+                />
+              ) : (
+                <>
+                  <ProposalAddActionButton
+                    className="btn btn-primary btn-sm mb-6"
+                    onClick={() => setModalOpen(true)}
+                    size="small"
+                  />
+                  <ProposalActionsTable
+                    proposalActions={proposalActions}
+                    onActionDelete={handleDeleteAction}
+                    ephemeral={true}
+                  />
+                  <div className="flex">
+                    <button
+                      className="btn btn-primary mt-24"
+                      disabled={
+                        newProposalActions.length === 0 || submitDisabled
+                      }
+                      onClick={handleSubmit}
+                    >
+                      Submit Proposal
+                    </button>
+                  </div>
+                </>
+              )}
             </>
           )}
-        </>
-      )}
-      <ProposalActionAddModal
-        modalOpen={modalOpen}
-        onModalClose={() => setModalOpen(false)}
-        onActionAdd={handleAddAction}
-      />
+          <ProposalActionAddModal
+            modalOpen={modalOpen}
+            onModalClose={() => setModalOpen(false)}
+            onActionAdd={handleAddAction}
+          />
+        </Card>
+      </CardGroup>
     </>
   );
 };

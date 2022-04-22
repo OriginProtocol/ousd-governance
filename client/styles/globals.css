@@ -5,3 +5,53 @@
 a {
   color: hsl(var(--p));
 }
+
+[data-theme="origin-theme"] .table {
+  @apply text-sm;
+}
+
+[data-theme="origin-theme"] .table :where(thead,tfoot) :where(th,td):first-child {
+  border-radius: 0;
+}
+
+[data-theme="origin-theme"] .table :where(thead,tfoot) :where(th,td) {
+  @apply text-sm font-normal text-gray-400;
+  background-color: transparent;
+  text-transform: none;
+}
+
+[data-theme="origin-theme"] .table tr {
+  @apply border-b;
+}
+
+[data-theme="origin-theme"] .table tbody > tr:last-of-type {
+  border-bottom: 0;
+}
+
+[data-theme="origin-theme"] .table tr.hover:hover td,
+[data-theme="origin-theme"] .table tr.hover:hover th,
+[data-theme="origin-theme"] .table tr.hover:nth-child(even):hover td,
+[data-theme="origin-theme"] .table tr.hover:nth-child(even):hover th {
+  @apply bg-gray-200;
+}
+
+[data-theme="origin-theme"] .badge {
+  @apply border;
+  @apply p-1;
+}
+
+[data-theme="origin-theme"] .badge.badge-info {
+  border-color: hsl(var(--inc,var(--nc)) / calc(var(--tw-text-opacity) / 2));
+}
+
+[data-theme="origin-theme"] .badge.badge-warning {
+  border-color: hsl(var(--wac,var(--nc)) / calc(var(--tw-text-opacity) / 2));
+}
+
+[data-theme="origin-theme"] .badge.badge-error {
+  border-color: hsl(var(--erc,var(--nc)) / calc(var(--tw-text-opacity) / 2));
+}
+
+[data-theme="origin-theme"] .badge.badge-success {
+  border-color: hsl(var(--suc,var(--nc)) / calc(var(--tw-text-opacity) / 2));
+}
