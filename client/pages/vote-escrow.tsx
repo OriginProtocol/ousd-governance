@@ -110,6 +110,11 @@ export default function VoteEscrow({}) {
       setEndError("End date must be greater than existing lockup end date");
       return false;
     }
+
+    if (weeks > MAX_WEEKS) {
+      setEndError(`Can not lockup for more than ${MAX_WEEKS} weeks`);
+      return false;
+    }
     return true;
   };
 
@@ -255,16 +260,14 @@ export default function VoteEscrow({}) {
               </label>
               <div className="input-group">
                 <input
-                  type="number"
-                  min="1"
-                  max={MAX_WEEKS.toString()}
+                  type="text"
                   placeholder="Type here"
                   className={`text-lg input input-bordered w-full border-2 ${
                     endError && "input-error"
                   }`}
                   value={weeks}
                   onChange={(e) => {
-                    setWeeks(e.target.value);
+                    setWeeks(e.target.value.replace(/\D+/g, ''));
                     setEndError("");
                   }}
                 />
