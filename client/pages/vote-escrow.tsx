@@ -267,7 +267,7 @@ export default function VoteEscrow({}) {
                   }`}
                   value={weeks}
                   onChange={(e) => {
-                    setWeeks(e.target.value.replace(/\D+/g, ''));
+                    setWeeks(e.target.value.replace(/\D+/g, ""));
                     setEndError("");
                   }}
                 />
