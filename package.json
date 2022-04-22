@@ -3,7 +3,8 @@
   "license": "MIT",
   "homepage": "https://github.com/originprotocol/ousd-governance",
   "scripts": {
-    "node": "scripts/node.sh fork"
+    "node": "scripts/node.sh fork",
+    "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json"
   },
   "dependencies": {
     "hardhat": "^2.9.1"

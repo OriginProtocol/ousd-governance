@@ -4,6 +4,7 @@ import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
+import { cleanupDatabase } from "utils/db";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 
 
@@ -20,6 +21,12 @@ if (!networkId) {
   process.exit(1);
 } else {
   logger.info(`Listening on network ${networkId}`);
+}
+
+if (process.env.NODE_ENV === 'development' && networkId === '31337') {
+  cleanupDatabase(prisma).then(success => {
+    console.log("All the data pruned from the database");
+  });
 }
 
 const WEB3_PROVIDER = RPC_URLS[networkId];
