@@ -14,7 +14,9 @@ export const ProposalParameters = ({ proposal, state, quorum }) => {
       const blockNumber = await web3Provider.getBlockNumber();
       setBlockNumber(parseInt(blockNumber));
     };
-    getBlockNumber();
+    if (web3Provider) {
+      getBlockNumber();
+    }
   }, [web3Provider]);
 
   const blockDifference = proposal.endBlock - proposal.startBlock;

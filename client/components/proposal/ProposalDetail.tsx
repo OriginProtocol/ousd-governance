@@ -34,7 +34,7 @@ export const ProposalDetail = ({
       setProposal(await Governance.proposals(proposalId));
       setProposalState(await Governance.state(proposalId));
     };
-    if (proposalId) {
+    if (proposalId && Governance) {
       loadProposal();
     }
   }, [proposalId, Governance, reloadProposal]);
@@ -43,7 +43,7 @@ export const ProposalDetail = ({
     const loadVotePower = async () => {
       setVotePower(await Governance.getVotes(address, proposal.startBlock));
     };
-    if (address && proposal) {
+    if (address && proposal && Governance) {
       loadVotePower();
     }
   }, [address, proposal, Governance]);
@@ -52,7 +52,7 @@ export const ProposalDetail = ({
     const loadHasVoted = async () => {
       setHasVoted(await Governance.hasVoted(proposalId, address));
     };
-    if (address && proposal) {
+    if (address && proposal && Governance) {
       loadHasVoted();
     }
   }, [address, proposal, Governance, proposalId, reloadProposal]);
@@ -61,7 +61,7 @@ export const ProposalDetail = ({
     const loadQuorum = async () => {
       setQuorum(await Governance.quorum(proposal.startBlock));
     };
-    if (proposal) {
+    if (proposal && Governance) {
       loadQuorum();
     }
   }, [proposal, Governance, proposalId, reloadProposal]);
