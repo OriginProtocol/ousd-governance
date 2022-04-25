@@ -51,6 +51,7 @@ try {
     curveLiquidity: {},
     convexLiquidity: {},
     ousdHolders: {},
+    ousdRebasers: [],
     wousdHolders: {},
   };
 }
@@ -66,6 +67,8 @@ const options = {
   // Note: this flag is the reason for the commit specific dependency in package.json
   ignoreUnknownEvents: true,
 };
+
+const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL);
 
 const web3 = new Web3(process.env.PROVIDER_URL);
 
@@ -101,8 +104,13 @@ const contracts = [curveContract, convexContract, ousdContract, wousdContract];
 
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
-const { curveLiquidity, convexLiquidity, ousdHolders, wousdHolders } =
-  savedProgress;
+const {
+  curveLiquidity,
+  convexLiquidity,
+  ousdHolders,
+  ousdRebasers,
+  wousdHolders,
+} = savedProgress;
 
 const bigNumberify = (value) => {
   if (BigNumber.isBigNumber(value)) {
@@ -124,20 +132,22 @@ const handleCurveTransfer = async (blockNumber, event) => {
       ).sub(bigNumberify(event.values.value)),
     });
   }
-  if (curveLiquidity[event.values.receiver] === undefined) {
-    curveLiquidity[event.values.receiver] = [
-      {
+  if (event.values.receiver !== ZERO_ADDRESS) {
+    if (curveLiquidity[event.values.receiver] === undefined) {
+      curveLiquidity[event.values.receiver] = [
+        {
+          blockNumber: blockNumber,
+          amount: event.values.value,
+        },
+      ];
+    } else {
+      curveLiquidity[event.values.receiver].push({
         blockNumber: blockNumber,
-        amount: event.values.value,
-      },
-    ];
-  } else {
-    curveLiquidity[event.values.receiver].push({
-      blockNumber: blockNumber,
-      amount: bigNumberify(
-        last(curveLiquidity[event.values.receiver]).amount
-      ).add(bigNumberify(event.values.value)),
-    });
+        amount: bigNumberify(
+          last(curveLiquidity[event.values.receiver]).amount
+        ).add(bigNumberify(event.values.value)),
+      });
+    }
   }
 };
 
@@ -176,9 +186,6 @@ const handleOusdTransfer = async (blockNumber, event) => {
   if (event.values.value === "0") return;
   // Debit sender, unless its the 0 address
   if (event.values.from !== ZERO_ADDRESS) {
-    if (last(ousdHolders[event.values.from]) === undefined) {
-      console.log(event);
-    }
     ousdHolders[event.values.from].push({
       blockNumber: blockNumber,
       // Subtract removed liquidity from the last entry
@@ -195,6 +202,12 @@ const handleOusdTransfer = async (blockNumber, event) => {
           amount: event.values.value,
         },
       ];
+      /*
+      // If not is contract, add to rebasers
+      if ((await provider.getCode(event.values.to)) === "0x") {
+        ousdRebasers.push(event.values.to);
+      }
+      */
     } else {
       ousdHolders[event.values.to].push({
         blockNumber: blockNumber,
@@ -203,6 +216,13 @@ const handleOusdTransfer = async (blockNumber, event) => {
         ),
       });
     }
+  }
+};
+
+const handleOusdRebase = async (blockNumber, event) => {
+  for (const address in ousdRebasers) {
+    // TODO handle rebase
+    // For every OUSD user that has rebase, we need to add the rebase amount to the last entry
   }
 };
 
@@ -320,6 +340,8 @@ const rewardScore = (desc, addressHistory) => {
           history,
           score: history.reduce(
             (acc, { blockNumber, amount }, currentIndex) => {
+              // Ignore amounts less than 0, this can happen with OUSD due to the rebased yield not being included
+              if (bigNumberify(amount).lt(0)) return acc;
               if (currentIndex > 0) {
                 acc = acc.add(
                   // Multiply amount by the difference in block numbers
