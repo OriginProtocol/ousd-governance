@@ -59,8 +59,6 @@ export const Web3Button = () => {
 
   const resetWeb3State = useStore((state) => state.reset);
 
-  const state = useStore((state) => state);
-
   const networkInfo = useNetworkInfo();
 
   const connect = useCallback(async function () {
@@ -84,16 +82,20 @@ export const Web3Button = () => {
     provider.on("accountsChanged", async (accounts) => {
       const newAccount: string =
         accounts.length === 0 ? undefined : accounts[0];
-      if (newAccount !== undefined && address !== newAccount) {
-        resetWeb3State();
-      }
-
-      useStore.setState({
-        provider,
-        web3Provider,
-        chainId: network.chainId,
+      let storeUpdate = {
         address: newAccount,
-      });
+      };
+      resetWeb3State();
+
+      if (newAccount !== undefined) {
+        storeUpdate = {
+          ...storeUpdate,
+          provider,
+          web3Provider,
+          chainId: network.chainId,
+        };
+      }
+      useStore.setState(storeUpdate);
     });
 
     // Add contracts
