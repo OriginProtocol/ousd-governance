@@ -10,6 +10,7 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
+import moment from "moment";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -25,6 +26,7 @@ export default function VoteEscrow({}) {
   );
   const [existingEnd, setExistingEnd] = useState(ethers.BigNumber.from(0));
   const [existingEndWeeks, setExistingEndWeeks] = useState(0);
+  const [existingEndDate, setExistingEndDate] = useState("");
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
   const [reload, setReload] = useState(false);
@@ -83,6 +85,7 @@ export default function VoteEscrow({}) {
     const lockupEndToWeeks = async (end: ethers.BigNumber) => {
       const now = (await web3Provider.getBlock()).timestamp;
       setExistingEndWeeks(end.sub(now).div(604800).toNumber());
+      setExistingEndDate(moment(end.toNumber() * 1000).format("MMM D YYYY"));
     };
     if (web3Provider && address && existingEnd.gt(0)) {
       lockupEndToWeeks(existingEnd);
@@ -208,6 +211,9 @@ export default function VoteEscrow({}) {
                 <CardLabel>Lockup End</CardLabel>
                 <CardStat>{existingEndWeeks ? existingEndWeeks : 0}</CardStat>
                 <CardDescription>Weeks</CardDescription>
+                {existingEnd.gt(0) && (
+                  <CardDescription alt>{existingEndDate}</CardDescription>
+                )}
               </div>
             </Card>
           </div>

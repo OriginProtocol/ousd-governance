@@ -35,6 +35,7 @@
     "eslint-config-next": "12.1.0",
     "ethereum-events": "^0.1.3",
     "ethers": "^5.5.4",
+    "moment": "^2.29.3",
     "next": "12.1.0",
     "node-schedule": "^2.1.0",
     "nodemon": "^2.0.15",
