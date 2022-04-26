@@ -10,6 +10,7 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
+import TokenAmount from "components/TokenAmount";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -174,7 +175,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(balance))}
+                  <TokenAmount amount={balance} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>
@@ -185,7 +186,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Vote Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(votePower))}
+                  <TokenAmount amount={votePower} />
                 </CardStat>
                 <CardDescription>veOGV</CardDescription>
               </div>
@@ -196,7 +197,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Lockup Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(existingAmount))}
+                  <TokenAmount amount={existingAmount} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>
