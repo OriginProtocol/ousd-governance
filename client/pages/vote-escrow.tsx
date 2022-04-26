@@ -267,7 +267,6 @@ export default function VoteEscrow({}) {
                   max="208"
                   value={weeks}
                   onChange={(e) => {
-                    console.log(e.target.value);
                     setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
                     setEndError("");
                   }}
