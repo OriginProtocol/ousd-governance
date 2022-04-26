@@ -121,7 +121,7 @@ export default function VoteEscrow({}) {
   const handleApproval = async () => {
     const transaction = await contracts.OriginDollarGovernance.approve(
       contracts.VoteLockerCurve.address,
-      ethers.utils.parseUnits(amount)
+      ethers.constants.MaxUint256
     );
 
     useStore.setState({
