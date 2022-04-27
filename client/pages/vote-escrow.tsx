@@ -241,7 +241,6 @@ export default function VoteEscrow({}) {
               <button
                 className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
                 disabled={
-                  // TODO approval should be new amount - already locked
                   !amount ||
                   !weeks ||
                   allowances.ogv.gte(ethers.utils.parseUnits(amount))
@@ -254,7 +253,6 @@ export default function VoteEscrow({}) {
               <button
                 className="btn btn-primary md:btn-lg rounded-full flex-1"
                 disabled={
-                  // TODO approval should be new amount - already locked
                   !amount ||
                   !weeks ||
                   ethers.utils.parseUnits(amount).gt(allowances.ogv)
