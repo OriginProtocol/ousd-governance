@@ -351,6 +351,8 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             "End must be before maximum lockup time"
         );
         int128 amount = SafeCast.toInt128(int256(_amount));
+        // New lockups cannot be for zero tokens
+        require(oldLockup.end > 0 || _amount > 0, "Amount must be greater than 0");
         // Amount extensions
         require(
             amount >= oldLockup.amount,
