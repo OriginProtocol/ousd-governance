@@ -150,10 +150,15 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Lockup End</CardLabel>
                 <CardStat>
-                  {existingLockup.existingEndWeeks ? existingLockup.existingEndWeeks : 0} weeks
+                  {existingLockup.existingEndWeeks
+                    ? existingLockup.existingEndWeeks
+                    : 0}{" "}
+                  weeks
                 </CardStat>
                 {existingLockup.end.gt(0) && (
-                  <CardDescription>{existingLockup.existingEndDate}</CardDescription>
+                  <CardDescription>
+                    {existingLockup.existingEndDate}
+                  </CardDescription>
                 )}
               </div>
             </Card>

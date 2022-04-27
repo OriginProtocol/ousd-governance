@@ -48,7 +48,9 @@ const useAccountBalances = () => {
             existingEndWeeks: !existingLockup.end.eq(ethers.BigNumber.from(0))
               ? existingLockup.end.sub(now).div(604800).toNumber()
               : 0,
-            existingEndDate: moment(existingLockup.end.toNumber() * 1000).format("MMM D, YYYY"),
+            existingEndDate: moment(
+              existingLockup.end.toNumber() * 1000
+            ).format("MMM D, YYYY"),
           },
         });
       });
