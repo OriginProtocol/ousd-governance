@@ -10,87 +10,27 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
-import moment from "moment";
+import useAccountBalances from "utils/useAccountBalances";
+import TokenAmount from "components/TokenAmount";
 
 const MAX_WEEKS = 52 * 4;
 
 export default function VoteEscrow({}) {
-  const { web3Provider, address, contracts, pendingTransactions } = useStore();
+  const {
+    web3Provider,
+    address,
+    contracts,
+    pendingTransactions,
+    balances,
+    allowances,
+    existingLockup,
+  } = useStore();
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [votePower, setVotePower] = useState(0);
-  const [approval, setApproval] = useState(0);
-  const [existingAmount, setExistingAmount] = useState(
-    ethers.BigNumber.from(0)
-  );
-  const [existingEnd, setExistingEnd] = useState(ethers.BigNumber.from(0));
-  const [existingEndWeeks, setExistingEndWeeks] = useState(0);
-  const [existingEndDate, setExistingEndDate] = useState("");
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
-  const [reload, setReload] = useState(false);
   const networkInfo = useNetworkInfo();
-
-  // Load users governance token balance
-  useEffect(() => {
-    const loadBalance = async () => {
-      const balance = await contracts.OriginDollarGovernance.balanceOf(address);
-      setBalance(balance);
-    };
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
-      loadBalance();
-    }
-  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
-
-  // Load users vote power
-  useEffect(() => {
-    const loadVotePower = async () => {
-      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
-      setVotePower(votePower);
-    };
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
-      loadVotePower();
-    }
-  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
-
-  // Load the amount of governance token approved by the user for transfer by vl contract
-  useEffect(() => {
-    const loadApproval = async () => {
-      const approval = await contracts.OriginDollarGovernance.allowance(
-        address,
-        contracts.VoteLockerCurve.address
-      );
-      setApproval(approval);
-    };
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
-      loadApproval();
-    }
-  }, [address, web3Provider, contracts, reload, networkInfo.correct]);
-
-  // Load users existing lockup in case this is an extension
-  useEffect(() => {
-    const loadExistingLockup = async () => {
-      const lockup = await contracts.VoteLockerCurve.getLockup(address);
-      setExistingAmount(lockup[0]);
-      setExistingEnd(lockup[1]);
-    };
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
-      loadExistingLockup();
-    }
-  }, [address, web3Provider, contracts, networkInfo.correct, reload]);
-
-  // Calculate the number of weeks to existing lockup end (if one exists)
-  useEffect(() => {
-    const lockupEndToWeeks = async (end: ethers.BigNumber) => {
-      const now = (await web3Provider.getBlock()).timestamp;
-      setExistingEndWeeks(end.sub(now).div(604800).toNumber());
-      setExistingEndDate(moment(end.toNumber() * 1000).format("MMM D, YYYY"));
-    };
-    if (web3Provider && address && existingEnd.gt(0)) {
-      lockupEndToWeeks(existingEnd);
-    }
-  }, [address, existingEnd, web3Provider, reload]);
+  const { reloadAllowances, reloadBalances } = useAccountBalances();
 
   if (!web3Provider) {
     return <Disconnected />;
@@ -104,12 +44,12 @@ export default function VoteEscrow({}) {
   }
 
   const validate = async () => {
-    if (ethers.utils.parseUnits(amount).lte(existingAmount)) {
+    if (ethers.utils.parseUnits(amount).lte(existingLockup.amount)) {
       setAmountError("Amount must be greater than existing lockup amount");
       return false;
     }
     const now = (await web3Provider.getBlock()).timestamp;
-    if (now + weeks * 7 * 86400 < existingEnd) {
+    if (now + weeks * 7 * 86400 < existingLockup.end) {
       setEndError("End date must be greater than existing lockup end date");
       return false;
     }
@@ -124,7 +64,7 @@ export default function VoteEscrow({}) {
   const handleApproval = async () => {
     const transaction = await contracts.OriginDollarGovernance.approve(
       contracts.VoteLockerCurve.address,
-      ethers.utils.parseUnits(amount)
+      ethers.constants.MaxUint256
     );
 
     useStore.setState({
@@ -134,7 +74,7 @@ export default function VoteEscrow({}) {
           ...transaction,
           onComplete: () => {
             toast.success("Approval has been made", { hideProgressBar: true }),
-              setReload(!reload);
+              reloadAllowances();
           },
         },
       ],
@@ -159,7 +99,7 @@ export default function VoteEscrow({}) {
               toast.success("Approval has been made", {
                 hideProgressBar: true,
               });
-              setReload(!reload);
+              reloadBalances();
             },
           },
         ],
@@ -177,7 +117,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(balance))}
+                  <TokenAmount amount={balances.ogv} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>
@@ -188,7 +128,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Vote Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(votePower))}
+                  <TokenAmount amount={balances.vote_power} />
                 </CardStat>
                 <CardDescription>veOGV</CardDescription>
               </div>
@@ -199,7 +139,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Lockup Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(existingAmount))}
+                  <TokenAmount amount={existingLockup.amount} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>
@@ -210,10 +150,10 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Lockup End</CardLabel>
                 <CardStat>
-                  {existingEndWeeks ? existingEndWeeks : 0} weeks
+                  {existingLockup.existingEndWeeks ? existingLockup.existingEndWeeks : 0} weeks
                 </CardStat>
-                {existingEnd.gt(0) && (
-                  <CardDescription>{existingEndDate}</CardDescription>
+                {existingLockup.end.gt(0) && (
+                  <CardDescription>{existingLockup.existingEndDate}</CardDescription>
                 )}
               </div>
             </Card>
@@ -231,7 +171,7 @@ export default function VoteEscrow({}) {
                 <input
                   type="number"
                   min={1}
-                  max={balance.toString()}
+                  max={balances.ogv.toString()}
                   placeholder="Amount"
                   className={`text-lg input input-bordered w-full border-2 ${
                     amountError && "input-error"
@@ -245,7 +185,7 @@ export default function VoteEscrow({}) {
                 <button
                   className="btn"
                   onClick={() =>
-                    setAmount(ethers.utils.formatUnits(balance.toString()))
+                    setAmount(ethers.utils.formatUnits(balances.ogv.toString()))
                   }
                 >
                   Max
@@ -300,10 +240,9 @@ export default function VoteEscrow({}) {
               <button
                 className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
                 disabled={
-                  // TODO approval should be new amount - already locked
                   !amount ||
                   !weeks ||
-                  approval.gte(ethers.utils.parseUnits(amount))
+                  allowances.ogv.gte(ethers.utils.parseUnits(amount))
                 }
                 onClick={handleApproval}
               >
@@ -313,10 +252,9 @@ export default function VoteEscrow({}) {
               <button
                 className="btn btn-primary md:btn-lg rounded-full flex-1"
                 disabled={
-                  // TODO approval should be new amount - already locked
                   !amount ||
                   !weeks ||
-                  ethers.utils.parseUnits(amount).gt(approval)
+                  ethers.utils.parseUnits(amount).gt(allowances.ogv)
                 }
                 onClick={handleLockup}
               >

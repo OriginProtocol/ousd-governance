@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
@@ -78,7 +77,7 @@ const Home: NextPage = ({
     proposals: [],
     states: [],
   });
-  const [totalSupply, setTotalSupply] = useState<string>("0");
+  const [totalSupply, setTotalSupply] = useState<BigNumber>(BigNumber.from(0));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -108,9 +107,7 @@ const Home: NextPage = ({
 
   useEffect(() => {
     const loadTotalSupply = async () => {
-      const totalSupply = (
-        await contracts.VoteLockerCurve.totalSupply()
-      ).toString();
+      const totalSupply = await contracts.VoteLockerCurve.totalSupply();
       setTotalSupply(totalSupply);
     };
 

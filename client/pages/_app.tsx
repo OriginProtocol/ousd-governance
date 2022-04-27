@@ -7,10 +7,12 @@ import Layout from "../components/layout";
 import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
+import useAccountBalances from "utils/useAccountBalances";
 import { TransactionListener } from "components/TransactionListener";
 
 export default function App({ Component, pageProps }) {
   const { web3Provider, contracts, chainId } = useStore();
+  useAccountBalances();
 
   useEffect(() => {
     const loadContracts = async () => {

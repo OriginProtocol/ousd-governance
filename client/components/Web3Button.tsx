@@ -79,6 +79,25 @@ export const Web3Button = () => {
     const address = await signer.getAddress();
     const network = await web3Provider.getNetwork();
 
+    provider.on("accountsChanged", async (accounts) => {
+      const newAccount: string =
+        accounts.length === 0 ? undefined : accounts[0];
+      let storeUpdate = {
+        address: newAccount,
+      };
+      resetWeb3State();
+
+      if (newAccount !== undefined) {
+        storeUpdate = {
+          ...storeUpdate,
+          provider,
+          web3Provider,
+          chainId: network.chainId,
+        };
+      }
+      useStore.setState(storeUpdate);
+    });
+
     // Add contracts
     useStore.setState({
       provider,
