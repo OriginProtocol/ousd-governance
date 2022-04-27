@@ -282,6 +282,17 @@ export default function VoteEscrow({}) {
                   <span>|</span>
                   <span>|</span>
                 </div>
+                <div className="w-full flex justify-between text-xs text-gray-400 pt-1">
+                  <span>0 wks</span>
+                  <span>&nbsp;</span>
+                  <span>1 yr</span>
+                  <span>&nbsp;</span>
+                  <span>2 yrs</span>
+                  <span>&nbsp;</span>
+                  <span>3 yrs</span>
+                  <span>&nbsp;</span>
+                  <span>4 yrs</span>
+                </div>
               </div>
               {endError && (
                 <label className="label">
