@@ -85,7 +85,7 @@ export default function VoteEscrow({}) {
     const lockupEndToWeeks = async (end: ethers.BigNumber) => {
       const now = (await web3Provider.getBlock()).timestamp;
       setExistingEndWeeks(end.sub(now).div(604800).toNumber());
-      setExistingEndDate(moment(end.toNumber() * 1000).format("MMM D YYYY"));
+      setExistingEndDate(moment(end.toNumber() * 1000).format("MMM D, YYYY"));
     };
     if (web3Provider && address && existingEnd.gt(0)) {
       lockupEndToWeeks(existingEnd);
@@ -209,10 +209,11 @@ export default function VoteEscrow({}) {
             <Card dark tightPadding>
               <div className="space-y-1">
                 <CardLabel>Lockup End</CardLabel>
-                <CardStat>{existingEndWeeks ? existingEndWeeks : 0}</CardStat>
-                <CardDescription>Weeks</CardDescription>
+                <CardStat>
+                  {existingEndWeeks ? existingEndWeeks : 0} weeks
+                </CardStat>
                 {existingEnd.gt(0) && (
-                  <CardDescription alt>{existingEndDate}</CardDescription>
+                  <CardDescription>{existingEndDate}</CardDescription>
                 )}
               </div>
             </Card>
