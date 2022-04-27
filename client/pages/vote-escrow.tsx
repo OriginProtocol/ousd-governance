@@ -117,7 +117,6 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Balance</CardLabel>
                 <CardStat>
-
                   <TokenAmount amount={balances.ogv} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
