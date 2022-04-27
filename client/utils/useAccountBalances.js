@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import moment from "moment";
 
 const useAccountBalances = () => {
   const [reloadAllowances, setReloadAllowances] = useState(0);
@@ -47,6 +48,9 @@ const useAccountBalances = () => {
             existingEndWeeks: !existingLockup.end.eq(ethers.BigNumber.from(0))
               ? existingLockup.end.sub(now).div(604800).toNumber()
               : 0,
+            existingEndDate: moment(
+              existingLockup.end.toNumber() * 1000
+            ).format("MMM D, YYYY"),
           },
         });
       });

@@ -152,9 +152,14 @@ export default function VoteEscrow({}) {
                 <CardStat>
                   {existingLockup.existingEndWeeks
                     ? existingLockup.existingEndWeeks
-                    : 0}
+                    : 0}{" "}
+                  weeks
                 </CardStat>
-                <CardDescription>Weeks</CardDescription>
+                {existingLockup.end.gt(0) && (
+                  <CardDescription>
+                    {existingLockup.existingEndDate}
+                  </CardDescription>
+                )}
               </div>
             </Card>
           </div>
