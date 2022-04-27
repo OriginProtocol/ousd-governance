@@ -4,6 +4,7 @@ import CardGroup from "components/CardGroup";
 import Card from "components/Card";
 import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
+import TokenAmount from "components/TokenAmount";
 
 export const ProposalVoteStats = ({
   proposal,
@@ -17,7 +18,7 @@ export const ProposalVoteStats = ({
         <Card dark tightPadding>
           <CardLabel>Your Vote Power</CardLabel>
           <CardStat>
-            {truncateBalance(ethers.utils.formatUnits(votePower))}
+            <TokenAmount amount={votePower} />
           </CardStat>
         </Card>
       </div>
@@ -25,7 +26,7 @@ export const ProposalVoteStats = ({
         <Card dark tightPadding>
           <CardLabel>For</CardLabel>
           <CardStat>
-            {truncateBalance(ethers.utils.formatUnits(proposal.forVotes))}
+            <TokenAmount amount={proposal.forVotes} />
           </CardStat>
           {!hasVoted && (
             <button
@@ -42,7 +43,7 @@ export const ProposalVoteStats = ({
         <Card dark tightPadding>
           <CardLabel>Against</CardLabel>
           <CardStat>
-            {truncateBalance(ethers.utils.formatUnits(proposal.againstVotes))}
+            <TokenAmount amount={proposal.againstVotes} />
           </CardStat>
           {!hasVoted && (
             <button
@@ -59,7 +60,7 @@ export const ProposalVoteStats = ({
         <Card dark tightPadding>
           <CardLabel>Abstain</CardLabel>
           <CardStat>
-            {truncateBalance(ethers.utils.formatUnits(proposal.abstainVotes))}
+            <TokenAmount amount={proposal.abstainVotes} />
           </CardStat>
           {!hasVoted && (
             <button

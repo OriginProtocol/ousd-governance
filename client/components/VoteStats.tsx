@@ -1,8 +1,9 @@
-import numeral from "numeraljs";
 import CardGroup from "./CardGroup";
 import Card from "./Card";
 import CardLabel from "./CardLabel";
 import CardStat from "./CardStat";
+import TokenAmount from "./TokenAmount";
+import { BigNumber } from "ethers";
 
 export const VoteStats = ({
   proposalCount,
@@ -11,7 +12,7 @@ export const VoteStats = ({
 }: {
   proposalCount: number | undefined;
   holderCount: number;
-  totalSupply: number;
+  totalSupply: BigNumber;
 }) => {
   return (
     <CardGroup horizontal>
@@ -27,7 +28,9 @@ export const VoteStats = ({
         <Card dark tightPadding>
           <div className="space-y-2">
             <CardLabel>Vote Supply</CardLabel>
-            <CardStat>{numeral(totalSupply / 1e18).format("0 a")}</CardStat>
+            <CardStat>
+              <TokenAmount amount={totalSupply} />
+            </CardStat>
           </div>
         </Card>
       </div>
