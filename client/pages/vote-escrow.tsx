@@ -25,12 +25,24 @@ export default function VoteEscrow({}) {
     allowances,
     existingLockup,
   } = useStore();
+
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
   const networkInfo = useNetworkInfo();
   const { reloadAllowances, reloadBalances } = useAccountBalances();
+
+  useEffect(() => {
+    if (existingLockup.end.gt(0)) {
+      setAmount(ethers.utils.formatUnits(existingLockup.amount.toString()));
+      setWeeks(existingLockup.existingEndWeeks);
+    }
+  }, [
+    existingLockup.end,
+    existingLockup.amount,
+    existingLockup.existingEndWeeks,
+  ]);
 
   if (!web3Provider) {
     return <Disconnected />;
@@ -43,21 +55,35 @@ export default function VoteEscrow({}) {
     );
   }
 
+  const amountInputModified =
+    amount > ethers.utils.formatUnits(existingLockup.amount.toString());
+  const lengthInputModified = weeks !== existingLockup.existingEndWeeks;
+  const bothInputsModified = amountInputModified && lengthInputModified;
+
+  console.log(weeks, existingLockup.existingEndWeeks);
+
   const validate = async () => {
-    if (ethers.utils.parseUnits(amount).lte(existingLockup.amount)) {
+    if (
+      amountInputModified &&
+      ethers.utils.parseUnits(amount).lte(existingLockup.amount)
+    ) {
       setAmountError("Amount must be greater than existing lockup amount");
       return false;
     }
-    const now = (await web3Provider.getBlock()).timestamp;
-    if (now + weeks * 7 * 86400 < existingLockup.end) {
-      setEndError("End date must be greater than existing lockup end date");
-      return false;
+
+    if (lengthInputModified) {
+      const now = (await web3Provider.getBlock()).timestamp;
+      if (now + weeks * 7 * 86400 < existingLockup.end) {
+        setEndError("End date must be greater than existing lockup end date");
+        return false;
+      }
+
+      if (weeks > MAX_WEEKS) {
+        setEndError(`Can not lockup for more than ${MAX_WEEKS} weeks`);
+        return false;
+      }
     }
 
-    if (weeks > MAX_WEEKS) {
-      setEndError(`Can not lockup for more than ${MAX_WEEKS} weeks`);
-      return false;
-    }
     return true;
   };
 
@@ -96,7 +122,7 @@ export default function VoteEscrow({}) {
           {
             ...transaction,
             onComplete: () => {
-              toast.success("Approval has been made", {
+              toast.success("Lockup confirmed", {
                 hideProgressBar: true,
               });
               reloadBalances();
@@ -168,9 +194,29 @@ export default function VoteEscrow({}) {
                 </span>
               </label>
               <div className="input-group">
+                {existingLockup.end.gt(0) && (
+                  <button
+                    className="btn"
+                    onClick={() =>
+                      setAmount(
+                        ethers.utils.formatUnits(
+                          existingLockup.amount.toString()
+                        )
+                      )
+                    }
+                  >
+                    Min
+                  </button>
+                )}
                 <input
                   type="number"
-                  min={1}
+                  min={
+                    existingLockup.end.gt(0)
+                      ? ethers.utils.formatUnits(
+                          existingLockup.amount.toString()
+                        )
+                      : 1
+                  }
                   max={balances.ogv.toString()}
                   placeholder="Amount"
                   className={`text-lg input input-bordered w-full border-2 ${
@@ -191,6 +237,17 @@ export default function VoteEscrow({}) {
                   Max
                 </button>
               </div>
+              {existingLockup.end.gt(0) && !bothInputsModified && (
+                <div className="pt-4 flex w-1/2">
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full w-full"
+                    disabled={amount <= existingLockup.amount}
+                    onClick={handleLockup}
+                  >
+                    Increase lockup amount
+                  </button>
+                </div>
+              )}
               {amountError && (
                 <label className="label">
                   <span className="label-text-alt text-error-content">
@@ -206,6 +263,14 @@ export default function VoteEscrow({}) {
                 </span>
               </label>
               <div className="input-group">
+                {existingLockup.end.gt(0) && (
+                  <button
+                    className="btn"
+                    onClick={() => setWeeks(existingLockup.existingEndWeeks)}
+                  >
+                    Min
+                  </button>
+                )}
                 <input
                   type="text"
                   placeholder="Type here"
@@ -222,6 +287,17 @@ export default function VoteEscrow({}) {
                   Max
                 </button>
               </div>
+              {existingLockup.end.gt(0) && !bothInputsModified && (
+                <div className="pt-4 flex w-1/2">
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full w-full"
+                    disabled={weeks <= existingLockup.existingEndWeeks}
+                    onClick={handleLockup}
+                  >
+                    Extend lockup length
+                  </button>
+                </div>
+              )}
               {endError && (
                 <label className="label">
                   <span className="label-text-alt text-error-content">
@@ -230,37 +306,46 @@ export default function VoteEscrow({}) {
                 </label>
               )}
             </div>
+            {existingLockup.end.gt(0) && bothInputsModified && (
+              <button
+                className="btn btn-primary md:btn-lg rounded-full w-full"
+                onClick={handleLockup}
+              >
+                Modify lockup
+              </button>
+            )}
             {estimatedVotePower && (
               <div className="pt-2 text-lg">
                 <span className="font-bold pr-2">Estimated votes</span>{" "}
                 {estimatedVotePower}
               </div>
             )}
-            <div className="flex py-3">
-              <button
-                className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
-                disabled={
-                  !amount ||
-                  !weeks ||
-                  allowances.ogv.gte(ethers.utils.parseUnits(amount))
-                }
-                onClick={handleApproval}
-              >
-                Approve Transfer
-              </button>
-
-              <button
-                className="btn btn-primary md:btn-lg rounded-full flex-1"
-                disabled={
-                  !amount ||
-                  !weeks ||
-                  ethers.utils.parseUnits(amount).gt(allowances.ogv)
-                }
-                onClick={handleLockup}
-              >
-                Lockup
-              </button>
-            </div>
+            {!existingLockup.end.gt(0) && (
+              <div className="flex py-3">
+                <button
+                  className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                  disabled={
+                    !amount ||
+                    !weeks ||
+                    allowances.ogv.gte(ethers.utils.parseUnits(amount))
+                  }
+                  onClick={handleApproval}
+                >
+                  Approve Transfer
+                </button>
+                <button
+                  className="btn btn-primary md:btn-lg rounded-full flex-1"
+                  disabled={
+                    !amount ||
+                    !weeks ||
+                    ethers.utils.parseUnits(amount).gt(allowances.ogv)
+                  }
+                  onClick={handleLockup}
+                >
+                  Lockup
+                </button>
+              </div>
+            )}
           </div>
         </Card>
       </CardGroup>
