@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  --toastify-font-family: Lato, sans-serif;
+  --toastify-color-dark: #0d3020;
+  --toastify-color-success: #4bbc8a;
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-color-warning: #fef3c8;
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-color-error: #d85e44;
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-color-info: #e1f3fe;
+  --toastify-icon-color-info: var(--toastify-color-info);
+}
+
 a {
   color: hsl(var(--p));
 }
@@ -55,3 +68,4 @@ a {
 [data-theme="origin-theme"] .badge.badge-success {
   border-color: hsl(var(--suc,var(--nc)) / calc(var(--tw-text-opacity) / 2));
 }
+

@@ -11,6 +11,7 @@ import CardDescription from "components/CardDescription";
 import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
+import TokenAmount from "components/TokenAmount";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -63,7 +64,7 @@ export default function VoteEscrow({}) {
   const handleApproval = async () => {
     const transaction = await contracts.OriginDollarGovernance.approve(
       contracts.VoteLockerCurve.address,
-      ethers.utils.parseUnits(amount)
+      ethers.constants.MaxUint256
     );
 
     useStore.setState({
@@ -116,7 +117,8 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(ethers.utils.formatUnits(balances.ogv))}
+
+                  <TokenAmount amount={balances.ogv} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>
@@ -127,9 +129,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Vote Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(
-                    ethers.utils.formatUnits(balances.vote_power)
-                  )}
+                  <TokenAmount amount={balances.vote_power} />
                 </CardStat>
                 <CardDescription>veOGV</CardDescription>
               </div>
@@ -140,9 +140,7 @@ export default function VoteEscrow({}) {
               <div className="space-y-1">
                 <CardLabel>Lockup Balance</CardLabel>
                 <CardStat>
-                  {truncateBalance(
-                    ethers.utils.formatUnits(existingLockup.amount)
-                  )}
+                  <TokenAmount amount={existingLockup.amount} />
                 </CardStat>
                 <CardDescription>OGV</CardDescription>
               </div>

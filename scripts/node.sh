@@ -48,6 +48,9 @@ main()
         printf "\n"
         echo "🟢 Node initialized"
         
+        # deploy the contracts
+        npm run deploy:contracts:dev
+
         # wait for subprocesses to finish
         for job in `jobs -p`
           do
