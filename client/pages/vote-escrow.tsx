@@ -12,6 +12,7 @@ import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
+import RangeInput from "components/vote-escrow/RangeInput";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -266,41 +267,26 @@ export default function VoteEscrow({}) {
                   <span className="text-sm text-gray-500">{weeks} weeks</span>
                 </span>
               </label>
-              <div>
-                <input
-                  className="range range-lg range-accent"
-                  type="range"
-                  min="0"
-                  max="208"
-                  value={weeks}
-                  onChange={(e) => {
-                    setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
-                    setEndError("");
-                  }}
-                />
-                <div className="w-full flex justify-between text-xs text-gray-400 px-3">
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                  <span>|</span>
-                </div>
-                <div className="w-full flex justify-between text-xs text-gray-400 pt-1">
-                  <span>0 wks</span>
-                  <span>&nbsp;</span>
-                  <span>1 yr</span>
-                  <span>&nbsp;</span>
-                  <span>2 yrs</span>
-                  <span>&nbsp;</span>
-                  <span>3 yrs</span>
-                  <span>&nbsp;</span>
-                  <span>4 yrs</span>
-                </div>
-              </div>
+              <RangeInput
+                min="0"
+                max="208"
+                value={weeks}
+                markers={[
+                  "0 wks",
+                  "",
+                  "1 yr",
+                  "",
+                  "2 yrs",
+                  "",
+                  "3yrs",
+                  "",
+                  "4 yrs",
+                ]}
+                onChange={(e) => {
+                  setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
+                  setEndError("");
+                }}
+              />
               {existingLockup.end.gt(0) && !bothInputsModified && (
                 <div className="pt-4 flex w-1/2">
                   <button
