@@ -5,7 +5,7 @@ interface CardStatProps {
 }
 
 const CardStat: FunctionComponent<CardStatProps> = ({ children }) => (
-  <div className="text-2xl">{children}</div>
+  <div className="text-2xl whitespace-nowrap">{children}</div>
 );
 
 export default CardStat;

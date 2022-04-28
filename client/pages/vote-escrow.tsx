@@ -60,8 +60,6 @@ export default function VoteEscrow({}) {
   const lengthInputModified = weeks !== existingLockup.existingEndWeeks;
   const bothInputsModified = amountInputModified && lengthInputModified;
 
-  console.log(weeks, existingLockup.existingEndWeeks);
-
   const validate = async () => {
     if (
       amountInputModified &&
@@ -178,9 +176,14 @@ export default function VoteEscrow({}) {
                 <CardStat>
                   {existingLockup.existingEndWeeks
                     ? existingLockup.existingEndWeeks
-                    : 0}
+                    : 0}{" "}
+                  weeks
                 </CardStat>
-                <CardDescription>Weeks</CardDescription>
+                {existingLockup.end.gt(0) && (
+                  <CardDescription>
+                    {existingLockup.existingEndDate}
+                  </CardDescription>
+                )}
               </div>
             </Card>
           </div>
@@ -258,34 +261,45 @@ export default function VoteEscrow({}) {
             </div>
             <div>
               <label className="label">
-                <span className="label-text text-lg font-bold">
-                  Lockup length (weeks)
+                <span className="label-text text-lg font-bold flex justify-between items-center w-full">
+                  <span>Lockup length</span>
+                  <span className="text-sm text-gray-500">{weeks} weeks</span>
                 </span>
               </label>
-              <div className="input-group">
-                {existingLockup.end.gt(0) && (
-                  <button
-                    className="btn"
-                    onClick={() => setWeeks(existingLockup.existingEndWeeks)}
-                  >
-                    Min
-                  </button>
-                )}
+              <div>
                 <input
-                  type="text"
-                  placeholder="Type here"
-                  className={`text-lg input input-bordered w-full border-2 ${
-                    endError && "input-error"
-                  }`}
+                  className="range range-lg range-accent"
+                  type="range"
+                  min="0"
+                  max="208"
                   value={weeks}
                   onChange={(e) => {
-                    setWeeks(e.target.value.replace(/\D+/g, ""));
+                    setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
                     setEndError("");
                   }}
                 />
-                <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
-                  Max
-                </button>
+                <div className="w-full flex justify-between text-xs text-gray-400 px-3">
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                  <span>|</span>
+                </div>
+                <div className="w-full flex justify-between text-xs text-gray-400 pt-1">
+                  <span>0 wks</span>
+                  <span>&nbsp;</span>
+                  <span>1 yr</span>
+                  <span>&nbsp;</span>
+                  <span>2 yrs</span>
+                  <span>&nbsp;</span>
+                  <span>3 yrs</span>
+                  <span>&nbsp;</span>
+                  <span>4 yrs</span>
+                </div>
               </div>
               {existingLockup.end.gt(0) && !bothInputsModified && (
                 <div className="pt-4 flex w-1/2">

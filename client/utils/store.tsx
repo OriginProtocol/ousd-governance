@@ -30,6 +30,7 @@ const defaultState: Web3DataType = {
     amount: ethers.BigNumber.from(0),
     end: ethers.BigNumber.from(0),
     existingEndWeeks: 0,
+    existingEndDate: "",
   },
   allowances: {
     ogv: ethers.BigNumber.from("0"),
