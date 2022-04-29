@@ -373,7 +373,7 @@ export default function VoteEscrow({}) {
               {estimatedVotePower && (
                 <div className="pt-2 text-lg">
                   <span className="font-bold pr-2">Estimated votes</span>{" "}
-                  {Number(estimatedVotePower).toFixed()}
+                  {ethers.utils.commify(Number(estimatedVotePower).toFixed())}
                 </div>
               )}
               {!existingLockup.end.gt(0) && (
