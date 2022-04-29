@@ -208,7 +208,11 @@ export default function VoteEscrow({}) {
                   label="Lockup amount"
                   counterUnit="OGV"
                   min={"1"}
-                  max={Number(ethers.utils.formatUnits(balances.ogv.toString()))
+                  max={Number(
+                    ethers.utils.formatUnits(
+                      balances.ogv.add(existingLockup.amount).toString()
+                    )
+                  )
                     .toFixed()
                     .toString()}
                   value={amount}
@@ -226,6 +230,9 @@ export default function VoteEscrow({}) {
                     "100%",
                   ]}
                   onChange={(e) => {
+                    console.log(
+                      balances.ogv.add(existingLockup.amount).toString()
+                    );
                     setAmount(e.target.value);
                     setAmountError("");
                   }}
