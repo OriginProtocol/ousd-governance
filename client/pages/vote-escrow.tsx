@@ -8,20 +8,17 @@ import Card from "components/Card";
 import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
-import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import RangeInput from "components/vote-escrow/RangeInput";
-import fromExponential from "from-exponential";
 
 const MAX_WEEKS = 52 * 4;
 
 export default function VoteEscrow({}) {
   const {
     web3Provider,
-    address,
     contracts,
     pendingTransactions,
     balances,
@@ -33,7 +30,6 @@ export default function VoteEscrow({}) {
   const [weeks, setWeeks] = useState(0);
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
-  const networkInfo = useNetworkInfo();
   const { reloadAllowances, reloadBalances } = useAccountBalances();
 
   useEffect(() => {
