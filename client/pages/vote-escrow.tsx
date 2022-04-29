@@ -230,9 +230,6 @@ export default function VoteEscrow({}) {
                     "100%",
                   ]}
                   onChange={(e) => {
-                    console.log(
-                      balances.ogv.add(existingLockup.amount).toString()
-                    );
                     setAmount(e.target.value);
                     setAmountError("");
                   }}
@@ -347,12 +344,31 @@ export default function VoteEscrow({}) {
                 )}
               </div>
               {existingLockup.end.gt(0) && bothInputsModified && (
-                <button
-                  className="btn btn-primary md:btn-lg rounded-full w-full"
-                  onClick={handleLockup}
-                >
-                  Modify lockup
-                </button>
+                <div className="pt-4 flex">
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                    onClick={handleLockup}
+                  >
+                    Modify lockup
+                  </button>
+                  <button
+                    className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                    onClick={() => {
+                      setAmount(
+                        Number(
+                          ethers.utils.formatUnits(
+                            existingLockup.amount.toString()
+                          )
+                        )
+                          .toFixed()
+                          .toString()
+                      );
+                      setWeeks(existingLockup.existingEndWeeks);
+                    }}
+                  >
+                    Reset
+                  </button>
+                </div>
               )}
               {estimatedVotePower && (
                 <div className="pt-2 text-lg">
