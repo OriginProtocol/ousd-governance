@@ -238,9 +238,9 @@ export default function VoteEscrow({}) {
                   }}
                 />
                 {existingLockup.end.gt(0) && !bothInputsModified && (
-                  <div className="pt-4 flex w-1/2">
+                  <div className="pt-4 flex">
                     <button
-                      className="btn btn-primary md:btn-lg rounded-full w-full"
+                      className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
                       disabled={
                         parseInt(amount) <=
                         parseInt(
@@ -256,6 +256,34 @@ export default function VoteEscrow({}) {
                       onClick={handleLockup}
                     >
                       Increase lockup amount
+                    </button>
+                    <button
+                      className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                      disabled={
+                        parseInt(amount) ===
+                        parseInt(
+                          Number(
+                            ethers.utils.formatUnits(
+                              existingLockup.amount.toString()
+                            )
+                          )
+                            .toFixed()
+                            .toString()
+                        )
+                      }
+                      onClick={() => {
+                        setAmount(
+                          Number(
+                            ethers.utils.formatUnits(
+                              existingLockup.amount.toString()
+                            )
+                          )
+                            .toFixed()
+                            .toString()
+                        );
+                      }}
+                    >
+                      Reset
                     </button>
                   </div>
                 )}
@@ -291,13 +319,22 @@ export default function VoteEscrow({}) {
                   }}
                 />
                 {existingLockup.end.gt(0) && !bothInputsModified && (
-                  <div className="pt-4 flex w-1/2">
+                  <div className="pt-4 flex">
                     <button
-                      className="btn btn-primary md:btn-lg rounded-full w-full"
+                      className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
                       disabled={weeks <= existingLockup.existingEndWeeks}
                       onClick={handleLockup}
                     >
                       Extend lockup length
+                    </button>
+                    <button
+                      className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                      disabled={weeks === existingLockup.existingEndWeeks}
+                      onClick={() => {
+                        setWeeks(existingLockup.existingEndWeeks);
+                      }}
+                    >
+                      Reset
                     </button>
                   </div>
                 )}
