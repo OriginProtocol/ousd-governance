@@ -1,5 +1,6 @@
 import { FunctionComponent, ChangeEventHandler } from "react";
 import { ethers } from "ethers";
+import TokenAmount from "components/TokenAmount";
 
 interface RangeInputProps {
   label: string;
@@ -25,7 +26,7 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
       <span className="label-text text-lg font-bold flex justify-between items-center w-full">
         <span>{label}</span>
         <span className="text-sm text-gray-500">
-          {ethers.utils.commify(value)} {counterUnit}
+          <TokenAmount amount={value} /> {counterUnit}
         </span>
       </span>
     </label>
