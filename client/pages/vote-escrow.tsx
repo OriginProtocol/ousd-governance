@@ -12,6 +12,7 @@ import { truncateBalance, useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
+import LockupStats from "components/vote-escrow/LockupStats";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -287,6 +288,7 @@ export default function VoteEscrow({}) {
             </div>
           </div>
         </Card>
+        <LockupStats />
       </CardGroup>
     </>
   );

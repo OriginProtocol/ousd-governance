@@ -7,7 +7,11 @@ type Web3DataType = {
   address?: string;
   chainId?: number;
   contracts: Object;
+  balances: Object;
+  existingLockup: Object;
+  allowances: Object;
   pendingTransactions: Array<any>;
+  totalBalances: Object;
 };
 
 type StoreType = Web3DataType & {
@@ -36,6 +40,10 @@ const defaultState: Web3DataType = {
     ogv: ethers.BigNumber.from("0"),
   },
   pendingTransactions: [],
+  totalBalances: {
+    totalSupply: ethers.BigNumber.from("0"),
+    lockedUpSupply: ethers.BigNumber.from("0"),
+  },
 };
 
 export const useStore = create<StoreType>((set) => ({
