@@ -622,10 +622,10 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @return uint256 The most recent epoch before the block
      */
     function _findEpoch(
-        Checkpoint[] memory _checkpoints,
+        Checkpoint[] storage _checkpoints,
         uint256 _block,
         uint256 _maxEpoch
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 minEpoch = 0;
         uint256 maxEpoch = _maxEpoch;
         for (uint256 i = 0; i < 128; i++) {
