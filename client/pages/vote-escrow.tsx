@@ -199,6 +199,12 @@ export default function VoteEscrow({}) {
         <Card>
           {balances.ogv.gt(0) ? (
             <div className="space-y-4">
+              {existingLockup.end.gt(0) && (
+                <p className="text-sm text-gray-600">
+                  You have an existing lockup. You can increase the amount, the
+                  length, or both.
+                </p>
+              )}
               <div>
                 <RangeInput
                   label="Lockup amount"
