@@ -32,19 +32,21 @@ export default function VoteEscrow({}) {
   const [endError, setEndError] = useState("");
   const { reloadAllowances, reloadBalances } = useAccountBalances();
 
+  const existingLockupAmount = Number(
+    ethers.utils.formatUnits(existingLockup.amount.toString())
+  )
+    .toFixed()
+    .toString();
+
   useEffect(() => {
     if (existingLockup.end.gt(0)) {
-      setAmount(
-        Number(ethers.utils.formatUnits(existingLockup.amount.toString()))
-          .toFixed()
-          .toString()
-      );
+      setAmount(existingLockupAmount);
       setWeeks(existingLockup.existingEndWeeks);
     }
   }, [
     existingLockup.end,
-    existingLockup.amount,
     existingLockup.existingEndWeeks,
+    existingLockupAmount,
   ]);
 
   if (!web3Provider) {
@@ -58,13 +60,7 @@ export default function VoteEscrow({}) {
     );
   }
 
-  const amountInputModified =
-    parseInt(amount) >
-    parseInt(
-      Number(ethers.utils.formatUnits(existingLockup.amount.toString()))
-        .toFixed()
-        .toString()
-    );
+  const amountInputModified = parseInt(amount) > parseInt(existingLockupAmount);
   const lengthInputModified = weeks !== existingLockup.existingEndWeeks;
   const bothInputsModified = amountInputModified && lengthInputModified;
 
