@@ -117,7 +117,8 @@ export default function VoteEscrow({}) {
     const valid = await validate();
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
-      const end = now + weeks * 7 * 86400;
+      const end =
+        now + (existingLockup.end.gt(0) ? weeks + 1 : weeks) * 7 * 86400;
       const transaction = await contracts.VoteLockerCurve.lockup(
         ethers.utils.parseUnits(amount),
         end
