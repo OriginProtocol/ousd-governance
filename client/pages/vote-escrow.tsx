@@ -8,7 +8,7 @@ import Card from "components/Card";
 import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
-import { truncateBalance, useNetworkInfo } from "utils/index";
+import { useNetworkInfo } from "utils/index";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
