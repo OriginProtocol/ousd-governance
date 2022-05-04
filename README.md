@@ -16,14 +16,15 @@ pipx install eth-brownie
 ```
 
 ## Install brownie dependencies
+
 We require OpenZeppelin contract code that is in master and will be released after 4.5.0. Since the release
 tag has not been created yet we need to import them by commit hash. Once newer version of 4.5.0 is released
 we can default to that.
 
 ```bash
 
-brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9
-brownie pm install OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458
+brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0
+brownie pm install OpenZeppelin/openzeppelin-contracts@4.6.0
 ```
 
 ## Install hardhat
@@ -46,6 +47,7 @@ _If this command reverts with an error it may be an incompatability with python 
 Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`
 
 Node will be run in forked mode
+
 ```bash
 yarn run node
 ```
@@ -64,6 +66,7 @@ First, install the dependencies:
 cd client
 yarn install
 ```
+
 Copy `client/sample.env` to `client/.env`.
 
 Setup postgresql locally and create a database and update the `DATABASE_URL` in your `client/.env`
@@ -116,3 +119,4 @@ Because we [start from the last seen block saved in the database](/client/listen
 5. Run `yarn run dev` again
 
 You should now see proposals added to the database when you submit transactions.
+
