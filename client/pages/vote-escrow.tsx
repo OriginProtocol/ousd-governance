@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
@@ -13,10 +13,41 @@ import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
 import LockupStats from "components/vote-escrow/LockupStats";
+import prisma from "lib/prisma";
 
 const MAX_WEEKS = 52 * 4;
 
-export default function VoteEscrow({}) {
+export async function getServerSideProps({ res }: { res: any }) {
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=59"
+  );
+
+  const lockups = await prisma.lockup.findMany();
+  const lockupCount = lockups.length;
+  const totalLockupWeeks = lockups.reduce(
+    (total: Number, lockup: Object) => total + lockup.weeks,
+    0
+  );
+  const totalTokensLockedUp = lockups.reduce(
+    (total: Number, lockup: Object) => total + lockup.amount,
+    0
+  );
+
+  return {
+    props: {
+      lockupCount,
+      totalLockupWeeks,
+      totalTokensLockedUp,
+    },
+  };
+}
+
+export default function VoteEscrow({
+  lockupCount,
+  totalLockupWeeks,
+  totalTokensLockedUp,
+}) {
   const {
     web3Provider,
     address,
@@ -288,7 +319,11 @@ export default function VoteEscrow({}) {
             </div>
           </div>
         </Card>
-        <LockupStats />
+        <LockupStats
+          lockupCount={lockupCount}
+          totalLockupWeeks={totalLockupWeeks}
+          totalTokensLockedUp={totalTokensLockedUp}
+        />
       </CardGroup>
     </>
   );
