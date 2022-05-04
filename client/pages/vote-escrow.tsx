@@ -1,5 +1,5 @@
-import { ethers, BigNumber } from "ethers";
-import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import { useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
