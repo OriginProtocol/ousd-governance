@@ -42,7 +42,6 @@ const defaultState: Web3DataType = {
   pendingTransactions: [],
   totalBalances: {
     totalSupply: ethers.BigNumber.from("0"),
-    lockedUpSupply: ethers.BigNumber.from("0"),
   },
 };
 
