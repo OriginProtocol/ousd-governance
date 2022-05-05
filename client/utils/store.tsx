@@ -1,11 +1,12 @@
 import create from "zustand";
+import { ethers } from "ethers";
 
 type Web3DataType = {
   provider?: any;
   web3Provider?: any;
   address?: string;
   chainId?: number;
-  contracts: Array<any>;
+  contracts: Object;
   pendingTransactions: Array<any>;
 };
 
@@ -18,7 +19,22 @@ const defaultState: Web3DataType = {
   web3Provider: null,
   address: undefined,
   chainId: 31337,
-  contracts: [],
+  contracts: {
+    loaded: false,
+  },
+  balances: {
+    ogv: ethers.BigNumber.from("0"),
+    vote_power: ethers.BigNumber.from("0"),
+  },
+  existingLockup: {
+    amount: ethers.BigNumber.from(0),
+    end: ethers.BigNumber.from(0),
+    existingEndWeeks: 0,
+    existingEndDate: "",
+  },
+  allowances: {
+    ogv: ethers.BigNumber.from("0"),
+  },
   pendingTransactions: [],
 };
 

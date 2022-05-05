@@ -6,6 +6,8 @@ import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { ProposalVoteStats } from "components/proposal/ProposalVoteStats";
 import { ProposalParameters } from "components/proposal/ProposalParameters";
 import { SectionTitle } from "components/SectionTitle";
+import CardGroup from "components/CardGroup";
+import Card from "components/Card";
 import { useStore } from "utils/store";
 import { toast } from "react-toastify";
 
@@ -32,7 +34,7 @@ export const ProposalDetail = ({
       setProposal(await Governance.proposals(proposalId));
       setProposalState(await Governance.state(proposalId));
     };
-    if (proposalId) {
+    if (proposalId && Governance) {
       loadProposal();
     }
   }, [proposalId, Governance, reloadProposal]);
@@ -41,7 +43,7 @@ export const ProposalDetail = ({
     const loadVotePower = async () => {
       setVotePower(await Governance.getVotes(address, proposal.startBlock));
     };
-    if (address && proposal) {
+    if (address && proposal && Governance) {
       loadVotePower();
     }
   }, [address, proposal, Governance]);
@@ -50,7 +52,7 @@ export const ProposalDetail = ({
     const loadHasVoted = async () => {
       setHasVoted(await Governance.hasVoted(proposalId, address));
     };
-    if (address && proposal) {
+    if (address && proposal && Governance) {
       loadHasVoted();
     }
   }, [address, proposal, Governance, proposalId, reloadProposal]);
@@ -59,7 +61,7 @@ export const ProposalDetail = ({
     const loadQuorum = async () => {
       setQuorum(await Governance.quorum(proposal.startBlock));
     };
-    if (proposal) {
+    if (proposal && Governance) {
       loadQuorum();
     }
   }, [proposal, Governance, proposalId, reloadProposal]);
@@ -86,32 +88,40 @@ export const ProposalDetail = ({
   };
 
   return (
-    <>
+    <CardGroup>
       <ProposalVoteStats
         proposal={proposal}
         votePower={votePower}
         onVote={handleVote}
         hasVoted={hasVoted}
       />
-      <SectionTitle>Proposal Parameters</SectionTitle>
-      <ProposalParameters
-        proposal={proposal}
-        state={proposalState}
-        quorum={quorum}
-      />
-      <SectionTitle>Governance Actions</SectionTitle>
-      <ProposalActionsTable proposalActions={proposalActions} />
-      {description && (
-        <>
-          <SectionTitle>Signalling Proposal</SectionTitle>
-          <Link
-            href={`https://vote.originprotocol.com/#/proposal/${description}`}
-            passHref
-          >
-            <a target="_blank">{description}</a>
-          </Link>
-        </>
-      )}
-    </>
+      <Card>
+        <div className="space-y-8">
+          <div>
+            <SectionTitle>Proposal Parameters</SectionTitle>
+            <ProposalParameters
+              proposal={proposal}
+              state={proposalState}
+              quorum={quorum}
+            />
+          </div>
+          <div>
+            <SectionTitle>Governance Actions</SectionTitle>
+            <ProposalActionsTable proposalActions={proposalActions} />
+            {description && (
+              <>
+                <SectionTitle>Signalling Proposal</SectionTitle>
+                <Link
+                  href={`https://vote.originprotocol.com/#/proposal/${description}`}
+                  passHref
+                >
+                  <a target="_blank">{description}</a>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </Card>
+    </CardGroup>
   );
 };

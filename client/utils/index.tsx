@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
+import { useStore } from "utils/store";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -95,4 +96,25 @@ export function usePrevious(value) {
     ref.current = value;
   });
   return ref.current;
+}
+
+export function useNetworkInfo() {
+  const { chainId } = useStore();
+  const envNetwork = Number(process.env.NETWORK_ID);
+  return {
+    walletNetwork: chainId,
+    envNetwork: envNetwork,
+    correct: envNetwork === chainId,
+  };
+}
+
+export function inputToBigNumber(
+  bigNumber: string,
+  decimals: number = 0
+): BigNumber {
+  const remainingAmount = bigNumber.replace(/[^\d.]/g, "");
+  return ethers.utils.parseUnits(
+    remainingAmount === "" ? "0" : remainingAmount,
+    decimals
+  );
 }

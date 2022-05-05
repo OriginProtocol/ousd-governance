@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (proxy/ERC1967/ERC1967Proxy.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/proxy/Proxy.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/proxy/Proxy.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
 
 /**
  * @dev This contract implements an upgradeable proxy. It is upgradeable because calls are delegated to an

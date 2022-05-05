@@ -1,5 +1,10 @@
 import { ethers } from "ethers";
 import { truncateBalance } from "utils/index";
+import CardGroup from "components/CardGroup";
+import Card from "components/Card";
+import CardLabel from "components/CardLabel";
+import CardStat from "components/CardStat";
+import TokenAmount from "components/TokenAmount";
 
 export const ProposalVoteStats = ({
   proposal,
@@ -8,58 +13,66 @@ export const ProposalVoteStats = ({
   hasVoted,
 }) => {
   return (
-    <div className="w-full shadow stats text-center">
-      <div className="stat">
-        <div className="stat-title">Your Vote Power</div>
-        <div className="stat-value text-primary">
-          {truncateBalance(ethers.utils.formatUnits(votePower))}
-        </div>
-      </div>{" "}
-      <div className="stat">
-        <div className="stat-title">For</div>
-        <div className="stat-value text-success-content">
-          {truncateBalance(ethers.utils.formatUnits(proposal.forVotes))}
-        </div>
-        {!hasVoted && (
-          <button
-            className="btn btn-sm btn-success w-100 mt-4"
-            disabled={!votePower.gt(0)}
-            onClick={() => onVote(1)}
-          >
-            Vote
-          </button>
-        )}
+    <CardGroup horizontal fourCol>
+      <div>
+        <Card dark tightPadding>
+          <CardLabel>Your Vote Power</CardLabel>
+          <CardStat>
+            <TokenAmount amount={votePower} />
+          </CardStat>
+        </Card>
       </div>
-      <div className="stat">
-        <div className="stat-title">Against</div>
-        <div className="stat-value text-error-content">
-          {truncateBalance(ethers.utils.formatUnits(proposal.againstVotes))}
-        </div>
-        {!hasVoted && (
-          <button
-            className="btn btn-sm btn-error w-100 mt-4"
-            disabled={!votePower.gt(0)}
-            onClick={() => onVote(0)}
-          >
-            Vote
-          </button>
-        )}
+      <div>
+        <Card dark tightPadding>
+          <CardLabel>For</CardLabel>
+          <CardStat>
+            <TokenAmount amount={proposal.forVotes} />
+          </CardStat>
+          {!hasVoted && (
+            <button
+              className="btn btn-sm btn-success w-full mt-4"
+              disabled={!votePower.gt(0)}
+              onClick={() => onVote(1)}
+            >
+              Vote
+            </button>
+          )}
+        </Card>
       </div>
-      <div className="stat">
-        <div className="stat-title">Abstain</div>
-        <div className="stat-value text-neutral">
-          {truncateBalance(ethers.utils.formatUnits(proposal.abstainVotes))}
-        </div>
-        {!hasVoted && (
-          <button
-            className="btn btn-sm w-100 mt-4"
-            disabled={!votePower.gt(0)}
-            onClick={() => onVote(2)}
-          >
-            Vote
-          </button>
-        )}
+      <div>
+        <Card dark tightPadding>
+          <CardLabel>Against</CardLabel>
+          <CardStat>
+            <TokenAmount amount={proposal.againstVotes} />
+          </CardStat>
+          {!hasVoted && (
+            <button
+              className="btn btn-sm btn-error w-full mt-4"
+              disabled={!votePower.gt(0)}
+              onClick={() => onVote(0)}
+            >
+              Vote
+            </button>
+          )}
+        </Card>
       </div>
-    </div>
+      <div>
+        <Card dark tightPadding>
+          <CardLabel>Abstain</CardLabel>
+          <CardStat>
+            <TokenAmount amount={proposal.abstainVotes} />
+          </CardStat>
+          {!hasVoted && (
+            <button
+              className="btn btn-sm w-full mt-4"
+              disabled={!votePower.gt(0)}
+              onClick={() => onVote(2)}
+            >
+              Vote
+            </button>
+          )}
+        </Card>
+      </div>
+    </CardGroup>
   );
 };

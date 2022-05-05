@@ -7,6 +7,7 @@ FROM node:lts as builder
 WORKDIR /client
 COPY ./client .
 COPY --from=dependencies /client/node_modules ./node_modules
+ENV NETWORK_ID 4
 RUN yarn add @swc/cli @swc/core
 RUN yarn build
 

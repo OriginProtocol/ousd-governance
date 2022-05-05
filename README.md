@@ -16,14 +16,15 @@ pipx install eth-brownie
 ```
 
 ## Install brownie dependencies
+
 We require OpenZeppelin contract code that is in master and will be released after 4.5.0. Since the release
 tag has not been created yet we need to import them by commit hash. Once newer version of 4.5.0 is released
 we can default to that.
 
 ```bash
 
-brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9
-brownie pm install OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458
+brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0
+brownie pm install OpenZeppelin/openzeppelin-contracts@4.6.0
 ```
 
 ## Install hardhat
@@ -43,8 +44,12 @@ _If this command reverts with an error it may be an incompatability with python 
 
 ## Running a local node
 
+Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`
+
+Node will be run in forked mode
+
 ```bash
-npx hardhat node --port 8545
+yarn run node
 ```
 
 In another terminal:
@@ -62,7 +67,9 @@ cd client
 yarn install
 ```
 
-Setup postgresql locally and create a database. Set `DATABASE_URL` in your environment.
+Copy `client/sample.env` to `client/.env`.
+
+Setup postgresql locally and create a database and update the `DATABASE_URL` in your `client/.env`
 
 _A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`._
 
@@ -72,8 +79,9 @@ Push the database and generate a client:
 npx prisma db push
 ```
 
+(these are already defaults in `client/sample.env`)
+Set the `NETWORK_ID` env var to 31337.
 Set the `WEB3_PROVIDER` variable in your environment.
-
 _The hardhat RPC default is `http://127.0.0.1:8545`._
 
 Then, run the development server:
@@ -85,3 +93,30 @@ yarn dev
 ```
 
 This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
+
+## Gotchas
+
+Here are some places you may come unstuck when setting up locally. If you find any yourself, please document them here to help your fellow engineers:
+
+### 1. How do we populate the database with proposal data post- transaction submission?
+
+**Problem:**
+
+You're adding proposals and the transactions are going through on-chain, but confirmed proposals aren't showing in the UI. You might experience [listener.ts](/client/listener.ts) outputting lots of `info: Got confirmed block` messages, but nothing to confirm the script is picking up `ProposalCreated` events.
+
+**Explanation:**
+
+Proposals aren't pushed to the database from the front-end submision handler. Instead, [listener.ts](/client/listener.ts) monitors your local node, detects when the `ProposalCreated` event is fired, then adds the proposal to the database. However, these events can't be picked up when the starting block number is off in your database.
+
+**Solution:**
+
+Because we [start from the last seen block saved in the database](/client/listener.ts#L121), you may experience issues if this number is out of sync. To quickly solve:
+
+1. Comment out the database lookup function
+2. Add `ethereumEvents.start(0)` beneath to ensure a start from the beginning
+3. Run `yarn run dev`
+4. Revert what you changed
+5. Run `yarn run dev` again
+
+You should now see proposals added to the database when you submit transactions.
+

@@ -13,13 +13,13 @@
 
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/ERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/math/SafeCast.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/utils/SafeERC20.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/utils/Strings.sol";
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/access/OwnableUpgradeable.sol";
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/proxy/utils/Initializable.sol";
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@a16f26a063cd018c4c986832c3df332a131f53b9/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/math/SafeCast.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/utils/SafeERC20.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/OwnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/Initializable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     using SafeERC20 for ERC20;
@@ -143,17 +143,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
         __UUPSUpgradeable_init();
 
-        stakingToken = ERC20(_stakingToken);
-
-        // Derive the name and symbol from the staking token
-        _name = string(
-            bytes.concat(bytes("Vote Locked"), " ", bytes(stakingToken.name()))
-        );
-        _symbol = string(
-            bytes.concat(bytes("vl"), bytes(stakingToken.symbol()))
-        );
-        // Use the same decimals as the staking token
-        _decimals = stakingToken.decimals();
+        setStakingToken(_stakingToken);
 
         // Push an initial global checkpoint
         _globalCheckpoints.push(
@@ -164,6 +154,23 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
                 blk: block.number
             })
         );
+    }
+
+    /**
+     * @notice Sets the staking token
+     * @param _stakingToken Token that is locked up in return for vote escrowed token
+     */
+    function setStakingToken(address _stakingToken) public onlyOwner {
+        stakingToken = ERC20(_stakingToken);
+        // Derive the name and symbol from the staking token
+        _name = string(
+            bytes.concat(bytes("Vote Escrowed"), " ", bytes(stakingToken.name()))
+        );
+        _symbol = string(
+            bytes.concat(bytes("ve"), bytes(stakingToken.symbol()))
+        );
+        // Use the same decimals as the staking token
+        _decimals = stakingToken.decimals();
     }
 
     /**
@@ -319,28 +326,6 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         virtual
         returns (address)
     {}
-
-    /**
-     * @dev Delegate votes from the sender to `delegatee`.
-     */
-    function delegate(address delegatee) public virtual {
-        // TODO a future upgrade may support delegation
-        revert("Delegation is not supported");
-    }
-
-    /**
-     * @dev Delegates votes from signer to `delegatee`
-     */
-    function delegateBySig(
-        address delegatee,
-        uint256 nonce,
-        uint256 end,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual {
-        revert("Delegation by signature is not supported");
-    }
 
     /**
      * @dev Deposits staking token and mints new veTokens according to the lockup length
@@ -637,7 +622,7 @@ contract VoteLockerCurve is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * @return uint256 The most recent epoch before the block
      */
     function _findEpoch(
-        Checkpoint[] memory _checkpoints,
+        Checkpoint[] storage _checkpoints,
         uint256 _block,
         uint256 _maxEpoch
     ) internal view returns (uint256) {

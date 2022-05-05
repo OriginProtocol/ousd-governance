@@ -1,14 +1,15 @@
-import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import type { NextPage } from "next";
-import { loadProposals } from "utils/index";
+import { loadProposals, useNetworkInfo } from "utils/index";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { Loading } from "components/Loading";
 import { VoteStats } from "components/VoteStats";
 import { PageTitle } from "components/PageTitle";
 import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
+import Card from "components/Card";
+import CardGroup from "components/CardGroup";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 
@@ -70,12 +71,13 @@ const Home: NextPage = ({
   proposalCount: number;
   holderCount: number;
 }) => {
-  const { contracts, chainId } = useStore();
+  const { contracts } = useStore();
+  const networkInfo = useNetworkInfo();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
   });
-  const [totalSupply, setTotalSupply] = useState<string>("0");
+  const [totalSupply, setTotalSupply] = useState<BigNumber>(BigNumber.from(0));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,31 +99,45 @@ const Home: NextPage = ({
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
-    load();
-  }, [proposals, setProposalData, contracts.Governance]);
+
+    if (networkInfo.correct && contracts.Governance) {
+      load();
+    }
+  }, [proposals, setProposalData, contracts.Governance, networkInfo.correct]);
 
   useEffect(() => {
     const loadTotalSupply = async () => {
-      const totalSupply = (
-        await contracts.VoteLockerCurve.totalSupply()
-      ).toString();
+      const totalSupply = await contracts.VoteLockerCurve.totalSupply();
       setTotalSupply(totalSupply);
     };
-    loadTotalSupply();
-  }, [contracts]);
+
+    if (networkInfo.correct && contracts.VoteLockerCurve) {
+      loadTotalSupply();
+    }
+  }, [contracts, networkInfo.correct]);
 
   return (
     <div>
-      <PageTitle>Governance Overview</PageTitle>
-      <VoteStats
-        proposalCount={proposalCount}
-        holderCount={holderCount}
-        totalSupply={totalSupply}
-      />
-      <SectionTitle>Last 5 Proposals</SectionTitle>
-      {loading ? <Loading /> : <ProposalTable proposalData={proposalData} />}
-      <SectionTitle>Top 5 Voters</SectionTitle>
-      <LeaderboardTable voters={voters} />
+      <PageTitle>Overview</PageTitle>
+      <CardGroup>
+        <VoteStats
+          proposalCount={proposalCount}
+          holderCount={holderCount}
+          totalSupply={totalSupply}
+        />
+        <Card>
+          <SectionTitle>Last 5 Proposals</SectionTitle>
+          {loading ? (
+            <Loading />
+          ) : (
+            <ProposalTable proposalData={proposalData} />
+          )}
+        </Card>
+        <Card>
+          <SectionTitle>Top 5 Voters</SectionTitle>
+          <LeaderboardTable voters={voters} />
+        </Card>
+      </CardGroup>
     </div>
   );
 };

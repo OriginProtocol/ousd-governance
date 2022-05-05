@@ -3,9 +3,10 @@ import { providers } from "ethers";
 import { useCallback, useEffect } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
-import { truncateEthAddress } from "utils/index";
+import { truncateEthAddress, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
 import { INFURA_ID, mainnetNetworkUrl } from "constants/index";
+import { toast } from "react-toastify";
 
 const providerOptions = {
   walletconnect: {
@@ -38,6 +39,12 @@ const providerOptions = {
   },
 };
 
+const networkNameMap = {
+  1: "Mainnet",
+  4: "Rinkeby",
+  31337: "localhost",
+};
+
 let web3Modal: any | undefined;
 if (typeof window !== "undefined") {
   web3Modal = new Web3Modal({
@@ -51,6 +58,8 @@ export const Web3Button = () => {
   const { provider, web3Provider, address } = useStore();
 
   const resetWeb3State = useStore((state) => state.reset);
+
+  const networkInfo = useNetworkInfo();
 
   const connect = useCallback(async function () {
     let provider;
@@ -69,6 +78,25 @@ export const Web3Button = () => {
     const signer = web3Provider.getSigner();
     const address = await signer.getAddress();
     const network = await web3Provider.getNetwork();
+
+    provider.on("accountsChanged", async (accounts) => {
+      const newAccount: string =
+        accounts.length === 0 ? undefined : accounts[0];
+      let storeUpdate = {
+        address: newAccount,
+      };
+      resetWeb3State();
+
+      if (newAccount !== undefined) {
+        storeUpdate = {
+          ...storeUpdate,
+          provider,
+          web3Provider,
+          chainId: network.chainId,
+        };
+      }
+      useStore.setState(storeUpdate);
+    });
 
     // Add contracts
     useStore.setState({
@@ -97,24 +125,58 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
-  return web3Provider ? (
-    <>
-      {address && (
-        <span className="text-muted">
-          {truncateEthAddress(address)}
-          {web3Provider.network.name === "unknown" && " / Localhost"}
-          {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
-        </span>
-      )}
+  if (!networkInfo.correct) {
+    return (
       <button
-        className="ml-2 btn btn-primary btn-sm rounded-btn"
-        onClick={disconnect}
+        className="btn btn-primary btn-error btn-sm rounded-btn"
+        onClick={() => {
+          toast.error(
+            `Please connect to ${
+              networkNameMap[networkInfo.envNetwork]
+            } network.`,
+            {
+              hideProgressBar: true,
+            }
+          );
+        }}
       >
-        Disconnect
+        Wrong Network
       </button>
-    </>
+    );
+  }
+
+  return web3Provider ? (
+    <div className="dropdown relative">
+      {address && (
+        <label
+          tabIndex={0}
+          className="flex items-center space-x-2 p-2 md:px-4 border border-[#bbc9da] text-white rounded-full text-sm leading-none capitalize cursor-pointer"
+        >
+          <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
+          <div className="hidden md:flex">
+            {truncateEthAddress(address)}
+            {web3Provider.network.name === "unknown" && " / Localhost"}
+            {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
+          </div>
+        </label>
+      )}
+      <div
+        tabIndex={0}
+        className="dropdown-content absolute top-full mt-3 right-0 bg-white p-3 md:p-4 rounded-xl border shadow-sm w-36 lg:w-full no-animation"
+      >
+        <button
+          className="btn btn-primary btn-sm rounded-btn w-full"
+          onClick={disconnect}
+        >
+          Disconnect
+        </button>
+      </div>
+    </div>
   ) : (
-    <button className="btn btn-primary btn-sm rounded-btn" onClick={connect}>
+    <button
+      className="btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary"
+      onClick={connect}
+    >
       Connect
     </button>
   );

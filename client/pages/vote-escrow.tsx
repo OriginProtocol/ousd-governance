@@ -3,92 +3,51 @@ import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
-import { truncateBalance } from "utils/index";
+import CardGroup from "components/CardGroup";
+import Card from "components/Card";
+import CardLabel from "components/CardLabel";
+import CardStat from "components/CardStat";
+import CardDescription from "components/CardDescription";
 import { toast } from "react-toastify";
+import useAccountBalances from "utils/useAccountBalances";
+import TokenAmount from "components/TokenAmount";
+import Link from "components/Link";
+import RangeInput from "components/vote-escrow/RangeInput";
 
 const MAX_WEEKS = 52 * 4;
 
 export default function VoteEscrow({}) {
-  const { web3Provider, address, contracts, pendingTransactions } = useStore();
+  const {
+    web3Provider,
+    contracts,
+    pendingTransactions,
+    balances,
+    allowances,
+    existingLockup,
+  } = useStore();
+
   const [amount, setAmount] = useState("0");
   const [weeks, setWeeks] = useState(0);
-  const [balance, setBalance] = useState(0);
-  const [votePower, setVotePower] = useState(0);
-  const [approval, setApproval] = useState(0);
-  const [existingAmount, setExistingAmount] = useState(
-    ethers.BigNumber.from(0)
-  );
-  const [existingEnd, setExistingEnd] = useState(ethers.BigNumber.from(0));
-  const [existingEndWeeks, setExistingEndWeeks] = useState(0);
   const [amountError, setAmountError] = useState("");
   const [endError, setEndError] = useState("");
-  const [reload, setReload] = useState(false);
-  const { OriginDollarGovernance, VoteLockerCurve } = contracts;
+  const { reloadAllowances, reloadBalances } = useAccountBalances();
 
-  // Load users governance token balance
-  useEffect(() => {
-    const loadBalance = async () => {
-      const balance = await OriginDollarGovernance.balanceOf(address);
-      setBalance(balance);
-    };
-    if (web3Provider && address) {
-      loadBalance();
-    }
-  }, [address, web3Provider, OriginDollarGovernance, reload]);
+  const existingLockupAmount = Number(
+    ethers.utils.formatUnits(existingLockup.amount.toString())
+  )
+    .toFixed()
+    .toString();
 
-  // Load users vote power
   useEffect(() => {
-    const loadVotePower = async () => {
-      const votePower = await VoteLockerCurve.balanceOf(address);
-      setVotePower(votePower);
-    };
-    if (web3Provider && address) {
-      loadVotePower();
-    }
-  }, [address, web3Provider, VoteLockerCurve, reload]);
-
-  // Load the amount of governance token approved by the user for transfer by vl contract
-  useEffect(() => {
-    const loadApproval = async () => {
-      const approval = await OriginDollarGovernance.allowance(
-        address,
-        VoteLockerCurve.address
-      );
-      setApproval(approval);
-    };
-    if (web3Provider && address) {
-      loadApproval();
+    if (existingLockup.end.gt(0)) {
+      setAmount(existingLockupAmount);
+      setWeeks(existingLockup.existingEndWeeks);
     }
   }, [
-    address,
-    web3Provider,
-    OriginDollarGovernance,
-    VoteLockerCurve.address,
-    reload,
+    existingLockup.end,
+    existingLockup.existingEndWeeks,
+    existingLockupAmount,
   ]);
-
-  // Load users existing lockup in case this is an extension
-  useEffect(() => {
-    const loadExistingLockup = async () => {
-      const lockup = await VoteLockerCurve.getLockup(address);
-      setExistingAmount(lockup[0]);
-      setExistingEnd(lockup[1]);
-    };
-    if (web3Provider && address) {
-      loadExistingLockup();
-    }
-  }, [address, web3Provider, VoteLockerCurve, reload]);
-
-  // Calculate the number of weeks to existing lockup end (if one exists)
-  useEffect(() => {
-    const lockupEndToWeeks = async (end: ethers.BigNumber) => {
-      const now = (await web3Provider.getBlock()).timestamp;
-      setExistingEndWeeks(end.sub(now).div(604800).toNumber());
-    };
-    if (web3Provider && address && existingEnd.gt(0)) {
-      lockupEndToWeeks(existingEnd);
-    }
-  }, [address, existingEnd, web3Provider, reload]);
 
   if (!web3Provider) {
     return <Disconnected />;
@@ -101,23 +60,39 @@ export default function VoteEscrow({}) {
     );
   }
 
+  const amountInputModified = parseInt(amount) > parseInt(existingLockupAmount);
+  const lengthInputModified = weeks !== existingLockup.existingEndWeeks;
+  const bothInputsModified = amountInputModified && lengthInputModified;
+
   const validate = async () => {
-    if (ethers.utils.parseUnits(amount).lte(existingAmount)) {
+    if (
+      amountInputModified &&
+      ethers.utils.parseUnits(amount).lte(existingLockup.amount)
+    ) {
       setAmountError("Amount must be greater than existing lockup amount");
       return false;
     }
-    const now = (await web3Provider.getBlock()).timestamp;
-    if (now + weeks * 7 * 86400 < existingEnd) {
-      setEndError("End date must be greater than existing lockup end date");
-      return false;
+
+    if (lengthInputModified) {
+      const now = (await web3Provider.getBlock()).timestamp;
+      if (now + weeks * 7 * 86400 < existingLockup.end) {
+        setEndError("End date must be greater than existing lockup end date");
+        return false;
+      }
+
+      if (weeks > MAX_WEEKS) {
+        setEndError(`Can not lockup for more than ${MAX_WEEKS} weeks`);
+        return false;
+      }
     }
+
     return true;
   };
 
   const handleApproval = async () => {
-    const transaction = await OriginDollarGovernance.approve(
-      VoteLockerCurve.address,
-      ethers.utils.parseUnits(amount)
+    const transaction = await contracts.OriginDollarGovernance.approve(
+      contracts.VoteLockerCurve.address,
+      ethers.constants.MaxUint256
     );
 
     useStore.setState({
@@ -127,7 +102,7 @@ export default function VoteEscrow({}) {
           ...transaction,
           onComplete: () => {
             toast.success("Approval has been made", { hideProgressBar: true }),
-              setReload(!reload);
+              reloadAllowances();
           },
         },
       ],
@@ -138,8 +113,9 @@ export default function VoteEscrow({}) {
     const valid = await validate();
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
-      const end = now + weeks * 7 * 86400;
-      const transaction = await VoteLockerCurve.lockup(
+      const end =
+        now + (existingLockup.end.gt(0) ? weeks + 1 : weeks) * 7 * 86400;
+      const transaction = await contracts.VoteLockerCurve.lockup(
         ethers.utils.parseUnits(amount),
         end
       );
@@ -149,10 +125,10 @@ export default function VoteEscrow({}) {
           {
             ...transaction,
             onComplete: () => {
-              toast.success("Approval has been made", {
+              toast.success("Lockup confirmed", {
                 hideProgressBar: true,
               });
-              setReload(!reload);
+              reloadBalances();
             },
           },
         ],
@@ -163,130 +139,286 @@ export default function VoteEscrow({}) {
   return (
     <>
       <PageTitle>Vote Escrow</PageTitle>
-
-      <div className="grid content-center">
-        <div className="stats shadow mb-16">
-          <div className="stat">
-            <div className="stat-title">Balance</div>
-            <div className="stat-value text-primary">
-              {truncateBalance(ethers.utils.formatUnits(balance))}
-            </div>
-            <div className="stat-desc">OGV</div>
+      <CardGroup>
+        <CardGroup horizontal fourCol>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Balance</CardLabel>
+                <CardStat>
+                  <TokenAmount amount={balances.ogv} />
+                </CardStat>
+                <CardDescription>OGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Vote Balance</div>
-            <div className="stat-value text-info-content">
-              {truncateBalance(ethers.utils.formatUnits(votePower))}
-            </div>
-            <div className="stat-desc">veOGV</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Vote Balance</CardLabel>
+                <CardStat>
+                  <TokenAmount amount={balances.vote_power} />
+                </CardStat>
+                <CardDescription>veOGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Lockup Balance</div>
-            <div className="stat-value text-success-content">
-              {truncateBalance(ethers.utils.formatUnits(existingAmount))}
-            </div>
-            <div className="stat-desc">OGV</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Lockup Balance</CardLabel>
+                <CardStat>
+                  <TokenAmount amount={existingLockup.amount} />
+                </CardStat>
+                <CardDescription>OGV</CardDescription>
+              </div>
+            </Card>
           </div>
-          <div className="stat">
-            <div className="stat-title">Lockup End</div>
-            <div className="stat-value">
-              {existingEndWeeks ? existingEndWeeks : 0}
-            </div>
-            <div className="stat-desc">Weeks</div>
+          <div>
+            <Card dark tightPadding>
+              <div className="space-y-1">
+                <CardLabel>Lockup End</CardLabel>
+                <CardStat>
+                  {existingLockup.existingEndWeeks
+                    ? existingLockup.existingEndWeeks
+                    : 0}{" "}
+                  weeks
+                </CardStat>
+                {existingLockup.end.gt(0) && (
+                  <CardDescription>
+                    {existingLockup.existingEndDate}
+                  </CardDescription>
+                )}
+              </div>
+            </Card>
           </div>
-        </div>
-      </div>
-
-      <div className="max-w-lg mx-auto">
-        <label className="label">
-          <span className="label-text">Lockup amount</span>
-        </label>
-        <div className="input-group">
-          <input
-            type="number"
-            min={1}
-            max={balance.toString()}
-            placeholder="Amount"
-            className={`input input-bordered w-full ${
-              amountError && "input-error"
-            }`}
-            value={amount}
-            onChange={(e) => {
-              setAmount(e.target.value);
-              setAmountError("");
-            }}
-          />
-          <button
-            className="btn"
-            onClick={() =>
-              setAmount(ethers.utils.formatUnits(balance.toString()))
-            }
-          >
-            Max
-          </button>
-        </div>
-        {amountError && (
-          <label className="label">
-            <span className="label-text-alt text-error-content">
-              {amountError}
-            </span>
-          </label>
-        )}
-        <label className="label">
-          <span className="label-text">Lockup length (weeks)</span>
-        </label>
-        <div className="input-group">
-          <input
-            type="number"
-            min="1"
-            max={MAX_WEEKS.toString()}
-            placeholder="Type here"
-            className={`input input-bordered w-full ${
-              endError && "input-error"
-            }`}
-            value={weeks}
-            onChange={(e) => {
-              setWeeks(e.target.value);
-              setEndError("");
-            }}
-          />
-          <button className="btn" onClick={() => setWeeks(MAX_WEEKS)}>
-            Max
-          </button>
-        </div>
-        {endError && (
-          <label className="label">
-            <span className="label-text-alt text-error-content">
-              {endError}
-            </span>
-          </label>
-        )}
-        {estimatedVotePower && (
-          <div className="mt-5">Estimated votes: {estimatedVotePower}</div>
-        )}
-
-        <button
-          className="btn btn-primary mt-5 mr-5"
-          disabled={
-            // TODO approval should be new amount - already locked
-            !amount || !weeks || approval.gte(ethers.utils.parseUnits(amount))
-          }
-          onClick={handleApproval}
-        >
-          Approve Transfer
-        </button>
-
-        <button
-          className="btn btn-primary mt-5"
-          disabled={
-            // TODO approval should be new amount - already locked
-            !amount || !weeks || ethers.utils.parseUnits(amount).gt(approval)
-          }
-          onClick={handleLockup}
-        >
-          Lockup
-        </button>
-      </div>
+        </CardGroup>
+        <Card>
+          {balances.ogv.gt(0) ? (
+            <div className="space-y-4">
+              {existingLockup.end.gt(0) && (
+                <p className="text-sm text-gray-600">
+                  You have an existing lockup. You can increase the amount, the
+                  length, or both.
+                </p>
+              )}
+              <div>
+                <RangeInput
+                  label="Lockup amount"
+                  counterUnit="OGV"
+                  min={"1"}
+                  max={Number(
+                    ethers.utils.formatUnits(
+                      balances.ogv.add(existingLockup.amount).toString()
+                    )
+                  )
+                    .toFixed()
+                    .toString()}
+                  value={amount}
+                  markers={[
+                    "0%",
+                    "",
+                    "20%",
+                    "",
+                    "40%",
+                    "",
+                    "60%",
+                    "",
+                    "80%",
+                    "",
+                    "100%",
+                  ]}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setAmountError("");
+                  }}
+                />
+                {existingLockup.end.gt(0) && !bothInputsModified && (
+                  <div className="pt-4 flex">
+                    <button
+                      className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                      disabled={
+                        parseInt(amount) <=
+                        parseInt(
+                          Number(
+                            ethers.utils.formatUnits(
+                              existingLockup.amount.toString()
+                            )
+                          )
+                            .toFixed()
+                            .toString()
+                        )
+                      }
+                      onClick={handleLockup}
+                    >
+                      Increase lockup amount
+                    </button>
+                    <button
+                      className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                      disabled={
+                        parseInt(amount) ===
+                        parseInt(
+                          Number(
+                            ethers.utils.formatUnits(
+                              existingLockup.amount.toString()
+                            )
+                          )
+                            .toFixed()
+                            .toString()
+                        )
+                      }
+                      onClick={() => {
+                        setAmount(
+                          Number(
+                            ethers.utils.formatUnits(
+                              existingLockup.amount.toString()
+                            )
+                          )
+                            .toFixed()
+                            .toString()
+                        );
+                      }}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                )}
+                {amountError && (
+                  <label className="label">
+                    <span className="label-text-alt text-error-content">
+                      {amountError}
+                    </span>
+                  </label>
+                )}
+              </div>
+              <div>
+                <RangeInput
+                  label="Lockup length"
+                  counterUnit="weeks"
+                  min="0"
+                  max="208"
+                  value={weeks}
+                  markers={[
+                    "0 wks",
+                    "",
+                    "1 yr",
+                    "",
+                    "2 yrs",
+                    "",
+                    "3 yrs",
+                    "",
+                    "4 yrs",
+                  ]}
+                  onChange={(e) => {
+                    setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
+                    setEndError("");
+                  }}
+                />
+                {existingLockup.end.gt(0) && !bothInputsModified && (
+                  <div className="pt-4 flex">
+                    <button
+                      className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                      disabled={weeks <= existingLockup.existingEndWeeks}
+                      onClick={handleLockup}
+                    >
+                      Extend lockup length
+                    </button>
+                    <button
+                      className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                      disabled={weeks === existingLockup.existingEndWeeks}
+                      onClick={() => {
+                        setWeeks(existingLockup.existingEndWeeks);
+                      }}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                )}
+                {endError && (
+                  <label className="label">
+                    <span className="label-text-alt text-error-content">
+                      {endError}
+                    </span>
+                  </label>
+                )}
+              </div>
+              {existingLockup.end.gt(0) && bothInputsModified && (
+                <div className="pt-4 flex">
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                    onClick={handleLockup}
+                  >
+                    Modify lockup
+                  </button>
+                  <button
+                    className="btn btn-neutral md:btn-lg rounded-full flex-1"
+                    onClick={() => {
+                      setAmount(
+                        Number(
+                          ethers.utils.formatUnits(
+                            existingLockup.amount.toString()
+                          )
+                        )
+                          .toFixed()
+                          .toString()
+                      );
+                      setWeeks(existingLockup.existingEndWeeks);
+                    }}
+                  >
+                    Reset
+                  </button>
+                </div>
+              )}
+              {estimatedVotePower && (
+                <div className="pt-2 text-lg">
+                  <span className="font-bold pr-2">Estimated votes</span>{" "}
+                  {ethers.utils.commify(Number(estimatedVotePower).toFixed())}
+                </div>
+              )}
+              {!existingLockup.end.gt(0) && (
+                <div className="flex py-3">
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+                    disabled={
+                      !amount ||
+                      !weeks ||
+                      allowances.ogv.gte(ethers.utils.parseUnits(amount))
+                    }
+                    onClick={handleApproval}
+                  >
+                    Approve Transfer
+                  </button>
+                  <button
+                    className="btn btn-primary md:btn-lg rounded-full flex-1"
+                    disabled={
+                      !amount ||
+                      !weeks ||
+                      ethers.utils.parseUnits(amount).gt(allowances.ogv)
+                    }
+                    onClick={handleLockup}
+                  >
+                    Lockup
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p>You need OGV to be able to participate in governance.</p>
+              <div>
+                <Link
+                  className="btn btn-primary md:btn-lg rounded-full"
+                  href="https://app.uniswap.org/#/swap?chain=mainnet"
+                  type="external"
+                  newWindow
+                >
+                  Get OGV from Uniswap
+                </Link>
+              </div>
+            </div>
+          )}
+        </Card>
+      </CardGroup>
     </>
   );
 }
