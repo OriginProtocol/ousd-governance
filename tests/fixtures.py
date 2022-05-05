@@ -27,3 +27,12 @@ def governance(staking, timelock_controller, web3):
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="CANCELLER_ROLE"), governance)
     return governance
+
+@pytest.fixture
+def optional_lockup_distributor(token, vote_locker):
+    return run("deploy_optional_lockup_distributor", "main", (token.address, vote_locker.address))
+
+
+@pytest.fixture
+def tranche_lockup_distributor(vote_locker):
+    pass
