@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorSettings.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorTimelockControl.sol";
-import "OpenZeppelin/openzeppelin-contracts@02fcc75bb7f35376c22def91b0fb9bc7a50b9458/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorSettings.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
 
 contract Governance is
     GovernorSettings,
