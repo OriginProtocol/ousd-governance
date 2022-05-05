@@ -36,4 +36,8 @@ export const navItems = [
     href: "/vote-escrow",
     label: "Vote Escrow",
   },
+  {
+    href: "/claim",
+    label: "Claim",
+  },
 ];
