@@ -7,7 +7,7 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/M
 import "./IMerkleDistributor.sol";
 
 interface IVoteLocker {
-  function lockup(uint256 amount, uint256 end) external;
+  function lockup(uint256 amount, uint256 end, address _account) external;
 }
 
 contract OptionalLockupDistributor {
@@ -76,8 +76,9 @@ contract OptionalLockupDistributor {
         // Mark it claimed and send the token.
         _setClaimed(_index);
         if (_lockupDuration > 0) {
+          IERC20(token).approve(stakingContract, _amount);
           // stakingContract.stake(_amount, _lockupDuration, msg.sender),
-          IVoteLocker(stakingContract).lockup(_amount, block.timestamp + _lockupDuration);
+          IVoteLocker(stakingContract).lockup(_amount, block.timestamp + _lockupDuration, msg.sender);
         } else {
           require(
             IERC20(token).transfer(msg.sender, _amount),
