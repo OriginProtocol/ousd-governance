@@ -91,17 +91,24 @@ const handleEvents = async (blockNumber, events, done) => {
       }
     } else if(event.name === "LockupUpdated") {
       try {
-        await prisma.lockup.update({
+        await prisma.lockup.updateMany({
           where: {
             address: event.values.provider,
           },
           data: {
+            active: false,
+          }
+        });
+        logger.info("Updated existing lockup(s)");
+        await prisma.lockup.create({
+          data: {
+            address: event.values.provider,
             amount: event.values.amount,
             end: event.values.end,
             weeks: Math.round((event.values.end - now) / 604800),
-          }
+          },
         });
-        logger.info("Updated existing lockup");
+        logger.info("Inserted new lockup");
       } catch (e) {
         // Likely not found
       }
