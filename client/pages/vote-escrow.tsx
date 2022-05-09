@@ -25,7 +25,13 @@ export async function getServerSideProps({ res }: { res: any }) {
     "public, s-maxage=60, stale-while-revalidate=59"
   );
 
-  const lockups = await prisma.lockup.findMany();
+  const lockups = await prisma.lockup.findMany({
+    where: {
+      active: {
+        equals: true,
+      },
+    },
+  });
   const lockupCount = lockups.length;
   const totalLockupWeeks = lockups.reduce(
     (total: Number, lockup: Object) => total + lockup.weeks,
