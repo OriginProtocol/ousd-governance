@@ -40,7 +40,7 @@ model Lockup {
   address  String @unique
   amount   String
   end      String
-  weeks    Int @default(0)
+  weeks    Int
 
   @@map("lockups")
 }
