@@ -82,7 +82,7 @@ const handleEvents = async (blockNumber, events, done) => {
             address: event.values.provider,
             amount: event.values.amount,
             end: event.values.end,
-            weeks: parseInt(((event.values.end - now) / 604800).toFixed()),
+            weeks: Math.round((event.values.end - now) / 604800),
           },
         });
         logger.info("Inserted new lockup");
@@ -98,7 +98,7 @@ const handleEvents = async (blockNumber, events, done) => {
           data: {
             amount: event.values.amount,
             end: event.values.end,
-            weeks: parseInt(((event.values.end - now) / 604800).toFixed()),
+            weeks: Math.round((event.values.end - now) / 604800),
           }
         });
         logger.info("Updated existing lockup");
