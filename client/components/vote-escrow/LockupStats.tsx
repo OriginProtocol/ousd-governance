@@ -25,7 +25,7 @@ const LockupStats: FunctionComponent<LockupStatsProps> = ({
 
   const percentageLockedUp =
     (parseInt(totalTokensLockedUp) / totalSupply) * 100;
-  const averageLockupLength = totalLockupWeeks / lockupCount;
+  const averageLockupLength = Math.round(totalLockupWeeks / lockupCount);
 
   return (
     <Card alt>
