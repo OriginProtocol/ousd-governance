@@ -1,33 +1,45 @@
 pragma solidity 0.8.10;
-import { ERC20Snapshot } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
+import { ERC20Votes } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import { ERC20Permit } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import { ERC20 } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import { PRBMathUD60x18 } from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 
-// import "forge-std/Test.sol"; // Todo: Remove
 
-contract Ogve is ERC20Snapshot {
-	uint256 constant YEAR_BASE = 18e17;
-	uint256 constant MAX_REWARDS_UPDATE = 24 * 30 days;
+contract OgvStaking is ERC20Votes {
+	
+	// 1. Core Storage
 
 	ERC20 immutable public ogv;
-	uint256 public epoch; // Not immutable, needs to persist through upgrades.
+	uint256 immutable public epoch;
+
+	// 2. Staking and Lockup Storage
+
+	uint256 constant YEAR_BASE = 18e17;
 	struct Lockup {
 		uint128 amount;
 		uint128 end;
 		uint256 points;
 	}
 	mapping(address => Lockup[]) public lockups;
+
+	// 3. Reward Storage
+
+	uint256 constant MAX_REWARDS_UPDATE = 24 * 30 days;
 	mapping(address => uint256) public rewardDebt;
 	uint256 public accRewardPerShare; // As of the start of the block
 	uint256 public lastRewardTime;
 	uint256 public rewardRate;
 	uint256[] public rewardMonths;
 
+	// Events
 	event Stake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
 	event Unstake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
 	event Reward(address indexed user, uint256 amount);
 
-	constructor(address ogv_, uint256 epoch_) ERC20("","") {
+
+	// 1. Core Functions
+
+	constructor(address ogv_, uint256 epoch_) ERC20("","") ERC20Permit("OGV Staking") {
 		ogv = ERC20(ogv_);
 		epoch = epoch_;
 	}
@@ -38,7 +50,8 @@ contract Ogve is ERC20Snapshot {
 	function transfer(address to, uint256 amount) public override returns (bool) { revert(); }
 	function transferFrom(address from, address to, uint256 amount) public override returns (bool) { revert(); }
 
-	function _getCurrentSnapshotId() internal view override returns(uint256) { return block.number; } // Snapshots are block based
+
+	// 2. Staking and Lockup Functions
 
 	function stake(uint256 amount, uint256 duration, address to) external {
 		if(to == address(0)){ to == msg.sender; }
@@ -81,6 +94,9 @@ contract Ogve is ERC20Snapshot {
 		return amount * multiplier / 1e18;
 	}
 
+
+	// 3. Reward functions
+
 	function previewRewards(address user) external view returns (uint256) {
 		(uint256 _accRewardPerShare,  uint256 _lastRewardTime) = _previewUpdateRewards();
 		uint256 balance = balanceOf(user);
@@ -105,7 +121,7 @@ contract Ogve is ERC20Snapshot {
 		if(balance == 0){ return; }
 		uint256 preReward = balance * _accRewardPerShare / 1e12; 
 		uint256 reward = preReward - rewardDebt[user];
-		
+
 		rewardDebt[user] = preReward; 
 		ogv.transfer(user, reward);
 		emit Reward(user, reward);
@@ -165,4 +181,5 @@ contract Ogve is ERC20Snapshot {
 		}
 		ogv.transferFrom(msg.sender, address(this), total);
 	}
+
 }
