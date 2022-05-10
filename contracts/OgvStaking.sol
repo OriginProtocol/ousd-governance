@@ -55,9 +55,8 @@ contract OgvStaking is ERC20Votes {
 
 	function stake(uint256 amount, uint256 duration, address to) external {
 		if(to == address(0)){ to == msg.sender; }
-		require(duration >= 7 days, 'Staking: Too short');
-		require(duration <= 1461 days, 'Staking: Too long');
 		require(amount <= type(uint128).max, 'Staking: Too much');
+		// duration checked inside previewPoints
 		uint256 start = block.timestamp;
 		if(start < epoch){ start = epoch; }
 		uint128 end = uint128(start + duration);
@@ -86,7 +85,28 @@ contract OgvStaking is ERC20Votes {
 		emit Unstake(msg.sender, lockupId, amount, end, points);
 	}
 
+	function extend(uint256 lockupId, uint256 duration) external {
+		// duration checked inside previewPoints
+		Lockup memory lockup = lockups[msg.sender][lockupId];
+		uint256 oldAmount = lockup.amount;
+		uint256 oldEnd = lockup.end;
+		uint256 oldPoints = lockup.points;
+		uint256 start = block.timestamp;
+		if(start < epoch){ start = epoch; }
+		uint256 newEnd = start + duration;
+		require(newEnd > oldEnd, "New lockup must be longer");
+		uint256 newPoints = previewPoints(oldAmount, duration);
+		lockup.end = uint128(newEnd);
+		lockup.points = newPoints;
+		lockups[msg.sender][lockupId] = lockup;
+		_mint(msg.sender, newPoints - oldPoints);
+		emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
+		emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
+	}
+
 	function previewPoints(uint256 amount, uint256 duration) public view returns (uint256) {
+		require(duration >= 7 days, 'Staking: Too short');
+		require(duration <= 1461 days, 'Staking: Too long');
 		uint256 _epoch = epoch; // Gas savings
 		uint256 start = block.timestamp > _epoch ? block.timestamp : _epoch;
 		uint256 endYearpoc = (start + duration - _epoch) * 1e18 / 360 days;
