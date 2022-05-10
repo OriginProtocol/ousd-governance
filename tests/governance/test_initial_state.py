@@ -1,6 +1,6 @@
 from brownie import accounts
 
-from ..fixtures import governance, timelock_controller, token, vote_locker
+from ..fixtures import governance, timelock_controller, token, staking
 
 
 def test_name(governance):

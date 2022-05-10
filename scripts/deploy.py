@@ -6,7 +6,6 @@ def main(output_file=None):
     # accounts.default = accounts.load("rinkeby_deployer")
 
     token = run("deploy_token")
-    votelock = run("deploy_vote_locker", "main", (token.address,))
 
     epoch = 86400 # 1 day
     staking = run("deploy_staking", "main", (token.address, epoch))
@@ -16,7 +15,7 @@ def main(output_file=None):
         [accounts[0]], [accounts[0]]
     )
 
-    governance = Governance.deploy(votelock, timelock_controller)
+    governance = Governance.deploy(staking, timelock_controller)
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
