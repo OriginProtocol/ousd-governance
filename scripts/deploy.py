@@ -1,13 +1,15 @@
 import json
 from brownie import *
 
-
 def main(output_file=None):
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")
 
     token = run("deploy_token")
     votelock = run("deploy_vote_locker", "main", (token.address,))
+
+    epoch = 86400 # 1 day
+    staking = run("deploy_staking", "main", (token.address, epoch))
 
     timelock_delay = 86400 * 2  # 48 hours
     timelock_controller = Timelock.deploy(
@@ -24,10 +26,11 @@ def main(output_file=None):
         output = dict(
             OriginDollarGovernance=dict(address=token.address, abi=token.abi),
             VoteLockerCurve=dict(address=votelock.address, abi=votelock.abi),
+            OgvStaking=dict(address=staking.address, abi=staking.abi),
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),
         )
         with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
 
-    return (token, votelock, timelock_controller, governance)
+    return (token, votelock, staking, timelock_controller, governance)
