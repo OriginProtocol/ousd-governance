@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "utils/store";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
@@ -8,6 +8,9 @@ import Card from "components/Card";
 import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
+import { useNetworkInfo } from "utils/index";
+import LockupStats from "components/vote-escrow/LockupStats";
+import prisma from "lib/prisma";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
@@ -16,7 +19,43 @@ import RangeInput from "components/vote-escrow/RangeInput";
 
 const MAX_WEEKS = 52 * 4;
 
-export default function VoteEscrow({}) {
+export async function getServerSideProps({ res }: { res: any }) {
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=59"
+  );
+
+  const lockups = await prisma.lockup.findMany({
+    where: {
+      active: {
+        equals: true,
+      },
+    },
+  });
+  const lockupCount = lockups.length;
+  const totalLockupWeeks = lockups.reduce(
+    (total: Number, lockup: Object) => total + lockup.weeks,
+    0
+  );
+  const totalTokensLockedUp = lockups.reduce(
+    (total: Number, lockup: Object) => total + lockup.amount,
+    0
+  );
+
+  return {
+    props: {
+      lockupCount,
+      totalLockupWeeks,
+      totalTokensLockedUp,
+    },
+  };
+}
+
+export default function VoteEscrow({
+  lockupCount,
+  totalLockupWeeks,
+  totalTokensLockedUp,
+}) {
   const {
     web3Provider,
     contracts,
@@ -418,6 +457,11 @@ export default function VoteEscrow({}) {
             </div>
           )}
         </Card>
+        <LockupStats
+          lockupCount={lockupCount}
+          totalLockupWeeks={totalLockupWeeks}
+          totalTokensLockedUp={totalTokensLockedUp}
+        />
       </CardGroup>
     </>
   );
