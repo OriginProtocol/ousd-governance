@@ -1,18 +1,17 @@
 import { useState } from "react";
 import type { NextPage } from "next";
-import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
 import StepTracker from "components/StepTracker";
 import StepControls from "components/StepControls";
 import Explanation from "components/claim/Explanation";
-import Eligability from "components/claim/Eligability";
+import Eligibility from "@/components/claim/Eligibility";
 import Claim from "components/claim/Claim";
 
 interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const steps = ["Explanation", "Eligability", "Claim"];
+  const steps = ["Explanation", "Eligibility", "Claim"];
   const stepControlsLabels = [
     "Read explanation",
     "Check your eligibility",
@@ -27,7 +26,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
       <StepTracker currentStep={currentStep} steps={steps} />
       <Card>
         {currentStep == 0 && <Explanation />}
-        {currentStep == 1 && <Eligability />}
+        {currentStep == 1 && <Eligibility />}
         {currentStep == 2 && <Claim />}
       </Card>
       <StepControls
