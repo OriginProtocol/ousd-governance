@@ -1,8 +1,8 @@
 pragma solidity 0.8.10;
-import { ERC20Votes } from "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import { ERC20Permit } from "openzeppelin-contracts/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import { ERC20 } from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import { PRBMathUD60x18 } from "prb-math/PRBMathUD60x18.sol";
+import { ERC20Votes } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import { ERC20Permit } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import { ERC20 } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
+import { PRBMathUD60x18 } from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 
 
 contract RewardsSource {
