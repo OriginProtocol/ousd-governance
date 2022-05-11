@@ -3,12 +3,16 @@ import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/to
 import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
+import { RewardsSource } from "./RewardsSource.sol";
+
 
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
 
     ERC20 public immutable ogv;
     uint256 public immutable epoch;
+    RewardsSource public rewardsSource;
+
 
     // 2. Staking and Lockup Storage
 
@@ -25,9 +29,6 @@ contract OgvStaking is ERC20Votes {
     uint256 constant MAX_REWARDS_UPDATE = 24 * 30 days;
     mapping(address => uint256) public rewardDebt;
     uint256 public accRewardPerShare; // As of the start of the block
-    uint256 public lastRewardTime;
-    uint256 public rewardRate;
-    uint256[] public rewardMonths;
 
     // Events
     event Stake(
@@ -79,6 +80,12 @@ contract OgvStaking is ERC20Votes {
     ) public override returns (bool) {
         revert();
     }
+
+
+   function setRewardsSource(address temp_fix_me_) external {
+   	 // TODO: TEMP Add governance check
+   	 rewardsSource = RewardsSource(temp_fix_me_);
+   }
 
     // 2. Staking and Lockup Functions
 
@@ -162,10 +169,13 @@ contract OgvStaking is ERC20Votes {
     // 3. Reward functions
 
     function previewRewards(address user) external view returns (uint256) {
-        (
-            uint256 _accRewardPerShare,
-            uint256 _lastRewardTime
-        ) = _previewUpdateRewards();
+    	uint256 supply = totalSupply();
+    	if(supply == 0 ){
+    		return 0;
+    	}
+        uint256 newRewards = rewardsSource.previewRewards();
+        uint256 _accRewardPerShare = accRewardPerShare;
+        _accRewardPerShare += (newRewards * 1e12) / supply;
         uint256 balance = balanceOf(user);
         uint256 preReward = (balance * _accRewardPerShare) / 1e12;
         return preReward - rewardDebt[user];
@@ -175,28 +185,19 @@ contract OgvStaking is ERC20Votes {
         _collectRewards(msg.sender);
     }
 
-    function updateRewards() public {
-        (
-            uint256 _accRewardPerShare,
-            uint256 _lastRewardTime
-        ) = _previewUpdateRewards();
-        accRewardPerShare = _accRewardPerShare;
-        lastRewardTime = _lastRewardTime;
-    }
-
     function _collectRewards(address user) internal {
-        (
-            uint256 _accRewardPerShare,
-            uint256 _lastRewardTime
-        ) = _previewUpdateRewards();
-        accRewardPerShare = _accRewardPerShare;
-        lastRewardTime = _lastRewardTime;
+    	uint256 supply = totalSupply();
+    	if(supply == 0 ){
+    		return;
+    	}
+        uint256 newRewards = rewardsSource.collectRewards();
+        accRewardPerShare += (newRewards * 1e12) / totalSupply();
 
         uint256 balance = balanceOf(user);
         if (balance == 0) {
             return;
         }
-        uint256 preReward = (balance * _accRewardPerShare) / 1e12;
+        uint256 preReward = (balance * accRewardPerShare) / 1e12;
         uint256 reward = preReward - rewardDebt[user];
 
         rewardDebt[user] = preReward;
@@ -204,80 +205,5 @@ contract OgvStaking is ERC20Votes {
         emit Reward(user, reward);
     }
 
-    function _previewUpdateRewards() internal view returns (uint256, uint256) {
-        uint256 _accRewardPerShare = accRewardPerShare;
-        uint256 _lastRewardTime = lastRewardTime;
-        if (_lastRewardTime >= block.timestamp) {
-            return (_accRewardPerShare, _lastRewardTime);
-        }
-        uint256 supply = totalSupply();
-        if (supply == 0) {
-            return (_accRewardPerShare, block.timestamp);
-        }
-        uint256 end = block.timestamp;
-        if (end - _lastRewardTime > MAX_REWARDS_UPDATE) {
-            end = _lastRewardTime + MAX_REWARDS_UPDATE;
-        }
-        uint256 newRewards = rewardsBetween(_lastRewardTime, end);
-        _accRewardPerShare += (newRewards * 1e12) / supply;
-        return (_accRewardPerShare, end);
-    }
 
-    function rewardsBetween(uint256 start, uint256 end)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 _epoch = epoch;
-        if (rewardMonths.length == 0) {
-            return 0;
-        }
-        if (end <= _epoch) {
-            return 0;
-        }
-        if (end <= start) {
-            return 0;
-        }
-        if (start < _epoch) {
-            start = _epoch;
-        }
-        uint256 startMonth = (start - _epoch) / 30 days;
-        uint256 endMonth = (end - _epoch) / 30 days;
-        if (endMonth >= rewardMonths.length) {
-            endMonth = rewardMonths.length - 1;
-        }
-        uint256 totalRewards = 0;
-        for (uint256 i = startMonth; i <= endMonth; i++) {
-            uint256 monthRewards = rewardMonths[i];
-            uint256 monthStart = _epoch + (i * 30 days);
-            uint256 monthEnd = monthStart + 30 days;
-            uint256 durationStart = start < monthStart ? monthStart : start;
-            uint256 durationEnd = end > monthEnd ? monthEnd : end;
-            totalRewards +=
-                (monthRewards * (durationEnd - durationStart)) /
-                30 days;
-        }
-        return totalRewards;
-    }
-
-    function addRewards(uint256 start, uint256[] calldata amounts) external {
-        uint256 beforeLen = rewardMonths.length;
-        require(
-            (block.timestamp < epoch) ||
-                (start > ((block.timestamp - epoch) / 30 days)),
-            "Staking: Can only add to future"
-        );
-        require(start <= beforeLen, "Staking: Start too far");
-        uint256 total = 0;
-        for (uint256 i = 0; i < amounts.length; i++) {
-            uint256 amount = amounts[i];
-            total += amount;
-            if (start + i >= beforeLen) {
-                rewardMonths.push(amount);
-            } else {
-                rewardMonths[start + i] += amount;
-            }
-        }
-        ogv.transferFrom(msg.sender, address(this), total);
-    }
 }
