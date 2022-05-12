@@ -12,6 +12,7 @@ contract OgvStaking is ERC20Votes {
     uint256 public immutable epoch;
     RewardsSource public rewardsSource;
 
+
     // 2. Staking and Lockup Storage
 
     uint256 constant YEAR_BASE = 18e17;
@@ -47,12 +48,13 @@ contract OgvStaking is ERC20Votes {
 
     // 1. Core Functions
 
-    constructor(address ogv_, uint256 epoch_)
+    constructor(address ogv_, uint256 epoch_, address rewardsSource_)
         ERC20("", "")
         ERC20Permit("OGV Staking")
     {
         ogv = ERC20(ogv_);
         epoch = epoch_;
+        rewardsSource = RewardsSource(rewardsSource_);
     }
 
     function name() public pure override returns (string memory) {
@@ -79,11 +81,6 @@ contract OgvStaking is ERC20Votes {
         revert("Staking: Transfers disabled");
     }
 
-    function setRewardsSource(address temp_fix_me_) external {
-        // TODO: TEMP Add governance check
-        rewardsSource = RewardsSource(temp_fix_me_);
-    }
-
     // 2. Staking and Lockup Functions
 
     function stake(
@@ -92,7 +89,7 @@ contract OgvStaking is ERC20Votes {
         address to
     ) external {
         if (to == address(0)) {
-            to = msg.sender;
+            to == msg.sender;
         }
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
@@ -116,13 +113,15 @@ contract OgvStaking is ERC20Votes {
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
 
-    function unstake(uint256 lockupId) external {
+    function unstake(uint256 lockupId, bool noRewards) external {
         Lockup memory lockup = lockups[msg.sender][lockupId];
         uint256 amount = lockup.amount;
         uint256 end = lockup.end;
         uint256 points = lockup.points;
         require(block.timestamp >= end, "Staking: End of lockup not reached");
-        _collectRewards(msg.sender);
+        if(!noRewards){
+            _collectRewards(msg.sender);    
+        }
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
         ogv.transfer(msg.sender, amount);
@@ -168,7 +167,7 @@ contract OgvStaking is ERC20Votes {
 
     function previewRewards(address user) external view returns (uint256) {
         uint256 supply = totalSupply();
-        if (supply == 0) {
+        if (supply == 0 ) {
             return 0;
         }
         uint256 newRewards = rewardsSource.previewRewards();
@@ -185,7 +184,7 @@ contract OgvStaking is ERC20Votes {
 
     function _collectRewards(address user) internal {
         uint256 supply = totalSupply();
-        if (supply == 0) {
+        if (supply == 0 ) {
             return;
         }
         uint256 newRewards = rewardsSource.collectRewards();
