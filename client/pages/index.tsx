@@ -10,6 +10,7 @@ import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
 import Card from "components/Card";
 import CardGroup from "components/CardGroup";
+import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 
@@ -117,7 +118,7 @@ const Home: NextPage = ({
   }, [contracts, networkInfo.correct]);
 
   return (
-    <div>
+    <Wrapper narrow>
       <PageTitle>Overview</PageTitle>
       <CardGroup>
         <VoteStats
@@ -138,7 +139,7 @@ const Home: NextPage = ({
           <LeaderboardTable voters={voters} />
         </Card>
       </CardGroup>
-    </div>
+    </Wrapper>
   );
 };
 

@@ -1,12 +1,13 @@
 import { FunctionComponent } from "react";
 import { SectionTitle } from "components/SectionTitle";
+import Card from "components/Card";
 
 interface ExplanationProps {}
 
 const Explanation: FunctionComponent<ExplanationProps> = () => (
-  <div>
+  <Card>
     <SectionTitle>Explanation</SectionTitle>
-  </div>
+  </Card>
 );
 
 export default Explanation;

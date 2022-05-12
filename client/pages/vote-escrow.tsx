@@ -16,6 +16,7 @@ import useAccountBalances from "utils/useAccountBalances";
 import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import RangeInput from "components/vote-escrow/RangeInput";
+import Wrapper from "components/Wrapper";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -176,7 +177,7 @@ export default function VoteEscrow({
   };
 
   return (
-    <>
+    <Wrapper narrow>
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
         <CardGroup horizontal fourCol>
@@ -463,6 +464,6 @@ export default function VoteEscrow({
           totalTokensLockedUp={totalTokensLockedUp}
         />
       </CardGroup>
-    </>
+    </Wrapper>
   );
 }

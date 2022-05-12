@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { NextPage } from "next";
 import Card from "components/Card";
+import Wrapper from "components/Wrapper";
 import StepTracker from "components/StepTracker";
 import StepControls from "components/StepControls";
 import Explanation from "components/claim/Explanation";
@@ -23,18 +24,22 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
 
   return (
     <div className="space-y-6">
-      <StepTracker currentStep={currentStep} steps={steps} />
-      <Card>
+      <Wrapper narrow>
+        <StepTracker currentStep={currentStep} steps={steps} />
+      </Wrapper>
+      <Wrapper narrow={currentStep !== 2}>
         {currentStep == 0 && <Explanation />}
         {currentStep == 1 && <Eligibility />}
         {currentStep == 2 && <Claim />}
-      </Card>
-      <StepControls
-        currentStep={currentStep}
-        stepControlsLabels={stepControlsLabels}
-        handleNextStep={handleNextStep}
-        handlePrevStep={handlePrevStep}
-      />
+        <div className="mt-5">
+          <StepControls
+            currentStep={currentStep}
+            stepControlsLabels={stepControlsLabels}
+            handleNextStep={handleNextStep}
+            handlePrevStep={handlePrevStep}
+          />
+        </div>
+      </Wrapper>
     </div>
   );
 };

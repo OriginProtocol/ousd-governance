@@ -14,7 +14,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
   const isEligible = true; // @TODO replace with real check
 
   return (
-    <div>
+    <Card>
       <div className="space-y-4">
         {!web3Provider ? (
           <>
@@ -138,7 +138,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 };
 
