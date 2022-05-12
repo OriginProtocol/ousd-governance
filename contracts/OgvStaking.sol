@@ -3,8 +3,7 @@ import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/to
 import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
-import { RewardsSource } from "./RewardsSource.sol";
-
+import {RewardsSource} from "./RewardsSource.sol";
 
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
@@ -12,7 +11,6 @@ contract OgvStaking is ERC20Votes {
     ERC20 public immutable ogv;
     uint256 public immutable epoch;
     RewardsSource public rewardsSource;
-
 
     // 2. Staking and Lockup Storage
 
@@ -70,7 +68,7 @@ contract OgvStaking is ERC20Votes {
         override
         returns (bool)
     {
-        revert();
+        revert("Staking: Transfers disabled");
     }
 
     function transferFrom(
@@ -78,14 +76,13 @@ contract OgvStaking is ERC20Votes {
         address to,
         uint256 amount
     ) public override returns (bool) {
-        revert();
+        revert("Staking: Transfers disabled");
     }
 
-
-   function setRewardsSource(address temp_fix_me_) external {
-   	 // TODO: TEMP Add governance check
-   	 rewardsSource = RewardsSource(temp_fix_me_);
-   }
+    function setRewardsSource(address temp_fix_me_) external {
+        // TODO: TEMP Add governance check
+        rewardsSource = RewardsSource(temp_fix_me_);
+    }
 
     // 2. Staking and Lockup Functions
 
@@ -169,10 +166,10 @@ contract OgvStaking is ERC20Votes {
     // 3. Reward functions
 
     function previewRewards(address user) external view returns (uint256) {
-    	uint256 supply = totalSupply();
-    	if(supply == 0 ){
-    		return 0;
-    	}
+        uint256 supply = totalSupply();
+        if (supply == 0) {
+            return 0;
+        }
         uint256 newRewards = rewardsSource.previewRewards();
         uint256 _accRewardPerShare = accRewardPerShare;
         _accRewardPerShare += (newRewards * 1e12) / supply;
@@ -186,10 +183,10 @@ contract OgvStaking is ERC20Votes {
     }
 
     function _collectRewards(address user) internal {
-    	uint256 supply = totalSupply();
-    	if(supply == 0 ){
-    		return;
-    	}
+        uint256 supply = totalSupply();
+        if (supply == 0) {
+            return;
+        }
         uint256 newRewards = rewardsSource.collectRewards();
         accRewardPerShare += (newRewards * 1e12) / totalSupply();
 
@@ -204,6 +201,4 @@ contract OgvStaking is ERC20Votes {
         ogv.transfer(user, reward);
         emit Reward(user, reward);
     }
-
-
 }

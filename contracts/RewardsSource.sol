@@ -1,9 +1,8 @@
 pragma solidity 0.8.10;
-import { ERC20Votes } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import { ERC20Permit } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import { ERC20 } from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
-import { PRBMathUD60x18 } from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
-
+import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
+import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 
 contract RewardsSource {
     // 1. Core Storage
@@ -18,9 +17,13 @@ contract RewardsSource {
     uint256 public lastRewardTime;
     uint256[] public rewardMonths;
 
-    constructor(address ogv_, uint256 epoch_, address rewardsTarget_){
-        require(ogv_!=address(0));
-        require(rewardsTarget_!=address(0));
+    constructor(
+        address ogv_,
+        uint256 epoch_,
+        address rewardsTarget_
+    ) {
+        require(ogv_ != address(0));
+        require(rewardsTarget_ != address(0));
         ogv = ERC20(ogv_);
         epoch = epoch_;
         rewardsTarget = rewardsTarget_;
@@ -28,7 +31,7 @@ contract RewardsSource {
 
     function collectRewards() external returns (uint256) {
         require(msg.sender == rewardsTarget, "Not rewardsTarget");
-        if(block.timestamp <= lastRewardTime){
+        if (block.timestamp <= lastRewardTime) {
             return 0;
         }
         uint256 amount = _calcRewards();
@@ -42,7 +45,7 @@ contract RewardsSource {
     }
 
     function _calcRewards() internal view returns (uint256) {
-        if(block.timestamp <= lastRewardTime){
+        if (block.timestamp <= lastRewardTime) {
             return 0;
         }
         return rewardsBetween(lastRewardTime, block.timestamp);
