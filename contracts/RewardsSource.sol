@@ -11,34 +11,31 @@ interface Mintable {
 
 contract RewardsSource is Governable {
     ERC20 public immutable ogv;
-    uint256 public immutable epoch;
-    address public rewardsTarget;
+    address public rewardsTarget; // Contract that receives rewards
+    uint256 public lastRewardTime; // Start of the time to calculate rewards over
+    uint256 private currentSlopeIndex = 0; // Allows us to start with the correct slope
 
-    uint256 public lastRewardTime;
-    uint256[] public rewardMonths;
-    uint256 private currentKneeIndex = 0;
-
-    struct Knee {
+    struct Slope {
         uint64 start; // uint64 = billions and billions of years
-        uint64 end; // Internal use only. By duplicating the start of the next knee, we can save a slot read
+        uint64 end; // Internal use only. By duplicating the start of the next slope, we can save a slot read
         uint128 ratePerDay;
     }
-    Knee[] public inflationKnees;
+    Slope[] public inflationSlopes;
 
     uint256 constant MAX_KNEES = 48;
     uint256 constant MAX_INFLATION_PER_DAY = (5 * 1e6 * 1e18);
 
-    constructor(address ogv_, uint256 epoch_){
-        require(ogv_!=address(0), "OGV must be set");
+    constructor(address ogv_){
+        require(ogv_!=address(0), "Rewards: OGV must be set");
         ogv = ERC20(ogv_);
-        epoch = epoch_;
+        lastRewardTime = block.timestamp; // No possible rewards from before contract deployed
     }
 
     function collectRewards() external returns (uint256) {
-        require(msg.sender == rewardsTarget, "Not rewardsTarget");
+        require(msg.sender == rewardsTarget, "Rewards: Not rewardsTarget");
         if(block.timestamp <= lastRewardTime){ return 0; }
-        (uint256 rewards, uint256 _nextKneeIndex) = _calcRewards();
-        if(_nextKneeIndex != 0){ currentKneeIndex = _nextKneeIndex; }
+        (uint256 rewards, uint256 _nextSlopeIndex) = _calcRewards();
+        if(_nextSlopeIndex != 0){ currentSlopeIndex = _nextSlopeIndex; }
         lastRewardTime = block.timestamp;
         Mintable(address(ogv)).mintTo(rewardsTarget, rewards);
         return rewards;
@@ -51,47 +48,46 @@ contract RewardsSource is Governable {
 
     function _calcRewards() internal view returns (uint256, uint256) {
         uint256 last = lastRewardTime;
-        if(last == 0) { return (0, currentKneeIndex); }
-        if(last >= block.timestamp){ return (0, currentKneeIndex); }
-        if(inflationKnees.length == 0 ){ return (0, currentKneeIndex); }
+        if(last >= block.timestamp){ return (0, currentSlopeIndex); }
+        if(inflationSlopes.length == 0 ){ return (0, 0); } // Save a slot read by returning a zero constant
         uint256 total = 0;
-        uint256 nextKneeIndex = 0;
-        uint256 _currentKneeIndex = currentKneeIndex;
+        uint256 nextSlopeIndex = 0; // Zero means no change
+        uint256 _currentSlopeIndex = currentSlopeIndex;
         uint256 i;
-        for(i = _currentKneeIndex; i < inflationKnees.length; i++){
-            Knee memory knee = inflationKnees[i];
-            uint256 slopeStart = knee.start;
-            uint256 slopeEnd = knee.end;
+        for(i = _currentSlopeIndex; i < inflationSlopes.length; i++){
+            Slope memory slope = inflationSlopes[i];
+            uint256 slopeStart = slope.start;
+            uint256 slopeEnd = slope.end;
             uint256 rangeStart = last;
             uint256 rangeEnd = block.timestamp;
-            if(rangeStart > slopeEnd){ continue; } // no slope overlap possible
-            if(rangeEnd < slopeStart){ continue; } // no slope overlap possible
-            if(rangeStart < slopeStart){ rangeStart = slopeStart; }
-            if(rangeEnd > slopeEnd){ rangeEnd = slopeEnd; }
+            if(rangeStart > slopeEnd){ continue; } // no duration possible in this slope
+            if(rangeEnd < slopeStart){ continue; } // no duration possible in this slope
+            if(rangeStart < slopeStart){ rangeStart = slopeStart; } // trim to slope edge
+            if(rangeEnd > slopeEnd){ rangeEnd = slopeEnd; } // trim to slope edge
             uint256 duration = rangeEnd - rangeStart;
-            total += duration * knee.ratePerDay / 1 days;
-            if(i > _currentKneeIndex && duration > 0){ 
-                nextKneeIndex = i; // We have moved into a new slope
+            total += duration * slope.ratePerDay / 1 days;
+            if(i > _currentSlopeIndex && duration > 0){ 
+                nextSlopeIndex = i; // We have moved into a new slope
             }
             if(slopeEnd < rangeEnd){ break; } // No future slope could match
         }
-        return (total, nextKneeIndex);
+        return (total, nextSlopeIndex);
     }
 
-    function setInflation(Knee[] memory knees) external onlyGovernor { // slope ends intentionaly are overwritten
-        require(knees.length <= MAX_KNEES, "Too many knees");
-        delete inflationKnees;
-        currentKneeIndex = 0;
-        uint256 minKneeStart = 0;
-        if(knees.length == 0){ return; }
-        knees[knees.length - 1].end = type(uint64).max;
-        for(uint256 i = 0; i < knees.length; i++){
-            require(knees[i].ratePerDay <= MAX_INFLATION_PER_DAY, "ratePerDay too high");
-            if(i < knees.length - 1){
-                require(knees[i].start > minKneeStart, "start times must increase");
-                knees[i].end = knees[i+1].start;
+    function setInflation(Slope[] memory slopes) external onlyGovernor { // slope ends intentionally are overwritten
+        require(slopes.length <= MAX_KNEES, "Rewards: Too many slopes");
+        delete inflationSlopes; // Delete all before rebuilding
+        currentSlopeIndex = 0; // Reset
+        uint256 minSlopeStart = 0;
+        if(slopes.length == 0){ return; }
+        slopes[slopes.length - 1].end = type(uint64).max;
+        for(uint256 i = 0; i < slopes.length; i++){
+            require(slopes[i].ratePerDay <= MAX_INFLATION_PER_DAY, "Rewards: RatePerDay too high");
+            require(slopes[i].start > minSlopeStart, "Rewards: Start times must increase");
+            if(i < slopes.length - 1){
+                slopes[i].end = slopes[i+1].start;
             }
-            inflationKnees.push(knees[i]);
+            inflationSlopes.push(slopes[i]);
         }
     }
 
