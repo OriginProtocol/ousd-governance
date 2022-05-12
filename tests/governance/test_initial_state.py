@@ -20,11 +20,11 @@ def test_voting_period(governance):
 
 
 def test_quorum(governance, web3):
-    assert governance.quorum(web3.eth.block_number) == 0
+    assert governance.quorum(web3.eth.block_number - 1) == 0
 
 
 def test_voting_power(governance, web3):
-    assert governance.getVotes(accounts[0], web3.eth.block_number) == 0
+    assert governance.getVotes(accounts[0], web3.eth.block_number - 1) == 0
 
 
 def test_timelock_min_delay(timelock_controller):
