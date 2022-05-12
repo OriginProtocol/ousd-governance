@@ -95,7 +95,7 @@ contract OgvStaking is ERC20Votes {
         address to
     ) external {
         if (to == address(0)) {
-            to == msg.sender;
+            to = msg.sender;
         }
         require(amount <= type(uint128).max, "Staking: Too much");
         // duration checked inside previewPoints
