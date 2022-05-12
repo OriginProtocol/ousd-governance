@@ -34,3 +34,14 @@ model Listener {
 
     @@map("listener")
 }
+
+model Lockup {
+  id       Int @default(autoincrement()) @id
+  address  String
+  amount   String
+  end      String
+  weeks    Int
+  active   Boolean @default(true)
+
+  @@map("lockups")
+}

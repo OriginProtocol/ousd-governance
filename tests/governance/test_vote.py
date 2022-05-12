@@ -37,6 +37,24 @@ def test_cant_create_proposal_if_below_threshold(governance):
             {"from": accounts[0]}
         )
 
+def test_can_cancel_proposal(governance, staking, token):
+    alice = accounts[0]
+    amount = 1000 * 10 ** 18
+    token.approve(staking.address, amount * 10, {"from": alice})
+    staking.stake(amount, WEEK, alice, {"from": alice})
+    # Self delegate
+    staking.delegate(alice, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    chain.mine()
+    governance.cancel(tx.return_value, { "from": alice })
+    assert governance.state(tx.return_value) == 2
 
 def test_proposal_can_pass_vote(governance, staking, token, timelock_controller, web3):
     alice = accounts[0]
@@ -228,4 +246,3 @@ def test_timelock_proposal_can_not_be_cancelled_after_is_executed(governance, st
     # can not cancel executed proposal
     with brownie.reverts("Governor: proposal not active"):
         governance.cancel(tx.return_value)
-

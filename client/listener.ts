@@ -42,7 +42,7 @@ const contracts = [
     name: "VoteLockerCurve",
     address: GovernanceContracts.VoteLockerCurve.address,
     abi: GovernanceContracts.VoteLockerCurve.abi,
-    events: ["LockupCreated"],
+    events: ["LockupCreated", "LockupUpdated"],
   },
 ];
 
@@ -62,6 +62,7 @@ const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
 const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
+    const now = event.timestamp;
     if (event.name == "ProposalCreated") {
       try {
         await prisma.proposal.create({
@@ -73,6 +74,43 @@ const handleEvents = async (blockNumber, events, done) => {
         logger.info("Inserted new proposal");
       } catch (e) {
         // Likely duplicate
+      }
+    } else if(event.name === "LockupCreated") {
+      try {
+        await prisma.lockup.create({
+          data: {
+            address: event.values.provider,
+            amount: event.values.amount,
+            end: event.values.end,
+            weeks: Math.round((event.values.end - now) / 604800),
+          },
+        });
+        logger.info("Inserted new lockup");
+      } catch (e) {
+        // Likely duplicate
+      }
+    } else if(event.name === "LockupUpdated") {
+      try {
+        await prisma.lockup.updateMany({
+          where: {
+            address: event.values.provider,
+          },
+          data: {
+            active: false,
+          }
+        });
+        logger.info("Updated existing lockup(s)");
+        await prisma.lockup.create({
+          data: {
+            address: event.values.provider,
+            amount: event.values.amount,
+            end: event.values.end,
+            weeks: Math.round((event.values.end - now) / 604800),
+          },
+        });
+        logger.info("Inserted new lockup");
+      } catch (e) {
+        // Likely not found
       }
     } else {
       try {
