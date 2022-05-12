@@ -13,6 +13,10 @@ def staking(token):
     return run("deploy_staking", "main", (token.address, DAY))
 
 @pytest.fixture
+def rewards(token, staking):
+    return run("deploy_rewards", "main", (token.address, DAY, staking.address))
+
+@pytest.fixture
 def timelock_controller():
     return accounts[0].deploy(Timelock, [accounts[0]], [accounts[0]])
 
