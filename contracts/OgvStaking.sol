@@ -100,6 +100,7 @@ contract OgvStaking is ERC20Votes {
             })
         );
         _mint(to, points);
+        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
         ogv.transferFrom(msg.sender, address(this), amount);
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
@@ -115,6 +116,7 @@ contract OgvStaking is ERC20Votes {
         }
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
+        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
         ogv.transfer(msg.sender, amount);
         emit Unstake(msg.sender, lockupId, amount, end, points);
     }
@@ -131,6 +133,7 @@ contract OgvStaking is ERC20Votes {
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
         _mint(msg.sender, newPoints - oldPoints);
+        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
         emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
         emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
     }
@@ -165,6 +168,7 @@ contract OgvStaking is ERC20Votes {
 
     function collectRewards() external {
         _collectRewards(msg.sender);
+        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
     }
 
     function _collectRewards(address user) internal {
@@ -179,8 +183,6 @@ contract OgvStaking is ERC20Votes {
         }
         uint256 grossReward = (balance * accRewardPerShare) / 1e12;
         uint256 netReward = grossReward - rewardDebt[user];
-        rewardDebt[user] = grossReward;
         ogv.transfer(user, netReward);
         emit Reward(user, netReward);
     }
-}
