@@ -7,14 +7,10 @@ import {RewardsSource} from "./RewardsSource.sol";
 
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
-
-    ERC20 public immutable ogv;
     uint256 public immutable epoch;
-    RewardsSource public rewardsSource;
 
 
     // 2. Staking and Lockup Storage
-
     uint256 constant YEAR_BASE = 18e17;
     struct Lockup {
         uint128 amount;
@@ -24,8 +20,8 @@ contract OgvStaking is ERC20Votes {
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
-
-    uint256 constant MAX_REWARDS_UPDATE = 24 * 30 days;
+    ERC20 public immutable ogv;
+    RewardsSource public rewardsSource;
     mapping(address => uint256) public rewardDebt;
     uint256 public accRewardPerShare; // As of the start of the block
 
@@ -47,7 +43,7 @@ contract OgvStaking is ERC20Votes {
     event Reward(address indexed user, uint256 amount);
 
     // 1. Core Functions
-
+    
     constructor(address ogv_, uint256 epoch_, address rewardsSource_)
         ERC20("", "")
         ERC20Permit("OGV Staking")
@@ -65,7 +61,7 @@ contract OgvStaking is ERC20Votes {
         return "Staked OGV";
     }
 
-    function transfer(address to, uint256 amount)
+    function transfer(address, uint256)
         public
         override
         returns (bool)
@@ -74,10 +70,9 @@ contract OgvStaking is ERC20Votes {
     }
 
     function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public override returns (bool) {
+        address, address,uint256
+    ) public override returns (bool)
+    {
         revert("Staking: Transfers disabled");
     }
 
@@ -100,6 +95,7 @@ contract OgvStaking is ERC20Votes {
         }
         uint128 end = uint128(start + duration);
         uint256 points = previewPoints(amount, duration);
+        require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
         _collectRewards(to);
         lockups[to].push(
             Lockup({
@@ -141,7 +137,6 @@ contract OgvStaking is ERC20Votes {
         uint256 newEnd = start + duration;
         require(newEnd > oldEnd, "New lockup must be longer");
         uint256 newPoints = previewPoints(oldAmount, duration);
-        require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
