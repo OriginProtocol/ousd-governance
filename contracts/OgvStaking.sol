@@ -174,17 +174,17 @@ contract OgvStaking is ERC20Votes {
             return;
         }
         uint256 newRewards = rewardsSource.collectRewards();
-        accRewardPerShare += (newRewards * 1e12) / totalSupply();
+        accRewardPerShare += (newRewards * 1e12) / supply;
 
         uint256 balance = balanceOf(user);
         if (balance == 0) {
             return;
         }
-        uint256 preReward = (balance * accRewardPerShare) / 1e12;
-        uint256 reward = preReward - rewardDebt[user];
+        uint256 grossReward = (balance * accRewardPerShare) / 1e12;
+        uint256 netReward = grossReward - rewardDebt[user];
 
-        rewardDebt[user] = preReward;
-        ogv.transfer(user, reward);
-        emit Reward(user, reward);
+        rewardDebt[user] = grossReward;
+        ogv.transfer(user, netReward);
+        emit Reward(user, netReward);
     }
 }
