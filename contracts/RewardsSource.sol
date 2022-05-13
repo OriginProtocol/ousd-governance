@@ -37,7 +37,7 @@ contract RewardsSource is Governable {
         (uint256 rewards, uint256 _nextSlopeIndex) = _calcRewards();
         if(_nextSlopeIndex != 0){ currentSlopeIndex = _nextSlopeIndex; }
         lastRewardTime = block.timestamp;
-        Mintable(address(ogv)).mintTo(rewardsTarget, rewards);
+        Mintable(address(ogv)).mint(rewardsTarget, rewards);
         return rewards;
     }
 
@@ -64,9 +64,8 @@ contract RewardsSource is Governable {
             if(rangeEnd < slopeStart){ continue; } // no duration possible in this slope
             if(rangeStart < slopeStart){ rangeStart = slopeStart; } // trim to slope edge
             if(rangeEnd > slopeEnd){ rangeEnd = slopeEnd; } // trim to slope edge
-            uint256 duration = rangeEnd - rangeStart;
-            total += duration * slope.ratePerDay / 1 days;
-            if(i > _currentSlopeIndex && duration > 0){ 
+            total += (rangeEnd - rangeStart) * slope.ratePerDay / 1 days;
+            if(i > _currentSlopeIndex){ 
                 nextSlopeIndex = i; // We have moved into a new slope
             }
             if(slopeEnd < rangeEnd){ break; } // No future slope could match
