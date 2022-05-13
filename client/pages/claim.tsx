@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { NextPage } from "next";
-import Card from "components/Card";
 import Wrapper from "components/Wrapper";
 import StepTracker from "components/StepTracker";
 import StepControls from "components/StepControls";
