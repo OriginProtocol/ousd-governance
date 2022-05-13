@@ -53,6 +53,7 @@ if (typeof window !== "undefined") {
     cacheProvider: true,
     providerOptions,
   });
+  useStore.setState({web3Modal});
 }
 
 interface Web3ButtonProps {

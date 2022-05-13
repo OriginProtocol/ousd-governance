@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useCallback } from "react";
 import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
@@ -10,8 +10,22 @@ import TokenIcon from "components/TokenIcon";
 interface EligibilityProps {}
 
 const Eligibility: FunctionComponent<EligibilityProps> = () => {
-  const { web3Provider, address } = useStore();
+  const { provider, web3Provider, address, web3Modal } = useStore();
   const isEligible = true; // @TODO replace with real check
+  
+
+  const resetWeb3State = useStore((state) => state.reset);
+
+  const handleDisconnect = useCallback(
+    async function () {
+      await web3Modal.clearCachedProvider();
+      if (provider?.disconnect && typeof provider.disconnect === "function") {
+        await provider.disconnect();
+      }
+      resetWeb3State();
+    },
+    [provider, resetWeb3State]
+  );
 
   return (
     <Card>
@@ -64,6 +78,12 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
                 </p>
               </>
             )}
+            <button
+              className="text-sm text-gray-500 underline ml-auto"
+              onClick={handleDisconnect}
+            >
+              Disconnect to check another address
+            </button>
           </>
         )}
         <table className="table w-full">
