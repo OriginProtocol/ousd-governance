@@ -8,7 +8,8 @@ const Explanation: FunctionComponent<ExplanationProps> = () => (
   <Card>
     <SectionTitle>Explanation</SectionTitle>
     <p className="text-sm text-gray-600">
-      Here&apos;s what OGV is, why you can claim it and what you can do with it...
+      Here&apos;s what OGV is, why you can claim it and what you can do with
+      it...
     </p>
   </Card>
 );

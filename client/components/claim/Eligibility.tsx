@@ -12,7 +12,6 @@ interface EligibilityProps {}
 const Eligibility: FunctionComponent<EligibilityProps> = () => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const isEligible = true; // @TODO replace with real check
-  
 
   const resetWeb3State = useStore((state) => state.reset);
 
@@ -24,7 +23,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
       }
       resetWeb3State();
     },
-    [provider, resetWeb3State]
+    [web3Modal, provider, resetWeb3State]
   );
 
   return (

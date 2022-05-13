@@ -1,5 +1,6 @@
 import { FunctionComponent } from "react";
 import { SectionTitle } from "components/SectionTitle";
+import Wrapper from "components/Wrapper";
 import Card from "components/Card";
 import CardGroup from "components/CardGroup";
 import CardLabel from "components/CardLabel";
@@ -8,11 +9,39 @@ import RangeInput from "components/vote-escrow/RangeInput";
 import Button from "components/Button";
 import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
+import { Web3Button } from "components/Web3Button";
 
 interface ClaimProps {}
 
 const Claim: FunctionComponent<ClaimProps> = () => {
   const { web3Provider, address } = useStore();
+  const isEligible = true; // @TODO replace with real check
+
+  if (!web3Provider) {
+    return (
+      <Wrapper narrow>
+        <Card>
+          <SectionTitle>Please connect your wallet to claim</SectionTitle>
+          <Web3Button inPage />
+        </Card>
+      </Wrapper>
+    );
+  }
+
+  if (!isEligible) {
+    return (
+      <Wrapper narrow>
+        <Card>
+          <SectionTitle>
+            Unfortunately, you&apos;re not eligible to claim.
+          </SectionTitle>
+          <p className="text-sm text-gray-600">
+            Try connecting another wallet.
+          </p>
+        </Card>
+      </Wrapper>
+    );
+  }
 
   return (
     <div className="grid lg:grid-cols-12 gap-5 lg:gap-4">
