@@ -1,6 +1,6 @@
 import brownie
 from brownie import chain, accounts
-from ..fixtures import token, staking
+from ..fixtures import token, staking, rewards
 
 def test_cant_stake_above_max(staking, token):
     token.approve(staking, 100e18)
