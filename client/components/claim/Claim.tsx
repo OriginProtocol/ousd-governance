@@ -48,7 +48,18 @@ const Claim: FunctionComponent<ClaimProps> = () => {
     <div className="grid lg:grid-cols-12 gap-5 lg:gap-4">
       <div className="lg:col-span-3 order-2 lg:order-1">
         <Card tightPadding alt>
-          <SectionTitle>Your current lockups</SectionTitle>
+          <SectionTitle>Benefits of locking OGV</SectionTitle>
+          <ol className="space-y-2 list-decimal list-inside text-sm text-gray-600">
+            <li>
+              Here&apos;s a benefit of locking the OGV that you claim straight
+              away
+            </li>
+            <li>
+              And here&apos;s another one that would be useful to show the user
+              at this phase
+            </li>
+            <li>This is a short, but important benefit</li>
+          </ol>
         </Card>
       </div>
       <div className="lg:col-span-6 order-1 lg:order-2">
@@ -106,12 +117,15 @@ const Claim: FunctionComponent<ClaimProps> = () => {
                     </span>
                     <div className="flex space-x-2 font-bold text-2xl text-gray-800">
                       <div className="flex items-center space-x-1">
-                        <span>100 veOGV</span>
+                        <span>50 veOGV</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </Card>
+              <p className="text-sm text-gray-600">
+                Your veOGV gives X voting power for...
+              </p>
               <Button large>Claim</Button>
             </div>
           </div>
