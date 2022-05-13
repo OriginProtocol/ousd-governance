@@ -111,6 +111,7 @@ contract OgvStaking is ERC20Votes {
         uint256 end = lockup.end;
         uint256 points = lockup.points;
         require(block.timestamp >= end, "Staking: End of lockup not reached");
+        require(end != 0, "Staking: Already unstaked this lockup");
         if(!noRewards){
             _collectRewards(msg.sender);    
         }
