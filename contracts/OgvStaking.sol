@@ -84,7 +84,7 @@ contract OgvStaking is ERC20Votes {
         address to
     ) external {
         if (to == address(0)) {
-            to == msg.sender;
+            to = msg.sender;
         }
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
@@ -100,8 +100,8 @@ contract OgvStaking is ERC20Votes {
             })
         );
         _mint(to, points);
-        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
-        ogv.transferFrom(msg.sender, address(this), amount);
+        rewardDebt[to] = (balanceOf(to) * accRewardPerShare) / 1e12;
+        ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
 
