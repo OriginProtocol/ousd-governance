@@ -56,8 +56,8 @@ contract RewardsSource is Governable {
             return (0, currentSlopeIndex);
         }
         if (inflationSlopes.length == 0) {
-            return (0, 0);
-        } // Save a slot read by returning a zero constant
+            return (0, 0); // Save a slot read by returning a zero constant
+        } 
         uint256 total = 0;
         uint256 nextSlopeIndex = 0; // Zero means no change
         uint256 _currentSlopeIndex = currentSlopeIndex;
@@ -69,25 +69,25 @@ contract RewardsSource is Governable {
             uint256 rangeStart = last;
             uint256 rangeEnd = block.timestamp;
             if (rangeStart > slopeEnd) {
-                continue;
-            } // no duration possible in this slope
+                continue; // no duration possible in this slope
+            } 
             if (rangeEnd < slopeStart) {
-                continue;
-            } // no duration possible in this slope
+                continue; // no duration possible in this slope
+            } 
             if (rangeStart < slopeStart) {
-                rangeStart = slopeStart;
-            } // trim to slope edge
+                rangeStart = slopeStart; // trim to slope edge
+            } 
             if (rangeEnd > slopeEnd) {
-                rangeEnd = slopeEnd;
-            } // trim to slope edge
+                rangeEnd = slopeEnd; // trim to slope edge
+            } 
             uint256 duration = rangeEnd - rangeStart;
             total += (duration * slope.ratePerDay) / 1 days;
             if (i > _currentSlopeIndex && duration > 0) {
                 nextSlopeIndex = i; // We have moved into a new slope
             }
             if (slopeEnd < rangeEnd) {
-                break;
-            } // No future slope could match
+                break; // No future slope could match
+            } 
         }
         return (total, nextSlopeIndex);
     }
