@@ -167,8 +167,8 @@ contract OgvStaking is ERC20Votes {
         uint256 _accRewardPerShare = accRewardPerShare;
         _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
         uint256 balance = balanceOf(user);
-        uint256 preReward = (balance * _accRewardPerShare) / 1e12;
-        return preReward - rewardDebt[user];
+        uint256 grossReward = (balance * _accRewardPerShare) / 1e12;
+        return grossReward - rewardDebt[user];
     }
 
     function _collectRewards(address user) internal {
