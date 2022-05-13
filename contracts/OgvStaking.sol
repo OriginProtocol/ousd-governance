@@ -154,11 +154,10 @@ contract OgvStaking is ERC20Votes {
     function previewRewards(address user) external view returns (uint256) {
         uint256 supply = totalSupply();
         if (supply == 0 ) {
-            return 0;
+            return 0; // No one has any points to even get rewards
         }
-        uint256 newRewards = rewardsSource.previewRewards();
         uint256 _accRewardPerShare = accRewardPerShare;
-        _accRewardPerShare += (newRewards * 1e12) / supply;
+        _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
         uint256 balance = balanceOf(user);
         uint256 preReward = (balance * _accRewardPerShare) / 1e12;
         return preReward - rewardDebt[user];
@@ -171,18 +170,15 @@ contract OgvStaking is ERC20Votes {
     function _collectRewards(address user) internal {
         uint256 supply = totalSupply();
         if (supply == 0 ) {
-            return;
+            return; // Increasing accRewardPerShare would be meaningless. 
         }
-        uint256 newRewards = rewardsSource.collectRewards();
-        accRewardPerShare += (newRewards * 1e12) / supply;
-
+        accRewardPerShare += (rewardsSource.collectRewards() * 1e12) / supply;
         uint256 balance = balanceOf(user);
         if (balance == 0) {
-            return;
+            return; // Do NOT move this check before `accRewardPerShare +=`
         }
         uint256 grossReward = (balance * accRewardPerShare) / 1e12;
         uint256 netReward = grossReward - rewardDebt[user];
-
         rewardDebt[user] = grossReward;
         ogv.transfer(user, netReward);
         emit Reward(user, netReward);
