@@ -72,13 +72,29 @@ const Claim: FunctionComponent<ClaimProps> = () => {
               <p className="text-sm text-gray-600">
                 If you lockup your OGV, you&apos;ll be rewarded with...
               </p>
-              <RangeInput
-                label="Lockup length"
-                counterUnit="weeks"
-                min="0"
-                max="208"
-                value="0"
-              />
+              <div>
+                <RangeInput
+                  label="Lockup length"
+                  counterUnit="weeks"
+                  min="0"
+                  max="208"
+                  value="208"
+                />
+                <ul className="w-full flex space-x-3 text-sm text-gray-500 justify-end">
+                  <li>
+                    <button className="underline">1 year</button>
+                  </li>
+                  <li>
+                    <button className="underline">2 years</button>
+                  </li>
+                  <li>
+                    <button className="underline">3 years</button>
+                  </li>
+                  <li>
+                    <button className="underline">4 years</button>
+                  </li>
+                </ul>
+              </div>
               <Button large>Claim and lock</Button>
             </div>
             <div className="space-y-4 pt-6">
