@@ -3,22 +3,27 @@ from brownie import *
 from pathlib import Path
 from .helpers import DAY
 
+
 @pytest.fixture
 def token():
     accounts.default = accounts[0]
     return run("deploy_token")
 
+
 @pytest.fixture
 def rewards(token):
     return run("deploy_rewards", "main", (token.address,))
+
 
 @pytest.fixture
 def staking(token, rewards):
     return run("deploy_staking", "main", (token.address, DAY, rewards.address))
 
+
 @pytest.fixture
 def timelock_controller():
     return accounts[0].deploy(Timelock, [accounts[0]], [accounts[0]])
+
 
 @pytest.fixture
 def governance(staking, timelock_controller, web3):
