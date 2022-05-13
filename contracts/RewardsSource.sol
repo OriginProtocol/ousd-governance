@@ -6,7 +6,7 @@ import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.
 import {Governable} from "./Governable.sol";
 
 interface Mintable {
-    function mintTo(address to, uint256 amount) external;
+    function mint(address to, uint256 amount) external;
 }
 
 contract RewardsSource is Governable {
