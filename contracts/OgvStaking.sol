@@ -89,18 +89,13 @@ contract OgvStaking is ERC20Votes {
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
         // duration checked inside previewPoints
-        uint256 start = block.timestamp;
-        if (start < epoch) {
-            start = epoch;
-        }
-        uint128 end = uint128(start + duration);
-        uint256 points = previewPoints(amount, duration);
+        (uint256 points, uint256 end) = previewPoints(amount, duration);
         require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
         _collectRewards(to);
         lockups[to].push(
             Lockup({
                 amount: uint128(amount), // max checked in require above
-                end: end,
+                end: uint128(end),
                 points: points
             })
         );
@@ -130,13 +125,8 @@ contract OgvStaking is ERC20Votes {
         uint256 oldAmount = lockup.amount;
         uint256 oldEnd = lockup.end;
         uint256 oldPoints = lockup.points;
-        uint256 start = block.timestamp;
-        if (start < epoch) {
-            start = epoch;
-        }
-        uint256 newEnd = start + duration;
+        (uint256 newPoints, uint256 newEnd) = previewPoints(oldAmount, duration);
         require(newEnd > oldEnd, "New lockup must be longer");
-        uint256 newPoints = previewPoints(oldAmount, duration);
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
@@ -148,14 +138,15 @@ contract OgvStaking is ERC20Votes {
     function previewPoints(uint256 amount, uint256 duration)
         public
         view
-        returns (uint256)
+        returns (uint256, uint256)
     {
         require(duration >= 7 days, "Staking: Too short");
         require(duration <= 1461 days, "Staking: Too long");
         uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
-        uint256 endYearpoc = ((start + duration - epoch) * 1e18) / 360 days;
+        uint256 end = start + duration;
+        uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
         uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
-        return (amount * multiplier) / 1e18;
+        return ((amount * multiplier) / 1e18, end);
     }
 
     // 3. Reward functions
