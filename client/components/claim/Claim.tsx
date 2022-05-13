@@ -10,6 +10,7 @@ import Button from "components/Button";
 import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
 import { Web3Button } from "components/Web3Button";
+import TokenIcon from "components/TokenIcon";
 
 interface ClaimProps {}
 
@@ -102,33 +103,76 @@ const Claim: FunctionComponent<ClaimProps> = () => {
       </div>
       <div className="lg:col-span-3 order-3">
         <Card tightPadding alt>
-          <SectionTitle>Total OGV lockup stats</SectionTitle>
-          <CardGroup>
+          <div className="divide-y space-y-6">
             <div>
-              <Card tightPadding>
-                <div className="space-y-1">
-                  <CardLabel>OGV locked up</CardLabel>
-                  <CardStat>1,000,000</CardStat>
+              <SectionTitle>Total OGV lockup stats</SectionTitle>
+              <CardGroup>
+                <div>
+                  <Card tightPadding>
+                    <div className="space-y-1">
+                      <CardLabel>OGV locked up</CardLabel>
+                      <CardStat>1,000,000</CardStat>
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div>
-              <Card tightPadding>
-                <div className="space-y-1">
-                  <CardLabel>% of OGV locked up</CardLabel>
-                  <CardStat>50%</CardStat>
+                <div>
+                  <Card tightPadding>
+                    <div className="space-y-1">
+                      <CardLabel>% of OGV locked up</CardLabel>
+                      <CardStat>50%</CardStat>
+                    </div>
+                  </Card>
                 </div>
-              </Card>
-            </div>
-            <div>
-              <Card tightPadding>
-                <div className="space-y-1">
-                  <CardLabel>Average lock time</CardLabel>
-                  <CardStat>104 weeks</CardStat>
+                <div>
+                  <Card tightPadding>
+                    <div className="space-y-1">
+                      <CardLabel>Average lock time</CardLabel>
+                      <CardStat>104 weeks</CardStat>
+                    </div>
+                  </Card>
                 </div>
-              </Card>
+              </CardGroup>
             </div>
-          </CardGroup>
+            <div className="pt-6">
+              <SectionTitle>Latest events</SectionTitle>
+              <table className="text-sm  w-full">
+                <tbody className="divide-y space-y-3">
+                  <tr className="flex flex-col">
+                    <td className="flex justify-between items-center">
+                      <button className="underline font-bold">
+                        Claim and lock
+                      </button>
+                      <span className="text-xs text-gray-600">
+                        13/05/2022 09:00
+                      </span>
+                    </td>
+                    <td className="flex justify-between items-center">
+                      <button>{truncateEthAddress(address)}</button>
+                      <div className="flex justify-between items-center space-x-1">
+                        <TokenIcon />
+                        <span>100 OGV</span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="flex flex-col pt-3">
+                    <td className="flex justify-between items-center">
+                      <button className="underline font-bold">Claim</button>
+                      <span className="text-xs text-gray-600">
+                        13/05/2022 08:00
+                      </span>
+                    </td>
+                    <td className="flex justify-between items-center">
+                      <button>{truncateEthAddress(address)}</button>
+                      <div className="flex justify-between items-center space-x-1">
+                        <TokenIcon />
+                        <span>50 OGV</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </Card>
       </div>
     </div>
