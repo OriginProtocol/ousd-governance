@@ -154,6 +154,11 @@ contract OgvStaking is ERC20Votes {
 
     // 3. Reward functions
 
+    function collectRewards() external {
+        _collectRewards(msg.sender);
+        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
+    }
+
     function previewRewards(address user) external view returns (uint256) {
         uint256 supply = totalSupply();
         if (supply == 0 ) {
@@ -164,11 +169,6 @@ contract OgvStaking is ERC20Votes {
         uint256 balance = balanceOf(user);
         uint256 preReward = (balance * _accRewardPerShare) / 1e12;
         return preReward - rewardDebt[user];
-    }
-
-    function collectRewards() external {
-        _collectRewards(msg.sender);
-        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
     }
 
     function _collectRewards(address user) internal {
@@ -186,3 +186,4 @@ contract OgvStaking is ERC20Votes {
         ogv.transfer(user, netReward);
         emit Reward(user, netReward);
     }
+}
