@@ -43,7 +43,7 @@ contract OgvStaking is ERC20Votes {
     event Reward(address indexed user, uint256 amount);
 
     // 1. Core Functions
-    
+
     constructor(address ogv_, uint256 epoch_, address rewardsSource_)
         ERC20("", "")
         ERC20Permit("OGV Staking")
@@ -152,9 +152,8 @@ contract OgvStaking is ERC20Votes {
     {
         require(duration >= 7 days, "Staking: Too short");
         require(duration <= 1461 days, "Staking: Too long");
-        uint256 _epoch = epoch; // Gas savings
-        uint256 start = block.timestamp > _epoch ? block.timestamp : _epoch;
-        uint256 endYearpoc = ((start + duration - _epoch) * 1e18) / 360 days;
+        uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
+        uint256 endYearpoc = ((start + duration - epoch) * 1e18) / 360 days;
         uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
         return (amount * multiplier) / 1e18;
     }
