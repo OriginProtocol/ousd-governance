@@ -91,7 +91,7 @@ def test_proposal_can_fail_vote(governance, staking, token, rewards, timelock_co
     token.transfer(bob, amount * 2, {"from": accounts[0]})
     token.approve(staking.address, amount, {"from": alice})
     token.approve(staking.address, amount * 2, {"from": bob})
-    staking.setRewardsSource(rewards)
+    rewards.setRewardsTarget(staking.address, { "from": alice })
     staking.stake(amount, WEEK, alice, {"from": alice})
     staking.stake(amount * 2, WEEK, bob, {"from": bob})
     staking.delegate(alice, {"from": alice})

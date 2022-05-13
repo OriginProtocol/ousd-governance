@@ -9,7 +9,6 @@ contract OgvStaking is ERC20Votes {
     // 1. Core Storage
     uint256 public immutable epoch;
 
-
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
     struct Lockup {
@@ -44,10 +43,11 @@ contract OgvStaking is ERC20Votes {
 
     // 1. Core Functions
 
-    constructor(address ogv_, uint256 epoch_, address rewardsSource_)
-        ERC20("", "")
-        ERC20Permit("OGV Staking")
-    {
+    constructor(
+        address ogv_,
+        uint256 epoch_,
+        address rewardsSource_
+    ) ERC20("", "") ERC20Permit("OGV Staking") {
         ogv = ERC20(ogv_);
         epoch = epoch_;
         rewardsSource = RewardsSource(rewardsSource_);
@@ -61,18 +61,15 @@ contract OgvStaking is ERC20Votes {
         return "Staked OGV";
     }
 
-    function transfer(address, uint256)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(address, uint256) public override returns (bool) {
         revert("Staking: Transfers disabled");
     }
 
     function transferFrom(
-        address, address,uint256
-    ) public override returns (bool)
-    {
+        address,
+        address,
+        uint256
+    ) public override returns (bool) {
         revert("Staking: Transfers disabled");
     }
 
@@ -90,7 +87,10 @@ contract OgvStaking is ERC20Votes {
         require(amount > 0, "Staking: Not enough");
         // duration checked inside previewPoints
         (uint256 points, uint256 end) = previewPoints(amount, duration);
-        require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
+        require(
+            points + totalSupply() <= type(uint192).max,
+            "Staking: Max points exceeded"
+        );
         _collectRewards(to);
         lockups[to].push(
             Lockup({
@@ -112,12 +112,14 @@ contract OgvStaking is ERC20Votes {
         uint256 points = lockup.points;
         require(block.timestamp >= end, "Staking: End of lockup not reached");
         require(end != 0, "Staking: Already unstaked this lockup");
-        if(!noRewards){
-            _collectRewards(msg.sender);    
+        if (!noRewards) {
+            _collectRewards(msg.sender);
         }
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
-        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
+        rewardDebt[msg.sender] =
+            (balanceOf(msg.sender) * accRewardPerShare) /
+            1e12;
         ogv.transfer(msg.sender, amount);
         emit Unstake(msg.sender, lockupId, amount, end, points);
     }
@@ -128,13 +130,18 @@ contract OgvStaking is ERC20Votes {
         uint256 oldAmount = lockup.amount;
         uint256 oldEnd = lockup.end;
         uint256 oldPoints = lockup.points;
-        (uint256 newPoints, uint256 newEnd) = previewPoints(oldAmount, duration);
+        (uint256 newPoints, uint256 newEnd) = previewPoints(
+            oldAmount,
+            duration
+        );
         require(newEnd > oldEnd, "New lockup must be longer");
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
         _mint(msg.sender, newPoints - oldPoints);
-        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
+        rewardDebt[msg.sender] =
+            (balanceOf(msg.sender) * accRewardPerShare) /
+            1e12;
         emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
         emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
     }
@@ -157,12 +164,14 @@ contract OgvStaking is ERC20Votes {
 
     function collectRewards() external {
         _collectRewards(msg.sender);
-        rewardDebt[msg.sender] = (balanceOf(msg.sender) * accRewardPerShare) / 1e12;
+        rewardDebt[msg.sender] =
+            (balanceOf(msg.sender) * accRewardPerShare) /
+            1e12;
     }
 
     function previewRewards(address user) external view returns (uint256) {
         uint256 supply = totalSupply();
-        if (supply == 0 ) {
+        if (supply == 0) {
             return 0; // No one has any points to even get rewards
         }
         uint256 _accRewardPerShare = accRewardPerShare;
@@ -174,8 +183,8 @@ contract OgvStaking is ERC20Votes {
 
     function _collectRewards(address user) internal {
         uint256 supply = totalSupply();
-        if (supply == 0 ) {
-            return; // Increasing accRewardPerShare would be meaningless. 
+        if (supply == 0) {
+            return; // Increasing accRewardPerShare would be meaningless.
         }
         accRewardPerShare += (rewardsSource.collectRewards() * 1e12) / supply;
         uint256 balance = balanceOf(user);
