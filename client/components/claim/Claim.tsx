@@ -45,24 +45,8 @@ const Claim: FunctionComponent<ClaimProps> = () => {
   }
 
   return (
-    <div className="grid lg:grid-cols-12 gap-5 lg:gap-4">
-      <div className="lg:col-span-3 order-2 lg:order-1">
-        <Card tightPadding alt>
-          <SectionTitle>Benefits of locking OGV</SectionTitle>
-          <ol className="space-y-2 list-decimal list-inside text-sm text-gray-600">
-            <li>
-              Here&apos;s a benefit of locking the OGV that you claim straight
-              away
-            </li>
-            <li>
-              And here&apos;s another one that would be useful to show the user
-              at this phase
-            </li>
-            <li>This is a short, but important benefit</li>
-          </ol>
-        </Card>
-      </div>
-      <div className="lg:col-span-6 order-1 lg:order-2">
+    <div className="grid lg:grid-cols-11 gap-5 lg:gap-4">
+      <div className="lg:col-span-6 lg:col-start-2">
         <Card>
           <div className="divide-y space-y-6">
             <div className="space-y-4">
@@ -131,7 +115,7 @@ const Claim: FunctionComponent<ClaimProps> = () => {
           </div>
         </Card>
       </div>
-      <div className="lg:col-span-3 order-3">
+      <div className="lg:col-span-3">
         <Card tightPadding alt>
           <div className="divide-y space-y-6">
             <div>
