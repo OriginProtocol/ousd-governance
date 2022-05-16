@@ -115,6 +115,7 @@ contract RewardsSource is Governable {
                 slopes[i].end = slopes[i + 1].start;
             }
             inflationSlopes.push(slopes[i]);
+            minSlopeStart = slopes[i].start;
         }
     }
 
