@@ -108,7 +108,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
                   ) : (
                     ``
                   )}
-                  <TokenIcon />
+                  <TokenIcon src="/ogv.svg" alt="OGV" />
                   <span>OGV</span>
                 </div>
               </td>
@@ -129,7 +129,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
                   ) : (
                     ``
                   )}
-                  <TokenIcon />
+                  <TokenIcon src="/ogv.svg" alt="OGV" />
                   <span>OGV</span>
                 </div>
               </td>
@@ -149,7 +149,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
                   ) : (
                     ``
                   )}
-                  <TokenIcon />
+                  <TokenIcon src="/veogv.svg" alt="veOGV" />
                   <span>veOGV</span>
                 </div>
               </td>

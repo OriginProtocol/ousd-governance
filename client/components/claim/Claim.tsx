@@ -179,7 +179,7 @@ const Claim: FunctionComponent<ClaimProps> = () => {
                     <td className="flex justify-between items-center">
                       <button>{truncateEthAddress(address)}</button>
                       <div className="flex justify-between items-center space-x-1">
-                        <TokenIcon />
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
                         <span>100 OGV</span>
                       </div>
                     </td>
@@ -194,7 +194,7 @@ const Claim: FunctionComponent<ClaimProps> = () => {
                     <td className="flex justify-between items-center">
                       <button>{truncateEthAddress(address)}</button>
                       <div className="flex justify-between items-center space-x-1">
-                        <TokenIcon />
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
                         <span>50 OGV</span>
                       </div>
                     </td>
