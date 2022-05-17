@@ -11,9 +11,9 @@ interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const steps = ["Explanation", "Eligibility", "Claim"];
+  const steps = ["Origin Products", "Eligibility", "Claim"];
   const stepControlsLabels = [
-    "Read explanation",
+    "Learn about Origin products",
     "Check your eligibility",
     "Claim your tokens",
   ];
@@ -27,17 +27,14 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
         <StepTracker currentStep={currentStep} steps={steps} />
       </Wrapper>
       <Wrapper narrow={currentStep !== 2}>
-        {currentStep == 0 && <Explanation />}
-        {currentStep == 1 && <Eligibility />}
-        {currentStep == 2 && <Claim />}
-        <div className="mt-5">
-          <StepControls
-            currentStep={currentStep}
-            stepControlsLabels={stepControlsLabels}
-            handleNextStep={handleNextStep}
+        {currentStep == 0 && <Explanation handleNextStep={handleNextStep} />}
+        {currentStep == 1 && (
+          <Eligibility
             handlePrevStep={handlePrevStep}
+            handleNextStep={handleNextStep}
           />
-        </div>
+        )}
+        {currentStep == 2 && <Claim handlePrevStep={handlePrevStep} />}
       </Wrapper>
     </div>
   );

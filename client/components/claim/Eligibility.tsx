@@ -1,4 +1,5 @@
 import { FunctionComponent, useCallback } from "react";
+import Image from "next/image";
 import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
@@ -6,10 +7,17 @@ import Button from "components/Button";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
 import TokenIcon from "components/TokenIcon";
+import CheckIcon from "components/CheckIcon";
 
-interface EligibilityProps {}
+interface EligibilityProps {
+  handleNextStep: () => void;
+  handlePrevStep: () => void;
+}
 
-const Eligibility: FunctionComponent<EligibilityProps> = () => {
+const Eligibility: FunctionComponent<EligibilityProps> = ({
+  handleNextStep,
+  handlePrevStep,
+}) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const isEligible = true; // @TODO replace with real check
 
@@ -26,138 +34,118 @@ const Eligibility: FunctionComponent<EligibilityProps> = () => {
     [web3Modal, provider, resetWeb3State]
   );
 
+  const canAdvance = web3Provider && isEligible;
+
   return (
-    <Card>
-      <div className="space-y-4">
-        {!web3Provider ? (
-          <>
-            <SectionTitle>Check claim eligability</SectionTitle>
-            <p className="text-sm text-gray-600">
-              Connect your wallet below to learn if you&apos;re eligible to
-              claim.
-            </p>
-            <Web3Button inPage />
-          </>
-        ) : (
-          <>
-            {isEligible ? (
-              <>
-                <SectionTitle>
-                  Congrats! You&apos;re eligible to claim 🎉
-                </SectionTitle>
-                <Card tightPadding alt>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <span className="text-sm text-gray-600">
-                        {truncateEthAddress(address)} can claim...
-                      </span>
-                      <div className="flex space-x-2 font-bold text-2xl text-gray-800">
-                        <div className="flex items-center space-x-1">
-                          <span>100 OGV</span>
-                        </div>
-                        <span>+</span>
-                        <div className="flex items-center space-x-1">
-                          <span>50 veOGV</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <Button>Claim</Button>
-                    </div>
+    <>
+      <Card>
+        <div>
+          <SectionTitle>Check Your Eligibility</SectionTitle>
+          {!web3Provider ? (
+            <>
+              <p className="text-sm text-gray-600">
+                Connect your wallet below to learn if you&apos;re eligible to
+                claim.
+              </p>
+              <div className="pt-6">
+                <Web3Button inPage />
+              </div>
+            </>
+          ) : (
+            <>
+              {isEligible ? (
+                <>
+                  <div className="bg-accent text-white font-bold px-2 py-4 text-center text-lg">
+                    <p className="">
+                      {truncateEthAddress(address)} is eligible to claim!
+                    </p>
                   </div>
-                </Card>
-              </>
-            ) : (
-              <>
-                <SectionTitle>
-                  Unfortunately, you&apos;re not eligible to claim.
-                </SectionTitle>
-                <p className="text-sm text-gray-600">
-                  Try connecting another wallet.
-                </p>
-              </>
-            )}
-            <button
-              className="text-sm text-gray-500 underline ml-auto"
-              onClick={handleDisconnect}
-            >
-              Disconnect to check another address
-            </button>
-          </>
-        )}
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th>Eligibility criteria</th>
-              <th>Claimable tokens</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                OGN holder {web3Provider ? (isEligible ? `✅` : `❌`) : ``}
-              </td>
-              <td>
-                <div className="flex space-x-1 items-center">
-                  {web3Provider ? (
-                    isEligible ? (
-                      <span>50x</span>
-                    ) : (
-                      <span>0</span>
-                    )
-                  ) : (
-                    ``
-                  )}
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>OGV</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                OUSD liquidity provider{" "}
-                {web3Provider ? (isEligible ? `✅` : `❌`) : ``}
-              </td>
-              <td>
-                <div className="flex space-x-1 items-center">
-                  {web3Provider ? (
-                    isEligible ? (
-                      <span>50x</span>
-                    ) : (
-                      <span>0</span>
-                    )
-                  ) : (
-                    ``
-                  )}
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>OGV</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                OUSD holder {web3Provider ? (isEligible ? `✅` : `❌`) : ``}
-              </td>
-              <td>
-                <div className="flex space-x-1 items-center">
-                  {web3Provider ? (
-                    isEligible ? (
-                      <span>50x</span>
-                    ) : (
-                      <span>0</span>
-                    )
-                  ) : (
-                    ``
-                  )}
-                  <TokenIcon src="/veogv.svg" alt="veOGV" />
-                  <span>veOGV</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </>
+              ) : (
+                <>
+                  <div className="bg-gray-500 text-white font-bold px-2 py-4 text-center text-lg">
+                    <p className="">
+                      Unfortunately, {truncateEthAddress(address)} isn&apos;t
+                      eligible to claim
+                    </p>
+                  </div>
+                </>
+              )}
+              <div className="mt-2">
+                <button
+                  className="text-sm text-gray-500 underline ml-auto block"
+                  onClick={handleDisconnect}
+                >
+                  Try another address
+                </button>
+              </div>
+            </>
+          )}
+          <table className="table w-full mt-6">
+            <thead>
+              <tr>
+                <th>Eligibility Criteria</th>
+                <th>Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    {canAdvance && <CheckIcon />}
+                    <span>OGN holder</span>
+                  </div>
+                </td>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    <TokenIcon src="/ogv.svg" alt="OGV" />
+                    <span>OGV</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    {canAdvance && <CheckIcon />}
+                    <span>OUSD liquidity provider</span>
+                  </div>
+                </td>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    <TokenIcon src="/ogv.svg" alt="OGV" />
+                    <span>OGV</span>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    {canAdvance && <CheckIcon />}
+                    <span>OUSD holder</span>
+                  </div>
+                </td>
+                <td>
+                  <div className="flex space-x-2 items-center">
+                    <TokenIcon src="/veogv.svg" alt="veOGV" />
+                    <span>veOGV</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+      <div className="mt-6 flex">
+        <div className="mr-auto">
+          <Button onClick={handlePrevStep}>&larr; Origin Products</Button>
+        </div>
+        <div className="ml-auto">
+          <Button onClick={handleNextStep} disabled={!canAdvance}>
+            Claim Your Tokens &rarr;
+          </Button>
+        </div>
       </div>
-    </Card>
+    </>
   );
 };
 
