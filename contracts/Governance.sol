@@ -3,10 +3,10 @@ pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorSettings.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/compatibility/GovernorCompatibilityBravo.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/GovernorPreventLateQuorum.sol";
+import "./GovernorCompatibilityBravo.sol";
 
 contract Governance is
     GovernorSettings,
@@ -20,7 +20,7 @@ contract Governance is
         GovernorSettings(
             1, /* 1 block */
             45818, /* 1 week */
-            2500
+            2500 * 1e18
         )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4) // Default quorum numerator is 100, so 4/100 or 4%

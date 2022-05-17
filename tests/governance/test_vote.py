@@ -2,7 +2,7 @@ import brownie
 from brownie import accounts, chain
 
 from ..helpers import approx, mine_blocks
-from ..fixtures import governance, timelock_controller, token, staking
+from ..fixtures import governance, timelock_controller, token, staking, rewards
 
 DAY = 86400
 WEEK = 7 * DAY
@@ -37,6 +37,24 @@ def test_cant_create_proposal_if_below_threshold(governance):
             {"from": accounts[0]}
         )
 
+def test_can_cancel_proposal(governance, staking, token):
+    alice = accounts[0]
+    amount = 1000 * 10 ** 18
+    token.approve(staking.address, amount * 10, {"from": alice})
+    staking.stake(amount, WEEK, alice, {"from": alice})
+    # Self delegate
+    staking.delegate(alice, {"from": alice})
+    tx = governance.propose(
+        [governance.address],
+        [0],
+        ["setVotingDelay(uint256)"],
+        ["0x0000000000000000000000000000000000000000000000000000000000000064"],
+        "Set voting delay",
+        {"from": accounts[0]},
+    )
+    chain.mine()
+    governance.cancel(tx.return_value, { "from": alice })
+    assert governance.state(tx.return_value) == 2
 
 def test_proposal_can_pass_vote(governance, staking, token, timelock_controller, web3):
     alice = accounts[0]
@@ -66,16 +84,18 @@ def test_proposal_can_pass_vote(governance, staking, token, timelock_controller,
     assert governance.state(tx.return_value) == 4
 
 
-def test_proposal_can_fail_vote(governance, staking, token, timelock_controller, web3):
+def test_proposal_can_fail_vote(governance, staking, token, rewards, timelock_controller, web3):
     alice = accounts[0]
     bob = accounts[1]
     amount = 1000 * 10 ** 18
     token.transfer(bob, amount * 2, {"from": accounts[0]})
-    token.approve(staking.address, amount * 10, {"from": alice})
-    token.approve(staking.address, amount * 10 * 2, {"from": bob})
+    token.approve(staking.address, amount, {"from": alice})
+    token.approve(staking.address, amount * 2, {"from": bob})
+    token.grantMinterRole(rewards.address, { "from": alice })
+    rewards.setRewardsTarget(staking.address, { "from": alice })
     staking.stake(amount, WEEK, alice, {"from": alice})
-    staking.delegate(alice, {"from": alice})
     staking.stake(amount * 2, WEEK, bob, {"from": bob})
+    staking.delegate(alice, {"from": alice})
     staking.delegate(bob, {"from": bob})
     tx = governance.propose(
         [governance.address],
@@ -179,6 +199,7 @@ def test_timelock_proposal_can_be_cancelled_after_time_passes(governance, stakin
     amount = 1000 * 10 ** 18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice)
     tx = governance.propose(
         [governance.address],
         [0],
@@ -204,13 +225,14 @@ def test_timelock_proposal_can_not_be_cancelled_after_is_executed(governance, st
     amount = 1000 * 10 ** 18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice)
     tx = governance.propose(
         [governance.address],
         [0],
         ["setVotingDelay(uint256)"],
         ["0x0000000000000000000000000000000000000000000000000000000000000064"],
         "Set voting delay",
-        {"from": accounts[0]},
+        {"from": alice},
     )
     chain.mine()
     governance.castVote(tx.return_value, 1, {"from": alice})
@@ -225,4 +247,3 @@ def test_timelock_proposal_can_not_be_cancelled_after_is_executed(governance, st
     # can not cancel executed proposal
     with brownie.reverts("Governor: proposal not active"):
         governance.cancel(tx.return_value)
-

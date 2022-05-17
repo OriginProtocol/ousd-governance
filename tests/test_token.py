@@ -24,7 +24,8 @@ def test_non_owner_cant_mint(token):
     with brownie.reverts("Ownable: caller is not the owner"):
         token.mint(accounts[1], 100, { 'from': accounts[1] })
 
-def test_owner_can_mint(token):
+def test_minter_can_mint(token):
+    token.grantMinterRole(accounts[0], { "from": accounts[0] })
     token.mint(accounts[1], 100, { 'from': accounts[0] })
     assert token.totalSupply() == 1000000000 * 10 ** 18 + 100
 
