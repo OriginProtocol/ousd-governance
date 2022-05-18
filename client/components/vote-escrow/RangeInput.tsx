@@ -8,8 +8,9 @@ interface RangeInputProps {
   min: string;
   max: string;
   value: number | string;
-  markers?: string[];
+  markers?: object[];
   onChange: ChangeEventHandler<HTMLInputElement>;
+  onMarkerClick?: (marker: string) => void;
 }
 
 const RangeInput: FunctionComponent<RangeInputProps> = ({
@@ -20,6 +21,7 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
   value,
   markers,
   onChange,
+  onMarkerClick,
 }) => (
   <>
     <label className="label">
@@ -45,7 +47,18 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
             {markers.map((marker, index) => (
               <span key={index} className="flex flex-col items-center w-8">
                 <span>|</span>
-                <span className="mt-1">{marker}</span>
+                {marker.value ? (
+                  <button
+                    onClick={
+                      onMarkerClick ? () => onMarkerClick(marker.value) : null
+                    }
+                    className="mt-1 hover:underline"
+                  >
+                    {marker.label}
+                  </button>
+                ) : (
+                  <span className="mt-1">{marker.label}</span>
+                )}
               </span>
             ))}
           </div>

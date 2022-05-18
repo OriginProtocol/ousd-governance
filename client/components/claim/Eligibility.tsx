@@ -19,6 +19,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   handlePrevStep,
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
+
   const isEligible = true; // @TODO replace with real check
 
   const resetWeb3State = useStore((state) => state.reset);
