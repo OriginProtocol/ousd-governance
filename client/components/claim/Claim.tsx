@@ -13,6 +13,8 @@ import { Web3Button } from "components/Web3Button";
 import TokenIcon from "components/TokenIcon";
 import CardDescription from "components/CardDescription";
 import BarChart from "components/BarChart";
+import ExternalLinkIcon from "components/ExternalLinkIcon";
+import Link from "components/Link";
 
 interface ClaimProps {
   handlePrevStep: () => void;
@@ -66,18 +68,20 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
               <div className="divide-y space-y-6">
                 <div className="space-y-4">
                   <SectionTitle>Claim OGV</SectionTitle>
-                  <Card alt tightPadding>
-                    <div className="space-y-1">
-                      <CardLabel>You&apos;re claiming</CardLabel>
-                      <div className="flex space-x-1 items-center">
-                        <TokenIcon src="/ogv.svg" alt="OGV" />
-                        <CardStat>100</CardStat>
+                  <CardGroup horizontal twoCol>
+                    <Card alt tightPadding>
+                      <div className="space-y-1">
+                        <CardLabel>You&apos;re claiming</CardLabel>
+                        <div className="flex space-x-1 items-center">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <CardStat>100</CardStat>
+                        </div>
+                        <CardDescription>OGV</CardDescription>
                       </div>
-                      <CardDescription>OGV</CardDescription>
-                    </div>
-                  </Card>
+                    </Card>
+                  </CardGroup>
                   <div className="space-y-2">
-                    <div>
+                    {/*<div>
                       <RangeInput
                         label="Lockup amount"
                         counterUnit="OGV"
@@ -139,7 +143,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                           }
                         }}
                       />
-                    </div>
+                      </div>*/}
                     <div>
                       <RangeInput
                         label="Lockup length"
@@ -196,6 +200,28 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       />
                     </div>
                   </div>
+                  <CardGroup horizontal twoCol>
+                    <Card alt tightPadding>
+                      <div className="space-y-1">
+                        <CardLabel>Starting votes</CardLabel>
+                        <div className="flex space-x-1 items-center">
+                          <TokenIcon src="/veogv.svg" alt="veOGV" />
+                          <CardStat>25</CardStat>
+                        </div>
+                        <CardDescription>veOGV</CardDescription>
+                      </div>
+                    </Card>
+                    <Card alt tightPadding>
+                      <div className="space-y-1">
+                        <CardLabel>Rewards</CardLabel>
+                        <CardStat>123%</CardStat>
+                        <CardDescription>APY</CardDescription>
+                      </div>
+                    </Card>
+                  </CardGroup>
+                  <div className="pt-3">
+                    <Button large>Claim and lock</Button>
+                  </div>
                   <div className="pt-3">
                     <BarChart
                       data={{
@@ -215,31 +241,27 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       }}
                     />
                   </div>
-                  <p>Estimated starting votes: 25</p>
-                  <Button large>Claim and lock</Button>
                 </div>
               </div>
             </Card>
             <Card>
               <div className="space-y-4">
-                <Card tightPadding alt>
-                  <div className="flex items-center justify-between">
+                <SectionTitle>Claim veOGV</SectionTitle>
+                <CardGroup horizontal twoCol>
+                  <Card alt tightPadding>
                     <div className="space-y-1">
-                      <span className="text-sm text-gray-600">
-                        {truncateEthAddress(address)} can claim...
-                      </span>
-                      <div className="flex space-x-2 font-bold text-2xl text-gray-800">
-                        <div className="flex items-center space-x-1">
-                          <span>50 veOGV</span>
-                        </div>
+                      <CardLabel>You&apos;re claiming</CardLabel>
+                      <div className="flex space-x-1 items-center">
+                        <TokenIcon src="/veogv.svg" alt="veOGV" />
+                        <CardStat>50</CardStat>
                       </div>
+                      <CardDescription>veOGV</CardDescription>
                     </div>
-                  </div>
-                </Card>
-                <p className="text-sm text-gray-600">
-                  Your veOGV gives X voting power for...
-                </p>
-                <Button large>Claim</Button>
+                  </Card>
+                </CardGroup>
+                <div className="pt-3">
+                  <Button large>Claim</Button>
+                </div>
               </div>
             </Card>
           </CardGroup>
@@ -248,7 +270,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
           <Card alt>
             <div className="divide-y space-y-6">
               <div>
-                <SectionTitle>Total OGV lockup stats</SectionTitle>
+                <SectionTitle>OGV Statistics</SectionTitle>
                 <CardGroup>
                   <div>
                     <Card tightPadding>
@@ -266,50 +288,91 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       </div>
                     </Card>
                   </div>
-                  <div>
-                    <Card tightPadding>
-                      <div className="space-y-1">
-                        <CardLabel>Average lock time</CardLabel>
-                        <CardStat>104 weeks</CardStat>
-                      </div>
-                    </Card>
-                  </div>
                 </CardGroup>
               </div>
               <div className="pt-6">
-                <SectionTitle>Latest events</SectionTitle>
-                <table className="text-sm  w-full">
+                <SectionTitle>Latest Events</SectionTitle>
+                <table className="w-full">
                   <tbody className="divide-y space-y-3">
                     <tr className="flex flex-col">
-                      <td className="flex justify-between items-center">
-                        <button className="underline font-bold">
-                          Claim and lock
-                        </button>
-                        <span className="text-xs text-gray-600">
-                          13/05/2022 09:00
-                        </span>
-                      </td>
-                      <td className="flex justify-between items-center">
-                        <button>{truncateEthAddress(address)}</button>
-                        <div className="flex justify-between items-center space-x-1">
-                          <TokenIcon src="/ogv.svg" alt="OGV" />
-                          <span>100 OGV</span>
-                        </div>
+                      <td>
+                        <Link
+                          className="text-gray-600 hover:underline"
+                          type="external"
+                          href="#"
+                        >
+                          <span className="mr-2">
+                            <span className="font-bold">joshfraser.eth</span>{" "}
+                            just locked 100 OGV for 4 years
+                          </span>
+                          <ExternalLinkIcon />
+                        </Link>
                       </td>
                     </tr>
                     <tr className="flex flex-col pt-3">
-                      <td className="flex justify-between items-center">
-                        <button className="underline font-bold">Claim</button>
-                        <span className="text-xs text-gray-600">
-                          13/05/2022 08:00
-                        </span>
+                      <td>
+                        <Link
+                          className="text-gray-600 hover:underline"
+                          type="external"
+                          href="#"
+                        >
+                          <span className="mr-2">
+                            <span className="font-bold">tomhirst.eth</span> just
+                            locked 500 OGV for 2 years
+                          </span>
+                          <ExternalLinkIcon />
+                        </Link>
                       </td>
-                      <td className="flex justify-between items-center">
-                        <button>{truncateEthAddress(address)}</button>
-                        <div className="flex justify-between items-center space-x-1">
-                          <TokenIcon src="/ogv.svg" alt="OGV" />
-                          <span>50 OGV</span>
-                        </div>
+                    </tr>
+                    <tr className="flex flex-col pt-3">
+                      <td>
+                        <Link
+                          className="text-gray-600 hover:underline"
+                          type="external"
+                          href="#"
+                        >
+                          <span className="mr-2">
+                            <span className="font-bold">
+                              {truncateEthAddress(address)}
+                            </span>{" "}
+                            just locked 50 OGV for 1 week
+                          </span>
+                          <ExternalLinkIcon />
+                        </Link>
+                      </td>
+                    </tr>
+                    <tr className="flex flex-col pt-3">
+                      <td>
+                        <Link
+                          className="text-gray-600 hover:underline"
+                          type="external"
+                          href="#"
+                        >
+                          <span className="mr-2">
+                            <span className="font-bold">
+                              {truncateEthAddress(address)}
+                            </span>{" "}
+                            just locked 5000 OGV for 1 year
+                          </span>
+                          <ExternalLinkIcon />
+                        </Link>
+                      </td>
+                    </tr>
+                    <tr className="flex flex-col pt-3">
+                      <td>
+                        <Link
+                          className="text-gray-600 hover:underline"
+                          type="external"
+                          href="#"
+                        >
+                          <span className="mr-2">
+                            <span className="font-bold">
+                              {truncateEthAddress(address)}
+                            </span>{" "}
+                            just locked 1234 OGV for 25 weeks
+                          </span>
+                          <ExternalLinkIcon />
+                        </Link>
                       </td>
                     </tr>
                   </tbody>
