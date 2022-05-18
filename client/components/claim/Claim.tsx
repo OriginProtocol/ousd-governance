@@ -12,6 +12,7 @@ import { useStore } from "utils/store";
 import { Web3Button } from "components/Web3Button";
 import TokenIcon from "components/TokenIcon";
 import CardDescription from "components/CardDescription";
+import BarChart from "components/BarChart";
 
 interface ClaimProps {
   handlePrevStep: () => void;
@@ -195,15 +196,30 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       />
                     </div>
                   </div>
-                  <div className="bg-gray-500">
-                    Proposed vote power over time chart
+                  <div className="pt-3">
+                    <BarChart
+                      data={{
+                        labels: ["1 yr", "2 yr", "3 yr", "4 yr"],
+                        datasets: [
+                          {
+                            label: "OGV",
+                            data: new Array(4).fill(100),
+                            backgroundColor: new Array(4).fill("#4bbc8a"),
+                          },
+                          {
+                            label: "veOGV",
+                            data: [25, 50, 75, 100],
+                            backgroundColor: new Array(4).fill("#0d3020"),
+                          },
+                        ],
+                      }}
+                    />
                   </div>
                   <p>Estimated starting votes: 25</p>
                   <Button large>Claim and lock</Button>
                 </div>
               </div>
             </Card>
-
             <Card>
               <div className="space-y-4">
                 <Card tightPadding alt>
