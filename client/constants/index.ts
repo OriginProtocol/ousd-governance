@@ -37,3 +37,5 @@ export const navItems = [
     label: "Vote Escrow",
   },
 ];
+
+export const APP_NAME = "OUSD Governance";
