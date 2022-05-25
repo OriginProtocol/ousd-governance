@@ -29,19 +29,24 @@ const useAccountBalances = () => {
       };
     };
 
+    const loadOgnBalance = async () =>
+      await contracts.OriginToken.balanceOf(address);
+
     if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
         loadBalance(),
         loadVotePower(),
         loadExistingLockup(),
+        loadOgnBalance(),
         web3Provider.getBlock(),
-      ]).then(([ogv, vote_power, existingLockup, lastestBlock]) => {
+      ]).then(([ogv, vote_power, existingLockup, ogn, lastestBlock]) => {
         const now = lastestBlock.timestamp;
 
         useStore.setState({
           balances: {
             ogv,
             vote_power,
+            ogn,
           },
           existingLockup: {
             ...existingLockup,
