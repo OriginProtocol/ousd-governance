@@ -47,6 +47,9 @@ main()
         done
         printf "\n"
         echo "🟢 Node initialized"
+
+        # generate merkle tree
+        npm run generate-merkle-tree
         
         # deploy the contracts
         npm run deploy:contracts:dev

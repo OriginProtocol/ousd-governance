@@ -20,14 +20,17 @@ def main(output_file=None):
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)
 
+    merkle_distributor = run("deploy_merkle_distributor", "main", (token.address,))
+
     if output_file:
         output = dict(
             OriginDollarGovernance=dict(address=token.address, abi=token.abi),
             VoteLockerCurve=dict(address=votelock.address, abi=votelock.abi),
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),
+            MerkleDistributor=dict(address=merkle_distributor.address, abi=merkle_distributor.abi),
         )
         with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
 
-    return (token, votelock, timelock_controller, governance)
+    return (token, votelock, timelock_controller, governance, merkle_distributor)

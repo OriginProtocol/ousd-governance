@@ -4,9 +4,14 @@
   "homepage": "https://github.com/originprotocol/ousd-governance",
   "scripts": {
     "node": "scripts/node.sh fork",
-    "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json"
+    "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json",
+    "generate-merkle-tree": "ts-node scripts/generate-merkle-tree.ts"
   },
   "dependencies": {
-    "hardhat": "^2.9.1"
+    "hardhat": "^2.9.1",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.2.31",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.2"
   }
 }
