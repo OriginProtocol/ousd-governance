@@ -1,20 +1,29 @@
 import fs from 'fs';
 import { MerkleTree } from 'merkletreejs';
-import keccak256 from 'keccak256';
-import addresses from './addresses.json';
+import { utils } from 'ethers';
+import accounts from './accounts.json';
 
-const hashedAddresses = Object.keys(addresses).map(address => keccak256(address));
-const merkleTree = new MerkleTree(hashedAddresses, keccak256, {sortPairs: true});
+const nodes = Object.keys(accounts).map((account, index) => {
+    const { amount } = accounts[account as keyof typeof accounts];
+    return utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount]);
+});
+const merkleTree = new MerkleTree(nodes, utils.keccak256, {sortPairs: true});
 const merkleRoot = `0x${merkleTree.getRoot().toString('hex')}`;
 
 const claims = {
     merkleRoot,
-    claims: Object.keys(addresses).reduce(
-        (claim, address, index) => Object.assign(claim, {
-            [address]: {
+    claims: Object.keys(accounts).reduce(
+        (claim, account, index) => Object.assign(claim, {
+            [account]: {
                 index,
-                amount: addresses[address as keyof typeof addresses],
-                proof: merkleTree.getHexProof(keccak256(address)),
+                amount: accounts[account as keyof typeof accounts].amount,
+                split: accounts[account as keyof typeof accounts].split,
+                proof: merkleTree.getHexProof(
+                    utils.solidityKeccak256(
+                        ['uint256', 'address', 'uint256'],
+                        [index, account, accounts[account as keyof typeof accounts].amount]
+                    ),
+                ),
             },
         }),
     {}),

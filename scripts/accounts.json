@@ -1,0 +1,15 @@
+{
+    "0x8dea6Ef7767e0D6ae7Dd9D144E514D7DFAe75B36": {
+        "amount": 100,
+        "split": {
+            "ogn": 50,
+            "lmc": 50
+        }
+    },
+    "0x4370823e0453BAe9F6B6b790daA7D02Fd158719f": {
+        "amount": 1000,
+        "split": {
+            "ogn": 1000
+        }
+    }
+}
