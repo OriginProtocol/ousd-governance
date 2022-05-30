@@ -1,4 +1,5 @@
 import { FunctionComponent, useState } from "react";
+import moment from "moment";
 import { SectionTitle } from "components/SectionTitle";
 import Wrapper from "components/Wrapper";
 import Card from "components/Card";
@@ -40,6 +41,25 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   const projectedRewards = claimableOgv * (currentApy / 52) * lockupDuration;
   const maxRewards =
     claimableOgv * (currentApy / 52) * maxLockupDurationInWeeks;
+
+  const now = new Date();
+  const lockupEnd = new Date(
+    now.getTime() + lockupDuration * 7 * 24 * 60 * 60 * 1000
+  );
+  const fourYearsFromNow = new Date(
+    now.getTime() + 4 * 365 * 24 * 60 * 60 * 1000
+  );
+  const threeYearsFromNow = new Date(
+    now.getTime() + 3 * 365 * 24 * 60 * 60 * 1000
+  );
+  const twoYearsFromNow = new Date(
+    now.getTime() + 2 * 365 * 24 * 60 * 60 * 1000
+  );
+  const oneYearFromNow = new Date(
+    now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
+  );
+
+  const claimableVeOgv = 100;
 
   if (!web3Provider) {
     return (
@@ -89,7 +109,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                     </Card>
                     <Card alt tightPadding>
                       <div className="space-y-1">
-                        <CardLabel>Projected reward</CardLabel>
+                        <CardLabel>Lockup reward</CardLabel>
                         <div className="flex space-x-1 items-center">
                           <CardStat>
                             {isValidLockup ? projectedApy.toFixed(2) : 0}%
@@ -250,7 +270,10 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                               <span>veOGV</span>
                             </th>
                             <td className="w-1/4">
-                              {!isValidLockup ? 0 : claimableOgv}
+                              {(
+                                (claimableOgv / maxLockupDurationInWeeks) *
+                                lockupDuration
+                              ).toFixed(2)}
                             </td>
                           </tr>
                         ) : (
@@ -280,6 +303,30 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         </tr>
                       </tbody>
                     </table>
+                    {isValidLockup && (
+                      <>
+                        <p className="text-gray-600 text-sm">
+                          You are locking up:
+                        </p>
+                        <table className="table w-full">
+                          <tbody>
+                            <tr>
+                              <th className="flex items-center space-x-2">
+                                <TokenIcon src="/ogv.svg" alt="OGV" />
+                                <span>
+                                  OGV
+                                  <span className="block text-xs text-gray-500 font-normal italic">
+                                    unlocks{" "}
+                                    {moment(lockupEnd).format("MMM D, YYYY")}
+                                  </span>
+                                </span>
+                              </th>
+                              <td className="w-1/4">{claimableOgv}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </>
+                    )}
                   </div>
                   {!isValidLockup && (
                     <span className="block bg-red-500 text-white px-4 py-3">
@@ -304,14 +351,111 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                     <div className="space-y-1">
                       <CardLabel>Your eligibility</CardLabel>
                       <div className="flex space-x-1 items-center">
-                        <TokenIcon src="/veogv.svg" alt="veOGV" />
-                        <CardStat>50</CardStat>
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
+                        <CardStat>{claimableVeOgv}</CardStat>
                       </div>
-                      <CardDescription>veOGV</CardDescription>
+                      <CardDescription>OGV</CardDescription>
+                    </div>
+                  </Card>
+                  <Card alt tightPadding>
+                    <div className="space-y-1">
+                      <CardLabel>Lockup reward</CardLabel>
+                      <div className="flex space-x-1 items-center">
+                        <CardStat>{(currentApy * 100).toFixed(2)}%</CardStat>
+                      </div>
+                      <CardDescription>APY</CardDescription>
                     </div>
                   </Card>
                 </CardGroup>
-                <div className="pt-3">
+                <div className="space-y-2 pt-3">
+                  <p className="text-gray-600 text-sm">You are claiming:</p>
+                  <table className="table w-full">
+                    <tbody>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/veogv.svg" alt="veOGV" />
+                          <span>veOGV</span>
+                        </th>
+                        <td className="w-1/4">
+                          {claimableVeOgv / 4 +
+                            (claimableVeOgv / 4) * 0.75 +
+                            (claimableVeOgv / 4) * 0.5 +
+                            (claimableVeOgv / 4) * 0.25}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <span>
+                            Projected OGV rewards
+                            <span className="block text-xs text-gray-500 font-normal italic">
+                              based on current APYs
+                            </span>
+                          </span>
+                        </th>
+                        <td className="w-1/4">{projectedRewards.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p className="text-gray-600 text-sm">You are locking up:</p>
+                  <table className="table w-full">
+                    <tbody>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <span>
+                            OGV
+                            <span className="block text-xs text-gray-500 font-normal italic">
+                              unlocks{" "}
+                              {moment(oneYearFromNow).format("MMM D, YYYY")}
+                            </span>
+                          </span>
+                        </th>
+                        <td className="w-1/4">{claimableOgv / 4}</td>
+                      </tr>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <span>
+                            OGV
+                            <span className="block text-xs text-gray-500 font-normal italic">
+                              unlocks{" "}
+                              {moment(twoYearsFromNow).format("MMM D, YYYY")}
+                            </span>
+                          </span>
+                        </th>
+                        <td className="w-1/4">{claimableOgv / 4}</td>
+                      </tr>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <span>
+                            OGV
+                            <span className="block text-xs text-gray-500 font-normal italic">
+                              unlocks{" "}
+                              {moment(threeYearsFromNow).format("MMM D, YYYY")}
+                            </span>
+                          </span>
+                        </th>
+                        <td className="w-1/4">{claimableOgv / 4}</td>
+                      </tr>
+                      <tr>
+                        <th className="flex items-center space-x-2">
+                          <TokenIcon src="/ogv.svg" alt="OGV" />
+                          <span>
+                            OGV
+                            <span className="block text-xs text-gray-500 font-normal italic">
+                              unlocks{" "}
+                              {moment(fourYearsFromNow).format("MMM D, YYYY")}
+                            </span>
+                          </span>
+                        </th>
+                        <td className="w-1/4">{claimableOgv / 4}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                {/*<div className="pt-3">
                   <BarChart
                     data={{
                       labels: ["1 yr", "2 yr", "3 yr", "4 yr"],
@@ -328,10 +472,11 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         },
                       ],
                     }}
+                    caption={`Chart showing veOGV unlocking to OGV over time.`}
                   />
-                </div>
+                  </div>*/}
                 <div className="pt-3">
-                  <Button large>Claim and lock</Button>
+                  <Button large>Claim</Button>
                 </div>
               </div>
             </Card>
