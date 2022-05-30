@@ -393,7 +393,13 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                             </span>
                           </span>
                         </th>
-                        <td className="w-1/4">{projectedRewards.toFixed(2)}</td>
+                        <td className="w-1/4">
+                          {(
+                            (currentApy / 52) *
+                            maxLockupDurationInWeeks *
+                            100
+                          ).toFixed(2)}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
