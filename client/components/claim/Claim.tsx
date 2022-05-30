@@ -25,6 +25,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
 
   const isEligible = true; // @TODO replace with real check
   const claimableOgv = "100"; // @TODO replace with real value
+  const currentApy = 1.2345; // @TODO replace with real %
 
   const maxLockupDurationInWeeks = "208";
 
@@ -32,6 +33,13 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
+
+  const isValidLockup = lockupAmount > 0 && lockupDuration > 0;
+  const projectedApy =
+    (currentApy / maxLockupDurationInWeeks) * lockupDuration * 100;
+  const projectedRewards = claimableOgv * (currentApy / 52) * lockupDuration;
+  const maxRewards =
+    claimableOgv * (currentApy / 52) * maxLockupDurationInWeeks;
 
   if (!web3Provider) {
     return (
@@ -71,7 +79,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                   <CardGroup horizontal twoCol>
                     <Card alt tightPadding>
                       <div className="space-y-1">
-                        <CardLabel>You&apos;re claiming</CardLabel>
+                        <CardLabel>Your eligibility</CardLabel>
                         <div className="flex space-x-1 items-center">
                           <TokenIcon src="/ogv.svg" alt="OGV" />
                           <CardStat>100</CardStat>
@@ -79,13 +87,25 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         <CardDescription>OGV</CardDescription>
                       </div>
                     </Card>
+                    <Card alt tightPadding>
+                      <div className="space-y-1">
+                        <CardLabel>Projected reward</CardLabel>
+                        <div className="flex space-x-1 items-center">
+                          <CardStat>
+                            {isValidLockup ? projectedApy.toFixed(2) : 0}%
+                          </CardStat>
+                        </div>
+                        <CardDescription>APY</CardDescription>
+                      </div>
+                    </Card>
                   </CardGroup>
+                  {/*<p className="text-gray-600 text-sm">Locking up your OGV when you claim gives you governance votes (veOGV) and rewards (further OGV). The longer you lock up your OGV for, the greater your OGV rewards will be.</p>*/}
                   <div className="space-y-2">
                     {/*<div>
                       <RangeInput
-                        label="Lockup amount"
+                        label="Lock up your"
                         counterUnit="OGV"
-                        min={"1"}
+                        min={"0"}
                         max={claimableOgv}
                         value={lockupAmount}
                         onChange={(e) => {
@@ -146,7 +166,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       </div>*/}
                     <div>
                       <RangeInput
-                        label="Lockup length"
+                        label="Lock up your OGV for"
                         counterUnit="weeks"
                         min="0"
                         max={maxLockupDurationInWeeks}
@@ -200,13 +220,13 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       />
                     </div>
                   </div>
-                  <CardGroup horizontal twoCol>
+                  {/*<CardGroup horizontal twoCol>
                     <Card alt tightPadding>
                       <div className="space-y-1">
-                        <CardLabel>Starting votes</CardLabel>
+                        <CardLabel>You&apos;ll recieve</CardLabel>
                         <div className="flex space-x-1 items-center">
                           <TokenIcon src="/veogv.svg" alt="veOGV" />
-                          <CardStat>25</CardStat>
+                          <CardStat>100</CardStat>
                         </div>
                         <CardDescription>veOGV</CardDescription>
                       </div>
@@ -218,28 +238,60 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         <CardDescription>APY</CardDescription>
                       </div>
                     </Card>
-                  </CardGroup>
-                  <div className="pt-3">
-                    <Button large>Claim and lock</Button>
+                      </CardGroup>*/}
+                  <div className="space-y-2 pt-3">
+                    <p className="text-gray-600 text-sm">You are claiming:</p>
+                    <table className="table w-full">
+                      <tbody>
+                        {isValidLockup ? (
+                          <tr>
+                            <th className="flex items-center space-x-2">
+                              <TokenIcon src="/veogv.svg" alt="veOGV" />
+                              <span>veOGV</span>
+                            </th>
+                            <td className="w-1/4">
+                              {!isValidLockup ? 0 : claimableOgv}
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr>
+                            <th className="flex items-center space-x-2">
+                              <TokenIcon src="/ogv.svg" alt="OGV" />
+                              <span>OGV</span>
+                            </th>
+                            <td className="w-1/4">
+                              {isValidLockup ? 0 : claimableOgv}
+                            </td>
+                          </tr>
+                        )}
+                        <tr>
+                          <th className="flex items-center space-x-2">
+                            <TokenIcon src="/ogv.svg" alt="OGV" />
+                            <span>
+                              Projected OGV rewards
+                              <span className="block text-xs text-gray-500 font-normal italic">
+                                based on current APYs
+                              </span>
+                            </span>
+                          </th>
+                          <td className="w-1/4">
+                            {projectedRewards.toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
+                  {!isValidLockup && (
+                    <span className="block bg-red-500 text-white px-4 py-3">
+                      <span className="font-bold">Note:</span> If you don&apos;t
+                      lock up your {claimableOgv} OGV, you&apos;ll be missing
+                      out on up to {maxRewards.toFixed(2)} OGV in rewards!
+                    </span>
+                  )}
                   <div className="pt-3">
-                    <BarChart
-                      data={{
-                        labels: ["1 yr", "2 yr", "3 yr", "4 yr"],
-                        datasets: [
-                          {
-                            label: "OGV",
-                            data: new Array(4).fill(100),
-                            backgroundColor: new Array(4).fill("#4bbc8a"),
-                          },
-                          {
-                            label: "veOGV",
-                            data: [25, 50, 75, 100],
-                            backgroundColor: new Array(4).fill("#0d3020"),
-                          },
-                        ],
-                      }}
-                    />
+                    <Button large>
+                      {isValidLockup ? `Claim and lock` : `Claim`}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -250,7 +302,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <CardGroup horizontal twoCol>
                   <Card alt tightPadding>
                     <div className="space-y-1">
-                      <CardLabel>You&apos;re claiming</CardLabel>
+                      <CardLabel>Your eligibility</CardLabel>
                       <div className="flex space-x-1 items-center">
                         <TokenIcon src="/veogv.svg" alt="veOGV" />
                         <CardStat>50</CardStat>
@@ -260,7 +312,26 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                   </Card>
                 </CardGroup>
                 <div className="pt-3">
-                  <Button large>Claim</Button>
+                  <BarChart
+                    data={{
+                      labels: ["1 yr", "2 yr", "3 yr", "4 yr"],
+                      datasets: [
+                        {
+                          label: "OGV",
+                          data: new Array(4).fill(100),
+                          backgroundColor: new Array(4).fill("#4bbc8a"),
+                        },
+                        {
+                          label: "veOGV",
+                          data: [25, 50, 75, 100],
+                          backgroundColor: new Array(4).fill("#0d3020"),
+                        },
+                      ],
+                    }}
+                  />
+                </div>
+                <div className="pt-3">
+                  <Button large>Claim and lock</Button>
                 </div>
               </div>
             </Card>

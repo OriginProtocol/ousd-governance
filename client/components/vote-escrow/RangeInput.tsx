@@ -25,11 +25,13 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
 }) => (
   <>
     <label className="label">
-      <span className="label-text text-lg font-bold flex justify-between items-center w-full">
-        <span>{label}</span>
-        <span className="text-sm text-gray-500">
-          <TokenAmount amount={value} /> {counterUnit}
+      <span className="label-text text-lg flex justify-between items-center w-full">
+        <span>
+          {label} <TokenAmount amount={value} /> {counterUnit}
         </span>
+        {/*<span className="text-sm text-gray-500">
+          <TokenAmount amount={value} /> {counterUnit}
+</span>*/}
       </span>
     </label>
     <div>
