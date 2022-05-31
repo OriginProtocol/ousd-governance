@@ -38,7 +38,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   const isValidLockup = lockupAmount > 0 && lockupDuration > 0;
   const projectedApy =
     (currentApy / maxLockupDurationInWeeks) * lockupDuration * 100;
-  const projectedRewards = claimableOgv * (currentApy / 52) * lockupDuration;
   const maxRewards =
     claimableOgv * (currentApy / 52) * maxLockupDurationInWeeks;
 
@@ -287,20 +286,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                             </td>
                           </tr>
                         )}
-                        <tr>
-                          <th className="flex items-center space-x-2">
-                            <TokenIcon src="/ogv.svg" alt="OGV" />
-                            <span>
-                              Projected OGV rewards
-                              <span className="block text-xs text-gray-500 font-normal italic">
-                                based on current APYs
-                              </span>
-                            </span>
-                          </th>
-                          <td className="w-1/4">
-                            {projectedRewards.toFixed(2)}
-                          </td>
-                        </tr>
                       </tbody>
                     </table>
                     {isValidLockup && (
@@ -381,24 +366,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                             (claimableVeOgv / 4) * 0.75 +
                             (claimableVeOgv / 4) * 0.5 +
                             (claimableVeOgv / 4) * 0.25}
-                        </td>
-                      </tr>
-                      <tr>
-                        <th className="flex items-center space-x-2">
-                          <TokenIcon src="/ogv.svg" alt="OGV" />
-                          <span>
-                            Projected OGV rewards
-                            <span className="block text-xs text-gray-500 font-normal italic">
-                              based on current APYs
-                            </span>
-                          </span>
-                        </th>
-                        <td className="w-1/4">
-                          {(
-                            (currentApy / 52) *
-                            maxLockupDurationInWeeks *
-                            100
-                          ).toFixed(2)}
                         </td>
                       </tr>
                     </tbody>
