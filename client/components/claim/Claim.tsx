@@ -346,7 +346,15 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                     <div className="space-y-1">
                       <CardLabel>Lockup reward</CardLabel>
                       <div className="flex space-x-1 items-center">
-                        <CardStat>{(currentApy * 100).toFixed(2)}%</CardStat>
+                        <CardStat>
+                          {(
+                            (claimableVeOgv / 4) * currentApy +
+                            (claimableVeOgv / 4) * (currentApy * 0.75) +
+                            (claimableVeOgv / 4) * (currentApy * 0.5) +
+                            (claimableVeOgv / 4) * (currentApy * 0.25)
+                          ).toFixed(2)}
+                          %
+                        </CardStat>
                       </div>
                       <CardDescription>APY</CardDescription>
                     </div>
