@@ -1,7 +1,6 @@
 import fs from "fs";
 import { BigNumber } from "ethers";
 import EthereumEvents from "ethereum-events";
-import { merge } from "lodash";
 import {
   BlockHistory,
   bigNumberify,
