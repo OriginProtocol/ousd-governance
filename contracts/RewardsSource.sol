@@ -53,7 +53,7 @@ contract RewardsSource is Governable {
     function _calcRewards() internal view returns (uint256, uint256) {
         uint256 last = lastRewardTime;
         if (last >= block.timestamp) {
-            return (0, currentSlopeIndex);
+            return (0, 0); // A zero slopeIndex here results in no change to stored state
         }
         if (inflationSlopes.length == 0) {
             return (0, 0); // Save a slot read by returning a zero constant
@@ -68,11 +68,8 @@ contract RewardsSource is Governable {
             uint256 slopeEnd = slope.end;
             uint256 rangeStart = last;
             uint256 rangeEnd = block.timestamp;
-            if (rangeStart > slopeEnd) {
-                continue; // no duration possible in this slope
-            } 
             if (rangeEnd < slopeStart) {
-                continue; // no duration possible in this slope
+                break; // No future slope could match
             } 
             if (rangeStart < slopeStart) {
                 rangeStart = slopeStart; // trim to slope edge
