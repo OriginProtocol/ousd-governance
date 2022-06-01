@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@types/lodash": "^4.14.182",
     "ethereum-events": "github:AleG94/ethereum-events#8c92ade1d8f489a577399d5d3cd0093ef6c58aa5",
     "ethers": "^5.6.4",
     "lodash": "^4.17.21",
@@ -12,8 +13,14 @@
     "web3": "^1.7.3"
   },
   "scripts": {
-    "start": "ts-node ./src/index.ts",
+    "start:ogn": "ts-node ./src/ogn.ts",
+    "start:ousd": "ts-node ./src/ousd.ts",
     "prettier:check": "prettier --check 'src/*.{js,jsx,ts,tsx}'",
     "prettier:fix": "prettier --write 'src/*.{js,jsx,ts,tsx}'"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0"
   }
 }
