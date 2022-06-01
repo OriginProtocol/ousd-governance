@@ -26,7 +26,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
       <Wrapper narrow>
         <StepTracker currentStep={currentStep} steps={steps} />
       </Wrapper>
-      <Wrapper narrow={currentStep !== 2}>
+      <Wrapper narrow>
         {currentStep == 0 && <Explanation handleNextStep={handleNextStep} />}
         {currentStep == 1 && (
           <Eligibility
