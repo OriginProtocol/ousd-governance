@@ -8,14 +8,10 @@ import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import RangeInput from "components/vote-escrow/RangeInput";
 import Button from "components/Button";
-import { truncateEthAddress } from "utils/index";
 import { useStore } from "utils/store";
 import { Web3Button } from "components/Web3Button";
 import TokenIcon from "components/TokenIcon";
 import CardDescription from "components/CardDescription";
-import BarChart from "components/BarChart";
-import ExternalLinkIcon from "components/ExternalLinkIcon";
-import Link from "components/Link";
 import TokenAmount from "components/TokenAmount";
 
 interface ClaimProps {
@@ -23,24 +19,55 @@ interface ClaimProps {
 }
 
 const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
-  const { web3Provider, address } = useStore();
+  const { web3Provider } = useStore();
 
   const isEligible = true; // @TODO replace with real check
-  const claimableOgv = 100; // @TODO replace with real value
-  const currentApy = 1.2345; // @TODO replace with real %
+
+  const totalSupplyOfOgv = 1000000000; // @TODO replace with live value
+  const totalLockedUpOgv = 750000000; // @TODO replace with live value
+  const totalPercentageOfLockedUpOgv =
+    (totalLockedUpOgv / totalSupplyOfOgv) * 100;
+
+  const claimableOgv = 100; // @TODO replace with user value
+  const claimableVeOgv = 100; // @TODO replace with user value
+
+  const votingDecayFactor = 1.8; // @TODO replace with contract value
+  const ogvPrice = 0.15; // @TODO replace with live value
+  const totalVeOgv = 12980905133; // @TODO replace with live value
+  const stakingRewards = 100000000; // @TODO replace with real value
 
   const maxLockupDurationInWeeks = "208";
-
-  const [lockupAmount, setLockupAmount] = useState(claimableOgv);
+  //const [lockupAmount, setLockupAmount] = useState(claimableOgv);
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
 
-  const isValidLockup = lockupAmount > 0 && lockupDuration > 0;
-  const projectedApy =
-    (currentApy / maxLockupDurationInWeeks) * lockupDuration * 100;
-  const maxRewards =
-    claimableOgv * (currentApy / 52) * maxLockupDurationInWeeks;
+  const isValidLockup = lockupDuration > 0;
+
+  const getOgvLockupRewardApy = (veOgv: number) => {
+    const ogvPercentageOfRewards = veOgv / (totalVeOgv + veOgv);
+    const ogvRewards = stakingRewards * ogvPercentageOfRewards;
+    const valueOfOgvRewards = ogvRewards * ogvPrice;
+    const ogvLockupRewardApr =
+      (valueOfOgvRewards * 12) / (claimableOgv * ogvPrice);
+
+    return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
+  };
+
+  const veOgvFromOgvLockup = isValidLockup
+    ? claimableOgv * votingDecayFactor ** (lockupDuration / 52)
+    : 0;
+  const ogvLockupRewardApy = getOgvLockupRewardApy(veOgvFromOgvLockup);
+
+  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
+  const maxOgvLockupRewardApy = getOgvLockupRewardApy(maxVeOgvFromOgvLockup);
+
+  const veOgvFromVeOgvClaim =
+    (claimableVeOgv / 4) * votingDecayFactor ** (52 / 52) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (104 / 52) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (156 / 52) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (208 / 52);
+  const veOgvLockupRewardApy = 123.45; // @TODO replace with real calculated value
 
   const now = new Date();
   const lockupEnd = new Date(
@@ -58,8 +85,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   const oneYearFromNow = new Date(
     now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
   );
-
-  const claimableVeOgv = 100;
 
   if (!web3Provider) {
     return (
@@ -98,7 +123,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <div className="flex space-x-1 items-center">
                   <TokenIcon src="/ogv.svg" alt="OGV" />
                   <CardStat>
-                    <TokenAmount amount="1000000000" />
+                    <TokenAmount amount={totalSupplyOfOgv} />
                   </CardStat>
                 </div>
                 <CardDescription>OGV</CardDescription>
@@ -112,7 +137,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <div className="flex space-x-1 items-center">
                   <TokenIcon src="/ogv.svg" alt="OGV" />
                   <CardStat>
-                    <TokenAmount amount="750000000" />
+                    <TokenAmount amount={totalLockedUpOgv} />
                   </CardStat>
                 </div>
                 <CardDescription>OGV</CardDescription>
@@ -125,7 +150,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <CardLabel>% locked up</CardLabel>
                 <div className="flex space-x-1 items-center">
                   <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>75%</CardStat>
+                  <CardStat>{totalPercentageOfLockedUpOgv}%</CardStat>
                 </div>
                 <CardDescription>OGV</CardDescription>
               </div>
@@ -154,14 +179,13 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                     <CardLabel>Lockup reward</CardLabel>
                     <div className="flex space-x-1 items-center">
                       <CardStat>
-                        {isValidLockup ? projectedApy.toFixed(2) : 0}%
+                        {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}%
                       </CardStat>
                     </div>
                     <CardDescription>APY</CardDescription>
                   </div>
                 </Card>
               </CardGroup>
-              {/*<p className="text-gray-600 text-sm">Locking up your OGV when you claim gives you governance votes (veOGV) and rewards (further OGV). The longer you lock up your OGV for, the greater your OGV rewards will be.</p>*/}
               <div className="space-y-2">
                 {/*<div>
                       <RangeInput
@@ -282,25 +306,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                   />
                 </div>
               </div>
-              {/*<CardGroup horizontal twoCol>
-                    <Card alt tightPadding>
-                      <div className="space-y-1">
-                        <CardLabel>You&apos;ll recieve</CardLabel>
-                        <div className="flex space-x-1 items-center">
-                          <TokenIcon src="/veogv.svg" alt="veOGV" />
-                          <CardStat>100</CardStat>
-                        </div>
-                        <CardDescription>veOGV</CardDescription>
-                      </div>
-                    </Card>
-                    <Card alt tightPadding>
-                      <div className="space-y-1">
-                        <CardLabel>Rewards</CardLabel>
-                        <CardStat>123%</CardStat>
-                        <CardDescription>APY</CardDescription>
-                      </div>
-                    </Card>
-                      </CardGroup>*/}
               <div className="space-y-2 pt-3">
                 <p className="text-gray-600 text-sm">You are claiming:</p>
                 <table className="table table-compact w-full">
@@ -312,10 +317,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                           <span>veOGV</span>
                         </th>
                         <td className="w-1/4">
-                          {(
-                            (claimableOgv / maxLockupDurationInWeeks) *
-                            lockupDuration
-                          ).toFixed(2)}
+                          {veOgvFromOgvLockup.toFixed(2)}
                         </td>
                       </tr>
                     ) : (
@@ -358,7 +360,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <span className="block bg-red-500 text-white px-4 py-3">
                   <span className="font-bold">Note:</span> If you don&apos;t
                   lock up your {claimableOgv} OGV, you&apos;ll be missing out on
-                  up to {(currentApy * 100).toFixed(2)}% APY in rewards!
+                  up to {maxOgvLockupRewardApy.toFixed(2)}% APY in rewards!
                 </span>
               )}
               <div className="pt-3">
@@ -369,7 +371,6 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
             </div>
           </div>
         </Card>
-
         <Card>
           <div className="space-y-4">
             <SectionTitle>Claim veOGV</SectionTitle>
@@ -390,15 +391,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <div className="space-y-1">
                   <CardLabel>Lockup reward</CardLabel>
                   <div className="flex space-x-1 items-center">
-                    <CardStat>
-                      {(
-                        (claimableVeOgv / 4) * currentApy +
-                        (claimableVeOgv / 4) * (currentApy * 0.75) +
-                        (claimableVeOgv / 4) * (currentApy * 0.5) +
-                        (claimableVeOgv / 4) * (currentApy * 0.25)
-                      ).toFixed(2)}
-                      %
-                    </CardStat>
+                    <CardStat>{veOgvLockupRewardApy.toFixed(2)}%</CardStat>
                   </div>
                   <CardDescription>APY</CardDescription>
                 </div>
@@ -413,12 +406,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                       <TokenIcon src="/veogv.svg" alt="veOGV" />
                       <span>veOGV</span>
                     </th>
-                    <td className="w-1/4">
-                      {claimableVeOgv / 4 +
-                        (claimableVeOgv / 4) * 0.75 +
-                        (claimableVeOgv / 4) * 0.5 +
-                        (claimableVeOgv / 4) * 0.25}
-                    </td>
+                    <td className="w-1/4">{veOgvFromVeOgvClaim.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -435,7 +423,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         </span>
                       </span>
                     </th>
-                    <td className="w-1/4">{(claimableOgv / 4).toFixed(2)}</td>
+                    <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <th className="flex items-center space-x-2">
@@ -448,7 +436,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         </span>
                       </span>
                     </th>
-                    <td className="w-1/4">{(claimableOgv / 4).toFixed(2)}</td>
+                    <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <th className="flex items-center space-x-2">
@@ -461,7 +449,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         </span>
                       </span>
                     </th>
-                    <td className="w-1/4">{(claimableOgv / 4).toFixed(2)}</td>
+                    <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <th className="flex items-center space-x-2">
@@ -474,38 +462,17 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                         </span>
                       </span>
                     </th>
-                    <td className="w-1/4">{(claimableOgv / 4).toFixed(2)}</td>
+                    <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            {/*<div className="pt-3">
-                  <BarChart
-                    data={{
-                      labels: ["1 yr", "2 yr", "3 yr", "4 yr"],
-                      datasets: [
-                        {
-                          label: "OGV",
-                          data: new Array(4).fill(100),
-                          backgroundColor: new Array(4).fill("#4bbc8a"),
-                        },
-                        {
-                          label: "veOGV",
-                          data: [25, 50, 75, 100],
-                          backgroundColor: new Array(4).fill("#0d3020"),
-                        },
-                      ],
-                    }}
-                    caption={`Chart showing veOGV unlocking to OGV over time.`}
-                  />
-                  </div>*/}
             <div className="pt-3">
               <Button large>Claim</Button>
             </div>
           </div>
         </Card>
       </CardGroup>
-
       <div className="mt-6 flex">
         <div className="mr-auto">
           <Button onClick={handlePrevStep}>&larr; Learn about Origin</Button>
