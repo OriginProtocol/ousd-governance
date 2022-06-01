@@ -91,6 +91,35 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
       <div className="grid lg:grid-cols-11 gap-5 lg:gap-4">
         <div className="lg:col-span-6 lg:col-start-2">
           <CardGroup>
+            <CardGroup horizontal>
+              <div>
+                <Card dark tightPadding>
+                  <div className="space-y-1">
+                    <CardLabel>Total supply</CardLabel>
+                    <CardStat>1,000,000,000</CardStat>
+                    <CardDescription>OGV</CardDescription>
+                  </div>
+                </Card>
+              </div>
+              <div>
+                <Card dark tightPadding>
+                  <div className="space-y-1">
+                    <CardLabel>Locked up</CardLabel>
+                    <CardStat>750,000,000</CardStat>
+                    <CardDescription>OGV</CardDescription>
+                  </div>
+                </Card>
+              </div>
+              <div>
+                <Card dark tightPadding>
+                  <div className="space-y-1">
+                    <CardLabel>% locked up</CardLabel>
+                    <CardStat>75%</CardStat>
+                    <CardDescription>OGV</CardDescription>
+                  </div>
+                </Card>
+              </div>
+            </CardGroup>
             <Card>
               <div className="divide-y space-y-6">
                 <div className="space-y-4">
