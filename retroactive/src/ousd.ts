@@ -100,8 +100,6 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
     ethereumEvents.stop();
     const claims = calculateRewards();
 
-    console.log(claims);
-
     const csv = Object.entries(claims).map(
       ([address, data]: [address: string, data: any]) => {
         return `${address},${["ousd", "wousd"]
