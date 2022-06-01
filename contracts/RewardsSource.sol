@@ -94,15 +94,16 @@ contract RewardsSource is Governable {
 
     function setInflation(Slope[] memory slopes) external onlyGovernor {
         // slope ends intentionally are overwritten
-        require(slopes.length <= MAX_KNEES, "Rewards: Too many slopes");
+        uint256 length = slopes.length;
+        require(length <= MAX_KNEES, "Rewards: Too many slopes");
         delete inflationSlopes; // Delete all before rebuilding
         currentSlopeIndex = 0; // Reset
         uint256 minSlopeStart = 0;
-        if (slopes.length == 0) {
+        if (length == 0) {
             return;
         }
-        slopes[slopes.length - 1].end = type(uint64).max;
-        for (uint256 i = 0; i < slopes.length; i++) {
+        slopes[length - 1].end = type(uint64).max;
+        for (uint256 i = 0; i < length; i++) {
             require(
                 slopes[i].ratePerDay <= MAX_INFLATION_PER_DAY,
                 "Rewards: RatePerDay too high"
@@ -111,11 +112,11 @@ contract RewardsSource is Governable {
                 slopes[i].start > minSlopeStart,
                 "Rewards: Start times must increase"
             );
-            if (i < slopes.length - 1) {
+            if (i < length - 1) {
                 slopes[i].end = slopes[i + 1].start;
+                minSlopeStart = slopes[i].start;
             }
             inflationSlopes.push(slopes[i]);
-            minSlopeStart = slopes[i].start;
         }
     }
 
