@@ -2,7 +2,12 @@ import fs from "fs";
 import { BigNumber } from "ethers";
 import EthereumEvents from "ethereum-events";
 import { merge } from "lodash";
-import { bigNumberify, rewardScore, handleERC20Transfer } from "./utils";
+import {
+  BlockHistory,
+  bigNumberify,
+  rewardScore,
+  handleERC20Transfer,
+} from "./utils";
 import {
   ousdContract,
   wousdContract,
@@ -12,15 +17,13 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = 400000000;
-
 const SNAPSHOT_BLOCK = 14592991;
-
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
   blockNumber: number;
-  ousdHolders: Object;
-  wousdHolders: Object;
+  ousdHolders: { [address: string]: BlockHistory[] };
+  wousdHolders: { [address: string]: BlockHistory[] };
 };
 
 let savedProgress: ProgressFile;
@@ -85,7 +88,7 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
   }
 
   // Save the progress every 50000 blocks
-  if (blockNumber % 50000 === 0) {
+  if (blockNumber % 10000 === 0) {
     savedProgress = {
       blockNumber,
       ousdHolders,
@@ -97,6 +100,8 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
   if (blockNumber === SNAPSHOT_BLOCK) {
     ethereumEvents.stop();
     const claims = calculateRewards();
+
+    console.log(claims);
 
     const csv = Object.entries(claims).map(
       ([address, data]: [address: string, data: any]) => {
@@ -120,29 +125,35 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 const calculateRewards = () => {
   console.log("\n");
   console.log("Calculating OUSD rewards");
-  const ousdRewards = rewardScore("ousd", ousdHolders, SNAPSHOT_BLOCK);
+  const ousdRewards = rewardScore(ousdHolders, SNAPSHOT_BLOCK);
   console.log("Calculating wOUSD rewards");
-  const wousdRewards = rewardScore("wousd", wousdHolders, SNAPSHOT_BLOCK);
+  const wousdRewards = rewardScore(wousdHolders, SNAPSHOT_BLOCK);
 
   const totalScore = Object.values(ousdRewards)
     .concat(Object.values(wousdRewards))
-    .reduce((total: BigNumber, a: any) => {
-      return total.add(bigNumberify(a.amount));
+    .reduce((total: BigNumber, a: { [desc: string]: BigNumber }) => {
+      return total.add(bigNumberify(Object.values(a)[0]));
     }, bigNumberify(0));
 
-  return merge(ousdRewards, wousdRewards, (a, b) => {
-    if (a && b) {
-      const ousdReward = a.mul(AIRDROP_AMOUNT).div(totalScore);
-      const wousdReward = b.mul(AIRDROP_AMOUNT).div(totalScore);
-      return {
-        amount: a.plus(bigNumberify(b)).mul(AIRDROP_AMOUNT).div(totalScore),
-        split: {
-          ousd: ousdReward,
-          wousd: wousdReward,
-        },
-      };
-    }
-  });
+  const addresses = Object.keys(ousdRewards).concat(Object.keys(wousdRewards));
+
+  return addresses.reduce((acc, address) => {
+    const ousdReward = ousdRewards[address]
+      ? ousdRewards[address].mul(AIRDROP_AMOUNT).div(totalScore)
+      : bigNumberify(0);
+
+    const wousdReward = wousdRewards[address]
+      ? wousdRewards[address].mul(AIRDROP_AMOUNT).div(totalScore)
+      : bigNumberify(0);
+    acc[address] = {
+      amount: ousdReward.add(wousdReward),
+      split: {
+        ousd: ousdReward,
+        wousd: wousdReward,
+      },
+    };
+    return acc;
+  }, {});
 };
 
 console.log("Searching for events...");

@@ -73,11 +73,13 @@ const wousdContract = {
   events: ["Transfer"],
 };
 
-module.exports = {
+export {
   ognContract,
   ousd3CrvContract,
   ousd3CrvGaugeContract,
   convexContract,
   ousdContract,
   wousdContract,
+  OUSD_DEPLOY_BLOCK,
+  WOUSD_DEPLOY_BLOCK,
 };

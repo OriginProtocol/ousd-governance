@@ -17,7 +17,6 @@ const bigNumberify = (value): BigNumber => {
 };
 
 const rewardScore = (
-  desc: string,
   addressHistory: { [address: string]: BlockHistory[] },
   stopBlock: number,
   rewardFromBlock = 0
@@ -68,8 +67,7 @@ const rewardScore = (
       }
     )
     .reduce(
-      (obj, item) =>
-        Object.assign(obj, { [item.address]: { [desc]: item.score } }),
+      (obj, item) => Object.assign(obj, { [item.address]: item.score }),
       {}
     );
 };
@@ -77,7 +75,13 @@ const rewardScore = (
 // This is a generic handler to handle ERC20 Transer events that builds an object that
 // can be later used to calculate amount of an ERC20 held multiplied by the number of blocks
 // it was held for.
-const handleERC20Transfer = (obj, blockNumber, from, to, value) => {
+const handleERC20Transfer = (
+  obj: { [address: string]: BlockHistory[] },
+  blockNumber: number,
+  from: string,
+  to: string,
+  value: string
+) => {
   // Debit sender, unless its the zero address
   if (from !== ZERO_ADDRESS) {
     let amount = bigNumberify(last(obj[from]).amount).sub(bigNumberify(value));
@@ -100,7 +104,7 @@ const handleERC20Transfer = (obj, blockNumber, from, to, value) => {
       obj[to] = [
         {
           blockNumber: blockNumber,
-          amount: value,
+          amount: bigNumberify(value),
         },
       ];
     } else {

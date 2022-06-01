@@ -14,7 +14,4 @@ const ethereumEventsOptions = {
 
 const web3 = new Web3(process.env.PROVIDER_URL);
 
-module.exports = {
-  ethereumEventsOptions,
-  web3,
-};
+export { ethereumEventsOptions, web3 };
