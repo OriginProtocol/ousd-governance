@@ -11,10 +11,12 @@ import VeOgv from "components/claim/explanation/VeOgv";
 
 interface ExplanationProps {
   handleNextStep: () => void;
+  handlePrevStep: () => void;
 }
 
 const Explanation: FunctionComponent<ExplanationProps> = ({
   handleNextStep,
+  handlePrevStep,
 }) => {
   const [currentProduct, setCurrentProduct] = useState(0);
   const products = ["OGN", "OUSD", "OGV", "veOGV"];
@@ -55,9 +57,14 @@ const Explanation: FunctionComponent<ExplanationProps> = ({
         </div>
       </Card>
       <div className="mt-6 flex">
+        <div className="mr-auto">
+          <Button onClick={handlePrevStep}>
+            &larr; Check your eligibility
+          </Button>
+        </div>
         <div className="ml-auto">
           <Button onClick={handleNextStep} disabled={!canAdvance}>
-            Check your eligibility &rarr;
+            Claim your tokens &rarr;
           </Button>
         </div>
       </div>

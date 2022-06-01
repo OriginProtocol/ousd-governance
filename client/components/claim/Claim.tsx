@@ -508,9 +508,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
 
       <div className="mt-6 flex">
         <div className="mr-auto">
-          <Button onClick={handlePrevStep}>
-            &larr; Check Your Eligibility
-          </Button>
+          <Button onClick={handlePrevStep}>&larr; Learn about Origin</Button>
         </div>
       </div>
     </>

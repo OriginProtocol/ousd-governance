@@ -11,12 +11,10 @@ import CheckIcon from "components/CheckIcon";
 
 interface EligibilityProps {
   handleNextStep: () => void;
-  handlePrevStep: () => void;
 }
 
 const Eligibility: FunctionComponent<EligibilityProps> = ({
   handleNextStep,
-  handlePrevStep,
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
 
@@ -137,13 +135,8 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
         </div>
       </Card>
       <div className="mt-6 flex">
-        <div className="mr-auto">
-          <Button onClick={handlePrevStep}>&larr; Origin Products</Button>
-        </div>
         <div className="ml-auto">
-          <Button onClick={handleNextStep} disabled={!canAdvance}>
-            Claim Your Tokens &rarr;
-          </Button>
+          <Button onClick={handleNextStep}>Learn about Origin &rarr;</Button>
         </div>
       </div>
     </>
