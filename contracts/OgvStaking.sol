@@ -80,9 +80,22 @@ contract OgvStaking is ERC20Votes {
         uint256 duration,
         address to
     ) external {
-        if (to == address(0)) {
-            to = msg.sender;
-        }
+        _stake(amount, duration, to);
+    }
+
+    function stake(
+        uint256 amount,
+        uint256 duration
+    ) external {
+        _stake(amount, duration, msg.sender);
+    }
+
+    function _stake(
+        uint256 amount,
+        uint256 duration,
+        address to
+    ) internal {
+        require(to != address(0), "Staking: To the zero address");
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
         // duration checked inside previewPoints
