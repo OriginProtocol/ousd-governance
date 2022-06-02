@@ -1,11 +1,3 @@
-/// Merkle tree generator for airdrop of OGV for OGN holders and prelaunch liquidity mining campaign for OUSD
-//
-//
-// Airdrop is calculated using amount * number of blocks for:
-//    - Holders of OUSD3CRV-f
-//    - Holders of OUSD3CRV-f-gauge (i.e. OUSD3CRV-f staked in the Curve gauge)
-//    - Liquidity staked in Convex
-
 import fs from "fs";
 import { BigNumber } from "ethers";
 import EthereumEvents from "ethereum-events";
@@ -167,6 +159,7 @@ ethereumEvents.on(
     if (blockNumber % 50000 === 0) {
       savedProgress = {
         blockNumber,
+        ognHolders,
         ousd3Crv,
         ousd3CrvGauge,
         convexLiquidity,
