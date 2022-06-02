@@ -24,7 +24,8 @@ const LM_AIRDROP_AMOUNT = 50000000;
 // When the snapshot should be taken
 const SNAPSHOT_BLOCK = 14592991;
 // Announce block, i.e. start of LM campaign
-const ANNOUNCE_BLOCK = 14592991;
+// https://etherscan.io/block/14881677
+const ANNOUNCE_BLOCK = 14881677;
 const PROGRESS_FILE = "ogn-progress.json";
 
 let savedProgress;
