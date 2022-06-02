@@ -23,6 +23,7 @@ const nextConfig = {
       },
       'dev': {
         NETWORK_ID: 31337,
+        CLAIM_OPENS: 1657584000,
       },
       'staging': {
         NETWORK_ID: 4,

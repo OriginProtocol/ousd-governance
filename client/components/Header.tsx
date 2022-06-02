@@ -6,7 +6,11 @@ import Link from "components/Link";
 import Image from "next/image";
 import { navItems } from "../constants";
 
-const Header: FunctionComponent = () => {
+interface HeaderProps {
+  hideNav?: boolean;
+}
+
+const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 
   const overlayClassNames = classNames(
@@ -41,65 +45,76 @@ const Header: FunctionComponent = () => {
                   />
                 </Link>
               </div>
-              <ul className="space-x-10 font-light hidden lg:flex">
-                {navItems.map(({ href, label }) => (
-                  <li key={label}>
-                    <Link
-                      className="text-sm text-white hover:underline"
-                      currentClassName="font-normal"
-                      href={href}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              {!hideNav && (
+                <ul className="space-x-10 font-light hidden lg:flex">
+                  {navItems.map(({ href, label }) => (
+                    <li key={label}>
+                      <Link
+                        className="text-sm text-white hover:underline"
+                        currentClassName="font-normal"
+                        href={href}
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="flex-none flex items-center space-x-3 md:space-x-4">
-              <button
-                className="flex lg:hidden"
-                onClick={() => setMenuIsOpen(true)}
-              >
-                <Image
-                  width="25"
-                  height="19"
-                  src="/menu-icon.svg"
-                  alt="Open Menu"
-                />
-              </button>
+              {!hideNav && (
+                <button
+                  className="flex lg:hidden"
+                  onClick={() => setMenuIsOpen(true)}
+                >
+                  <Image
+                    width="25"
+                    height="19"
+                    src="/menu-icon.svg"
+                    alt="Open Menu"
+                  />
+                </button>
+              )}
               <Web3Button />
             </div>
           </div>
         </Wrapper>
       </header>
-      <div className={overlayClassNames} onClick={() => setMenuIsOpen(false)} />
-      <div className={mobileMenuClassNames}>
-        <button
-          className="absolute top-10 right-6"
-          onClick={() => setMenuIsOpen(false)}
-        >
-          <Image
-            width="18"
-            height="17"
-            src="/close-icon.svg"
-            alt="Close Menu"
+      {!hideNav && (
+        <>
+          <div
+            className={overlayClassNames}
+            onClick={() => setMenuIsOpen(false)}
           />
-        </button>
-        <ul className="mt-auto w-full text-2xl mb-10">
-          {navItems.map(({ href, label }) => (
-            <li key={label}>
-              <Link
-                className="px-6 py-3 block hover:text-gray-700 text-black border-l-4 border-white"
-                currentClassName="font-normal border-primary"
-                href={href}
-                onClick={() => setMenuIsOpen(false)}
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+          <div className={mobileMenuClassNames}>
+            <button
+              className="absolute top-10 right-6"
+              onClick={() => setMenuIsOpen(false)}
+            >
+              <Image
+                width="18"
+                height="17"
+                src="/close-icon.svg"
+                alt="Close Menu"
+              />
+            </button>
+            <ul className="mt-auto w-full text-2xl mb-10">
+              {navItems.map(({ href, label }) => (
+                <li key={label}>
+                  <Link
+                    className="px-6 py-3 block hover:text-gray-700 text-black border-l-4 border-white"
+                    currentClassName="font-normal border-primary"
+                    href={href}
+                    onClick={() => setMenuIsOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
     </>
   );
 };

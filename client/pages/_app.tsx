@@ -10,6 +10,7 @@ import { useStore } from "utils/store";
 import useAccountBalances from "utils/useAccountBalances";
 import useTotalBalances from "utils/useTotalBalances";
 import { TransactionListener } from "components/TransactionListener";
+import HoldingPage from "components/holding/Page";
 
 export default function App({ Component, pageProps }) {
   const { web3Provider, contracts, chainId } = useStore();
@@ -82,6 +83,14 @@ export default function App({ Component, pageProps }) {
 
   if (Object.keys(contracts).length === 0) {
     return <div>Loading...</div>;
+  }
+
+  if (new Date().getTime() / 1000 < parseInt(process.env.CLAIM_OPENS || "")) {
+    return (
+      <Layout hideNav>
+        <HoldingPage />
+      </Layout>
+    );
   }
 
   return (
