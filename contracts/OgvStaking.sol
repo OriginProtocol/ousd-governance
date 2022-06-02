@@ -47,18 +47,18 @@ contract OgvStaking is ERC20Votes {
         address ogv_,
         uint256 epoch_,
         address rewardsSource_
-    ) ERC20("", "") ERC20Permit("OGV Staking") {
+    ) ERC20("", "") ERC20Permit("veOGV") {
         ogv = ERC20(ogv_);
         epoch = epoch_;
         rewardsSource = RewardsSource(rewardsSource_);
     }
 
     function name() public pure override returns (string memory) {
-        return "OGVe";
+        return "veOGV";
     }
 
     function symbol() public pure override returns (string memory) {
-        return "Staked OGV";
+        return "veOGV";
     }
 
     function transfer(address, uint256) public override returns (bool) {
