@@ -103,8 +103,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
         durationInWeeks: 156,
       },
       {
-        address:
-          "0x3b9bddaccf50023e95592b449d5edf57d6ea483b2cc50a5620cf6cb8dbfb8229",
+        address: "0xe6030d4e773888e1dfe4cc31da6e05bfe53091ac",
         ogvLockedUp: 1234,
         durationInWeeks: 52,
       },
