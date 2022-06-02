@@ -12,8 +12,6 @@ import EthereumEvents from "ethereum-events";
 import { last } from "lodash";
 import {
   AccountHistory,
-  AccountReward,
-  BlockHistory,
   bigNumberify,
   rewardScore,
   handleERC20Transfer,
@@ -146,7 +144,6 @@ ethereumEvents.on(
   async (blockNumber: number, events: [any], done: () => void) => {
     for (const event of events) {
       if (event.to === ognContract.address) {
-        console.log(event);
         handleOgnTransfer(blockNumber, event);
       } else if (event.to === ousd3CrvContract.address) {
         handleCurveTransfer(blockNumber, event);
@@ -181,6 +178,21 @@ ethereumEvents.on(
       ethereumEvents.stop();
 
       const claims = calculateRewards();
+
+      const csv = Object.entries(claims).map(
+        ([address, data]: [address: string, data: any]) => {
+          return `${address},${["ogn", "ousd3Crv", "ousd3CrvGauge", "convex"]
+            .map((key) =>
+              data.split[key] === undefined ? 0 : data.split[key].toString()
+            )
+            .join(",")},${data.amount}`;
+        }
+      );
+
+      // Write a CSV for for easier verification
+      fs.writeFileSync("ogn-rewards.csv", csv.join("\n"));
+      // Write merkle tree claims JSON structure
+      fs.writeFileSync("ogn-claims.json", JSON.stringify(claims));
     }
 
     done();
@@ -233,6 +245,44 @@ const calculateRewards = () => {
         .concat(Object.keys(convexRewards))
     ),
   ];
+
+  return addresses.reduce((acc, address) => {
+    const ognReward = ognRewards[address]
+      ? ognRewards[address].mul(OGN_AIRDROP_AMOUNT).div(totalOgnScore)
+      : bigNumberify(0);
+
+    const ousd3CrvReward = ousd3CrvRewards[address]
+      ? ousd3CrvRewards[address]
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
+      : bigNumberify(0);
+
+    const ousd3CrvGaugeReward = ousd3CrvGaugeRewards[address]
+      ? ousd3CrvGaugeRewards[address]
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
+      : bigNumberify(0);
+
+    const convexReward = convexRewards[address]
+      ? convexRewards[address]
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
+      : bigNumberify(0);
+
+    acc[address] = {
+      amount: ognReward
+        .add(ousd3CrvReward)
+        .add(ousd3CrvGaugeReward)
+        .add(convexReward),
+      split: {
+        ogn: ognReward,
+        ousd3Crv: ousd3CrvReward,
+        ousd3GaugeCrv: ousd3CrvGaugeReward,
+        convex: convexReward,
+      },
+    };
+    return acc;
+  }, {});
 };
 
 console.log("Searching for events...");
