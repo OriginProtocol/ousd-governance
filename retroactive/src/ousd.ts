@@ -132,7 +132,9 @@ const calculateRewards = () => {
       return total.add(bigNumberify(Object.values(a)[0]));
     }, bigNumberify(0));
 
-  const addresses = Object.keys(ousdRewards).concat(Object.keys(wousdRewards));
+  const addresses = [
+    ...new Set(Object.keys(ousdRewards).concat(Object.keys(wousdRewards))),
+  ];
 
   return addresses.reduce((acc, address) => {
     const ousdReward = ousdRewards[address]

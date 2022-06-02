@@ -7,29 +7,34 @@
 //    - Liquidity staked in Convex
 
 import fs from "fs";
+import { BigNumber } from "ethers";
 import EthereumEvents from "ethereum-events";
 import { last } from "lodash";
-import { bigNumberify, rewardScore, handleERC20Transfer } from "./utils";
+import {
+  AccountHistory,
+  AccountReward,
+  BlockHistory,
+  bigNumberify,
+  rewardScore,
+  handleERC20Transfer,
+} from "./utils";
 import {
   ognContract,
   ousd3CrvContract,
   ousd3CrvGaugeContract,
   convexContract,
+  OGN_DEPLOY_BLOCK,
 } from "./contracts";
 import { ethereumEventsOptions, web3 } from "./config";
 
 // Amount of OGV being distributed to OGN holders
 const OGN_AIRDROP_AMOUNT = 1000000000;
-
 // Amount of OGV being distributed to participants in the prelaunch LM campaign
 const LM_AIRDROP_AMOUNT = 50000000;
-
 // When the snapshot should be taken
 const SNAPSHOT_BLOCK = 14592991;
-
 // Announce block, i.e. start of LM campaign
 const ANNOUNCE_BLOCK = 14592991;
-
 const PROGRESS_FILE = "ogn-progress.json";
 
 let savedProgress;
@@ -49,7 +54,16 @@ try {
   };
 }
 
-let { ognHolders, ousd3Crv, ousd3CrvGauge, convexLiquidity } = savedProgress;
+let {
+  ognHolders,
+  ousd3Crv,
+  ousd3CrvGauge,
+}: {
+  ognHolders: AccountHistory;
+  ousd3Crv: AccountHistory;
+  ousd3CrvGauge: AccountHistory;
+} = savedProgress;
+const { convexLiquidity }: { convexLiquidity: AccountHistory } = savedProgress;
 
 const contracts = [
   ognContract,
@@ -76,7 +90,7 @@ const handleOgnTransfer = async (blockNumber: number, event) => {
 };
 
 // Handler for OUSD3CRV-f transfer events
-const handleCurveTransfer = async (blockNumber: Number, event) => {
+const handleCurveTransfer = async (blockNumber: number, event) => {
   ousd3Crv = handleERC20Transfer(
     ousd3Crv,
     blockNumber,
@@ -87,7 +101,7 @@ const handleCurveTransfer = async (blockNumber: Number, event) => {
 };
 
 // Handler for OUSD3CRV-f-gauge transfer events
-const handleCurveGaugeTransfer = (blockNumber: Number, event) => {
+const handleCurveGaugeTransfer = (blockNumber: number, event) => {
   ousd3CrvGauge = handleERC20Transfer(
     ousd3CrvGauge,
     blockNumber,
@@ -98,7 +112,7 @@ const handleCurveGaugeTransfer = (blockNumber: Number, event) => {
 };
 
 // Handler for Convex events
-const handleConvexEvent = async (blockNumber: Number, event) => {
+const handleConvexEvent = async (blockNumber: number, event) => {
   if (event.name == "Staked") {
     // This only needs to be done once in add liquidity because it should
     // always be initialised before removing liquidity
@@ -129,9 +143,10 @@ const handleConvexEvent = async (blockNumber: Number, event) => {
 
 ethereumEvents.on(
   "block.confirmed",
-  async (blockNumber, events, done: Function) => {
+  async (blockNumber: number, events: [any], done: () => void) => {
     for (const event of events) {
       if (event.to === ognContract.address) {
+        console.log(event);
         handleOgnTransfer(blockNumber, event);
       } else if (event.to === ousd3CrvContract.address) {
         handleCurveTransfer(blockNumber, event);
@@ -163,42 +178,62 @@ ethereumEvents.on(
     }
 
     if (blockNumber === SNAPSHOT_BLOCK) {
-      console.log("\n");
       ethereumEvents.stop();
 
-      console.log("Calculating OGN rewards");
-      const ognRewards = rewardScore("ogn", ognHolders, SNAPSHOT_BLOCK);
-
-      // All the remaining rewards should calculate holding BETWEEN the SNAPSHOT_BLOCK and
-      // ANNOUNCE_BLOCK
-      console.log("Calculating OUSD3CRV-f rewards");
-      const ousd3CrvRewards = rewardScore(
-        "ousd3Crv",
-        ousd3Crv,
-        SNAPSHOT_BLOCK,
-        ANNOUNCE_BLOCK
-      );
-
-      console.log("Calculating OUSD3CRV-f-gauge rewards");
-      const ousd3CrvGaugeRewards = rewardScore(
-        "ousd3CrvGauge",
-        ousd3CrvGauge,
-        SNAPSHOT_BLOCK,
-        ANNOUNCE_BLOCK
-      );
-
-      console.log("Calculating Conved rewards");
-      const convexRewards = rewardScore(
-        "convex",
-        convexLiquidity,
-        SNAPSHOT_BLOCK,
-        ANNOUNCE_BLOCK
-      );
+      const claims = calculateRewards();
     }
 
     done();
   }
 );
+
+const calculateRewards = () => {
+  console.log("\n");
+  console.log("Calculating OGN rewards");
+  const ognRewards = rewardScore(ognHolders, SNAPSHOT_BLOCK);
+  // All the remaining rewards should calculate holding BETWEEN the SNAPSHOT_BLOCK and
+  // ANNOUNCE_BLOCK
+  console.log("Calculating OUSD3CRV-f rewards");
+  const ousd3CrvRewards = rewardScore(ousd3Crv, SNAPSHOT_BLOCK, ANNOUNCE_BLOCK);
+  console.log("Calculating OUSD3CRV-f-gauge rewards");
+  const ousd3CrvGaugeRewards = rewardScore(
+    ousd3CrvGauge,
+    SNAPSHOT_BLOCK,
+    ANNOUNCE_BLOCK
+  );
+  console.log("Calculating Conved rewards");
+  const convexRewards = rewardScore(
+    convexLiquidity,
+    SNAPSHOT_BLOCK,
+    ANNOUNCE_BLOCK
+  );
+
+  // Calculate the sum of all reward scores for the OGN airdrop
+  const totalOgnScore = Object.values(ognRewards).reduce(
+    (total: BigNumber, a: { [desc: string]: BigNumber }) => {
+      return total.add(bigNumberify(Object.values(a)[0]));
+    },
+    bigNumberify(0)
+  );
+
+  // Calculate the sum of all rewards scores for the LM campaign
+  const totalLiquidityMiningScore = Object.values(ousd3CrvRewards)
+    .concat(Object.values(ousd3CrvGaugeRewards))
+    .concat(Object.values(convexRewards))
+    .reduce((total: BigNumber, a: { [desc: string]: BigNumber }) => {
+      return total.add(bigNumberify(Object.values(a)[0]));
+    }, bigNumberify(0));
+
+  // List of all addresses
+  const addresses = [
+    ...new Set(
+      Object.keys(ognRewards)
+        .concat(Object.keys(ousd3CrvRewards))
+        .concat(Object.keys(ousd3CrvGaugeRewards))
+        .concat(Object.keys(convexRewards))
+    ),
+  ];
+};
 
 console.log("Searching for events...");
 

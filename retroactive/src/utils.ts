@@ -8,6 +8,14 @@ type BlockHistory = {
   amount: BigNumber;
 };
 
+type AccountHistory = {
+  [address: string]: BlockHistory[];
+};
+
+type AccountReward = {
+  [address: string]: BigNumber;
+};
+
 const bigNumberify = (value): BigNumber => {
   if (BigNumber.isBigNumber(value)) {
     return value;
@@ -82,6 +90,8 @@ const handleERC20Transfer = (
   to: string,
   value: string
 ) => {
+  // Ignore zero value transfers
+  if (value === "0") return obj;
   // Debit sender, unless its the zero address
   if (from !== ZERO_ADDRESS) {
     let amount = bigNumberify(last(obj[from]).amount).sub(bigNumberify(value));
@@ -118,6 +128,8 @@ const handleERC20Transfer = (
 };
 
 export {
+  AccountHistory,
+  AccountReward,
   BlockHistory,
   bigNumberify,
   rewardScore,
