@@ -16,7 +16,7 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = 400000000;
-const SNAPSHOT_BLOCK = 14592991;
+const SNAPSHOT_BLOCK = 14888133;
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
