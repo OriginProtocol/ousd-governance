@@ -1,8 +1,4 @@
 pragma solidity 0.8.10;
-import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
-import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {Governable} from "./Governable.sol";
 
 interface Mintable {
@@ -10,7 +6,7 @@ interface Mintable {
 }
 
 contract RewardsSource is Governable {
-    ERC20 public immutable ogv;
+    address public immutable ogv;
     address public rewardsTarget; // Contract that receives rewards
     uint256 public lastRewardTime; // Start of the time to calculate rewards over
     uint256 private currentSlopeIndex = 0; // Allows us to start with the correct slope
@@ -27,7 +23,7 @@ contract RewardsSource is Governable {
 
     constructor(address ogv_) {
         require(ogv_ != address(0), "Rewards: OGV must be set");
-        ogv = ERC20(ogv_);
+        ogv = ogv_;
         lastRewardTime = block.timestamp; // No possible rewards from before contract deployed
     }
 
@@ -41,7 +37,7 @@ contract RewardsSource is Governable {
             currentSlopeIndex = _nextSlopeIndex;
         }
         lastRewardTime = block.timestamp;
-        Mintable(address(ogv)).mint(rewardsTarget, rewards);
+        Mintable(ogv).mint(rewardsTarget, rewards);
         return rewards;
     }
 
