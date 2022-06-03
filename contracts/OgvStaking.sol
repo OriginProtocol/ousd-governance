@@ -20,7 +20,7 @@ contract OgvStaking is ERC20Votes {
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
-    ERC20 public immutable ogv;
+    ERC20 public immutable ogv; // Must not allow reentrancy
     RewardsSource public rewardsSource;
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
@@ -118,16 +118,14 @@ contract OgvStaking is ERC20Votes {
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
 
-    function unstake(uint256 lockupId, bool noRewards) external {
+    function unstake(uint256 lockupId) external {
         Lockup memory lockup = lockups[msg.sender][lockupId];
         uint256 amount = lockup.amount;
         uint256 end = lockup.end;
         uint256 points = lockup.points;
         require(block.timestamp >= end, "Staking: End of lockup not reached");
         require(end != 0, "Staking: Already unstaked this lockup");
-        if (!noRewards) {
-            _collectRewards(msg.sender);
-        }
+        _collectRewards(msg.sender);
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
         ogv.transfer(msg.sender, amount);
@@ -190,7 +188,12 @@ contract OgvStaking is ERC20Votes {
         if (supply == 0) {
             return; // Increasing accRewardPerShare would be meaningless.
         }
-        accRewardPerShare += (rewardsSource.collectRewards() * 1e12) / supply;
+        uint256 preBalance = ogv.balanceOf(address(this));
+        try rewardsSource.collectRewards() {
+        } catch { // Governance staking should continue, even if rewards fail
+        }
+        uint256 collected = ogv.balanceOf(address(this)) - preBalance;
+        accRewardPerShare += (collected * 1e12) / supply;
         uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
         uint256 netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
         rewardDebtPerShare[user] = accRewardPerShare ;
