@@ -22,6 +22,9 @@ contract RewardsSource is Governable {
     uint256 constant MAX_KNEES = 48;
     uint256 constant MAX_INFLATION_PER_DAY = (5 * 1e6 * 1e18);
 
+    event InflationChanged();
+    event RewardsTargetChange(address target, address previousTarget);
+
     constructor(address ogv_) {
         require(ogv_ != address(0), "Rewards: OGV must be set");
         ogv = ogv_;
@@ -112,9 +115,12 @@ contract RewardsSource is Governable {
             }
             inflationSlopes.push(slopes[i]);
         }
+        emit InflationChanged();
     }
 
     function setRewardsTarget(address rewardsTarget_) external onlyGovernor {
+        address previousTarget = rewardsTarget;
         rewardsTarget = rewardsTarget_; // Okay to be zero, just disables collecting rewards
+        emit RewardsTargetChange(rewardsTarget_, previousTarget);
     }
 }
