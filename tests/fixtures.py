@@ -1,6 +1,5 @@
 import pytest
 from brownie import *
-from pathlib import Path
 from .helpers import DAY
 
 @pytest.fixture
@@ -29,8 +28,8 @@ def governance(staking, timelock_controller, web3):
     return governance
 
 @pytest.fixture
-def optional_lockup_distributor(token, vote_locker):
-    return run("deploy_optional_lockup_distributor", "main", (token.address, vote_locker.address))
+def optional_lockup_distributor(token, staking):
+    return run("deploy_optional_lockup_distributor", "main", (token.address, staking.address))
 
 
 @pytest.fixture

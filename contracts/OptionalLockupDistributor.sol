@@ -4,10 +4,9 @@ pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
-import "./IMerkleDistributor.sol";
 
-interface IVoteLocker {
-  function lockup(uint256 amount, uint256 end, address _account) external;
+interface IOGVStaking {
+  function stake(uint256 amount, uint256 end, address _account) external;
 }
 
 contract OptionalLockupDistributor {
@@ -52,17 +51,17 @@ contract OptionalLockupDistributor {
     }
 
     /**
-     * @dev Execute a claim using a merkle proof with optional lockup in the staking contract.
+     * @dev Execute a claim using a merkle proof with optional stake in the staking contract.
      * @param _index Index in the tree
      * @param _amount Amount eligiblle to claim
      * @param _merkleProof The proof
-     * @param _lockupDuration Duration of the lockup to create
+     * @param _stakeDuration Duration of the stake to create
      */
     function claim(
         uint256 _index,
         uint256 _amount,
         bytes32[] calldata _merkleProof,
-        uint256 _lockupDuration
+        uint256 _stakeDuration
     ) external {
         require(!isClaimed(_index), "MerkleDistributor: Drop already claimed.");
 
@@ -75,10 +74,10 @@ contract OptionalLockupDistributor {
 
         // Mark it claimed and send the token.
         _setClaimed(_index);
-        if (_lockupDuration > 0) {
+        if (_stakeDuration > 0) {
           IERC20(token).approve(stakingContract, _amount);
-          // stakingContract.stake(_amount, _lockupDuration, msg.sender),
-          IVoteLocker(stakingContract).lockup(_amount, block.timestamp + _lockupDuration, msg.sender);
+          // stakingContract.stake(_amount, _stakeDuration, msg.sender),
+          IOGVStaking(stakingContract).stake(_amount, _stakeDuration, msg.sender);
         } else {
           require(
             IERC20(token).transfer(msg.sender, _amount),

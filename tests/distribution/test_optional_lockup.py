@@ -1,7 +1,6 @@
-import brownie
 from brownie import *
 from ..helpers import approx, H, MAXTIME, TOL, WEEK
-from ..fixtures import optional_lockup_distributor, token, vote_locker
+from ..fixtures import optional_lockup_distributor, token, staking, rewards
 
 merkle_proof = [
     0xc06e0d1a35007d9401ab64b2edb9cd0a674ebcce35acbf4c93e1193f99df35d3,
@@ -19,7 +18,7 @@ def test_no_lockup_duration(optional_lockup_distributor, token):
     assert token.balanceOf(accounts.default) == before_balance
 
 
-def test_claim_with_lockup_duration(optional_lockup_distributor, token, vote_locker):
+def test_claim_with_lockup_duration(optional_lockup_distributor, token, staking):
     amount = 0x019d971e4fe8401e74000000
     before_balance = token.balanceOf(accounts.default)
     # Transfer to the distributor contract so it has something to lockup
@@ -32,4 +31,3 @@ def test_claim_with_lockup_duration(optional_lockup_distributor, token, vote_loc
     optional_lockup_distributor.claim(1, amount, merkle_proof, WEEK)
     chain.sleep(H)
     chain.mine()
-    assert approx(vote_locker.balanceOf(accounts.default), amount // MAXTIME * (WEEK - 2 * H), TOL)
