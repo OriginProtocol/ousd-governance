@@ -1,6 +1,4 @@
 from brownie import *
-from pathlib import Path
-import json
 
 merkle_data = {
     "merkle_root": "0x362525d914142d116c518263e481c6cbe968a44638f9faeffb01c11a84008b96",
@@ -52,8 +50,8 @@ merkle_data = {
     }
 }
 
-def main(token_address, vote_locker_address):
+def main(token_address, staking_address):
     merkle_root = merkle_data["merkle_root"]
     return OptionalLockupDistributor.deploy(
-        token_address, merkle_root, vote_locker_address
+        token_address, merkle_root, staking_address
     )

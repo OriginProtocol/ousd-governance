@@ -34,5 +34,5 @@ def optional_lockup_distributor(token, vote_locker):
 
 
 @pytest.fixture
-def tranche_lockup_distributor(vote_locker):
-    pass
+def mandatory_lockup_distributor(token, staking):
+    return run("deploy_mandatory_lockup_distributor", "main", (token.address, staking.address))
