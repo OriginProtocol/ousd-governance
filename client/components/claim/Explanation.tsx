@@ -58,13 +58,11 @@ const Explanation: FunctionComponent<ExplanationProps> = ({
       </Card>
       <div className="mt-6 flex">
         <div className="mr-auto">
-          <Button onClick={handlePrevStep}>
-            &larr; Check your eligibility
-          </Button>
+          <Button onClick={handlePrevStep}>&larr; Check eligibility</Button>
         </div>
         <div className="ml-auto">
           <Button onClick={handleNextStep} disabled={!canAdvance}>
-            Claim your tokens &rarr;
+            Claim airdrop &rarr;
           </Button>
         </div>
       </div>

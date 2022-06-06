@@ -11,7 +11,7 @@ interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const steps = ["Eligibility", "Origin Products", "Claim"];
+  const steps = ["Check eligibility", "Learn about Origin", "Claim airdrop"];
 
   const handleNextStep = () => setCurrentStep(currentStep + 1);
   const handlePrevStep = () => setCurrentStep(currentStep - 1);
