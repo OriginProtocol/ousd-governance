@@ -109,7 +109,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
       },
     ];
 
-    setInterval(async () => {
+    const alertLoop = setInterval(async () => {
       const lockup = sample(recentLockups);
       const { address, ogvLockedUp, durationInWeeks } = lockup;
       const shortAddress =
@@ -126,6 +126,8 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
         }
       );
     }, random(5000, 20000, true));
+
+    return () => clearInterval(alertLoop);
   }, [web3Provider]);
 
   if (!web3Provider) {
