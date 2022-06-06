@@ -1,9 +1,9 @@
 import { FunctionComponent, useState } from "react";
 import Card from "components/Card";
 import Button from "components/Button";
-import Ogn from "components/claim/explanation/Ogn";
-import Ousd from "components/claim/explanation/Ousd";
-import Ogv from "components/claim/explanation/Ogv";
+import Ogn from "@/components/claim/education/Ogn";
+import Ousd from "@/components/claim/education/Ousd";
+import Ogv from "@/components/claim/education/Ogv";
 
 interface ExplanationProps {
   handleNextStep: () => void;

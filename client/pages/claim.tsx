@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import Wrapper from "components/Wrapper";
 import StepTracker from "components/StepTracker";
 import StepControls from "components/StepControls";
-import Explanation from "components/claim/Explanation";
+import Explanation from "@/components/claim/Education";
 import Eligibility from "@/components/claim/Eligibility";
 import Claim from "components/claim/Claim";
 
