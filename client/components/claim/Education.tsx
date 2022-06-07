@@ -18,8 +18,6 @@ const Explanation: FunctionComponent<ExplanationProps> = ({
 }) => {
   const [canAdvance, setCanAdvance] = useState(false);
 
-  console.log(canAdvance);
-
   return (
     <>
       <CardGroup>
