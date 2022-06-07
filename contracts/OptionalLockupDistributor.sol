@@ -6,7 +6,11 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.s
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
 
 interface IOGVStaking {
-  function stake(uint256 amount, uint256 end, address _account) external;
+    function stake(
+        uint256 amount,
+        uint256 end,
+        address _account
+    ) external;
 }
 
 contract OptionalLockupDistributor {
@@ -20,7 +24,11 @@ contract OptionalLockupDistributor {
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address _token, bytes32 _merkleRoot, address _stakingContract) {
+    constructor(
+        address _token,
+        bytes32 _merkleRoot,
+        address _stakingContract
+    ) {
         token = _token;
         merkleRoot = _merkleRoot;
         stakingContract = _stakingContract;
@@ -75,14 +83,18 @@ contract OptionalLockupDistributor {
         // Mark it claimed and send the token.
         _setClaimed(_index);
         if (_stakeDuration > 0) {
-          IERC20(token).approve(stakingContract, _amount);
-          // stakingContract.stake(_amount, _stakeDuration, msg.sender),
-          IOGVStaking(stakingContract).stake(_amount, _stakeDuration, msg.sender);
+            IERC20(token).approve(stakingContract, _amount);
+            // stakingContract.stake(_amount, _stakeDuration, msg.sender),
+            IOGVStaking(stakingContract).stake(
+                _amount,
+                _stakeDuration,
+                msg.sender
+            );
         } else {
-          require(
-            IERC20(token).transfer(msg.sender, _amount),
-            "MerkleDistributor: Transfer failed."
-          );
+            require(
+                IERC20(token).transfer(msg.sender, _amount),
+                "MerkleDistributor: Transfer failed."
+            );
         }
 
         emit Claimed(_index, msg.sender, _amount);

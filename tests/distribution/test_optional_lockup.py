@@ -20,14 +20,10 @@ def test_no_lockup_duration(optional_lockup_distributor, token):
 
 def test_claim_with_lockup_duration(optional_lockup_distributor, token, staking):
     amount = 0x019d971e4fe8401e74000000
-    before_balance = token.balanceOf(accounts.default)
-    # Transfer to the distributor contract so it has something to lockup
+    # Transfer to the distributor contract so it has something to give out
     token.transfer(optional_lockup_distributor.address, amount)
-    # Move to timing which is good for testing - beginning of a UTC week
-    chain.sleep((chain[-1].timestamp // WEEK + 1) * WEEK - chain[-1].timestamp)
-    chain.mine()
-    chain.sleep(H)
-    # Four year lockup
     optional_lockup_distributor.claim(1, amount, merkle_proof, WEEK)
-    chain.sleep(H)
+    chain.sleep(WEEK)
     chain.mine()
+    assert(staking.lockups(accounts.default, 0)[0] == amount)
+

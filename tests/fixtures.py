@@ -31,7 +31,6 @@ def governance(staking, timelock_controller, web3):
 def optional_lockup_distributor(token, staking):
     return run("deploy_optional_lockup_distributor", "main", (token.address, staking.address))
 
-
 @pytest.fixture
 def mandatory_lockup_distributor(token, staking):
     return run("deploy_mandatory_lockup_distributor", "main", (token.address, staking.address))

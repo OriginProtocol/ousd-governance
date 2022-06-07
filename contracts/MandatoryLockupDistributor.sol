@@ -6,7 +6,11 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.s
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
 
 interface IOGVStaking {
-  function stake(uint256 amount, uint256 end) external;
+    function stake(
+        uint256 amount,
+        uint256 end,
+        address to
+    ) external;
 }
 
 contract MandatoryLockupDistributor {
@@ -20,7 +24,11 @@ contract MandatoryLockupDistributor {
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(address _token, bytes32 _merkleRoot, address _stakingContract) {
+    constructor(
+        address _token,
+        bytes32 _merkleRoot,
+        address _stakingContract
+    ) {
         token = _token;
         merkleRoot = _merkleRoot;
         stakingContract = _stakingContract;
@@ -76,10 +84,10 @@ contract MandatoryLockupDistributor {
         IERC20(token).approve(stakingContract, _amount);
 
         // Create four lockups for a year each
-        IOGVStaking(stakingContract).stake(_amount / 4, 52 weeks);
-        IOGVStaking(stakingContract).stake(_amount / 4, 104 weeks);
-        IOGVStaking(stakingContract).stake(_amount / 4, 156 weeks);
-        IOGVStaking(stakingContract).stake(_amount / 4, 208 weeks);
+        IOGVStaking(stakingContract).stake(_amount / 4, 52 weeks, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 104 weeks, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 156 weeks, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 208 weeks, msg.sender);
 
         emit Claimed(_index, msg.sender, _amount);
     }
