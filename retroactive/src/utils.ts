@@ -41,11 +41,7 @@ const rewardScore = (
               // Ignore amounts less than 0, this can happen with OUSD due to the rebased yield not being included
               if (bigNumberify(amount).lt(0)) return acc;
               // Block number of history event is lower than the rewardFromBlock, ignore
-              if (
-                rewardFromBlock !== undefined &&
-                blockNumber < rewardFromBlock
-              )
-                return acc;
+              if (blockNumber < rewardFromBlock) return acc;
               // First history entry, ignore because we need at least two entries to calculate amount * block time held for
               if (currentIndex === 0) return acc;
 
