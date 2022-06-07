@@ -5,7 +5,8 @@ import { last } from "lodash";
 import {
   AccountHistory,
   bigNumberify,
-  rewardScore,
+  balanceRewardScore,
+  cumulativeRewardScore,
   handleERC20Transfer,
 } from "./utils";
 import {
@@ -196,19 +197,19 @@ ethereumEvents.on(
 const calculateRewards = () => {
   console.log("\n");
   console.log("Calculating OGN rewards");
-  const ognRewards = rewardScore(ognHolders, SNAPSHOT_BLOCK);
+  const ognRewards = balanceRewardScore(ognHolders);
   // All the remaining rewards should calculate holding BETWEEN the SNAPSHOT_BLOCK and
   // ANNOUNCE_BLOCK
   console.log("Calculating OUSD3CRV-f rewards");
-  const ousd3CrvRewards = rewardScore(ousd3Crv, SNAPSHOT_BLOCK, ANNOUNCE_BLOCK);
+  const ousd3CrvRewards = cumulativeRewardScore(ousd3Crv, SNAPSHOT_BLOCK, ANNOUNCE_BLOCK);
   console.log("Calculating OUSD3CRV-f-gauge rewards");
-  const ousd3CrvGaugeRewards = rewardScore(
+  const ousd3CrvGaugeRewards = cumulativeRewardScore(
     ousd3CrvGauge,
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
   console.log("Calculating Convex rewards");
-  const convexRewards = rewardScore(
+  const convexRewards = cumulativeRewardScore(
     convexLiquidity,
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK

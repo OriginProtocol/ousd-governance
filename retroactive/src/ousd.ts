@@ -4,7 +4,7 @@ import EthereumEvents from "ethereum-events";
 import {
   BlockHistory,
   bigNumberify,
-  rewardScore,
+  cumulativeRewardScore,
   handleERC20Transfer,
 } from "./utils";
 import {
@@ -122,9 +122,9 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 const calculateRewards = () => {
   console.log("\n");
   console.log("Calculating OUSD rewards");
-  const ousdRewards = rewardScore(ousdHolders, SNAPSHOT_BLOCK);
+  const ousdRewards = cumulativeRewardScore(ousdHolders, SNAPSHOT_BLOCK);
   console.log("Calculating wOUSD rewards");
-  const wousdRewards = rewardScore(wousdHolders, SNAPSHOT_BLOCK);
+  const wousdRewards = cumulativeRewardScore(wousdHolders, SNAPSHOT_BLOCK);
 
   const totalScore = Object.values(ousdRewards)
     .concat(Object.values(wousdRewards))

@@ -24,13 +24,13 @@ const bigNumberify = (value): BigNumber => {
   }
 };
 
-const rewardScore = (
+// Calculate a reward score based on the holdings of a token multipled by the
+// number of blocks it was held for.
+const cumulativeRewardScore = (
   addressHistory: { [address: string]: BlockHistory[] },
   stopBlock: number,
   rewardFromBlock = 0
 ) => {
-  // Calculate total rewards score by muiltiplying the amount of holdings by
-  // the number of blocks it is held for
   return Object.entries(addressHistory)
     .map(
       ([address, history]: [address: string, history: Array<BlockHistory>]) => {
@@ -84,9 +84,22 @@ const rewardScore = (
     );
 };
 
+// Calculate a reward based on the last recorded balance of a token (i.e. up to
+// SNAPSHOT_BLOCK).
+const balanceRewardScore = (
+  addressHistory: { [address: string]: BlockHistory[] }
+) => {
+  return Object.entries(addressHistory)
+    .reduce(
+      (obj, [address, history]: [address: string, history: Array<BlockHistory>]) => {
+        obj[address] = history[history.length - 1].amount
+        return obj
+      }, {})
+}
+
+
 // This is a generic handler to handle ERC20 Transfer events that builds an
-// object that can be later used to calculate amount of an ERC20 held
-// multiplied by the number of blocks it was held for.
+// object that can be later used in the reward scoring functions.
 const handleERC20Transfer = (
   obj: { [address: string]: BlockHistory[] },
   blockNumber: number,
@@ -137,7 +150,8 @@ export {
   AccountReward,
   BlockHistory,
   bigNumberify,
-  rewardScore,
+  balanceRewardScore,
+  cumulativeRewardScore,
   handleERC20Transfer,
   ZERO_ADDRESS,
 };
