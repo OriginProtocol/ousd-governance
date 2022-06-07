@@ -6,6 +6,7 @@ interface ButtonProps {
   onClick?: () => void;
   large?: Boolean;
   disabled?: Boolean;
+  fullWidth?: Boolean;
 }
 
 const Button: FunctionComponent<ButtonProps> = ({
@@ -13,9 +14,11 @@ const Button: FunctionComponent<ButtonProps> = ({
   onClick,
   large,
   disabled,
+  fullWidth,
 }) => {
   const className = classNames("btn btn-primary rounded-full", {
     "btn-lg": large,
+    "w-full": fullWidth,
   });
 
   return (
