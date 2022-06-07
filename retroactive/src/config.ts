@@ -1,4 +1,5 @@
 import Web3 from "web3";
+import { ethers } from "ethers";
 
 const ethereumEventsOptions = {
   pollInterval: 10000, // period between polls in milliseconds (default: 13000)
@@ -14,4 +15,6 @@ const ethereumEventsOptions = {
 
 const web3 = new Web3(process.env.PROVIDER_URL);
 
-export { ethereumEventsOptions, web3 };
+const provider = new ethers.providers.JsonRpcProvider(process.env.PROVIDER_URL);
+
+export { ethereumEventsOptions, provider, web3 };

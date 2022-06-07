@@ -86,17 +86,20 @@ const cumulativeRewardScore = (
 
 // Calculate a reward based on the last recorded balance of a token (i.e. up to
 // SNAPSHOT_BLOCK).
-const balanceRewardScore = (
-  addressHistory: { [address: string]: BlockHistory[] }
-) => {
-  return Object.entries(addressHistory)
-    .reduce(
-      (obj, [address, history]: [address: string, history: Array<BlockHistory>]) => {
-        obj[address] = history[history.length - 1].amount
-        return obj
-      }, {})
-}
-
+const balanceRewardScore = (addressHistory: {
+  [address: string]: BlockHistory[];
+}) => {
+  return Object.entries(addressHistory).reduce(
+    (
+      obj,
+      [address, history]: [address: string, history: Array<BlockHistory>]
+    ) => {
+      obj[address] = history[history.length - 1].amount;
+      return obj;
+    },
+    {}
+  );
+};
 
 // This is a generic handler to handle ERC20 Transfer events that builds an
 // object that can be later used in the reward scoring functions.
