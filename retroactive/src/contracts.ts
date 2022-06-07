@@ -75,6 +75,18 @@ const wousdContract = {
   events: ["Transfer"],
 };
 
+const OGN_STAKING_ADDRESS = "0x501804B374EF06fa9C427476147ac09F1551B9A0"
+const OGN_STAKING_DEPLOY_BLOCK = 11469389
+const OGN_STAKING_ABI = '[{"constant":true,"inputs":[],"name":"governor","outputs":[{"internalType":"address","name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"newImplementation","type":"address"}],"name":"upgradeTo","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"newImplementation","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"upgradeToAndCall","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"implementation","outputs":[{"internalType":"address","name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"claimGovernance","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"isGovernor","outputs":[{"internalType":"bool","name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"_logic","type":"address"},{"internalType":"address","name":"_initGovernor","type":"address"},{"internalType":"bytes","name":"_data","type":"bytes"}],"name":"initialize","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":false,"inputs":[{"internalType":"address","name":"_newGovernor","type":"address"}],"name":"transferGovernance","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"internalType":"address","name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"implementation","type":"address"}],"name":"Upgraded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"PendingGovernorshipTransfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousGovernor","type":"address"},{"indexed":true,"internalType":"address","name":"newGovernor","type":"address"}],"name":"GovernorshipTransferred","type":"event"}]'
+
+const ognStakingContract = {
+  name: "OGNStaking",
+  address: OGN_STAKING_ADDRESS,
+  abi: OGN_STAKING_ABI,
+  events: ["Staked", "Withdrawn", "StakesTransferred"],
+};
+
+
 export {
   ognContract,
   ousd3CrvContract,
@@ -82,7 +94,9 @@ export {
   convexContract,
   ousdContract,
   wousdContract,
+  ognStakingContract,
   OUSD_DEPLOY_BLOCK,
   WOUSD_DEPLOY_BLOCK,
   OGN_DEPLOY_BLOCK,
+  OGN_STAKING_DEPLOY_BLOCK
 };
