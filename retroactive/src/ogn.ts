@@ -207,7 +207,7 @@ const calculateRewards = () => {
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
-  console.log("Calculating Conved rewards");
+  console.log("Calculating Convex rewards");
   const convexRewards = rewardScore(
     convexLiquidity,
     SNAPSHOT_BLOCK,
