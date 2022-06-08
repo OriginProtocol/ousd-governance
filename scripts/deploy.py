@@ -8,7 +8,9 @@ def main(output_file=None):
     token = run("deploy_token")
 
     epoch = 86400 # 1 day
-    staking = run("deploy_staking", "main", (token.address, epoch))
+    
+    rewards = run("deploy_rewards", "main", (token.address,))
+    staking = run("deploy_staking", "main", (token.address, epoch, rewards.address))
 
     timelock_controller = Timelock.deploy([accounts[0]], [accounts[0]])
 
@@ -21,6 +23,7 @@ def main(output_file=None):
     if output_file:
         output = dict(
             OriginDollarGovernance=dict(address=token.address, abi=token.abi),
+            RewardsSource=dict(address=rewards.address, abi=rewards.abi),
             OgvStaking=dict(address=staking.address, abi=staking.abi),
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),
@@ -28,4 +31,4 @@ def main(output_file=None):
         with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
 
-    return (token, votelock, staking, timelock_controller, governance)
+    return (token, rewards, staking, timelock_controller, governance)
