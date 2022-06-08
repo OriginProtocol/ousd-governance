@@ -18,15 +18,12 @@ const useAccountBalances = () => {
     };
 
     const loadVotePower = async () => {
-      return await contracts.VoteLockerCurve.balanceOf(address);
+      return await contracts.OgvStaking.balanceOf(address);
     };
 
-    const loadExistingLockup = async () => {
-      const lockup = await contracts.VoteLockerCurve.getLockup(address);
-      return {
-        amount: lockup[0],
-        end: lockup[1],
-      };
+    const loadExistingLockups = async () => {
+      // @TODO Pull from db
+      return 0;
     };
 
     const loadOgnBalance = async () =>
@@ -38,11 +35,11 @@ const useAccountBalances = () => {
       Promise.all([
         loadBalance(),
         loadVotePower(),
-        loadExistingLockup(),
+        loadExistingLockups(),
         loadOgnBalance(),
         loadOusdBalance(),
         web3Provider.getBlock(),
-      ]).then(([ogv, vote_power, existingLockup, ogn, ousd, lastestBlock]) => {
+      ]).then(([ogv, vote_power, existingLockups, ogn, ousd, lastestBlock]) => {
         const now = lastestBlock.timestamp;
 
         useStore.setState({
@@ -52,15 +49,7 @@ const useAccountBalances = () => {
             ogn,
             ousd,
           },
-          existingLockup: {
-            ...existingLockup,
-            existingEndWeeks: !existingLockup.end.eq(ethers.BigNumber.from(0))
-              ? existingLockup.end.sub(now).div(604800).toNumber()
-              : 0,
-            existingEndDate: moment(
-              existingLockup.end.toNumber() * 1000
-            ).format("MMM D, YYYY"),
-          },
+          existingLockups,
         });
       });
     }
@@ -70,7 +59,7 @@ const useAccountBalances = () => {
     const loadAllowance = async () => {
       return await contracts.OriginDollarGovernance.allowance(
         address,
-        contracts.VoteLockerCurve.address
+        contracts.OgvStaking.address
       );
     };
 
