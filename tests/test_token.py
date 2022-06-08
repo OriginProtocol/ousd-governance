@@ -21,13 +21,15 @@ def test_transfer_ownership(token):
     assert token.owner() == accounts[1]
 
 def test_non_owner_cant_mint(token):
-    with brownie.reverts("Ownable: caller is not the owner"):
-        token.mint(accounts[1], 100, { 'from': accounts[1] })
+    with brownie.reverts(
+        "AccessControl: account 0x4370823e0453bae9f6b6b790daa7d02fd158719f is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
+    ):
+        token.mint(accounts[1], 100, {"from": accounts[1]})
 
 def test_minter_can_mint(token):
-    token.grantMinterRole(accounts[0], { "from": accounts[0] })
-    token.mint(accounts[1], 100, { 'from': accounts[0] })
-    assert token.totalSupply() == 1000000000 * 10 ** 18 + 100
+    token.grantMinterRole(accounts[0], {"from": accounts[0]})
+    token.mint(accounts[1], 100, {"from": accounts[0]})
+    assert token.totalSupply() == 1000000000 * 10**18 + 100
 
 def test_cant_upgrade_to_non_uups(token):
     non_uups_token = NonUUPSToken.deploy({ 'from': accounts[0]})

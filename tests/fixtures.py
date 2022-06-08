@@ -1,6 +1,5 @@
 import pytest
 from brownie import *
-from pathlib import Path
 from .helpers import DAY
 
 @pytest.fixture
@@ -27,3 +26,11 @@ def governance(staking, timelock_controller, web3):
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="CANCELLER_ROLE"), governance)
     return governance
+
+@pytest.fixture
+def optional_lockup_distributor(token, staking):
+    return run("deploy_optional_lockup_distributor", "main", (token.address, staking.address))
+
+@pytest.fixture
+def mandatory_lockup_distributor(token, staking):
+    return run("deploy_mandatory_lockup_distributor", "main", (token.address, staking.address))

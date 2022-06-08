@@ -1,11 +1,16 @@
 from brownie import chain
 
+H = 3600
 DAY = 86400
 WEEK = 7 * DAY
+MAXTIME = 4 * 365 * DAY
+TOL = 120 / WEEK
 
 def approx(a, b, precision=1e-10):
     if a == b == 0:
         return True
+    print(2 * abs(a - b) / (a + b))
+    print(precision)
     return 2 * abs(a - b) / (a + b) <= precision
 
 def floor_week(timestamp):

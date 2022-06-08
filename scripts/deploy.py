@@ -10,10 +10,7 @@ def main(output_file=None):
     epoch = 86400 # 1 day
     staking = run("deploy_staking", "main", (token.address, epoch))
 
-    timelock_delay = 86400 * 2  # 48 hours
-    timelock_controller = Timelock.deploy(
-        [accounts[0]], [accounts[0]]
-    )
+    timelock_controller = Timelock.deploy([accounts[0]], [accounts[0]])
 
     governance = Governance.deploy(staking, timelock_controller)
 
@@ -24,7 +21,6 @@ def main(output_file=None):
     if output_file:
         output = dict(
             OriginDollarGovernance=dict(address=token.address, abi=token.abi),
-            VoteLockerCurve=dict(address=votelock.address, abi=votelock.abi),
             OgvStaking=dict(address=staking.address, abi=staking.abi),
             TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
             Governance=dict(address=governance.address, abi=governance.abi),

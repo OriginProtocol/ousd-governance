@@ -1,8 +1,5 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
-import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
-import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {Governable} from "./Governable.sol";
 
 interface Mintable {
@@ -10,7 +7,7 @@ interface Mintable {
 }
 
 contract RewardsSource is Governable {
-    ERC20 public immutable ogv;
+    address public immutable ogv;
     address public rewardsTarget; // Contract that receives rewards
     uint256 public lastRewardTime; // Start of the time to calculate rewards over
     uint256 private currentSlopeIndex = 0; // Allows us to start with the correct slope
@@ -25,9 +22,12 @@ contract RewardsSource is Governable {
     uint256 constant MAX_KNEES = 48;
     uint256 constant MAX_INFLATION_PER_DAY = (5 * 1e6 * 1e18);
 
+    event InflationChanged();
+    event RewardsTargetChange(address target, address previousTarget);
+
     constructor(address ogv_) {
         require(ogv_ != address(0), "Rewards: OGV must be set");
-        ogv = ERC20(ogv_);
+        ogv = ogv_;
         lastRewardTime = block.timestamp; // No possible rewards from before contract deployed
     }
 
@@ -41,7 +41,7 @@ contract RewardsSource is Governable {
             currentSlopeIndex = _nextSlopeIndex;
         }
         lastRewardTime = block.timestamp;
-        Mintable(address(ogv)).mint(rewardsTarget, rewards);
+        Mintable(ogv).mint(rewardsTarget, rewards);
         return rewards;
     }
 
@@ -53,7 +53,7 @@ contract RewardsSource is Governable {
     function _calcRewards() internal view returns (uint256, uint256) {
         uint256 last = lastRewardTime;
         if (last >= block.timestamp) {
-            return (0, currentSlopeIndex);
+            return (0, 0); // A zero slopeIndex here results in no change to stored state
         }
         if (inflationSlopes.length == 0) {
             return (0, 0); // Save a slot read by returning a zero constant
@@ -68,11 +68,8 @@ contract RewardsSource is Governable {
             uint256 slopeEnd = slope.end;
             uint256 rangeStart = last;
             uint256 rangeEnd = block.timestamp;
-            if (rangeStart > slopeEnd) {
-                continue; // no duration possible in this slope
-            } 
             if (rangeEnd < slopeStart) {
-                continue; // no duration possible in this slope
+                break; // No future slope could match
             } 
             if (rangeStart < slopeStart) {
                 rangeStart = slopeStart; // trim to slope edge
@@ -94,15 +91,16 @@ contract RewardsSource is Governable {
 
     function setInflation(Slope[] memory slopes) external onlyGovernor {
         // slope ends intentionally are overwritten
-        require(slopes.length <= MAX_KNEES, "Rewards: Too many slopes");
+        uint256 length = slopes.length;
+        require(length <= MAX_KNEES, "Rewards: Too many slopes");
         delete inflationSlopes; // Delete all before rebuilding
         currentSlopeIndex = 0; // Reset
         uint256 minSlopeStart = 0;
-        if (slopes.length == 0) {
+        if (length == 0) {
             return;
         }
-        slopes[slopes.length - 1].end = type(uint64).max;
-        for (uint256 i = 0; i < slopes.length; i++) {
+        slopes[length - 1].end = type(uint64).max;
+        for (uint256 i = 0; i < length; i++) {
             require(
                 slopes[i].ratePerDay <= MAX_INFLATION_PER_DAY,
                 "Rewards: RatePerDay too high"
@@ -111,15 +109,18 @@ contract RewardsSource is Governable {
                 slopes[i].start > minSlopeStart,
                 "Rewards: Start times must increase"
             );
-            if (i < slopes.length - 1) {
+            if (i < length - 1) {
                 slopes[i].end = slopes[i + 1].start;
+                minSlopeStart = slopes[i].start;
             }
             inflationSlopes.push(slopes[i]);
-            minSlopeStart = slopes[i].start;
         }
+        emit InflationChanged();
     }
 
     function setRewardsTarget(address rewardsTarget_) external onlyGovernor {
+        address previousTarget = rewardsTarget;
         rewardsTarget = rewardsTarget_; // Okay to be zero, just disables collecting rewards
+        emit RewardsTargetChange(rewardsTarget_, previousTarget);
     }
 }

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
@@ -19,9 +20,9 @@ contract OgvStaking is ERC20Votes {
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
-    ERC20 public immutable ogv;
+    ERC20 public immutable ogv; // Must not allow reentrancy
     RewardsSource public rewardsSource;
-    mapping(address => uint256) public rewardDebt;
+    mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
     // Events
@@ -47,18 +48,18 @@ contract OgvStaking is ERC20Votes {
         address ogv_,
         uint256 epoch_,
         address rewardsSource_
-    ) ERC20("", "") ERC20Permit("OGV Staking") {
+    ) ERC20("", "") ERC20Permit("veOGV") {
         ogv = ERC20(ogv_);
         epoch = epoch_;
         rewardsSource = RewardsSource(rewardsSource_);
     }
 
     function name() public pure override returns (string memory) {
-        return "OGVe";
+        return "veOGV";
     }
 
     function symbol() public pure override returns (string memory) {
-        return "Staked OGV";
+        return "veOGV";
     }
 
     function transfer(address, uint256) public override returns (bool) {
@@ -80,9 +81,22 @@ contract OgvStaking is ERC20Votes {
         uint256 duration,
         address to
     ) external {
-        if (to == address(0)) {
-            to = msg.sender;
-        }
+        _stake(amount, duration, to);
+    }
+
+    function stake(
+        uint256 amount,
+        uint256 duration
+    ) external {
+        _stake(amount, duration, msg.sender);
+    }
+
+    function _stake(
+        uint256 amount,
+        uint256 duration,
+        address to
+    ) internal {
+        require(to != address(0), "Staking: To the zero address");
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
         // duration checked inside previewPoints
@@ -100,32 +114,27 @@ contract OgvStaking is ERC20Votes {
             })
         );
         _mint(to, points);
-        rewardDebt[to] = (balanceOf(to) * accRewardPerShare) / 1e12;
         ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
 
-    function unstake(uint256 lockupId, bool noRewards) external {
+    function unstake(uint256 lockupId) external {
         Lockup memory lockup = lockups[msg.sender][lockupId];
         uint256 amount = lockup.amount;
         uint256 end = lockup.end;
         uint256 points = lockup.points;
         require(block.timestamp >= end, "Staking: End of lockup not reached");
         require(end != 0, "Staking: Already unstaked this lockup");
-        if (!noRewards) {
-            _collectRewards(msg.sender);
-        }
+        _collectRewards(msg.sender);
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
-        rewardDebt[msg.sender] =
-            (balanceOf(msg.sender) * accRewardPerShare) /
-            1e12;
         ogv.transfer(msg.sender, amount);
         emit Unstake(msg.sender, lockupId, amount, end, points);
     }
 
     function extend(uint256 lockupId, uint256 duration) external {
         // duration checked inside previewPoints
+        _collectRewards(msg.sender);
         Lockup memory lockup = lockups[msg.sender][lockupId];
         uint256 oldAmount = lockup.amount;
         uint256 oldEnd = lockup.end;
@@ -139,9 +148,6 @@ contract OgvStaking is ERC20Votes {
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
         _mint(msg.sender, newPoints - oldPoints);
-        rewardDebt[msg.sender] =
-            (balanceOf(msg.sender) * accRewardPerShare) /
-            1e12;
         emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
         emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
     }
@@ -164,9 +170,6 @@ contract OgvStaking is ERC20Votes {
 
     function collectRewards() external {
         _collectRewards(msg.sender);
-        rewardDebt[msg.sender] =
-            (balanceOf(msg.sender) * accRewardPerShare) /
-            1e12;
     }
 
     function previewRewards(address user) external view returns (uint256) {
@@ -176,24 +179,27 @@ contract OgvStaking is ERC20Votes {
         }
         uint256 _accRewardPerShare = accRewardPerShare;
         _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
-        uint256 balance = balanceOf(user);
-        uint256 grossReward = (balance * _accRewardPerShare) / 1e12;
-        return grossReward - rewardDebt[user];
+        uint256 netRewardsPerShare = _accRewardPerShare - rewardDebtPerShare[user];
+        return (balanceOf(user) * netRewardsPerShare) / 1e12;
     }
 
     function _collectRewards(address user) internal {
         uint256 supply = totalSupply();
-        if (supply == 0) {
-            return; // Increasing accRewardPerShare would be meaningless.
+        if (supply > 0) {
+            uint256 preBalance = ogv.balanceOf(address(this));
+            try rewardsSource.collectRewards() {
+            } catch { // Governance staking should continue, even if rewards fail
+            }
+            uint256 collected = ogv.balanceOf(address(this)) - preBalance;
+            accRewardPerShare += (collected * 1e12) / supply;
         }
-        accRewardPerShare += (rewardsSource.collectRewards() * 1e12) / supply;
-        uint256 balance = balanceOf(user);
-        if (balance == 0) {
-            return; // Do NOT move this check before `accRewardPerShare +=`
+        uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
+        uint256 netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
+        rewardDebtPerShare[user] = accRewardPerShare;
+        if (netRewards == 0) {
+            return;
         }
-        uint256 grossReward = (balance * accRewardPerShare) / 1e12;
-        uint256 netReward = grossReward - rewardDebt[user];
-        ogv.transfer(user, netReward);
-        emit Reward(user, netReward);
+        ogv.transfer(user, netRewards);
+        emit Reward(user, netRewards);
     }
 }
