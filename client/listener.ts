@@ -26,7 +26,7 @@ const WEB3_PROVIDER = RPC_URLS[networkId];
 const rpc_provider = new ethers.providers.JsonRpcProvider(WEB3_PROVIDER);
 
 export const governanceTokenContract = new ethers.Contract(
-  GovernanceContracts.VoteLockerCurve.address,
+  GovernanceContracts.OgvStaking.address,
   ["function balanceOf(address owner) view returns (uint256)"],
   rpc_provider
 );
@@ -39,10 +39,10 @@ const contracts = [
     events: ["ProposalCreated"],
   },
   {
-    name: "VoteLockerCurve",
-    address: GovernanceContracts.VoteLockerCurve.address,
-    abi: GovernanceContracts.VoteLockerCurve.abi,
-    events: ["LockupCreated", "LockupUpdated"],
+    name: "OgvStaking",
+    address: GovernanceContracts.OgvStaking.address,
+    abi: GovernanceContracts.OgvStaking.abi,
+    events: ["Stake", "Unstake"],
   },
 ];
 
@@ -75,40 +75,30 @@ const handleEvents = async (blockNumber, events, done) => {
       } catch (e) {
         // Likely duplicate
       }
-    } else if(event.name === "LockupCreated") {
+    } else if(event.name === "Stake") {
       try {
         await prisma.lockup.create({
           data: {
-            address: event.values.provider,
+            user: event.values.user,
+            lockupId: event.values.lockupId,
             amount: event.values.amount,
             end: event.values.end,
             weeks: Math.round((event.values.end - now) / 604800),
+            points: event.values.points,
           },
         });
-        logger.info("Inserted new lockup");
+        logger.info("Inserted lockup");
       } catch (e) {
         // Likely duplicate
       }
-    } else if(event.name === "LockupUpdated") {
+    } else if(event.name === "Unstake") {
       try {
-        await prisma.lockup.updateMany({
+        await prisma.lockup.delete({
           where: {
-            address: event.values.provider,
-          },
-          data: {
-            active: false,
-          }
-        });
-        logger.info("Updated existing lockup(s)");
-        await prisma.lockup.create({
-          data: {
-            address: event.values.provider,
-            amount: event.values.amount,
-            end: event.values.end,
-            weeks: Math.round((event.values.end - now) / 604800),
+            lockupId: event.values.lockupId,
           },
         });
-        logger.info("Inserted new lockup");
+        logger.info("Removed lockup");
       } catch (e) {
         // Likely not found
       }

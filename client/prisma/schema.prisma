@@ -36,12 +36,12 @@ model Listener {
 }
 
 model Lockup {
-  id       Int @default(autoincrement()) @id
-  address  String
-  amount   String
-  end      String
-  weeks    Int
-  active   Boolean @default(true)
+  user      String
+  lockupId  Int @unique
+  amount    String
+  end       String
+  weeks     Int
+  points    Int
 
   @@map("lockups")
 }
