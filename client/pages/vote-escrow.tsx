@@ -131,7 +131,7 @@ export default function VoteEscrow({
 
   const handleApproval = async () => {
     const transaction = await contracts.OriginDollarGovernance.approve(
-      contracts.VoteLockerCurve.address,
+      contracts.OgvStaking.address,
       ethers.constants.MaxUint256
     );
 
@@ -153,11 +153,11 @@ export default function VoteEscrow({
     const valid = await validate();
     if (valid) {
       const now = (await web3Provider.getBlock()).timestamp;
-      const end =
-        now + (existingLockup.end.gt(0) ? weeks + 1 : weeks) * 7 * 86400;
-      const transaction = await contracts.VoteLockerCurve.lockup(
+      const duration = weeks * 7 * 86400;
+
+      const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(amount),
-        end
+        duration
       );
       useStore.setState({
         pendingTransactions: [
@@ -197,13 +197,13 @@ export default function VoteEscrow({
               <div className="space-y-1">
                 <CardLabel>Vote Balance</CardLabel>
                 <CardStat>
-                  <TokenAmount amount={balances.vote_power} />
+                  <TokenAmount amount={balances.veOgv} />
                 </CardStat>
                 <CardDescription>veOGV</CardDescription>
               </div>
             </Card>
           </div>
-          <div>
+          {/*<div>
             <Card dark tightPadding>
               <div className="space-y-1">
                 <CardLabel>Lockup Balance</CardLabel>
@@ -230,8 +230,7 @@ export default function VoteEscrow({
                   </CardDescription>
                 )}
               </div>
-            </Card>
-          </div>
+                </div>*/}
         </CardGroup>
         <Card>
           {balances.ogv.gt(0) ? (

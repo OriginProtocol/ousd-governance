@@ -1,4 +1,5 @@
 import { FunctionComponent, useEffect, useState } from "react";
+import { BigNumber, utils } from "ethers";
 import moment from "moment";
 import { toast } from "react-toastify";
 import { sample, random } from "lodash";
@@ -22,12 +23,12 @@ interface ClaimProps {
 }
 
 const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
-  const { web3Provider } = useStore();
+  const { web3Provider, totalBalances } = useStore();
+  const { totalSupplyOfOgv, totalLockedUpOgv } = totalBalances;
 
   const isEligible = true; // @TODO replace with real check
 
-  const totalSupplyOfOgv = 1000000000; // @TODO replace with live value
-  const totalLockedUpOgv = 750000000; // @TODO replace with live value
+  //const totalLockedUpOgv = utils.parseEther("750000000"); // @TODO replace with live value (balance of OGV in staking contracting)
   const totalPercentageOfLockedUpOgv =
     (totalLockedUpOgv / totalSupplyOfOgv) * 100;
 
@@ -194,7 +195,9 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
                 <CardLabel>% locked up</CardLabel>
                 <div className="flex space-x-1 items-center">
                   <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>{totalPercentageOfLockedUpOgv}%</CardStat>
+                  <CardStat>
+                    {totalPercentageOfLockedUpOgv.toFixed(2)}%
+                  </CardStat>
                 </div>
                 <CardDescription>OGV</CardDescription>
               </div>

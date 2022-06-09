@@ -13,11 +13,11 @@ const useAccountBalances = () => {
 
   // Load users governance token balance and vote power
   useEffect(() => {
-    const loadBalance = async () => {
+    const loadOgvBalance = async () => {
       return await contracts.OriginDollarGovernance.balanceOf(address);
     };
 
-    const loadVotePower = async () => {
+    const loadVeOgvBalance = async () => {
       return await contracts.OgvStaking.balanceOf(address);
     };
 
@@ -33,19 +33,19 @@ const useAccountBalances = () => {
 
     if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
-        loadBalance(),
-        loadVotePower(),
+        loadOgvBalance(),
+        loadVeOgvBalance(),
         loadExistingLockups(),
         loadOgnBalance(),
         loadOusdBalance(),
         web3Provider.getBlock(),
-      ]).then(([ogv, vote_power, existingLockups, ogn, ousd, lastestBlock]) => {
+      ]).then(([ogv, veOgv, existingLockups, ogn, ousd, lastestBlock]) => {
         const now = lastestBlock.timestamp;
 
         useStore.setState({
           balances: {
             ogv,
-            vote_power,
+            veOgv,
             ogn,
             ousd,
           },

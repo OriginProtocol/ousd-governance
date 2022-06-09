@@ -7,17 +7,25 @@ const useTotalBalances = () => {
   const { web3Provider, contracts } = useStore();
 
   useEffect(() => {
-    const loadTotalSupply = async () =>
+    const loadTotalSupplyOfOgv = async () =>
       await contracts.OriginDollarGovernance.totalSupply();
 
+    const loadTotalLockedUpOgv = async () =>
+      await contracts.OriginDollarGovernance.balanceOf(
+        contracts.OgvStaking.address
+      );
+
     if (web3Provider && networkInfo.correct && contracts.loaded) {
-      Promise.all([loadTotalSupply()]).then(([totalSupply]) => {
-        useStore.setState({
-          totalBalances: {
-            totalSupply,
-          },
-        });
-      });
+      Promise.all([loadTotalSupplyOfOgv(), loadTotalLockedUpOgv()]).then(
+        ([totalSupplyOfOgv, totalLockedUpOgv]) => {
+          useStore.setState({
+            totalBalances: {
+              totalSupplyOfOgv,
+              totalLockedUpOgv,
+            },
+          });
+        }
+      );
     }
   }, [networkInfo, web3Provider, contracts]);
 };
