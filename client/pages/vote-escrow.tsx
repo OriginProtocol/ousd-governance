@@ -13,6 +13,7 @@ import LockupStats from "components/vote-escrow/LockupStats";
 import prisma from "lib/prisma";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
+import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import RangeInput from "components/vote-escrow/RangeInput";
@@ -185,9 +186,12 @@ export default function VoteEscrow({
             <Card dark tightPadding>
               <div className="space-y-1">
                 <CardLabel>Balance</CardLabel>
-                <CardStat>
-                  <TokenAmount amount={balances.ogv} />
-                </CardStat>
+                <div className="flex space-x-1 items-center">
+                  <TokenIcon src="/ogv.svg" alt="OGV" />
+                  <CardStat>
+                    <TokenAmount amount={balances.ogv} />
+                  </CardStat>
+                </div>
                 <CardDescription>OGV</CardDescription>
               </div>
             </Card>
@@ -196,9 +200,12 @@ export default function VoteEscrow({
             <Card dark tightPadding>
               <div className="space-y-1">
                 <CardLabel>Vote Balance</CardLabel>
-                <CardStat>
-                  <TokenAmount amount={balances.veOgv} />
-                </CardStat>
+                <div className="flex space-x-1 items-center">
+                  <TokenIcon src="/veogv.svg" alt="veOGV" />
+                  <CardStat>
+                    <TokenAmount amount={balances.veOgv} />
+                  </CardStat>
+                </div>
                 <CardDescription>veOGV</CardDescription>
               </div>
             </Card>

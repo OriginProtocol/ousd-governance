@@ -7,7 +7,7 @@ interface TokenIconProps {
 }
 
 const TokenIcon: FunctionComponent<TokenIconProps> = ({ src, alt }) => (
-  <div className="flex items-center">
+  <div className="flex items-center flex-shrink-0">
     <Image src={src} alt={alt} height={28} width={28} />
   </div>
 );
