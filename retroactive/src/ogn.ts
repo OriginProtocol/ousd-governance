@@ -170,12 +170,9 @@ ethereumEvents.on(
 
     if (blockNumber) {
       process.stdout.write(
-        `${blockNumber} - ${Object.keys(ognHolders).length} OGN holders, ${
-          Object.keys(ognStakers).length
-        } OGN Stakers, ${Object.keys(ousd3Crv).length} OUSD3CRV - f holders, ${
-          Object.keys(ousd3CrvGauge).length
-        } OUSD3CRV - f - gauge holders, ${
-          Object.keys(convexLiquidity).length
+        `${blockNumber} - ${Object.keys(ognHolders).length} OGN holders, ${Object.keys(ognStakers).length
+        } OGN Stakers, ${Object.keys(ousd3Crv).length} OUSD3CRV-f holders, ${Object.keys(ousd3CrvGauge).length
+        } OUSD3CRV-f-gauge holders, ${Object.keys(convexLiquidity).length
         } Convex providers\r`
       );
     }
@@ -185,6 +182,7 @@ ethereumEvents.on(
       savedProgress = {
         blockNumber,
         ognHolders,
+        ognStakers,
         ousd3Crv,
         ousd3CrvGauge,
         convexLiquidity,
@@ -278,13 +276,28 @@ const calculateRewards = () => {
 
   const totalOgnScore = totalOgnHoldersScore.add(totalOgnStakersScore);
 
+  const totalOusd3CrvRewardsScore = Object.values(
+    ousd3CrvRewards
+  ).reduce<BigNumber>((total: BigNumber, amount: BigNumber) => {
+    return total.add(amount);
+  }, bigNumberify(0));
+
+  const totalOusd3CrvGaugeRewardsScore = Object.values(
+    ousd3CrvGaugeRewards
+  ).reduce<BigNumber>((total: BigNumber, amount: BigNumber) => {
+    return total.add(amount);
+  }, bigNumberify(0));
+
+  const totalConvexRewardsScore = Object.values(
+    convexRewards
+  ).reduce<BigNumber>((total: BigNumber, amount: BigNumber) => {
+    return total.add(amount);
+  }, bigNumberify(0));
+
   // Calculate the sum of all rewards scores for the LM campaign
-  const totalLiquidityMiningScore = Object.values(ousd3CrvRewards)
-    .concat(Object.values(ousd3CrvGaugeRewards))
-    .concat(Object.values(convexRewards))
-    .reduce((total: BigNumber, a: { [desc: string]: BigNumber }) => {
-      return total.add(bigNumberify(Object.values(a)[0]));
-    }, bigNumberify(0));
+  const totalLiquidityMiningScore = totalOusd3CrvRewardsScore
+    .add(totalOusd3CrvGaugeRewardsScore)
+    .add(totalConvexRewardsScore);
 
   // List of all addresses
   const addresses = [
@@ -296,7 +309,7 @@ const calculateRewards = () => {
     ),
   ];
 
-  return addresses.reduce((acc, address) => {
+  const rewards = addresses.reduce((acc, address) => {
     const ognReward = ognRewards[address]
       ? ognRewards[address].mul(OGN_AIRDROP_AMOUNT).div(totalOgnScore)
       : bigNumberify(0);
@@ -307,20 +320,20 @@ const calculateRewards = () => {
 
     const ousd3CrvReward = ousd3CrvRewards[address]
       ? ousd3CrvRewards[address]
-          .mul(LM_AIRDROP_AMOUNT)
-          .div(totalLiquidityMiningScore)
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     const ousd3CrvGaugeReward = ousd3CrvGaugeRewards[address]
       ? ousd3CrvGaugeRewards[address]
-          .mul(LM_AIRDROP_AMOUNT)
-          .div(totalLiquidityMiningScore)
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     const convexReward = convexRewards[address]
       ? convexRewards[address]
-          .mul(LM_AIRDROP_AMOUNT)
-          .div(totalLiquidityMiningScore)
+        .mul(LM_AIRDROP_AMOUNT)
+        .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     acc[address] = {
@@ -332,12 +345,67 @@ const calculateRewards = () => {
         ogn: ognReward,
         ognStaking: ognStakingReward,
         ousd3Crv: ousd3CrvReward,
-        ousd3GaugeCrv: ousd3CrvGaugeReward,
+        ousd3CrvGauge: ousd3CrvGaugeReward,
         convex: convexReward,
       },
     };
     return acc;
   }, {});
+
+  const ognRewardTokenSum = Object.values(rewards).reduce(
+    (
+      total: BigNumber,
+      account: { split: { ogn: BigNumber; ognStaking: BigNumber } }
+    ) => {
+      return total.add(account.split.ogn).add(account.split.ognStaking);
+    },
+    bigNumberify(0)
+  );
+
+  const lmRewardTokenSum = Object.values(rewards).reduce(
+    (
+      total: BigNumber,
+      account: {
+        split: {
+          ousd3Crv: BigNumber;
+          ousd3CrvGauge: BigNumber;
+          convex: BigNumber;
+        };
+      }
+    ) => {
+      return total
+        .add(account.split.ousd3Crv)
+        .add(account.split.ousd3CrvGauge)
+        .add(account.split.convex);
+    },
+    bigNumberify(0)
+  );
+
+  console.log(
+    `OGN Holding rewards ${totalOgnHoldersScore.mul(100).div(totalOgnScore)}%`
+  );
+  console.log(
+    `OGN Staking rewards ${totalOgnStakersScore.mul(100).div(totalOgnScore)}%`
+  );
+  console.log(
+    `OUSD3CRV-f-rewards ${totalOusd3CrvRewardsScore
+      .mul(100)
+      .div(totalLiquidityMiningScore)}%`
+  );
+  console.log(
+    `OUSD3CRV-f-gauge rewards ${totalOusd3CrvGaugeRewardsScore
+      .mul(100)
+      .div(totalLiquidityMiningScore)}%`
+  );
+  console.log(
+    `Convex rewards ${totalConvexRewardsScore
+      .mul(100)
+      .div(totalLiquidityMiningScore)}%`
+  );
+  console.log(`Total airdrop for OGN: ${ognRewardTokenSum} `);
+  console.log(`Total airdrop for LM: ${lmRewardTokenSum} `);
+
+  return rewards;
 };
 
 console.log("Searching for events...");
