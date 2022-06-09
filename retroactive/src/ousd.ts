@@ -16,7 +16,7 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = 400000000;
-const SNAPSHOT_BLOCK = 14888133;
+const SNAPSHOT_BLOCK = 14929663;
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
@@ -127,17 +127,27 @@ const calculateRewards = () => {
   console.log("Calculating wOUSD rewards");
   const wousdRewards = cumulativeRewardScore(wousdHolders, SNAPSHOT_BLOCK);
 
-  const totalScore = Object.values(ousdRewards)
-    .concat(Object.values(wousdRewards))
-    .reduce((total: BigNumber, a: { [desc: string]: BigNumber }) => {
+  const ousdScore = Object.values(ousdRewards).reduce<BigNumber>(
+    (total: BigNumber, a: { [desc: string]: BigNumber }) => {
       return total.add(bigNumberify(Object.values(a)[0]));
-    }, bigNumberify(0));
+    },
+    bigNumberify(0)
+  );
+
+  const wousdScore = Object.values(wousdRewards).reduce<BigNumber>(
+    (total: BigNumber, a: { [desc: string]: BigNumber }) => {
+      return total.add(bigNumberify(Object.values(a)[0]));
+    },
+    bigNumberify(0)
+  );
+
+  const totalScore = ousdScore.add(wousdScore);
 
   const addresses = [
     ...new Set(Object.keys(ousdRewards).concat(Object.keys(wousdRewards))),
   ];
 
-  return addresses.reduce((acc, address) => {
+  const rewards = addresses.reduce((acc, address) => {
     const ousdReward = ousdRewards[address]
       ? ousdRewards[address].mul(AIRDROP_AMOUNT).div(totalScore)
       : bigNumberify(0);
@@ -154,6 +164,19 @@ const calculateRewards = () => {
     };
     return acc;
   }, {});
+
+  const rewardTokenSum = Object.values(rewards).reduce(
+    (total: BigNumber, account: { amount: BigNumber }) => {
+      return total.add(account.amount);
+    },
+    bigNumberify(0)
+  );
+
+  console.log(`OUSD rewards ${ousdScore.mul(100).div(totalScore)}%`);
+  console.log(`wOUSD rewards ${wousdScore.mul(100).div(totalScore)}%`);
+  console.log(`Total OGV airdropped: ${rewardTokenSum}`);
+
+  return rewards;
 };
 
 console.log("Searching for events...");
