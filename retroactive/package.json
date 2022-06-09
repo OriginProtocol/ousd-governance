@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/lodash": "^4.14.182",
+    "eslint-config-prettier": "^8.5.0",
     "ethereum-events": "github:AleG94/ethereum-events#8c92ade1d8f489a577399d5d3cd0093ef6c58aa5",
     "ethers": "^5.6.4",
     "lodash": "^4.17.21",
