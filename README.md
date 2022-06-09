@@ -1,6 +1,6 @@
 This is the [OUSD](https://ousd.com) decentralized governance stack.
 
-## Install brownie via pipx 
+## Install brownie via pipx
 
 [The recommended way to install Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html) is via [pipx](https://github.com/pipxproject/pipx):
 
