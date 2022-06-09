@@ -8,8 +8,6 @@ import Card from "components/Card";
 import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
-import { useNetworkInfo } from "utils/index";
-import LockupStats from "components/vote-escrow/LockupStats";
 import prisma from "lib/prisma";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
@@ -20,6 +18,7 @@ import RangeInput from "components/vote-escrow/RangeInput";
 import Wrapper from "components/Wrapper";
 import { SectionTitle } from "@/components/SectionTitle";
 import Button from "components/Button";
+import OgvTotalStats from "components/OgvTotalStats";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -55,11 +54,7 @@ export async function getServerSideProps({ res }: { res: any }) {
   };
 }
 
-export default function VoteEscrow({
-  lockupCount,
-  totalLockupWeeks,
-  totalTokensLockedUp,
-}) {
+export default function VoteEscrow() {
   const {
     web3Provider,
     contracts,
@@ -477,11 +472,7 @@ export default function VoteEscrow({
             </div>
           )}
         </Card>
-        <LockupStats
-          lockupCount={lockupCount}
-          totalLockupWeeks={totalLockupWeeks}
-          totalTokensLockedUp={totalTokensLockedUp}
-        />
+        <OgvTotalStats />
       </CardGroup>
     </Wrapper>
   );

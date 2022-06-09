@@ -1,5 +1,4 @@
 import { FunctionComponent, useEffect, useState } from "react";
-import { BigNumber, utils } from "ethers";
 import moment from "moment";
 import { toast } from "react-toastify";
 import { sample, random } from "lodash";
@@ -17,20 +16,16 @@ import { Web3Button } from "components/Web3Button";
 import TokenIcon from "components/TokenIcon";
 import CardDescription from "components/CardDescription";
 import TokenAmount from "components/TokenAmount";
+import OgvTotalStats from "components/OgvTotalStats";
 
 interface ClaimProps {
   handlePrevStep: () => void;
 }
 
 const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
-  const { web3Provider, totalBalances } = useStore();
-  const { totalSupplyOfOgv, totalLockedUpOgv } = totalBalances;
+  const { web3Provider } = useStore();
 
   const isEligible = true; // @TODO replace with real check
-
-  //const totalLockedUpOgv = utils.parseEther("750000000"); // @TODO replace with live value (balance of OGV in staking contracting)
-  const totalPercentageOfLockedUpOgv =
-    (totalLockedUpOgv / totalSupplyOfOgv) * 100;
 
   const claimableOgv = 100; // @TODO replace with user value
   const claimableVeOgv = 100; // @TODO replace with user value
@@ -160,50 +155,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   return (
     <>
       <CardGroup>
-        <CardGroup horizontal>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Total supply</CardLabel>
-                <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>
-                    <TokenAmount amount={totalSupplyOfOgv} />
-                  </CardStat>
-                </div>
-                <CardDescription>OGV</CardDescription>
-              </div>
-            </Card>
-          </div>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Locked up</CardLabel>
-                <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>
-                    <TokenAmount amount={totalLockedUpOgv} />
-                  </CardStat>
-                </div>
-                <CardDescription>OGV</CardDescription>
-              </div>
-            </Card>
-          </div>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>% locked up</CardLabel>
-                <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>
-                    {totalPercentageOfLockedUpOgv.toFixed(2)}%
-                  </CardStat>
-                </div>
-                <CardDescription>OGV</CardDescription>
-              </div>
-            </Card>
-          </div>
-        </CardGroup>
+        <OgvTotalStats />
         <Card>
           <div className="divide-y space-y-6">
             <div className="space-y-4">
