@@ -18,6 +18,8 @@ import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import RangeInput from "components/vote-escrow/RangeInput";
 import Wrapper from "components/Wrapper";
+import { SectionTitle } from "@/components/SectionTitle";
+import Button from "components/Button";
 
 const MAX_WEEKS = 52 * 4;
 
@@ -181,64 +183,75 @@ export default function VoteEscrow({
     <Wrapper narrow>
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
-        <CardGroup horizontal fourCol>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Balance</CardLabel>
-                <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <CardStat>
-                    <TokenAmount amount={balances.ogv} />
-                  </CardStat>
-                </div>
-                <CardDescription>OGV</CardDescription>
-              </div>
-            </Card>
-          </div>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Vote Balance</CardLabel>
-                <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/veogv.svg" alt="veOGV" />
-                  <CardStat>
-                    <TokenAmount amount={balances.veOgv} />
-                  </CardStat>
-                </div>
-                <CardDescription>veOGV</CardDescription>
-              </div>
-            </Card>
-          </div>
-          {/*<div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Lockup Balance</CardLabel>
+        <CardGroup horizontal>
+          <Card dark tightPadding>
+            <div className="space-y-1">
+              <CardLabel>Balance</CardLabel>
+              <div className="flex space-x-1 items-center">
+                <TokenIcon src="/ogv.svg" alt="OGV" />
                 <CardStat>
-                  <TokenAmount amount={existingLockup.amount} />
+                  <TokenAmount amount={balances.ogv} />
                 </CardStat>
-                <CardDescription>OGV</CardDescription>
               </div>
-            </Card>
-          </div>
-          <div>
-            <Card dark tightPadding>
-              <div className="space-y-1">
-                <CardLabel>Lockup End</CardLabel>
+              <CardDescription>OGV</CardDescription>
+            </div>
+          </Card>
+          <Card dark tightPadding>
+            <div className="space-y-1">
+              <CardLabel>Locked up</CardLabel>
+              <div className="flex space-x-1 items-center">
+                <TokenIcon src="/ogv.svg" alt="OGV" />
                 <CardStat>
-                  {existingLockup.existingEndWeeks
-                    ? existingLockup.existingEndWeeks
-                    : 0}{" "}
-                  weeks
+                  <TokenAmount amount={balances.lockedUpOgv} />
                 </CardStat>
-                {existingLockup.end.gt(0) && (
-                  <CardDescription>
-                    {existingLockup.existingEndDate}
-                  </CardDescription>
-                )}
               </div>
-                </div>*/}
+              <CardDescription>OGV</CardDescription>
+            </div>
+          </Card>
+          <Card dark tightPadding>
+            <div className="space-y-1">
+              <CardLabel>Vote balance</CardLabel>
+              <div className="flex space-x-1 items-center">
+                <TokenIcon src="/veogv.svg" alt="veOGV" />
+                <CardStat>
+                  <TokenAmount amount={balances.veOgv} />
+                </CardStat>
+              </div>
+              <CardDescription>veOGV</CardDescription>
+            </div>
+          </Card>
         </CardGroup>
+
+        <Card>
+          <SectionTitle>Your lockups</SectionTitle>
+          <table className="table w-full">
+            <thead>
+              <tr>
+                <th>OGV</th>
+                <th>Duration</th>
+                <th>Lockup ends</th>
+                <th>veOGV</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>52 weeks</td>
+                <td>Jun 9, 2023</td>
+                <td>10</td>
+                <td>
+                  <Button small>Extend</Button>
+                </td>
+                <td>
+                  <Button small>Unlock</Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Card>
+
         <Card>
           {balances.ogv.gt(0) ? (
             <div className="space-y-4">

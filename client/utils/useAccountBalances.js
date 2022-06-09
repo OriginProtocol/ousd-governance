@@ -17,6 +17,8 @@ const useAccountBalances = () => {
       return await contracts.OriginDollarGovernance.balanceOf(address);
     };
 
+    const loadLockedUpOgvBalance = () => 0; // @TODO Total lockup amounts from db for this address
+
     const loadVeOgvBalance = async () => {
       return await contracts.OgvStaking.balanceOf(address);
     };
@@ -34,24 +36,36 @@ const useAccountBalances = () => {
     if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
         loadOgvBalance(),
+        loadLockedUpOgvBalance(),
         loadVeOgvBalance(),
         loadExistingLockups(),
         loadOgnBalance(),
         loadOusdBalance(),
         web3Provider.getBlock(),
-      ]).then(([ogv, veOgv, existingLockups, ogn, ousd, lastestBlock]) => {
-        const now = lastestBlock.timestamp;
-
-        useStore.setState({
-          balances: {
-            ogv,
-            veOgv,
-            ogn,
-            ousd,
-          },
+      ]).then(
+        ([
+          ogv,
+          lockedUpOgv,
+          veOgv,
           existingLockups,
-        });
-      });
+          ogn,
+          ousd,
+          lastestBlock,
+        ]) => {
+          const now = lastestBlock.timestamp;
+
+          useStore.setState({
+            balances: {
+              ogv,
+              lockedUpOgv,
+              veOgv,
+              ogn,
+              ousd,
+            },
+            existingLockups,
+          });
+        }
+      );
     }
   }, [address, web3Provider, contracts, reloadBalances, networkInfo.correct]);
 
