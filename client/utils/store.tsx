@@ -9,6 +9,7 @@ type Web3DataType = {
   contracts: Object;
   balances: Object;
   existingLockup: Object;
+  lockups: Array<Object>;
   allowances: Object;
   pendingTransactions: Array<any>;
   totalBalances: Object;
@@ -36,6 +37,7 @@ const defaultState: Web3DataType = {
     existingEndWeeks: 0,
     existingEndDate: "",
   },
+  lockups: {},
   allowances: {
     ogv: ethers.BigNumber.from("0"),
   },

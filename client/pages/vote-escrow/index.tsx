@@ -5,55 +5,16 @@ import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
 import CardGroup from "components/CardGroup";
 import Card from "components/Card";
-import CardLabel from "components/CardLabel";
-import CardStat from "components/CardStat";
-import CardDescription from "components/CardDescription";
-import prisma from "lib/prisma";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
-import TokenIcon from "components/TokenIcon";
-import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import RangeInput from "@/components/RangeInput";
 import Wrapper from "components/Wrapper";
-import { SectionTitle } from "@/components/SectionTitle";
-import Button from "components/Button";
 import AccountBalances from "components/vote-escrow/AccountBalances";
+import YourLockups from "components/vote-escrow/YourLockups";
 import OgvTotalStats from "components/OgvTotalStats";
 
 const MAX_WEEKS = 52 * 4;
-
-export async function getServerSideProps({ res }: { res: any }) {
-  res.setHeader(
-    "Cache-Control",
-    "public, s-maxage=60, stale-while-revalidate=59"
-  );
-
-  const lockups = await prisma.lockup.findMany({
-    where: {
-      active: {
-        equals: true,
-      },
-    },
-  });
-  const lockupCount = lockups.length;
-  const totalLockupWeeks = lockups.reduce(
-    (total: Number, lockup: Object) => total + lockup.weeks,
-    0
-  );
-  const totalTokensLockedUp = lockups.reduce(
-    (total: Number, lockup: Object) => total + lockup.amount,
-    0
-  );
-
-  return {
-    props: {
-      lockupCount,
-      totalLockupWeeks,
-      totalTokensLockedUp,
-    },
-  };
-}
 
 export default function VoteEscrow() {
   const {
@@ -180,36 +141,7 @@ export default function VoteEscrow() {
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
         <AccountBalances />
-        <Card>
-          <SectionTitle>Your lockups</SectionTitle>
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th>OGV</th>
-                <th>Duration</th>
-                <th>Lockup ends</th>
-                <th>veOGV</th>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td>52 weeks</td>
-                <td>Jun 9, 2023</td>
-                <td>10</td>
-                <td>
-                  <Button small>Extend</Button>
-                </td>
-                <td>
-                  <Button small>Unlock</Button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </Card>
-
+        <YourLockups />
         <Card>
           {balances.ogv.gt(0) ? (
             <div className="space-y-4">

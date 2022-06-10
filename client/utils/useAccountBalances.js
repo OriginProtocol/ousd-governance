@@ -1,8 +1,6 @@
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
-import moment from "moment";
 
 const useAccountBalances = () => {
   const [reloadAllowances, setReloadAllowances] = useState(0);
@@ -23,49 +21,23 @@ const useAccountBalances = () => {
       return await contracts.OgvStaking.balanceOf(address);
     };
 
-    const loadExistingLockups = async () => {
-      // @TODO Pull from db
-      return 0;
-    };
-
-    const loadOgnBalance = async () =>
-      await contracts.OriginToken.balanceOf(address);
-
-    const loadOusdBalance = async () => await contracts.OUSD.balanceOf(address);
-
     if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
         loadOgvBalance(),
         loadLockedUpOgvBalance(),
         loadVeOgvBalance(),
-        loadExistingLockups(),
-        loadOgnBalance(),
-        loadOusdBalance(),
         web3Provider.getBlock(),
-      ]).then(
-        ([
-          ogv,
-          lockedUpOgv,
-          veOgv,
-          existingLockups,
-          ogn,
-          ousd,
-          lastestBlock,
-        ]) => {
-          const now = lastestBlock.timestamp;
+      ]).then(([ogv, lockedUpOgv, veOgv, lastestBlock]) => {
+        const now = lastestBlock.timestamp;
 
-          useStore.setState({
-            balances: {
-              ogv,
-              lockedUpOgv,
-              veOgv,
-              ogn,
-              ousd,
-            },
-            existingLockups,
-          });
-        }
-      );
+        useStore.setState({
+          balances: {
+            ogv,
+            lockedUpOgv,
+            veOgv,
+          },
+        });
+      });
     }
   }, [address, web3Provider, contracts, reloadBalances, networkInfo.correct]);
 

@@ -36,12 +36,13 @@ model Listener {
 }
 
 model Lockup {
-  user      String
   lockupId  Int @unique
-  amount    String
+  user      String
+  amount    Decimal @db.Decimal(78, 0)
   end       String
   weeks     Int
-  points    Int
+  points    Decimal @db.Decimal(78, 0)
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("lockups")
 }
