@@ -18,6 +18,7 @@ import RangeInput from "@/components/RangeInput";
 import Wrapper from "components/Wrapper";
 import { SectionTitle } from "@/components/SectionTitle";
 import Button from "components/Button";
+import AccountBalances from "components/vote-escrow/AccountBalances";
 import OgvTotalStats from "components/OgvTotalStats";
 
 const MAX_WEEKS = 52 * 4;
@@ -178,45 +179,7 @@ export default function VoteEscrow() {
     <Wrapper narrow>
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
-        <CardGroup horizontal>
-          <Card dark tightPadding>
-            <div className="space-y-1">
-              <CardLabel>Balance</CardLabel>
-              <div className="flex space-x-1 items-center">
-                <TokenIcon src="/ogv.svg" alt="OGV" />
-                <CardStat>
-                  <TokenAmount amount={balances.ogv} />
-                </CardStat>
-              </div>
-              <CardDescription>OGV</CardDescription>
-            </div>
-          </Card>
-          <Card dark tightPadding>
-            <div className="space-y-1">
-              <CardLabel>Locked up</CardLabel>
-              <div className="flex space-x-1 items-center">
-                <TokenIcon src="/ogv.svg" alt="OGV" />
-                <CardStat>
-                  <TokenAmount amount={balances.lockedUpOgv} />
-                </CardStat>
-              </div>
-              <CardDescription>OGV</CardDescription>
-            </div>
-          </Card>
-          <Card dark tightPadding>
-            <div className="space-y-1">
-              <CardLabel>Vote balance</CardLabel>
-              <div className="flex space-x-1 items-center">
-                <TokenIcon src="/veogv.svg" alt="veOGV" />
-                <CardStat>
-                  <TokenAmount amount={balances.veOgv} />
-                </CardStat>
-              </div>
-              <CardDescription>veOGV</CardDescription>
-            </div>
-          </Card>
-        </CardGroup>
-
+        <AccountBalances />
         <Card>
           <SectionTitle>Your lockups</SectionTitle>
           <table className="table w-full">
