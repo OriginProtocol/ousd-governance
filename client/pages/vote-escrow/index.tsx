@@ -14,7 +14,7 @@ import useAccountBalances from "utils/useAccountBalances";
 import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
-import RangeInput from "components/vote-escrow/RangeInput";
+import RangeInput from "@/components/RangeInput";
 import Wrapper from "components/Wrapper";
 import { SectionTitle } from "@/components/SectionTitle";
 import Button from "components/Button";

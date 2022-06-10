@@ -9,7 +9,7 @@ import TokenAmount from "components/TokenAmount";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import Button from "components/Button";
-import RangeInput from "components/vote-escrow/RangeInput";
+import RangeInput from "@/components/RangeInput";
 
 interface ClaimOgvProps {}
 
