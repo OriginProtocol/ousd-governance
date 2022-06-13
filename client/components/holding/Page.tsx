@@ -38,7 +38,15 @@ const HoldingPage: FunctionComponent = () => (
     <CardGroup>
       <Countdown date={date} renderer={renderer} />
       <Card>
-        <SectionTitle>Key dates</SectionTitle>
+        <SectionTitle>
+          <div className="flex items-center justify-between">
+            <span>Key dates</span>
+            <span className="text-sm text-gray-500 ml-2">
+              All times midnight UTC
+            </span>
+          </div>
+        </SectionTitle>
+
         <div className="overflow-scroll">
           <table className="table table-zebra w-full">
             <tbody>
