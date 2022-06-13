@@ -61,8 +61,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 </ul>
               )}
             </div>
-            <div className="flex-none flex items-center space-x-3 md:space-x-4">
-              {!hideNav && (
+            {!hideNav && (
+              <div className="flex-none flex items-center space-x-3 md:space-x-4">
                 <button
                   className="flex lg:hidden"
                   onClick={() => setMenuIsOpen(true)}
@@ -74,9 +74,9 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                     alt="Open Menu"
                   />
                 </button>
-              )}
-              <Web3Button />
-            </div>
+                <Web3Button />
+              </div>
+            )}
           </div>
         </Wrapper>
       </header>
