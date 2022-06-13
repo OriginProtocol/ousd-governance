@@ -76,11 +76,11 @@ const HoldingPage: FunctionComponent = () => (
           </a>
           <a
             className="btn btn-lg btn-primary rounded-full w-full lg:flex-1"
-            href="https://www.ousd.com/swap"
+            href="https://curve.fi/factory/9/deposit"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Get OUSD
+            Be an OUSD LP
           </a>
         </div>
         <a
