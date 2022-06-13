@@ -9,7 +9,7 @@ import CardStat from "../CardStat";
 import ExternalLinkIcon from "../ExternalLinkIcon";
 
 const renderer: CountdownRendererFn = ({ days, hours, minutes, seconds }) => (
-  <CardGroup horizontal fourCol>
+  <CardGroup horizontal fourCol dontStackOnMobile>
     <Card dark tightPadding>
       <CardStat>{days}</CardStat>
       <CardDescription>Days</CardDescription>
