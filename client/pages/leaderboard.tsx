@@ -3,6 +3,7 @@ import { PageTitle } from "components/PageTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
 import Card from "components/Card";
 import prisma from "lib/prisma";
+import Layout from "components/layout";
 
 export async function getServerSideProps({ res }: { res: any }) {
   const voters = (
@@ -21,12 +22,12 @@ export async function getServerSideProps({ res }: { res: any }) {
 
 const Leaderboard: NextPage = ({ voters }) => {
   return (
-    <>
+    <Layout>
       <PageTitle>Leaderboard</PageTitle>
       <Card>
         <LeaderboardTable voters={voters} />
       </Card>
-    </>
+    </Layout>
   );
 };
 
