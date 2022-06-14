@@ -104,7 +104,7 @@ yarn dev
 This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
 
 ## Deployment
-IMPORTANT (!) once we deploy contracts on the mainnet rename the `start:production:once_contracts_deployed` script command to `start` from the `client/package.json`... listener now fails because there are no contract deploy artifacts available in prod environment.
+IMPORTANT (!) once we deploy contracts on the mainnet rename the `start:production:once_contracts_deployed` script command to `start` from the `client/package.json`... If either listener or web commands fail on production we want the whole dyno to restart. Right now production listener is not working because contracts are not yet deployed to mainnet.
 
 ## Gotchas
 
