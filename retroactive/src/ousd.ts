@@ -81,14 +81,13 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 
   if (blockNumber) {
     process.stdout.write(
-      `${blockNumber} - ${Object.keys(ousdHolders).length} OUSD holders, ${
-        Object.keys(wousdHolders).length
+      `${blockNumber} - ${Object.keys(ousdHolders).length} OUSD holders, ${Object.keys(wousdHolders).length
       } wOUSD holders\r`
     );
   }
 
   // Save the progress every 50000 blocks
-  if (blockNumber % 10000 === 0) {
+  if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK) {
     savedProgress = {
       blockNumber,
       ousdHolders,

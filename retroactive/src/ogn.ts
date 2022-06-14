@@ -177,8 +177,8 @@ ethereumEvents.on(
       );
     }
 
-    // Save the progress every 50000 blocks
-    if (blockNumber % 50000 === 0) {
+    // Save the progress every 50000 blocks or at the end
+    if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK) {
       savedProgress = {
         blockNumber,
         ognHolders,
