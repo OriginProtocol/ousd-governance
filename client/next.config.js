@@ -18,7 +18,7 @@ const nextConfig = {
      * Note: these get "baked in" to the code at build time when building for Rinkeby / Mainnet
      */
     const envVars = {
-      'prod': {
+      'production': {
         NETWORK_ID: 1,
       },
       'dev': {
