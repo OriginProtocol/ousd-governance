@@ -33,11 +33,11 @@ contract OriginDollarGovernance is
     }
 
     function grantMinterRole(address _account) public onlyOwner {
-       _grantRole(MINTER_ROLE, _account);
+        _grantRole(MINTER_ROLE, _account);
     }
 
     function grantAdminRole(address _account) public onlyOwner {
-       _grantRole(DEFAULT_ADMIN_ROLE, _account);
+        _grantRole(DEFAULT_ADMIN_ROLE, _account);
     }
 
     function _authorizeUpgrade(address newImplementation)
