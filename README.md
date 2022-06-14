@@ -33,7 +33,7 @@ brownie pm install OpenZeppelin/openzeppelin-contracts@4.6.0
 yarn install
 ```
 
-## Running contract tests
+## Running contract tests (brownie)
 
 ```bash
 cd contracts
@@ -41,6 +41,15 @@ brownie test --network hardhat
 ```
 
 _If this command reverts with an error it may be an incompatability with python 3.10. Try python 3.9 instead ([pyenv](https://github.com/pyenv/pyenv) is a good solution for managing multiple python versions)._
+
+## Running contract tests (forge)
+
+The OGV staking contracts use forge for tests. 
+
+```bash
+forge install
+forge test
+```
 
 ## Running a local node
 
