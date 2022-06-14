@@ -12,6 +12,7 @@ import Card from "components/Card";
 import CardGroup from "components/CardGroup";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
+import Layout from "components/layout";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -117,7 +118,7 @@ const Home: NextPage = ({
   }, [contracts, networkInfo.correct]);
 
   return (
-    <div>
+    <Layout>
       <PageTitle>Overview</PageTitle>
       <CardGroup>
         <VoteStats
@@ -138,7 +139,7 @@ const Home: NextPage = ({
           <LeaderboardTable voters={voters} />
         </Card>
       </CardGroup>
-    </div>
+    </Layout>
   );
 };
 
