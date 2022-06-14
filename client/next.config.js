@@ -32,10 +32,12 @@ const nextConfig = {
     /**
      * Returns environment variables as an object
      */
-    const env = Object.keys(envVars[process.env.NODE_ENV]).reduce((acc, curr) => {
-      acc[`process.env.${curr}`] = JSON.stringify(process.env[curr])
-      return acc
-    }, {})
+    const env = Object.keys(process.env)
+      .concat(Object.keys(envVars[process.env.NODE_ENV]))
+      .reduce((acc, curr) => {
+        acc[`process.env.${curr}`] = JSON.stringify(process.env[curr])
+        return acc
+      }, {})
 
     config.plugins.push(new webpack.DefinePlugin(env))
 
