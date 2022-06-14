@@ -125,14 +125,14 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
-  console.log("ENVs", process.env.NETWORK_ID, " ", process.env.WEB3_PROVIDER, web3Provider, networkInfo);
+  console.log("ENVs", process.env.NETWORK_ID, " ", process.env.WEB3_PROVIDER, web3Provider, networkInfo, web3Modal);
 
-  if (!networkInfo.correct) {
+  if (web3Provider && !networkInfo.correct) {
     return (
       <button
         className="btn btn-primary btn-error btn-sm rounded-btn"
         onClick={() => {
-          console.log("ENVs", process.env.NETWORK_ID, " ", process.env.WEB3_PROVIDER, web3Provider, networkInfo);
+          console.log("ENVs", process.env.NETWORK_ID, " ", process.env.WEB3_PROVIDER, web3Provider, networkInfo, web3Modal);
 
           toast.error(
             `Please connect to ${
