@@ -17,7 +17,7 @@ const GovernanceContracts = CHAIN_CONTRACTS[networkId];
 
 if(!claimOpenTimestampPassed()) {
   logger.error("Claim not open yet");
-  process.exit(1);
+  process.exit(0);
 }
 
 if (!networkId) {
