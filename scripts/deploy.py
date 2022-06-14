@@ -1,14 +1,15 @@
 import json
 from brownie import *
 
+
 def main(output_file=None):
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")
 
     token = run("deploy_token")
 
-    epoch = 86400 # 1 day
-    
+    epoch = 86400  # 1 day
+
     rewards = run("deploy_rewards", "main", (token.address,))
     staking = run("deploy_staking", "main", (token.address, epoch, rewards.address))
 
@@ -25,7 +26,9 @@ def main(output_file=None):
             OriginDollarGovernance=dict(address=token.address, abi=token.abi),
             RewardsSource=dict(address=rewards.address, abi=rewards.abi),
             OgvStaking=dict(address=staking.address, abi=staking.abi),
-            TimelockController=dict(address=timelock_controller.address, abi=timelock_controller.abi),
+            TimelockController=dict(
+                address=timelock_controller.address, abi=timelock_controller.abi
+            ),
             Governance=dict(address=governance.address, abi=governance.abi),
         )
         with open(output_file, "w+") as f:

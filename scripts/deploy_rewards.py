@@ -1,5 +1,6 @@
 from brownie import *
 
+
 def main(token_address):
     rewards_impl = RewardsSource.deploy(token_address)
     # @TODO Proxy for staking implementation contract

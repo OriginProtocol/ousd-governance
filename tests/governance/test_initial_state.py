@@ -29,4 +29,3 @@ def test_voting_power(governance, web3):
 
 def test_timelock_min_delay(timelock_controller):
     assert timelock_controller.getMinDelay() == 86400 * 2
-
