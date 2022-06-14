@@ -18,7 +18,7 @@ const useContracts = () => {
       });
 
       const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
-      
+
       // wallet not connected yet
       if (!governanceContractDefinitions) {
         return;
