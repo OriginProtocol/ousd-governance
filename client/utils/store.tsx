@@ -22,7 +22,7 @@ const defaultState: Web3DataType = {
   provider: null,
   web3Provider: null,
   address: undefined,
-  chainId: 31337,
+  chainId: null,
   contracts: {
     loaded: false,
   },
