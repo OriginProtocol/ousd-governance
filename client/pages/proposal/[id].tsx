@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import { ProposalDetail } from "components/proposal/ProposalDetail";
 import { PageTitle } from "components/PageTitle";
 import prisma from "lib/prisma";
+import Layout from "components/layout";
 
 export async function getServerSideProps({
   res,
@@ -25,10 +26,10 @@ export async function getServerSideProps({
 
 const ProposalPage: NextPage = ({ proposalId, description }) => {
   return (
-    <>
+    <Layout>
       <PageTitle>Proposal</PageTitle>
       <ProposalDetail proposalId={proposalId} description={description} />
-    </>
+    </Layout>
   );
 };
 

@@ -143,7 +143,7 @@ contract OgvStaking is ERC20Votes {
             oldAmount,
             duration
         );
-        require(newEnd > oldEnd, "New lockup must be longer");
+        require(newEnd > oldEnd, "Staking: New lockup must be longer");
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;

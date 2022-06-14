@@ -118,3 +118,23 @@ export function inputToBigNumber(
     decimals
   );
 }
+
+export function claimOpensTimestamp() {
+  return parseInt(process.env.CLAIM_OPENS || "0");
+}
+
+export function claimClosesTimestamp() {
+  return parseInt(process.env.CLAIM_OPENS || "0");
+}
+
+const now = Math.floor(new Date().getTime() / 1000);
+
+export function claimOpenTimestampPassed() {
+  if (!claimOpensTimestamp()) return true;
+  return now > claimOpensTimestamp();
+}
+
+export function claimIsOpen() {
+  if (!claimOpensTimestamp() || !claimClosesTimestamp()) return false;
+  return now > claimOpensTimestamp() && now < claimClosesTimestamp();
+}

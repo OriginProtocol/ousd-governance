@@ -15,6 +15,7 @@ import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
+import Layout from "components/layout";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
@@ -139,7 +140,7 @@ const ProposalNew: NextPage = () => {
   }
 
   return (
-    <>
+    <Layout>
       <PageTitle>New Proposal</PageTitle>
       <CardGroup>
         <Card>
@@ -227,7 +228,7 @@ const ProposalNew: NextPage = () => {
           />
         </Card>
       </CardGroup>
-    </>
+    </Layout>
   );
 };
 
