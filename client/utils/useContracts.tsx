@@ -16,6 +16,14 @@ const useContracts = () => {
           loaded: false,
         },
       });
+
+      const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
+
+      // wallet not connected yet
+      if (!governanceContractDefinitions) {
+        return;
+      }
+
       const mainnetProvider = new ethers.providers.JsonRpcProvider(
         mainnetNetworkUrl
       );
@@ -29,7 +37,6 @@ const useContracts = () => {
       }
 
       const provider = web3Provider || networkProvider;
-      const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
