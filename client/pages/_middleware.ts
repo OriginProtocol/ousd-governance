@@ -1,11 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
 import { claimOpenTimestampPassed } from "utils";
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const regEx = /\.(.*)$/;
+  const hasExtension = regEx.test(pathname);
 
   // If the claim hasn't started
-  if (pathname !== "/claim" && !claimOpenTimestampPassed()) {
+  if (!hasExtension && pathname !== "/claim" && !claimOpenTimestampPassed()) {
     // Redirect everything to /claim
     const claimUrl = req.nextUrl.clone();
     claimUrl.pathname = "/claim";
