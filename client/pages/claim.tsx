@@ -2,8 +2,7 @@ import { useState } from "react";
 import type { NextPage } from "next";
 import Wrapper from "components/Wrapper";
 import StepTracker from "components/StepTracker";
-import StepControls from "components/StepControls";
-import Explanation from "@/components/claim/Education";
+import Education from "@/components/claim/Education";
 import Eligibility from "@/components/claim/Eligibility";
 import Claim from "components/claim/Claim";
 
@@ -21,10 +20,10 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
       <Wrapper narrow>
         <StepTracker currentStep={currentStep} steps={steps} />
       </Wrapper>
-      <Wrapper narrow>
+      <Wrapper narrow={currentStep !== 1}>
         {currentStep == 0 && <Eligibility handleNextStep={handleNextStep} />}
         {currentStep == 1 && (
-          <Explanation
+          <Education
             handlePrevStep={handlePrevStep}
             handleNextStep={handleNextStep}
           />

@@ -4,35 +4,25 @@ import Button from "components/Button";
 import CheckIconWhite from "components/CheckIconWhite";
 import CrossIconWhite from "components/CrossIconWhite";
 
-interface QuizProps {
-  onComplete?: Dispatch<SetStateAction<boolean>>;
+interface QuizQuestion {
+  question: string;
+  answers: Array<string>;
+  correctAnswer: string;
 }
 
-// @TODO Add final questions
-const questions = [
-  {
-    question: "Which token is a fully-backed stablecoin?",
-    answers: ["OGN", "OGV", "veOGV", "OUSD"],
-    correctAnswer: "OUSD",
-  },
-  {
-    question: "Which of the following is the governance token for OUSD?",
-    answers: ["OGN", "OGV", "GOV", "ODG"],
-    correctAnswer: "OGV",
-  },
-  {
-    question: "Which is the best reason to lock OGV and convert it to veOGv?",
-    answers: [
-      "To keep it from being burned",
-      "veOGV is freely transferable",
-      "To hedge against Bitcoin",
-      "veOGV holders earn fees from OUSD's yield",
-    ],
-    correctAnswer: "veOGV holders earn fees from OUSD's yield",
-  },
-];
+interface QuizProps {
+  questions: Array<QuizQuestion>;
+  onComplete?: () => void | Dispatch<SetStateAction<boolean>>;
+  onCompleteMessage?: string;
+  lastQuiz?: Boolean;
+}
 
-const Quiz: FunctionComponent<QuizProps> = ({ onComplete }) => {
+const Quiz: FunctionComponent<QuizProps> = ({
+  questions,
+  onComplete,
+  onCompleteMessage,
+  lastQuiz,
+}) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [status, setStatus] = useState({
@@ -55,7 +45,7 @@ const Quiz: FunctionComponent<QuizProps> = ({ onComplete }) => {
       });
       setCanProgress(true);
 
-      if (onComplete && quizComplete) {
+      if (onComplete && quizComplete && lastQuiz) {
         onComplete(true);
       }
     } else {
@@ -66,7 +56,7 @@ const Quiz: FunctionComponent<QuizProps> = ({ onComplete }) => {
       });
       setCanProgress(false);
 
-      if (onComplete) {
+      if (onComplete && quizComplete && lastQuiz) {
         onComplete(false);
       }
     }
@@ -166,7 +156,9 @@ const Quiz: FunctionComponent<QuizProps> = ({ onComplete }) => {
             )}
             {canProgress && quizComplete && (
               <p className="text-sm text-gray-600">
-                Quiz complete. It&apos;s time to claim the airdrop
+                {onCompleteMessage
+                  ? onCompleteMessage
+                  : "It's time to claim the airdrop"}
               </p>
             )}
           </div>
@@ -174,6 +166,11 @@ const Quiz: FunctionComponent<QuizProps> = ({ onComplete }) => {
         {canProgress && !quizComplete && (
           <Button onClick={handleNextQuestion} large fullWidth>
             Next Question
+          </Button>
+        )}
+        {onComplete && quizComplete && canProgress && !lastQuiz && (
+          <Button onClick={onComplete} large fullWidth>
+            Continue
           </Button>
         )}
       </div>
