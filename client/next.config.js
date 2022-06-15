@@ -19,9 +19,7 @@ const nextConfig = {
      */
     const envVars = {
       'production': {
-        NETWORK_ID: 1,
-        CLAIM_OPENS: 1657580400,
-        CLAIM_CLOSES: 1665356400,
+        NETWORK_ID: 1
       },
       'dev': {
         NETWORK_ID: 31337,
@@ -29,9 +27,7 @@ const nextConfig = {
         CLAIM_CLOSES: 1665356400,
       },
       'staging': {
-        NETWORK_ID: 4,
-        CLAIM_OPENS: 1657580400,
-        CLAIM_CLOSES: 1665356400,
+        NETWORK_ID: 4
       },
     }
 
