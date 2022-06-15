@@ -31,27 +31,30 @@ const Education: FunctionComponent<EducationProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-4">
+    <div className="lg:grid grid-cols-12 gap-4">
+      <div className="mb-4 lg:mb-0 col-span-4">
         <div>
           <Card alt>
-            <ul className="space-y-4">
+            <ul className="space-y-2 md:space-y-4">
               {educationSteps.map((step, index) => {
                 const isCurrent = index === currentEducationStep;
 
                 const markerClasses = classNames(
-                  "rounded h-6 w-6 flex items-center justify-center",
+                  "text-sm md:text-base rounded h-6 w-6 flex items-center justify-center",
                   {
                     "bg-primary text-white": isCurrent,
                     "bg-gray-300 text-gray-400": !isCurrent,
                   }
                 );
-                const textClasses = classNames({
+                const textClasses = classNames("text-sm md:text-base", {
                   "text-gray-500": !isCurrent,
                   "text-black": isCurrent,
                 });
                 return (
-                  <li key={step} className="flex items-center space-x-2">
+                  <li
+                    key={step}
+                    className="flex items-center space-x-2 lg:space-x-3"
+                  >
                     <span className={markerClasses}>{index + 1}</span>
                     <span className={textClasses}>{step}</span>
                   </li>
