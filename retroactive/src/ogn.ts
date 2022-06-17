@@ -170,9 +170,12 @@ ethereumEvents.on(
 
     if (blockNumber) {
       process.stdout.write(
-        `${blockNumber} - ${Object.keys(ognHolders).length} OGN holders, ${Object.keys(ognStakers).length
-        } OGN Stakers, ${Object.keys(ousd3Crv).length} OUSD3CRV-f holders, ${Object.keys(ousd3CrvGauge).length
-        } OUSD3CRV-f-gauge holders, ${Object.keys(convexLiquidity).length
+        `${blockNumber} - ${Object.keys(ognHolders).length} OGN holders, ${
+          Object.keys(ognStakers).length
+        } OGN Stakers, ${Object.keys(ousd3Crv).length} OUSD3CRV-f holders, ${
+          Object.keys(ousd3CrvGauge).length
+        } OUSD3CRV-f-gauge holders, ${
+          Object.keys(convexLiquidity).length
         } Convex providers\r`
       );
     }
@@ -320,20 +323,20 @@ const calculateRewards = () => {
 
     const ousd3CrvReward = ousd3CrvRewards[address]
       ? ousd3CrvRewards[address]
-        .mul(LM_AIRDROP_AMOUNT)
-        .div(totalLiquidityMiningScore)
+          .mul(LM_AIRDROP_AMOUNT)
+          .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     const ousd3CrvGaugeReward = ousd3CrvGaugeRewards[address]
       ? ousd3CrvGaugeRewards[address]
-        .mul(LM_AIRDROP_AMOUNT)
-        .div(totalLiquidityMiningScore)
+          .mul(LM_AIRDROP_AMOUNT)
+          .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     const convexReward = convexRewards[address]
       ? convexRewards[address]
-        .mul(LM_AIRDROP_AMOUNT)
-        .div(totalLiquidityMiningScore)
+          .mul(LM_AIRDROP_AMOUNT)
+          .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
     acc[address] = {
