@@ -102,9 +102,9 @@ const handleCurveGaugeTransfer = (blockNumber: number, event) => {
   ousd3CrvGauge = handleERC20Transfer(
     ousd3CrvGauge,
     blockNumber,
-    event.values.sender,
-    event.values.receiver,
-    event.values.value
+    event.values._from,
+    event.values._to,
+    event.values._value
   );
 };
 
