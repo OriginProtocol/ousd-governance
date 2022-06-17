@@ -67,6 +67,20 @@ In another terminal:
 brownie run deploy main client/networks/governance.localhost.json
 ```
 
+## Running brownie console in fork mode
+Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`
+
+Node will be run in forked mode
+
+```bash
+yarn run node
+```
+
+In another terminal:
+```bash
+brownie console --network hardhat-fork
+```
+
 ## Running the DApp and listener
 
 First, install the dependencies:
