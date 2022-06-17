@@ -48,30 +48,36 @@ const HoldingPage: FunctionComponent = () => (
         </SectionTitle>
 
         <div className="overflow-scroll">
-          <table className="table table-zebra w-full">
-            <tbody>
-              <tr>
-                <th>June 1</th>
-                <td>Prelaunch liquidity mining campaign begins</td>
-              </tr>
-              <tr>
-                <th>June 28</th>
-                <td>Final list of exchanges supporting OGV to be published</td>
-              </tr>
-              <tr>
-                <th>July 5-12</th>
-                <td>OGN snapshot window</td>
-              </tr>
-              <tr>
-                <th>July 12</th>
-                <td>OGV airdrop</td>
-              </tr>
-              <tr>
-                <th>October 10</th>
-                <td>90-day deadline to claim airdrop</td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="w-full flex text-left">
+            <div className="divide-y w-full">
+              <div className="flex flex-col pb-2">
+                <div className="font-bold">June 1</div>
+                <div className="text-gray-600">
+                  Prelaunch liquidity mining campaign begins
+                </div>
+              </div>
+              <div className="py-2">
+                <div className="font-bold">June 28</div>
+                <div className="text-gray-600">
+                  Final list of exchanges supporting OGV to be published
+                </div>
+              </div>
+              <div className="py-2">
+                <div className="font-bold">July 5-12</div>
+                <div className="text-gray-600">OGN snapshot window</div>
+              </div>
+              <div className="py-2">
+                <div className="font-bold">July 12</div>
+                <div className="text-gray-600">OGV airdrop</div>
+              </div>
+              <div className="py-2">
+                <div className="font-bold">October 10</div>
+                <div className="text-gray-600">
+                  90-day deadline to claim airdrop
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="space-y-4 lg:space-y-0 lg:space-x-4 lg:flex mt-6">
           <a
