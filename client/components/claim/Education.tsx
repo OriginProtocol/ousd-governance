@@ -77,7 +77,9 @@ const Education: FunctionComponent<EducationProps> = ({
         {currentEducationStep === 2 && <Ogn onComplete={setCanAdvance} />}
         <div className="mt-6 flex">
           <div className="mr-auto">
-            <Button onClick={handlePrevStep}>&larr; Check eligibility</Button>
+            <Button onClick={handlePrevStep} alt>
+              &larr; Check eligibility
+            </Button>
           </div>
           <div className="ml-auto">
             <Button onClick={handleNextStep} disabled={!canAdvance}>

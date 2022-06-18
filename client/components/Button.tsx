@@ -8,6 +8,7 @@ interface ButtonProps {
   small?: Boolean;
   disabled?: Boolean;
   fullWidth?: Boolean;
+  alt?: Boolean;
 }
 
 const Button: FunctionComponent<ButtonProps> = ({
@@ -17,11 +18,13 @@ const Button: FunctionComponent<ButtonProps> = ({
   small,
   disabled,
   fullWidth,
+  alt,
 }) => {
-  const className = classNames("btn btn-primary rounded-full", {
+  const className = classNames("btn rounded-full", {
     "btn-lg": large,
     "btn-sm": small,
     "w-full": fullWidth,
+    "btn-primary": !alt,
   });
 
   return (
