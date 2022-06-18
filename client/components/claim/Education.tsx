@@ -1,4 +1,5 @@
 import { FunctionComponent, useState } from "react";
+import { StickyContainer, Sticky } from "react-sticky";
 import classNames from "classnames";
 import CardGroup from "components/CardGroup";
 import Card from "components/Card";
@@ -27,40 +28,46 @@ const Education: FunctionComponent<EducationProps> = ({
   const educationSteps = ["OUSD", "OGV", "OGN"];
 
   return (
-    <div>
-      <div className="mb-4 lg:mb-0 lg:fixed lg:w-40 lg:-ml-44 xl:w-56 xl:-ml-60 lg:z-10">
-        <div>
-          <Card tightPadding alt>
-            <ul className="space-y-2 md:space-y-4">
-              {educationSteps.map((step, index) => {
-                const isCurrent = index === currentEducationStep;
+    <div className="lg:flex">
+      <StickyContainer>
+        <Sticky>
+          {({ style }) => (
+            <div style={style}>
+              <div className="lg:w-40 lg:-ml-44 xl:w-56 xl:-ml-60 lg:z-10 lg:pt-4">
+                <Card tightPadding alt>
+                  <ul className="space-y-2 md:space-y-4">
+                    {educationSteps.map((step, index) => {
+                      const isCurrent = index === currentEducationStep;
 
-                const markerClasses = classNames(
-                  "text-sm md:text-base rounded h-6 w-6 flex flex-shrink-0 items-center justify-center",
-                  {
-                    "bg-primary text-white": isCurrent,
-                    "bg-gray-300 text-gray-400": !isCurrent,
-                  }
-                );
-                const textClasses = classNames("text-sm md:text-base", {
-                  "text-gray-500": !isCurrent,
-                  "text-black": isCurrent,
-                });
-                return (
-                  <li
-                    key={step}
-                    className="flex items-center space-x-2 lg:space-x-3"
-                  >
-                    <span className={markerClasses}>{index + 1}</span>
-                    <span className={textClasses}>{step}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </Card>
-        </div>
-      </div>
-      <div>
+                      const markerClasses = classNames(
+                        "text-sm md:text-base rounded h-6 w-6 flex flex-shrink-0 items-center justify-center",
+                        {
+                          "bg-primary text-white": isCurrent,
+                          "bg-gray-300 text-gray-400": !isCurrent,
+                        }
+                      );
+                      const textClasses = classNames("text-sm md:text-base", {
+                        "text-gray-500": !isCurrent,
+                        "text-black": isCurrent,
+                      });
+                      return (
+                        <li
+                          key={step}
+                          className="flex items-center space-x-2 lg:space-x-3"
+                        >
+                          <span className={markerClasses}>{index + 1}</span>
+                          <span className={textClasses}>{step}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Card>
+              </div>
+            </div>
+          )}
+        </Sticky>
+      </StickyContainer>
+      <div className="mt-4 lg:mt-0">
         {currentEducationStep === 0 && (
           <Ousd onComplete={handleNextEducationStep} />
         )}
