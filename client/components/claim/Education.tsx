@@ -24,23 +24,19 @@ const Education: FunctionComponent<EducationProps> = ({
     setCurrentEducationStep(currentEducationStep + 1);
   };
 
-  const educationSteps = [
-    "Origin Dollar (OUSD)",
-    "Origin Dollar Governance (OGV)",
-    "Origin Story Governance (OGN)",
-  ];
+  const educationSteps = ["OUSD", "OGV", "OGN"];
 
   return (
-    <div className="lg:grid grid-cols-12 gap-4">
-      <div className="mb-4 lg:mb-0 col-span-4">
+    <div>
+      <div className="mb-4 lg:mb-0 lg:fixed lg:w-40 lg:-ml-44 xl:w-56 xl:-ml-60 lg:z-10">
         <div>
-          <Card alt>
+          <Card tightPadding alt>
             <ul className="space-y-2 md:space-y-4">
               {educationSteps.map((step, index) => {
                 const isCurrent = index === currentEducationStep;
 
                 const markerClasses = classNames(
-                  "text-sm md:text-base rounded h-6 w-6 flex items-center justify-center",
+                  "text-sm md:text-base rounded h-6 w-6 flex flex-shrink-0 items-center justify-center",
                   {
                     "bg-primary text-white": isCurrent,
                     "bg-gray-300 text-gray-400": !isCurrent,
@@ -64,7 +60,7 @@ const Education: FunctionComponent<EducationProps> = ({
           </Card>
         </div>
       </div>
-      <div className="col-span-8">
+      <div>
         {currentEducationStep === 0 && (
           <Ousd onComplete={handleNextEducationStep} />
         )}
