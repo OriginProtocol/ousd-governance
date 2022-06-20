@@ -242,7 +242,8 @@ contract OgvStaking is ERC20Votes {
         }
         uint256 _accRewardPerShare = accRewardPerShare;
         _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
-        uint256 netRewardsPerShare = _accRewardPerShare - rewardDebtPerShare[user];
+        uint256 netRewardsPerShare = _accRewardPerShare -
+            rewardDebtPerShare[user];
         return (balanceOf(user) * netRewardsPerShare) / 1e12;
     }
 
@@ -262,13 +263,14 @@ contract OgvStaking is ERC20Votes {
         uint256 supply = totalSupply();
         if (supply > 0) {
             uint256 preBalance = ogv.balanceOf(address(this));
-            try rewardsSource.collectRewards() {
-            } catch { // Governance staking should continue, even if rewards fail
+            try rewardsSource.collectRewards() {} catch {
+                // Governance staking should continue, even if rewards fail
             }
             uint256 collected = ogv.balanceOf(address(this)) - preBalance;
             accRewardPerShare += (collected * 1e12) / supply;
         }
-        uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
+        uint256 netRewardsPerShare = accRewardPerShare -
+            rewardDebtPerShare[user];
         uint256 netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
         rewardDebtPerShare[user] = accRewardPerShare;
         if (netRewards == 0) {

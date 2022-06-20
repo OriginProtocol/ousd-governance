@@ -6,6 +6,7 @@ interface CardGroupProps {
   horizontal?: Boolean;
   twoCol?: Boolean;
   fourCol?: Boolean;
+  dontStackOnMobile?: Boolean;
 }
 
 const CardGroup: FunctionComponent<CardGroupProps> = ({
@@ -13,6 +14,7 @@ const CardGroup: FunctionComponent<CardGroupProps> = ({
   horizontal,
   twoCol,
   fourCol,
+  dontStackOnMobile,
 }) => {
   const classes = classNames("w-full", {
     "grid gap-2": horizontal,
@@ -20,6 +22,9 @@ const CardGroup: FunctionComponent<CardGroupProps> = ({
     "sm:grid-cols-2": twoCol,
     "sm:grid-cols-4": fourCol,
     "sm:grid-cols-3": !twoCol && !fourCol,
+    "grid-cols-2": twoCol && dontStackOnMobile,
+    "grid-cols-4": fourCol && dontStackOnMobile,
+    "grid-cols-3": !twoCol && !fourCol && dontStackOnMobile,
   });
 
   return <div className={classes}>{children}</div>;

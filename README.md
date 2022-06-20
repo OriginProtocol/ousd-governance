@@ -1,6 +1,6 @@
 This is the [OUSD](https://ousd.com) decentralized governance stack.
 
-## Install brownie via pipx
+## Install brownie via pipx  
 
 [The recommended way to install Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html) is via [pipx](https://github.com/pipxproject/pipx):
 
@@ -67,6 +67,20 @@ In another terminal:
 brownie run deploy main client/networks/governance.localhost.json
 ```
 
+## Running brownie console in fork mode
+Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`
+
+Node will be run in forked mode
+
+```bash
+yarn run node
+```
+
+In another terminal:
+```bash
+brownie console --network hardhat-fork
+```
+
 ## Running the DApp and listener
 
 First, install the dependencies:
@@ -102,6 +116,9 @@ yarn dev
 ```
 
 This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
+
+## Deployment
+IMPORTANT (!) once we deploy contracts on the mainnet rename the `start:production:once_contracts_deployed` script command to `start` from the `client/package.json`... If either listener or web commands fail on production we want the whole dyno to restart. Right now production listener is not working because contracts are not yet deployed to mainnet.
 
 ## Gotchas
 

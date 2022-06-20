@@ -125,7 +125,7 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
-  if (!networkInfo.correct) {
+  if (web3Provider && !networkInfo.correct) {
     return (
       <button
         className="btn btn-primary btn-error btn-sm rounded-btn"
