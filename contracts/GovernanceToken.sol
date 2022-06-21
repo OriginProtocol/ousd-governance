@@ -10,7 +10,7 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/ut
 /// @custom:security-contact security@originprotocol.com
 contract OriginDollarGovernance is
     Initializable,
-    ERC20Upgradeable,
+    ERC20BurnableUpgradeable,
     OwnableUpgradeable,
     UUPSUpgradeable,
     AccessControlUpgradeable

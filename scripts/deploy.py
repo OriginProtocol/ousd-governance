@@ -19,8 +19,6 @@ def main(output_file=None):
     merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, "0x0000000000000000000000000000000000000000", staking.address, 14171617))
     merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, "0x0000000000000000000000000000000000000000", staking.address, 14171617))
 
-    merkle_mandatory.burnRemainingOGV()
-
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)

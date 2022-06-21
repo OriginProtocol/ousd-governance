@@ -60,7 +60,7 @@ abstract contract AbstractLockupDistributor {
     	require(block.number >= endBlock, "Can not yet burn the remaining OGV");
     	uint256 burnAmount = IERC20(token).balanceOf(address(this));
 
-    	// ERC20BurnableUpgradeable(token).burn(burnAmount);
+    	ERC20BurnableUpgradeable(token).burn(burnAmount);
     	emit OGVBurned(burnAmount);
 
     }
