@@ -1,6 +1,6 @@
 from brownie import *
 from ..helpers import approx, H, MAXTIME, WEEK
-from ..fixtures import optional_lockup_distributor, token, staking, rewards
+from ..fixtures import optional_lockup_distributor, token, staking, rewards, show_transfers
 
 merkle_proof = [
     0xC06E0D1A35007D9401AB64B2EDB9CD0A674EBCCE35ACBF4C93E1193F99DF35D3,
@@ -10,17 +10,18 @@ merkle_proof = [
 
 
 def test_no_lockup_duration(optional_lockup_distributor, token):
-    amount = 0x019D971E4FE8401E74000000
-    before_balance = token.balanceOf(accounts.default)
+    amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
     token.transfer(optional_lockup_distributor.address, amount)
-    optional_lockup_distributor.claim(1, amount, merkle_proof, 0)
-    # Should have got amount transferred to the contract straight back
-    assert token.balanceOf(accounts.default) == before_balance
+    before_balance = token.balanceOf(accounts.default)
+    tx = optional_lockup_distributor.claim(1, amount, merkle_proof, 0)
+    # show_transfers(tx, token, optional_lockup_distributor)
+    # Should have gotten amount transferred back to the contract.
+    assert token.balanceOf(accounts.default) == before_balance + amount
 
 
 def test_claim_with_lockup_duration(optional_lockup_distributor, token, staking):
-    amount = 0x019D971E4FE8401E74000000
+    amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
     token.transfer(optional_lockup_distributor.address, amount)
     optional_lockup_distributor.claim(1, amount, merkle_proof, WEEK)
