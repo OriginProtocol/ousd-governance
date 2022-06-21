@@ -28,3 +28,13 @@ def test_claim(mandatory_lockup_distributor, token, staking):
     assert lockup_three[1] == tx.timestamp + 156 * WEEK
     assert lockup_four[0] == amount / 4
     assert lockup_four[1] == tx.timestamp + 208 * WEEK
+
+def test_burn_remaining_amount(mandatory_lockup_distributor, token, staking):
+    amount = 500000000 * 1e18
+    # Transfer to the distributor contract so it has something to give out
+    token.transfer(mandatory_lockup_distributor.address, amount)
+    before_balance = token.balanceOf(accounts.default)
+    chain.sleep(WEEK)
+    chain.mine(100) # end block is set to 100 blocks after current fixture block
+    mandatory_lockup_distributor.burnRemainingOGV()
+    assert token.balanceOf(mandatory_lockup_distributor) == 0

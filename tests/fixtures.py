@@ -67,11 +67,12 @@ def get_coins(token, staking):
     COINS[staking.address.lower()] = {'name': 'veOGV', 'decimals': 18}
     return COINS
 
-def show_transfers(tx, token, staking):
+def show_transfers(tx, token, staking, distributor_contract):
     TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
     COINS = get_coins(token, staking)
     CONTRACT_ADDRESSES = {}
     CONTRACT_ADDRESSES[staking.address.lower()] = {'name': 'Staking contract'}
+    CONTRACT_ADDRESSES[distributor_contract.address.lower()] = {'name': 'Distributor contract'}
 
     print("\t".join([
         leading_whitespace("Coin", 10),

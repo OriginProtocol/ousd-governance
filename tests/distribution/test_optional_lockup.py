@@ -15,7 +15,6 @@ def test_no_lockup_duration(optional_lockup_distributor, token):
     token.transfer(optional_lockup_distributor.address, amount)
     before_balance = token.balanceOf(accounts.default)
     tx = optional_lockup_distributor.claim(1, amount, merkle_proof, 0)
-    # show_transfers(tx, token, optional_lockup_distributor)
     # Should have gotten amount transferred back to the contract.
     assert token.balanceOf(accounts.default) == before_balance + amount
 
@@ -28,3 +27,13 @@ def test_claim_with_lockup_duration(optional_lockup_distributor, token, staking)
     chain.sleep(WEEK)
     chain.mine()
     assert staking.lockups(accounts.default, 0)[0] == amount
+
+def test_burn_remaining_amount(optional_lockup_distributor, token, staking):
+    amount = 500000000 * 1e18
+    # Transfer to the distributor contract so it has something to give out
+    token.transfer(optional_lockup_distributor.address, amount)
+    before_balance = token.balanceOf(accounts.default)
+    chain.sleep(WEEK)
+    chain.mine(100) # end block is set to 100 blocks after current fixture block
+    optional_lockup_distributor.burnRemainingOGV()
+    assert token.balanceOf(optional_lockup_distributor) == 0
