@@ -28,7 +28,7 @@ const bigNumberify = (value): BigNumber => {
 // number of blocks it was held for.
 const cumulativeRewardScore = (
   addressHistory: { [address: string]: BlockHistory[] },
-  stopBlock: number,
+  snapshotBlock: number,
   rewardFromBlock = 0
 ) => {
   return Object.entries(addressHistory)
@@ -45,32 +45,31 @@ const cumulativeRewardScore = (
               // Block number of history event is lower than the
               // rewardFromBlock, ignore
               if (blockNumber < rewardFromBlock) return acc;
-              // First history entry, ignore because we need at least two
-              // entries to calculate amount * block time held for
-              if (currentIndex === 0) return acc;
 
               // The two blocks to calculate the difference between
               let firstBlock: number, lastBlock: number;
               if (currentIndex === history.length - 1) {
                 // Last history entry, use the difference between the given
-                // stop block and the history entry block. The event listener
-                // only queries up to stopBlock so it is acceptable to use that
+                // snapshot block and the history entry block. The event listener
+                // only queries up to snapshotBlock so it is acceptable to use that
                 // as firstBlock here.
-                firstBlock = stopBlock;
-                lastBlock = Math.max(rewardFromBlock, blockNumber);
+                lastBlock = snapshotBlock;
+                // The history entry might have a block number lower than the start of rewards, so
+                // set it to the highest of the two
+                firstBlock = Math.max(rewardFromBlock, blockNumber);
               } else {
                 // This is not the first or last history entry, use the
                 // difference between the current history entry block and the
-                // last history entry block
-                firstBlock = blockNumber;
-                lastBlock = Math.max(
+                // next history entry block
+                firstBlock = Math.max(
                   rewardFromBlock,
                   // Previous history entries block number
-                  history[currentIndex - 1].blockNumber
+                  history[currentIndex + 1].blockNumber
                 );
+                lastBlock = blockNumber;
               }
               // Multiply amount by the difference in block numbers
-              acc = acc.add(bigNumberify(amount).mul(firstBlock - lastBlock));
+              acc = acc.add(bigNumberify(amount).mul(lastBlock - firstBlock));
               return acc;
             },
             BigNumber.from(0)
