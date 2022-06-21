@@ -51,7 +51,7 @@ const cumulativeRewardScore = (
 
               // The two blocks to calculate the difference between
               let firstBlock: number, lastBlock: number;
-              if ((currentIndex = history.length - 1)) {
+              if (currentIndex === history.length - 1) {
                 // Last history entry, use the difference between the given
                 // stop block and the history entry block. The event listener
                 // only queries up to stopBlock so it is acceptable to use that
