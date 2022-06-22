@@ -46,28 +46,25 @@ const cumulativeRewardScore = (
               // rewardFromBlock, ignore
               if (blockNumber < rewardFromBlock) return acc;
 
-              // The two blocks to calculate the difference between
-              let firstBlock: number, lastBlock: number;
+              // The history entry might have a block number lower than the start of rewards, so
+              // set it to the highest of the two
+              let firstBlock = Math.max(rewardFromBlock, blockNumber)
+              let lastBlock: number
               if (currentIndex === history.length - 1) {
-                // Last history entry, use the difference between the given
-                // snapshot block and the history entry block. The event listener
-                // only queries up to snapshotBlock so it is acceptable to use that
-                // as firstBlock here.
-                lastBlock = snapshotBlock;
-                // The history entry might have a block number lower than the start of rewards, so
-                // set it to the highest of the two
-                firstBlock = Math.max(rewardFromBlock, blockNumber);
+                  // Last history entry, use the difference between the given
+                  // snapshot block and the history entry block
+                  lastBlock = snapshotBlock;
               } else {
                 // This is not the first or last history entry, use the
                 // difference between the current history entry block and the
                 // next history entry block
-                firstBlock = Math.max(
-                  rewardFromBlock,
-                  // Previous history entries block number
-                  history[currentIndex + 1].blockNumber
-                );
-                lastBlock = blockNumber;
+                lastBlock = Math.min(snapshotBlock, history[currentIndex + 1].blockNumber);
               }
+
+              if (address === "0xb580364843FFf2f0F5D98dAC12EC849FCAcffcbc") {
+                console.log(`Reward amount from ${firstBlock} to ${lastBlock} for ${bigNumberify(amount).toString()}`)
+              }
+
               // Multiply amount by the difference in block numbers
               acc = acc.add(bigNumberify(amount).mul(lastBlock - firstBlock));
               return acc;
@@ -78,8 +75,7 @@ const cumulativeRewardScore = (
       }
     )
     .reduce(
-      (obj, item) => Object.assign(obj, { [item.address]: item.score }),
-      {}
+      (obj, item) => Object.assign(obj, { [item.address]: item.score }), {}
     );
 };
 
