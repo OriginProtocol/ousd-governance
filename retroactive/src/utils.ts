@@ -61,6 +61,8 @@ const cumulativeRewardScore = (
                 lastBlock = Math.min(snapshotBlock, history[currentIndex + 1].blockNumber);
               }
 
+              // console.log(`Reward amount from ${firstBlock} to ${lastBlock} for ${bigNumberify(amount).toString()}`)
+
               // Multiply amount by the difference in block numbers
               acc = acc.add(bigNumberify(amount).mul(lastBlock - firstBlock));
               return acc;
