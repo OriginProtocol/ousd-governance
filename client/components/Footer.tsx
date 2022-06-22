@@ -68,7 +68,14 @@ const Footer: FunctionComponent = () => (
           </li>
         </ul>
         <div className="flex space-x-5 lg:space-x-7">
-          <p>Created by the team at Origin Protocol</p>
+          <a
+            className="text-gray-400 hover:text-black"
+            href="https://originprotocol.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <p>Created by the team at Origin Protocol</p>
+          </a>
         </div>
       </div>
     </Wrapper>
