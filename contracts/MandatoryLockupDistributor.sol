@@ -25,7 +25,7 @@ contract MandatoryLockupDistributor is AbstractLockupDistributor {
     /**
      * @dev Execute a claim using a merkle proof with optional lockup in the staking contract.
      * @param _index Index in the tree
-     * @param _amount Amount eligiblle to claim
+     * @param _amount Amount eligible to claim
      * @param _merkleProof The proof
      */
     function claim(
@@ -34,6 +34,7 @@ contract MandatoryLockupDistributor is AbstractLockupDistributor {
         bytes32[] calldata _merkleProof
     ) external {
         require(!isClaimed(_index), "MerkleDistributor: Drop already claimed.");
+        require(block.number < endBlock, "Can no longer claim. Claim period expired");
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(_index, msg.sender, _amount));

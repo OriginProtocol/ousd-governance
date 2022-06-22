@@ -30,6 +30,14 @@ def test_claim(mandatory_lockup_distributor, token, staking):
     assert lockup_four[0] == amount / 4
     assert lockup_four[1] == tx.timestamp + 208 * WEEK
 
+def test_can_not_claim(mandatory_lockup_distributor, token, staking):
+    amount = 0x019D971E4FE8401E74000000
+    # Transfer to the distributor contract so it has something to lockup
+    token.transfer(mandatory_lockup_distributor.address, amount)
+    chain.mine(100)
+    with brownie.reverts("Can no longer claim. Claim period expired"):
+        mandatory_lockup_distributor.claim(1, amount, merkle_proof)
+
 def test_burn_remaining_amount(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out

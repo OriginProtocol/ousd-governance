@@ -36,6 +36,7 @@ contract OptionalLockupDistributor is AbstractLockupDistributor {
         uint256 _stakeDuration
     ) external {
         require(!isClaimed(_index), "MerkleDistributor: Drop already claimed.");
+        require(block.number < endBlock, "Can no longer claim. Claim period expired");
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(_index, msg.sender, _amount));
