@@ -61,10 +61,6 @@ const cumulativeRewardScore = (
                 lastBlock = Math.min(snapshotBlock, history[currentIndex + 1].blockNumber);
               }
 
-              if (address === "0xb580364843FFf2f0F5D98dAC12EC849FCAcffcbc") {
-                console.log(`Reward amount from ${firstBlock} to ${lastBlock} for ${bigNumberify(amount).toString()}`)
-              }
-
               // Multiply amount by the difference in block numbers
               acc = acc.add(bigNumberify(amount).mul(lastBlock - firstBlock));
               return acc;
