@@ -27,7 +27,9 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
     <label className="label">
       <span className="label-text text-lg flex justify-between items-center w-full">
         <span>
-          {label} <TokenAmount amount={value} /> {counterUnit}
+          {label}&nbsp;
+          <TokenAmount amount={value} />
+          &nbsp;{counterUnit}
         </span>
         {/*<span className="text-sm text-gray-500">
           <TokenAmount amount={value} /> {counterUnit}

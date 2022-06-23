@@ -8,9 +8,11 @@ import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
 
-interface OgvTotalStatsProps {}
+interface OgvTotalStatsProps {
+  alt?: Boolean;
+}
 
-const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = () => {
+const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = ({ alt }) => {
   const { totalBalances } = useStore();
   const { totalSupplyOfOgv, totalLockedUpOgv } = totalBalances;
   const totalPercentageOfLockedUpOgv =
@@ -19,7 +21,7 @@ const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = () => {
   return (
     <CardGroup horizontal>
       <div>
-        <Card dark tightPadding>
+        <Card dark={!alt} alt={alt} tightPadding>
           <div className="space-y-1">
             <CardLabel>Total supply</CardLabel>
             <div className="flex space-x-1 items-center">
@@ -33,7 +35,7 @@ const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = () => {
         </Card>
       </div>
       <div>
-        <Card dark tightPadding>
+        <Card dark={!alt} alt={alt} tightPadding>
           <div className="space-y-1">
             <CardLabel>Locked up</CardLabel>
             <div className="flex space-x-1 items-center">
@@ -47,7 +49,7 @@ const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = () => {
         </Card>
       </div>
       <div>
-        <Card dark tightPadding>
+        <Card dark={!alt} alt={alt} tightPadding>
           <div className="space-y-1">
             <CardLabel>% locked up</CardLabel>
             <div className="flex space-x-1 items-center">

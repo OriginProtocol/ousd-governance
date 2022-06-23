@@ -126,7 +126,7 @@ const ProposalNew: NextPage = () => {
     );
   }
 
-  if (votePower.lt(proposalThreshold)) {
+  /*if (votePower.lt(proposalThreshold)) {
     return (
       <Wrapper narrow>
         <Card>
@@ -145,7 +145,7 @@ const ProposalNew: NextPage = () => {
         </Card>
       </Wrapper>
     );
-  }
+  }*/
 
   return (
     <Wrapper narrow>
