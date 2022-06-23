@@ -7,7 +7,7 @@ export function middleware(req: NextRequest) {
   const hasExtension = regEx.test(pathname);
 
   // If the claim hasn't started
-  if (!hasExtension && pathname !== "/claim" && claimIsOpen()) {
+  if (!hasExtension && pathname !== "/claim" && !claimIsOpen()) {
     // Redirect everything to /claim
     const claimUrl = req.nextUrl.clone();
     claimUrl.pathname = "/claim";
