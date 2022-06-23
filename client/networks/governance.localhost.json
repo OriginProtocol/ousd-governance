@@ -1,6 +1,6 @@
 {
   "OriginDollarGovernance": {
-    "address": "0x32FAFF5fc315fE0BF8B53f6A3C003d8c8eA08d72",
+    "address": "0x6Df42C33F604188c6A6742b5aA3506abB7C31C7B",
     "abi": [
       {
         "inputs": [],
@@ -301,6 +301,37 @@
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "burn",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "burnFrom",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {
@@ -703,7 +734,7 @@
     ]
   },
   "RewardsSource": {
-    "address": "0xea9C9315361c780704B4581E885c474B6979E0cE",
+    "address": "0x24d7aCAAA8372023CEFA2AB98D39D216B144B71b",
     "abi": [
       {
         "inputs": [
@@ -966,7 +997,7 @@
     ]
   },
   "OgvStaking": {
-    "address": "0x4e0cEEA1F36f176b30c810A44683CF833C9cc90E",
+    "address": "0x9D8b91A34d5D8A4F1fF8630240F512736eD89863",
     "abi": [
       {
         "inputs": [
@@ -1933,7 +1964,7 @@
     ]
   },
   "TimelockController": {
-    "address": "0x0dc28B42543642F5Cdd8b08e8e86236De1AB00f0",
+    "address": "0xdEFa2F0831a4B23eF624B50EdE048bf941aBF23E",
     "abi": [
       {
         "inputs": [
@@ -2799,7 +2830,7 @@
     ]
   },
   "Governance": {
-    "address": "0x3C4559E7C315c5413C6889976bbCcC2bd5AB92F3",
+    "address": "0x535b15CE6908b98DfA3Ef8Fb8E546190d014ACB0",
     "abi": [
       {
         "inputs": [

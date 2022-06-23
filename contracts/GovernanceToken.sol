@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/OwnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/AccessControlUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/Initializable.sol";
@@ -10,7 +10,7 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/ut
 /// @custom:security-contact security@originprotocol.com
 contract OriginDollarGovernance is
     Initializable,
-    ERC20Upgradeable,
+    ERC20BurnableUpgradeable,
     OwnableUpgradeable,
     UUPSUpgradeable,
     AccessControlUpgradeable
@@ -33,11 +33,11 @@ contract OriginDollarGovernance is
     }
 
     function grantMinterRole(address _account) public onlyOwner {
-       _grantRole(MINTER_ROLE, _account);
+        _grantRole(MINTER_ROLE, _account);
     }
 
     function grantAdminRole(address _account) public onlyOwner {
-       _grantRole(DEFAULT_ADMIN_ROLE, _account);
+        _grantRole(DEFAULT_ADMIN_ROLE, _account);
     }
 
     function _authorizeUpgrade(address newImplementation)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo } from "utils/index";
+import { useNetworkInfo, useClaimIsOpen } from "utils/index";
 
 const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
@@ -15,7 +15,7 @@ const useTotalBalances = () => {
         contracts.OgvStaking.address
       );
 
-    if (web3Provider && networkInfo.correct && contracts.loaded) {
+    if (useClaimIsOpen && web3Provider && networkInfo.correct && contracts.loaded) {
       Promise.all([loadTotalSupplyOfOgv(), loadTotalLockedUpOgv()]).then(
         ([totalSupplyOfOgv, totalLockedUpOgv]) => {
           useStore.setState({

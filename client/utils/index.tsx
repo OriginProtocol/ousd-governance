@@ -118,6 +118,25 @@ export function inputToBigNumber(
     decimals
   );
 }
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export { fetcher };
+
+export function claimOpensTimestamp() {
+  return parseInt(process.env.CLAIM_OPENS || "0");
+}
+
+export function claimClosesTimestamp() {
+  return parseInt(process.env.CLAIM_CLOSES || "0");
+}
+
+const now = Math.floor(new Date().getTime() / 1000);
+
+export function claimOpenTimestampPassed() {
+  if (!claimOpensTimestamp()) return true;
+  return now > claimOpensTimestamp();
+}
+
+export function claimIsOpen() {
+  if (!claimOpensTimestamp() || !claimClosesTimestamp()) return false;
+  return now > claimOpensTimestamp() && now < claimClosesTimestamp();
+}

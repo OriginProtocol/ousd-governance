@@ -6,6 +6,8 @@ interface Mintable {
     function mint(address to, uint256 amount) external;
 }
 
+/// @title OGV Inflation and Rewards
+/// @author Daniel Von Fange
 contract RewardsSource is Governable {
     address public immutable ogv;
     address public rewardsTarget; // Contract that receives rewards
@@ -31,6 +33,11 @@ contract RewardsSource is Governable {
         lastRewardTime = block.timestamp; // No possible rewards from before contract deployed
     }
 
+    /// @notice Collect rewards.
+    /// 
+    /// Can only be called by the contract that will receive the rewards.
+    ///
+    /// @return rewards OGV collected
     function collectRewards() external returns (uint256) {
         require(msg.sender == rewardsTarget, "Rewards: Not rewardsTarget");
         if (block.timestamp <= lastRewardTime) {
@@ -45,11 +52,21 @@ contract RewardsSource is Governable {
         return rewards;
     }
 
+    /// @notice Preview the amount of rewards that would be returned if rewards
+    /// were collected now.
+    ///
+    /// @return rewards OGV that would be collected
     function previewRewards() external view returns (uint256) {
         (uint256 rewards, ) = _calcRewards();
         return rewards;
     }
 
+    /// @dev Determine the amount of inflation / rewards that will have accrued
+    /// between the lastRewardTime and now.
+    ///
+    /// @return total OGV rewards accrued in the time period
+    /// @return slopeIndex a value to be cached, if non-zero, to speed up
+    ///   computing rewards in the future.
     function _calcRewards() internal view returns (uint256, uint256) {
         uint256 last = lastRewardTime;
         if (last >= block.timestamp) {
@@ -57,7 +74,7 @@ contract RewardsSource is Governable {
         }
         if (inflationSlopes.length == 0) {
             return (0, 0); // Save a slot read by returning a zero constant
-        } 
+        }
         uint256 total = 0;
         uint256 nextSlopeIndex = 0; // Zero means no change
         uint256 _currentSlopeIndex = currentSlopeIndex;
@@ -70,13 +87,13 @@ contract RewardsSource is Governable {
             uint256 rangeEnd = block.timestamp;
             if (rangeEnd < slopeStart) {
                 break; // No future slope could match
-            } 
+            }
             if (rangeStart < slopeStart) {
                 rangeStart = slopeStart; // trim to slope edge
-            } 
+            }
             if (rangeEnd > slopeEnd) {
                 rangeEnd = slopeEnd; // trim to slope edge
-            } 
+            }
             uint256 duration = rangeEnd - rangeStart;
             total += (duration * slope.ratePerDay) / 1 days;
             if (i > _currentSlopeIndex && duration > 0) {
@@ -84,11 +101,22 @@ contract RewardsSource is Governable {
             }
             if (slopeEnd < rangeEnd) {
                 break; // No future slope could match
-            } 
+            }
         }
         return (total, nextSlopeIndex);
     }
 
+    /// @notice Set inflation schedule.
+    ///
+    /// Inflation slopes use start times and ratePerDay. End times are
+    /// overwritten to be either the start of the next slope, or in the case of
+    /// the last slope, a max int64. The rate of the last slope then becomes
+    /// the inflation rate held into the future.
+    ///
+    /// The first slope start time may be defined into the future. In this case
+    /// there will be no inflation until that first start time is reached.
+    /// 
+    /// @param slopes inflation slope configuration
     function setInflation(Slope[] memory slopes) external onlyGovernor {
         // slope ends intentionally are overwritten
         uint256 length = slopes.length;
@@ -118,6 +146,8 @@ contract RewardsSource is Governable {
         emit InflationChanged();
     }
 
+    /// @notice Set the address of the contract than can collect rewards
+    /// @param rewardsTarget_ contract address that can collect rewards
     function setRewardsTarget(address rewardsTarget_) external onlyGovernor {
         address previousTarget = rewardsTarget;
         rewardsTarget = rewardsTarget_; // Okay to be zero, just disables collecting rewards

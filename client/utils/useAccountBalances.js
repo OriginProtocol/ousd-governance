@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo } from "utils/index";
+import { useNetworkInfo, claimIsOpen } from "utils/index";
+import moment from "moment";
 
 const useAccountBalances = () => {
   const [reloadAllowances, setReloadAllowances] = useState(0);
@@ -21,7 +22,13 @@ const useAccountBalances = () => {
       return await contracts.OgvStaking.balanceOf(address);
     };
 
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (
+      claimIsOpen() &&
+      web3Provider &&
+      address &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
       Promise.all([
         loadOgvBalance(),
         loadLockedUpOgvBalance(),
@@ -49,7 +56,13 @@ const useAccountBalances = () => {
       );
     };
 
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (
+      claimIsOpen() &&
+      web3Provider &&
+      address &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
       Promise.all([loadAllowance()]).then(([ogv_approval]) => {
         useStore.setState({
           allowances: {
