@@ -7,12 +7,12 @@ MAXTIME = 4 * 365 * DAY
 TOL = 120 / WEEK
 
 
-def approx(expected, received, precision=1e-10):
-    if expected == received == 0:
+def approx(expected, actual, precision=1e-10):
+    if expected == actual == 0:
         return True
-    if (expected < 0 and received > 0) or (received < 0 and expected > 0):
+    if (expected < 0 and actual > 0) or (actual < 0 and expected > 0):
         return False
-    return abs(expected - received) / abs(expected) <= precision
+    return abs(expected - actual) / abs(expected) <= precision
 
 
 def floor_week(timestamp):
