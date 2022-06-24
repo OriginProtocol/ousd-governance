@@ -56,7 +56,9 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      <Button large>Stake your OGV</Button>
+      <a className="btn btn-primary btn-lg" href="/vote-escrow/new">
+        Lock up your OGV
+      </a>
     </Card>
   );
 };

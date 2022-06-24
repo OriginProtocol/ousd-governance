@@ -3,9 +3,8 @@ import { Disconnected } from "components/Disconnected";
 import { useStore } from "utils/store";
 import Wrapper from "components/Wrapper";
 import { PageTitle } from "components/PageTitle";
-import LockupForm from "components/vote-escrow/LockupForm";
 
-const LockupNew: NextPage = () => {
+const LockupSingle: NextPage = () => {
   const { web3Provider } = useStore();
 
   if (!web3Provider) {
@@ -18,10 +17,9 @@ const LockupNew: NextPage = () => {
 
   return (
     <Wrapper narrow>
-      <PageTitle>New Lockup</PageTitle>
-      <LockupForm />
+      <PageTitle>Extend Lockup</PageTitle>
     </Wrapper>
   );
 };
 
-export default LockupNew;
+export default LockupSingle;

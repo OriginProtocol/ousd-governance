@@ -15,7 +15,12 @@ const useTotalBalances = () => {
         contracts.OgvStaking.address
       );
 
-    if (useClaimIsOpen && web3Provider && networkInfo.correct && contracts.loaded) {
+    if (
+      useClaimIsOpen &&
+      web3Provider &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
       Promise.all([loadTotalSupplyOfOgv(), loadTotalLockedUpOgv()]).then(
         ([totalSupplyOfOgv, totalLockedUpOgv]) => {
           useStore.setState({
