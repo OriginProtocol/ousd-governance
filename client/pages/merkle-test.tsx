@@ -3,6 +3,8 @@ import { PageTitle } from "components/PageTitle";
 import Card from "components/Card";
 import useClaim from "../utils/useClaim";
 import { useStore } from "utils/store";
+import Wrapper from "components/Wrapper";
+import { utils } from "ethers";
 
 const MerkleTest: NextPage = () => {
   const claim = useClaim();
@@ -10,7 +12,7 @@ const MerkleTest: NextPage = () => {
   const { address } = useStore();
 
   return (
-    <>
+    <Wrapper>
       <PageTitle>Merkle Test</PageTitle>
       <Card>
         {hasClaim ? (
@@ -20,14 +22,14 @@ const MerkleTest: NextPage = () => {
             <ul>
               <li>Index: {index}</li>
               <li>Account: {address}</li>
-              <li>Amount: {amount}</li>
+              <li>Amount: {utils.formatUnits(amount, 18)}</li>
               <li>Proof: {JSON.stringify(proof)}</li>
             </ul>
             <p className="underline">Eligibility criteria split:</p>
             <ul>
               {Object.keys(split).map((token) => (
                 <li key={token}>
-                  {token}: {split[token]}
+                  {token}: {utils.formatUnits(split[token], 18)}
                 </li>
               ))}
             </ul>
@@ -36,7 +38,7 @@ const MerkleTest: NextPage = () => {
           <p>Account isn&apos;t eligible to claim</p>
         )}
       </Card>
-    </>
+    </Wrapper>
   );
 };
 
