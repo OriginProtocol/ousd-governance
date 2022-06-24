@@ -18,24 +18,28 @@ const nextConfig = {
      * Note: these get "baked in" to the code at build time when building for Rinkeby / Mainnet
      */
     const envVars = {
-      'prod': {
-        NETWORK_ID: 1,
+      'production': {
+        NETWORK_ID: 1
       },
       'dev': {
         NETWORK_ID: 31337,
+        CLAIM_OPENS: 1657580400,
+        CLAIM_CLOSES: 1665356400,
       },
       'staging': {
-        NETWORK_ID: 4,
+        NETWORK_ID: 4
       },
     }
 
     /**
      * Returns environment variables as an object
      */
-    const env = Object.keys(envVars[process.env.NODE_ENV]).reduce((acc, curr) => {
-      acc[`process.env.${curr}`] = JSON.stringify(process.env[curr])
-      return acc
-    }, {})
+    const env = Object.keys(process.env)
+      .concat(Object.keys(envVars[process.env.NODE_ENV]))
+      .reduce((acc, curr) => {
+        acc[`process.env.${curr}`] = JSON.stringify(process.env[curr])
+        return acc
+      }, {})
 
     config.plugins.push(new webpack.DefinePlugin(env))
 

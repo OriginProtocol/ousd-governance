@@ -5,6 +5,6 @@ import "../GovernanceToken.sol";
 
 contract TestToken is OriginDollarGovernance {
     function proof() public {
-      revert("Upgraded");
+        revert("Upgraded");
     }
 }

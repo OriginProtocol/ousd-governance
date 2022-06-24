@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/OwnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/AccessControlUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 
@@ -11,8 +12,11 @@ contract OriginDollarGovernance is
     Initializable,
     ERC20Upgradeable,
     OwnableUpgradeable,
-    UUPSUpgradeable
+    UUPSUpgradeable,
+    AccessControlUpgradeable
 {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -24,8 +28,16 @@ contract OriginDollarGovernance is
         _mint(msg.sender, 1000000000 * 10**decimals());
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+    }
+
+    function grantMinterRole(address _account) public onlyOwner {
+        _grantRole(MINTER_ROLE, _account);
+    }
+
+    function grantAdminRole(address _account) public onlyOwner {
+        _grantRole(DEFAULT_ADMIN_ROLE, _account);
     }
 
     function _authorizeUpgrade(address newImplementation)
