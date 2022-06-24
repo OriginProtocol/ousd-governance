@@ -31,12 +31,6 @@ const useContracts = () => {
         RPC_URLS[chainId]
       );
 
-      let signer;
-      if (web3Provider) {
-        signer = await web3Provider.getSigner();
-      }
-
-      const provider = web3Provider || networkProvider;
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
@@ -45,7 +39,7 @@ const useContracts = () => {
             ...new ethers.Contract(
               definition.address,
               definition.abi,
-              signer || provider
+              networkProvider
             ),
             abi: definition.abi,
           },
