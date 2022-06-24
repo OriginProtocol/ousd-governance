@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
 
 abstract contract AbstractLockupDistributor {
@@ -51,6 +52,16 @@ abstract contract AbstractLockupDistributor {
         claimedBitMap[claimedWordIndex] =
             claimedBitMap[claimedWordIndex] |
             (1 << claimedBitIndex);
+    }
+
+    function isProofValid(
+        uint256 _index,
+        uint256 _amount,
+        bytes32[] calldata _merkleProof
+    ) external view returns (bool) {
+        // Verify the Merkle proof.
+        bytes32 node = keccak256(abi.encodePacked(_index, msg.sender, _amount));
+        return MerkleProof.verify(_merkleProof, merkleRoot, node);
     }
 
     /**
