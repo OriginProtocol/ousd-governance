@@ -1,11 +1,12 @@
 import fs from 'fs';
 import { MerkleTree } from 'merkletreejs';
-import { utils } from 'ethers';
+import { utils, BigNumber } from 'ethers';
 import accounts from './accounts.json';
 
 const nodes = Object.keys(accounts).map((account, index) => {
     const { amount } = accounts[account as keyof typeof accounts];
-    return utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amount]);
+    const amountBn = BigNumber.from(amount.hex);
+    return utils.solidityKeccak256(['uint256', 'address', 'uint256'], [index, account, amountBn]);
 });
 const merkleTree = new MerkleTree(nodes, utils.keccak256, {sortPairs: true});
 const merkleRoot = `0x${merkleTree.getRoot().toString('hex')}`;
