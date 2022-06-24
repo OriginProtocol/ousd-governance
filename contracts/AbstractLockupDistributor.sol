@@ -7,7 +7,7 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.s
 
 abstract contract AbstractLockupDistributor {
     //@notice This event is triggered whenever a call to #claim succeeds.
-    event Claimed(uint256 index, address account, uint256 amount);
+    event Claimed(uint256 indexed index, address indexed account, uint256 amount);
     event OGVBurned(uint256 amount);
 
     address public immutable token;
