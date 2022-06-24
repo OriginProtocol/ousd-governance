@@ -30,6 +30,7 @@ def test_claim(mandatory_lockup_distributor, token, staking):
     assert lockup_four[0] == amount / 4
     assert lockup_four[1] == tx.timestamp + 208 * WEEK
 
+
 def test_can_not_claim(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
@@ -38,15 +39,18 @@ def test_can_not_claim(mandatory_lockup_distributor, token, staking):
     with brownie.reverts("Can no longer claim. Claim period expired"):
         mandatory_lockup_distributor.claim(1, amount, merkle_proof)
 
+
 def test_burn_remaining_amount(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
     token.transfer(mandatory_lockup_distributor.address, amount)
     before_balance = token.balanceOf(accounts.default)
     chain.sleep(WEEK)
-    chain.mine(100) # end block is set to 100 blocks after current fixture block
+    # end block is set to 100 blocks after current fixture block
+    chain.mine(100)
     mandatory_lockup_distributor.burnRemainingOGV()
     assert token.balanceOf(mandatory_lockup_distributor) == 0
+
 
 def test_can_not_burn_remaining_amount(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
@@ -54,9 +58,11 @@ def test_can_not_burn_remaining_amount(mandatory_lockup_distributor, token, stak
     token.transfer(mandatory_lockup_distributor.address, amount)
     before_balance = token.balanceOf(accounts.default)
     chain.sleep(WEEK)
-    chain.mine(96) # end block is set to 100 blocks after current fixture block
+    # end block is set to 100 blocks after current fixture block
+    chain.mine(96)
     with brownie.reverts("Can not yet burn the remaining OGV"):
         mandatory_lockup_distributor.burnRemainingOGV()
+
 
 def test_valid_proof(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
@@ -64,11 +70,25 @@ def test_valid_proof(mandatory_lockup_distributor, token, staking):
     token.transfer(mandatory_lockup_distributor.address, amount)
     assert mandatory_lockup_distributor.isProofValid(1, amount, merkle_proof)
 
+
 def test_invalid_proof(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
     token.transfer(mandatory_lockup_distributor.address, amount)
     false_merkle_proof = merkle_proof
-    false_merkle_proof[0] = '0xC06E0D1A35007D9401AB64B2EDB9CD0A674EBCCE35ACBF4C93E1193F99DF35D2'
+    false_merkle_proof[
+        0
+    ] = "0xC06E0D1A35007D9401AB64B2EDB9CD0A674EBCCE35ACBF4C93E1193F99DF35D2"
     assert not mandatory_lockup_distributor.isProofValid(1, amount, false_merkle_proof)
 
+
+def test_cannot_claim_with_invalid_proof(mandatory_lockup_distributor, token, staking):
+    amount = 500000000 * 1e18
+    # Transfer to the distributor contract so it has something to lockup
+    token.transfer(mandatory_lockup_distributor.address, amount)
+    false_merkle_proof = merkle_proof
+    false_merkle_proof[
+        0
+    ] = "0xC06E0D1A35007D9401AB64B2EDB9CD0A674EBCCE35ACBF4C93E1193F99DF35D2"
+    with brownie.reverts("MerkleDistributor: Invalid proof."):
+        mandatory_lockup_distributor.claim(1, amount, merkle_proof)
