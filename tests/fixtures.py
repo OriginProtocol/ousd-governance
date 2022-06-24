@@ -52,53 +52,73 @@ test_merkle_data = {
     },
 }
 
-def leading_whitespace(s, desired = 16):
-    return ' ' * (desired-len(s)) + s
 
-def commas(v, decimals = 18):
+def leading_whitespace(s, desired=16):
+    return " " * (desired - len(s)) + s
+
+
+def commas(v, decimals=18):
     """Pretty format token amounts as floored, fixed size dollars"""
     v = int(v / 10**decimals)
-    s = f'{v:,}'
+    s = f"{v:,}"
     return leading_whitespace(s, 16)
+
 
 def get_coins(token, staking):
     COINS = {}
-    COINS[token.address.lower()] = {'name': 'OGV', 'decimals': 18}
-    COINS[staking.address.lower()] = {'name': 'veOGV', 'decimals': 18}
+    COINS[token.address.lower()] = {"name": "OGV", "decimals": 18}
+    COINS[staking.address.lower()] = {"name": "veOGV", "decimals": 18}
     return COINS
+
 
 def show_transfers(tx, token, staking, distributor_contract):
     TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
     COINS = get_coins(token, staking)
     CONTRACT_ADDRESSES = {}
-    CONTRACT_ADDRESSES[staking.address.lower()] = {'name': 'Staking contract'}
-    CONTRACT_ADDRESSES[distributor_contract.address.lower()] = {'name': 'Distributor contract'}
+    CONTRACT_ADDRESSES[staking.address.lower()] = {"name": "Staking contract"}
+    CONTRACT_ADDRESSES[distributor_contract.address.lower()] = {
+        "name": "Distributor contract"
+    }
 
-    print("\t".join([
-        leading_whitespace("Coin", 10),
-        leading_whitespace("From", 42),
-        leading_whitespace("To", 42),
-        "Amount"
-        ]))
+    print(
+        "\t".join(
+            [
+                leading_whitespace("Coin", 10),
+                leading_whitespace("From", 42),
+                leading_whitespace("To", 42),
+                "Amount",
+            ]
+        )
+    )
     for log in tx.logs:
         if log.topics and log.topics[0].hex() == TRANSFER:
             coin = log.address[0:10]
             amount = str(int(log.data, 16))
             if log.address.lower() in COINS:
-                coin = COINS[log.address.lower()]['name']
-                amount = commas(int(log.data, 16), COINS[log.address.lower()]['decimals'])
-            from_label = '0x' + log.topics[1].hex().replace("0x000000000000000000000000",'')
-            to_label = '0x' + log.topics[2].hex().replace("0x000000000000000000000000",'')
+                coin = COINS[log.address.lower()]["name"]
+                amount = commas(
+                    int(log.data, 16), COINS[log.address.lower()]["decimals"]
+                )
+            from_label = "0x" + log.topics[1].hex().replace(
+                "0x000000000000000000000000", ""
+            )
+            to_label = "0x" + log.topics[2].hex().replace(
+                "0x000000000000000000000000", ""
+            )
             if from_label.lower() in CONTRACT_ADDRESSES:
-                from_label = CONTRACT_ADDRESSES[from_label.lower()]['name']
+                from_label = CONTRACT_ADDRESSES[from_label.lower()]["name"]
             if to_label.lower() in CONTRACT_ADDRESSES:
-                to_label = CONTRACT_ADDRESSES[to_label.lower()]['name']
-            print("\t".join([
-                leading_whitespace(coin, 10),
-                leading_whitespace(from_label, 42),
-                leading_whitespace(to_label, 42),
-                amount
-                ]))
+                to_label = CONTRACT_ADDRESSES[to_label.lower()]["name"]
+            print(
+                "\t".join(
+                    [
+                        leading_whitespace(coin, 10),
+                        leading_whitespace(from_label, 42),
+                        leading_whitespace(to_label, 42),
+                        amount,
+                    ]
+                )
+            )
 
 
 @pytest.fixture
@@ -137,7 +157,12 @@ def optional_lockup_distributor(token, staking, web3):
         "deploy_optional_lockup_distributor",
         "main",
         # web3.eth.block_number + 100 -> set end_block to 100 blocks after the current block
-        (token.address, staking.address, test_merkle_data["merkle_root"], web3.eth.block_number + 100),
+        (
+            token.address,
+            staking.address,
+            test_merkle_data["merkle_root"],
+            web3.eth.block_number + 100,
+        ),
     )
 
 
@@ -147,5 +172,10 @@ def mandatory_lockup_distributor(token, staking):
         "deploy_mandatory_lockup_distributor",
         "main",
         # web3.eth.block_number + 100 -> set end_block to 100 blocks after the current block
-        (token.address, staking.address, test_merkle_data["merkle_root"], web3.eth.block_number + 100),
+        (
+            token.address,
+            staking.address,
+            test_merkle_data["merkle_root"],
+            web3.eth.block_number + 100,
+        ),
     )
