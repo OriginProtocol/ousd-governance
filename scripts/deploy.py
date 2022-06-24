@@ -1,14 +1,12 @@
 import json
 from brownie import *
 
-
 def main(output_file=None):
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")
     token = run("deploy_token")
 
-    epoch = 86400  # 1 day
-
+    epoch = 86400 # 1 day
     rewards = run("deploy_rewards", "main", (token.address,))
     staking = run("deploy_staking", "main", (token.address, epoch, rewards.address))
 
@@ -32,8 +30,10 @@ def main(output_file=None):
                 address=timelock_controller.address, abi=timelock_controller.abi
             ),
             Governance=dict(address=governance.address, abi=governance.abi),
+            MandatoryDistributor=dict(address=merkle_mandatory.address, abi=merkle_mandatory.abi),
+            OptionalDistributor=dict(address=merkle_optional.address, abi=merkle_optional.abi)
         )
         with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
 
-    return (token, rewards, staking, timelock_controller, governance)
+    return (token, staking, timelock_controller, governance, merkle_mandatory, merkle_optional, rewards)
