@@ -13,7 +13,6 @@ const useConnectSigner = (_contract) => {
       }
     };
     getSignerForContract();
-    
   }, [web3Provider]);
 
   return contract;

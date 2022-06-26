@@ -1,6 +1,7 @@
 import json
 from brownie import *
 
+
 def main(output_file=None):
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")

@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
 import "./AbstractLockupDistributor.sol";
 
 interface IOGVStaking {

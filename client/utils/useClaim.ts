@@ -7,11 +7,11 @@ const useClaim = () => {
   const { address } = useStore();
 
   const maybeConvertToBn = (amount) => {
-    if (typeof amount !== 'object' || !amount || amount.hex === undefined)
-      return null
+    if (typeof amount !== "object" || !amount || amount.hex === undefined)
+      return null;
 
     return BigNumber.from(amount.hex);
-  }
+  };
 
   useEffect(() => {
     const getClaim = async () => {
