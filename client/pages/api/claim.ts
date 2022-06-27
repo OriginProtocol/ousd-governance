@@ -10,9 +10,15 @@ type Data = {
   error?: string | undefined;
 };
 
-const isDevMode = process.env.NODE_ENV === 'development'
+const isDevMode = process.env.NODE_ENV === "development";
 const { claims } = JSON.parse(
-  fs.readFileSync(path.join(process.cwd(), isDevMode ? "../scripts/claims_dev.json" : "../scripts/claims.json"), "utf8")
+  fs.readFileSync(
+    path.join(
+      process.cwd(),
+      isDevMode ? "../scripts/claims_dev.json" : "../scripts/claims.json"
+    ),
+    "utf8"
+  )
 );
 
 const handler = (req: NextApiRequest, res: NextApiResponse<Data>) => {
