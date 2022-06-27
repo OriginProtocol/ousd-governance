@@ -209,9 +209,9 @@ ethereumEvents.on(
       );
 
       // Write a CSV for for easier verification
-      fs.writeFileSync("ogn-rewards.csv", csv.join("\n"));
+      fs.writeFileSync("../scripts/1_data/optional_lockup_rewards.csv", csv.join("\n"));
       // Write merkle tree claims JSON structure
-      fs.writeFileSync("ogn-claims.json", JSON.stringify(claims));
+      fs.writeFileSync("../scripts/1_data/optional_lockup_rewards.csv", JSON.stringify(claims));
     }
 
     done();

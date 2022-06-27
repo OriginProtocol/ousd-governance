@@ -119,9 +119,9 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
     );
 
     // Write a CSV for for easier verification
-    fs.writeFileSync("ousd-rewards.csv", csv.join("\n"));
+    fs.writeFileSync("../scripts/1_data/mandatory_lockup_rewards.csv", csv.join("\n"));
     // Write merkle tree claims JSON structure
-    fs.writeFileSync("ousd-claims.json", JSON.stringify(claims));
+    fs.writeFileSync("../scripts/1_data/mandatory_lockup_claims.json", JSON.stringify(claims));
   }
 
   done();
