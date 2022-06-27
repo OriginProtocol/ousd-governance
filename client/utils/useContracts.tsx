@@ -34,30 +34,25 @@ const useContracts = () => {
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
+        const contract = new ethers.Contract(
+          definition.address,
+          definition.abi,
+          networkProvider
+        );
         return {
-          [name]: {
-            ...new ethers.Contract(
-              definition.address,
-              definition.abi,
-              networkProvider
-            ),
-            abi: definition.abi,
-          },
+          [name]: contract,
         };
       });
 
       const ousdContracts = Object.entries(OUSDContracts.contracts).map(
         ([name, definition]) => {
+          const contract = new ethers.Contract(
+            definition.address,
+            definition.abi,
+            mainnetProvider
+          );
           return {
-            [name]: {
-              ...new ethers.Contract(
-                definition.address,
-                definition.abi,
-                // This has to be mainnet, as we are using mainnet OUSD contracts, even in testing
-                mainnetProvider
-              ),
-              abi: definition.abi,
-            },
+            [name]: contract,
           };
         }
       );

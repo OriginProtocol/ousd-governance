@@ -10,12 +10,14 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
+import useClaim from "utils/useClaim";
 
 interface ClaimVeOgvProps {}
 
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
+  const claim = useClaim();
   const claimableVeOgv = 100; // @TODO replace with user value
-
+  console.log("CLAIM: ", claim)
   const votingDecayFactor = 1.8; // @TODO replace with contract value
 
   const now = new Date();
@@ -135,7 +137,12 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
           </table>
         </div>
         <div className="pt-3">
-          <Button large>Claim</Button>
+          <Button
+            onClick={async () => {
+              claim.mandatory.claim();
+            }}
+            large
+          >Claim</Button>
         </div>
       </div>
     </Card>

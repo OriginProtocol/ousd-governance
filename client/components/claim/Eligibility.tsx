@@ -1,4 +1,5 @@
 import { FunctionComponent, useCallback } from "react";
+import { utils, BigNumber } from "ethers";
 import Image from "next/image";
 import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
@@ -8,6 +9,41 @@ import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
 import TokenIcon from "components/TokenIcon";
 import CheckIcon from "components/CheckIcon";
+import CrossIcon from "components/CrossIcon";
+import useClaim from "utils/useClaim";
+import { formatCurrency } from "utils/math";
+
+const EligibilityItem = ({
+  showCheckMark,
+  itemTitle,
+  tokens,
+  showOgvToken  
+}) => {
+  return (
+    <>
+      <tr>
+        <td>
+          <div className="flex space-x-2 items-center">
+            {showCheckMark ? <CheckIcon /> : <CrossIcon />}
+            <span>{itemTitle}</span>
+          </div>
+        </td>
+        <td>
+          <div className="flex space-x-2 items-center">
+            <TokenIcon
+              src={showOgvToken ? '/ogv.svg' : '/veogv.svg'}
+              alt={showOgvToken ? 'OGV' : 'veOGV'}
+            />
+            <span>
+              <span className="mr-1">{formatCurrency(utils.formatUnits(tokens, 18))}</span>
+              {showOgvToken ? 'OGV' : 'veOGV'}
+            </span>
+          </div>
+        </td>
+      </tr>
+    </>
+  );
+};
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -17,8 +53,11 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   handleNextStep,
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
+  const claim = useClaim();
 
-  const isEligible = true; // @TODO replace with real check
+  const isEligible = claim.loaded && claim.claimData.hasClaim;
+  const claimValid = isEligible && claim.optional && claim.mandatory && 
+    claim.optional.isValid && claim.mandatory.isValid
 
   const resetWeb3State = useStore((state) => state.reset);
 
@@ -35,6 +74,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 
   const canAdvance = web3Provider && isEligible;
 
+  console.log("CLAIM", claim)
   return (
     <>
       <Card>
@@ -54,11 +94,19 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             <>
               {isEligible ? (
                 <>
-                  <div className="bg-accent text-white font-bold px-2 py-4 text-center text-lg">
-                    <p className="">
-                      {truncateEthAddress(address)} is eligible to claim!
-                    </p>
-                  </div>
+                  {claimValid ? (
+                    <div className="bg-accent text-white font-bold px-2 py-4 text-center text-lg">
+                      <p className="">
+                        {truncateEthAddress(address)} is eligible to claim!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-orange-500 text-white font-bold px-2 py-4 text-center text-lg">
+                      <p className="">
+                        {truncateEthAddress(address)} has an invalid claim proof!
+                      </p>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -80,7 +128,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               </div>
             </>
           )}
-          <table className="table w-full mt-6">
+          {isEligible && <table className="table w-full mt-6">
             <thead>
               <tr>
                 <th>Eligibility Criteria</th>
@@ -88,50 +136,32 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    {canAdvance && <CheckIcon />}
-                    <span>OGN holder</span>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    <TokenIcon src="/ogv.svg" alt="OGV" />
-                    <span>OGV</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    {canAdvance && <CheckIcon />}
-                    <span>OUSD liquidity provider</span>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    <TokenIcon src="/ogv.svg" alt="OGV" />
-                    <span>OGV</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    {canAdvance && <CheckIcon />}
-                    <span>OUSD holder</span>
-                  </div>
-                </td>
-                <td>
-                  <div className="flex space-x-2 items-center">
-                    <TokenIcon src="/veogv.svg" alt="veOGV" />
-                    <span>veOGV</span>
-                  </div>
-                </td>
-              </tr>
+              <EligibilityItem
+                showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
+                itemTitle="OGN holder"
+                tokens={BigNumber.from(0)} // @TODO change this
+                showOgvToken={true}
+              />
+              <EligibilityItem
+                showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
+                itemTitle="OUSD liquidity provider"
+                tokens={BigNumber.from(0)} // @TODO change this
+                showOgvToken={true}
+              />
+              <EligibilityItem
+                showCheckMark={claim.claimData.split.ousd.gt(0)}
+                itemTitle="OUSD holder"
+                tokens={claim.claimData.split.ousd}
+                showOgvToken={false}
+              />
+              <EligibilityItem
+                showCheckMark={claim.claimData.split.wousd.gt(0)}
+                itemTitle="WOUSD holder"
+                tokens={claim.claimData.split.wousd}
+                showOgvToken={false}
+              />
             </tbody>
-          </table>
+          </table>}
         </div>
       </Card>
       <div className="mt-6 flex">

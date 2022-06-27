@@ -7,8 +7,8 @@ import Wrapper from "components/Wrapper";
 import { utils } from "ethers";
 
 const MerkleTest: NextPage = () => {
-  const claim = useClaim();
-  const { index, amount, proof, hasClaim, split } = claim;
+  const { claimData } = useClaim();
+  const { index, amount, proof, hasClaim, split } = claimData;
   const { address } = useStore();
 
   return (

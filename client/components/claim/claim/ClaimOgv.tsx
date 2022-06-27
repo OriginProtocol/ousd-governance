@@ -10,11 +10,13 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
+import useClaim from "utils/useClaim";
 
 interface ClaimOgvProps {}
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claimableOgv = 100; // @TODO replace with user value
+  const claim = useClaim();
   const maxLockupDurationInWeeks = "208";
 
   //const [lockupAmount, setLockupAmount] = useState(claimableOgv);
@@ -257,7 +259,12 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             </span>
           )}
           <div className="pt-3">
-            <Button large>{isValidLockup ? `Claim and lock` : `Claim`}</Button>
+            <Button 
+              onClick={async () => {
+                claim.optional.claim(parseInt(lockupDuration));
+              }}
+              large
+            >{isValidLockup ? `Claim and lock` : `Claim`}</Button>
           </div>
         </div>
       </div>
