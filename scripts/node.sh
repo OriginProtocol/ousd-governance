@@ -49,7 +49,7 @@ main()
         echo "🟢 Node initialized"
 
         # generate merkle tree
-        npm run generate-merkle-tree
+        npm run generate-merkle-tree-dev
         
         # deploy the contracts
         npm run deploy:contracts:dev
