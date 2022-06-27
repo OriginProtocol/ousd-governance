@@ -17,7 +17,7 @@ interface ClaimVeOgvProps {}
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const claim = useClaim();
   const claimableVeOgv = 100; // @TODO replace with user value
-  console.log("CLAIM: ", claim)
+  console.log("CLAIM: ", claim);
   const votingDecayFactor = 1.8; // @TODO replace with contract value
 
   const now = new Date();
@@ -142,7 +142,9 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               claim.mandatory.claim();
             }}
             large
-          >Claim</Button>
+          >
+            Claim
+          </Button>
         </div>
       </div>
     </Card>

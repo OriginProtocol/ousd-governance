@@ -44,15 +44,19 @@ const useClaim = () => {
   }, [address]);
 
   useEffect(() => {
-    if (!contracts.loaded || !claim.hasClaim){
+    if (!contracts.loaded || !claim.hasClaim) {
       return;
     }
 
     const readDistributor = async (distContract) => {
       return {
         isClaimed: await distContract.isClaimed(claim.index),
-        isValid: await distContract.isProofValid(claim.index, claim.amount, claim.proof)
-      }
+        isValid: await distContract.isProofValid(
+          claim.index,
+          claim.amount,
+          claim.proof
+        ),
+      };
     };
 
     setDistributorData({});
@@ -60,37 +64,59 @@ const useClaim = () => {
 
     Promise.all([
       readDistributor(contracts.OptionalDistributor),
-      readDistributor(contracts.MandatoryDistributor)
-    ]).then(([optional, mandatory]) => {
-      setDistributorData({
-        optional: {
-          ...optional,
-          claim: async (duration) => {
-            const durationTime = BigNumber.from(duration).mul(24).mul(60).mul(60).mul(7);
-            return (await useConnectSigner(contracts.OptionalDistributor, web3Provider))
-              ["claim(uint256,uint256,bytes32[],uint256)"](claim.index, claim.amount, claim.proof, durationTime)
-          }
-        },
-        mandatory: {
-          ...mandatory,
-          claim: async () => {
-            return (await useConnectSigner(contracts.MandatoryDistributor, web3Provider))
-              ["claim(uint256,uint256,bytes32[])"](claim.index, claim.amount, claim.proof)
-          }
-        }
+      readDistributor(contracts.MandatoryDistributor),
+    ])
+      .then(([optional, mandatory]) => {
+        setDistributorData({
+          optional: {
+            ...optional,
+            claim: async (duration) => {
+              const durationTime = BigNumber.from(duration)
+                .mul(24)
+                .mul(60)
+                .mul(60)
+                .mul(7);
+              return (
+                await useConnectSigner(
+                  contracts.OptionalDistributor,
+                  web3Provider
+                )
+              )["claim(uint256,uint256,bytes32[],uint256)"](
+                claim.index,
+                claim.amount,
+                claim.proof,
+                durationTime
+              );
+            },
+          },
+          mandatory: {
+            ...mandatory,
+            claim: async () => {
+              return (
+                await useConnectSigner(
+                  contracts.MandatoryDistributor,
+                  web3Provider
+                )
+              )["claim(uint256,uint256,bytes32[])"](
+                claim.index,
+                claim.amount,
+                claim.proof
+              );
+            },
+          },
+        });
+        setLoaded(true);
       })
-      setLoaded(true);
-    }).catch( error => {
-      console.log("Error fetching contract distribution state:", error)
-    });
-
+      .catch((error) => {
+        console.log("Error fetching contract distribution state:", error);
+      });
   }, [address, contracts.loaded, claim, web3Provider]);
 
   //console.log("DIST DATA", claim, distributorData);
   return {
     claimData: claim,
     ...distributorData,
-    loaded
+    loaded,
   };
 };
 

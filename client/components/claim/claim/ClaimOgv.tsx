@@ -259,12 +259,14 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             </span>
           )}
           <div className="pt-3">
-            <Button 
+            <Button
               onClick={async () => {
                 claim.optional.claim(parseInt(lockupDuration));
               }}
               large
-            >{isValidLockup ? `Claim and lock` : `Claim`}</Button>
+            >
+              {isValidLockup ? `Claim and lock` : `Claim`}
+            </Button>
           </div>
         </div>
       </div>
