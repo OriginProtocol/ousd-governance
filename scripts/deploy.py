@@ -1,7 +1,8 @@
 import json
 from brownie import *
 
-f = open('./scripts/claims_dev.json') # TODO change this (!!!)
+DEV_MODE = True # TODO change this (!!!)
+f = open('./scripts/claims_dev.json' if DEV_MODE else './scripts/claims.json')
 merkle_root = json.load(f)['merkleRoot']
 
 def main(output_file=None):
@@ -22,6 +23,10 @@ def main(output_file=None):
 
     merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, merkle_root, staking.address, mandatoryEndBlock))
     merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, merkle_root, staking.address, optionalEndBlock))
+
+    if DEV_MODE:
+        token.transfer(merkle_mandatory, 50000 * 10e18, {'from': accounts[0]})
+        token.transfer(merkle_optional, 50000 * 10e18, {'from': accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
