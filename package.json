@@ -6,6 +6,7 @@
     "node": "scripts/node.sh fork",
     "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json",
     "generate-merkle-tree": "ts-node scripts/generate-merkle-tree.ts",
+    "generate-merkle-tree-dev": "DEV_MODE=true ts-node scripts/generate-merkle-tree.ts",
     "build": "cd client && yarn install && yarn run build",
     "start": "cd client && yarn run start"
   },

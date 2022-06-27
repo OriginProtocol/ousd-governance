@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { MerkleTree } from 'merkletreejs';
 import { utils, BigNumber } from 'ethers';
-import accounts from './accounts.json';
+
+const accounts = JSON.parse(fs.readFileSync(process.env.DEV_MODE === "true" ? './scripts/accounts_dev.json' : './scripts/accounts.json', 'utf-8'))
 
 const nodes = Object.keys(accounts).map((account, index) => {
     const { amount } = accounts[account as keyof typeof accounts];
@@ -30,4 +31,7 @@ const claims = {
     {}),
 };
 
-fs.writeFileSync('./scripts/claims.json', JSON.stringify(claims, null, 2), 'utf-8');
+fs.writeFileSync(
+    process.env.DEV_MODE === "true" ? './scripts/claims_dev.json' : './scripts/claims.json',
+    JSON.stringify(claims, null, 2), 'utf-8'
+);
