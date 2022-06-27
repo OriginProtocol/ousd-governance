@@ -160,8 +160,8 @@ def optional_lockup_distributor(token, staking, web3):
         # web3.eth.block_number + 100 -> set end_block to 100 blocks after the current block
         (
             token.address,
-            staking.address,
             test_merkle_data["merkle_root"],
+            staking.address,
             web3.eth.block_number + 100,
         ),
     )
@@ -175,8 +175,8 @@ def mandatory_lockup_distributor(token, staking):
         # web3.eth.block_number + 100 -> set end_block to 100 blocks after the current block
         (
             token.address,
-            staking.address,
             test_merkle_data["merkle_root"],
+            staking.address,
             web3.eth.block_number + 100,
         ),
     )
