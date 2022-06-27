@@ -86,8 +86,9 @@ const useClaim = () => {
                 claim.index,
                 claim.amount,
                 claim.proof,
-                durationTime
-              );
+                durationTime,
+                { gasLimit: 1000000 }
+              ); // @TODO maybe set this to lower
             },
           },
           mandatory: {
@@ -101,8 +102,9 @@ const useClaim = () => {
               )["claim(uint256,uint256,bytes32[])"](
                 claim.index,
                 claim.amount,
-                claim.proof
-              );
+                claim.proof,
+                { gasLimit: 1000000 }
+              ); // @TODO maybe set this to lower
             },
           },
         });

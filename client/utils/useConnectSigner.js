@@ -3,7 +3,6 @@ import { useStore } from "utils/store";
 
 const useConnectSigner = async (_contract, web3Provider) => {
   const signer = await web3Provider.getSigner();
-  console.log("Contract definition", _contract);
   return _contract.connect(signer);
 };
 
