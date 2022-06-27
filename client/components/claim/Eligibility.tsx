@@ -84,7 +84,6 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 
   const canAdvance = web3Provider && isEligible;
 
-  console.log("CLAIM", claim)
   return (
     <>
       <Card>
