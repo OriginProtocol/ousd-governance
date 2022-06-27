@@ -16,7 +16,7 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = bigNumberify("400000000000000000000000000");
-const SNAPSHOT_BLOCK = 14929663;
+const SNAPSHOT_BLOCK = 15036444;
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
@@ -43,6 +43,13 @@ try {
 let { ousdHolders, wousdHolders } = savedProgress;
 
 const contracts = [ousdContract, wousdContract];
+
+const excludedContracts = [
+  "0x87650D7bbfC3A9F10587d7778206671719d9910D", // Curve.fi
+  "0xCC01d9D54d06b6a0b6D09A9f79c3A6438e505f71", // Uni v2
+  "0xcecaD69d7D4Ed6D52eFcFA028aF8732F27e08F70", // Flipper
+  "0x129360c964e2E13910d603043F6287E5e9383374", // Uni v3
+];
 
 const ethereumEvents = new EthereumEvents(
   web3,
@@ -81,7 +88,8 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 
   if (blockNumber) {
     process.stdout.write(
-      `${blockNumber} - ${Object.keys(ousdHolders).length} OUSD holders, ${Object.keys(wousdHolders).length
+      `${blockNumber} - ${Object.keys(ousdHolders).length} OUSD holders, ${
+        Object.keys(wousdHolders).length
       } wOUSD holders\r`
     );
   }
@@ -122,7 +130,13 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 const calculateRewards = () => {
   console.log("\n");
   console.log("Calculating OUSD rewards");
-  const ousdRewards = cumulativeRewardScore(ousdHolders, SNAPSHOT_BLOCK);
+  const filteredOusdHolders = Object.fromEntries(
+    Object.entries(ousdHolders).filter(([k]) => !excludedContracts.includes(k))
+  );
+  const ousdRewards = cumulativeRewardScore(
+    filteredOusdHolders,
+    SNAPSHOT_BLOCK
+  );
   console.log("Calculating wOUSD rewards");
   const wousdRewards = cumulativeRewardScore(wousdHolders, SNAPSHOT_BLOCK);
 

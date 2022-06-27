@@ -48,17 +48,20 @@ const cumulativeRewardScore = (
 
               // The history entry might have a block number lower than the start of rewards, so
               // set it to the highest of the two
-              let firstBlock = Math.max(rewardFromBlock, blockNumber)
-              let lastBlock: number
+              let firstBlock = Math.max(rewardFromBlock, blockNumber);
+              let lastBlock: number;
               if (currentIndex === history.length - 1) {
-                  // Last history entry, use the difference between the given
-                  // snapshot block and the history entry block
-                  lastBlock = snapshotBlock;
+                // Last history entry, use the difference between the given
+                // snapshot block and the history entry block
+                lastBlock = snapshotBlock;
               } else {
                 // This is not the first or last history entry, use the
                 // difference between the current history entry block and the
                 // next history entry block
-                lastBlock = Math.min(snapshotBlock, history[currentIndex + 1].blockNumber);
+                lastBlock = Math.min(
+                  snapshotBlock,
+                  history[currentIndex + 1].blockNumber
+                );
               }
 
               // console.log(`Reward amount from ${firstBlock} to ${lastBlock} for ${bigNumberify(amount).toString()}`)
@@ -73,7 +76,8 @@ const cumulativeRewardScore = (
       }
     )
     .reduce(
-      (obj, item) => Object.assign(obj, { [item.address]: item.score }), {}
+      (obj, item) => Object.assign(obj, { [item.address]: item.score }),
+      {}
     );
 };
 

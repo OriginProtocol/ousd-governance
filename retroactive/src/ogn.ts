@@ -230,17 +230,22 @@ const calculateRewards = async () => {
   );
 
   console.log("Calculating OGN staking rewards");
-  let ognStakingRewards = {}
-  let stakingProgressFile = `${SNAPSHOT_BLOCK}-staking-rewards.json`
+  let ognStakingRewards = {};
+  let stakingProgressFile = `${SNAPSHOT_BLOCK}-staking-rewards.json`;
   try {
-    ognStakingRewards = JSON.parse(fs.readFileSync(stakingProgressFile, "utf8"));
+    ognStakingRewards = JSON.parse(
+      fs.readFileSync(stakingProgressFile, "utf8")
+    );
   } catch {}
-  for (const address of ognStakers.filter(f => ognStakingRewards[f] === undefined)) {
+  for (const address of ognStakers.filter(
+    (f) => ognStakingRewards[f] === undefined
+  )) {
     // Use blockTag to query at the snapshot block. This requires Alchemy for the
     // provider URL.
     // TODO: verify this is returning correctly.
-    console.log('Querying staking holdings for', address);
-    ognStakingRewards[address] = await ognStakingContractInstance.totalCurrentHoldings(address, {
+    console.log("Querying staking holdings for", address);
+    ognStakingRewards[address] =
+      await ognStakingContractInstance.totalCurrentHoldings(address, {
         blockTag: SNAPSHOT_BLOCK,
       });
     fs.writeFileSync(stakingProgressFile, JSON.stringify(ognStakingRewards));
@@ -319,11 +324,15 @@ const calculateRewards = async () => {
 
   const rewards = addresses.reduce((acc, address) => {
     const ognReward = ognRewards[address]
-      ? bigNumberify(ognRewards[address]).mul(OGN_AIRDROP_AMOUNT).div(totalOgnScore)
+      ? bigNumberify(ognRewards[address])
+          .mul(OGN_AIRDROP_AMOUNT)
+          .div(totalOgnScore)
       : bigNumberify(0);
 
     const ognStakingReward = ognStakingRewards[address]
-      ? bigNumberify(ognStakingRewards[address]).mul(OGN_AIRDROP_AMOUNT).div(totalOgnScore)
+      ? bigNumberify(ognStakingRewards[address])
+          .mul(OGN_AIRDROP_AMOUNT)
+          .div(totalOgnScore)
       : bigNumberify(0);
 
     const ousd3CrvReward = ousd3CrvRewards[address]
