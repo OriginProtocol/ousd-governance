@@ -1,6 +1,8 @@
 import json
 from brownie import *
 
+f = open('./scripts/claims_dev.json') # TODO change this (!!!)
+merkle_root = json.load(f)['merkleRoot']
 
 def main(output_file=None):
     accounts.default = accounts[0]
@@ -15,13 +17,11 @@ def main(output_file=None):
 
     governance = Governance.deploy(staking, timelock_controller)
 
-    mandatoryMerkleRoot = "0x491d96af74432813e877dad937ba2506f356988e44662feb4f8114e0d88ed00b" # TODO change this
-    optionalMerkleRoot = "0x491d96af74432813e877dad937ba2506f356988e44662feb4f8114e0d88ed00b" # TODO change this
-    mandatoryEndBlock = 15333935 # TODO change this
-    optionalEndBlock = 15333935 # TODO change this
+    mandatoryEndBlock = 15333935 # TODO change this (!!!)
+    optionalEndBlock = 15333935 # TODO change this (!!!)
 
-    merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, mandatoryMerkleRoot, staking.address, mandatoryEndBlock))
-    merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, optionalMerkleRoot, staking.address, optionalEndBlock))
+    merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, merkle_root, staking.address, mandatoryEndBlock))
+    merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, merkle_root, staking.address, optionalEndBlock))
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)

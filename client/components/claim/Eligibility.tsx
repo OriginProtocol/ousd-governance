@@ -188,7 +188,9 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
       </Card>
       <div className="mt-6 flex">
         <div className="ml-auto">
-          <Button onClick={handleNextStep}>Learn about Origin &rarr;</Button>
+          <Button onClick={handleNextStep} disabled={!canAdvance}>
+            Learn about Origin &rarr;
+          </Button>
         </div>
       </div>
     </>
