@@ -54,6 +54,7 @@ const useClaim = () => {
         isValid: await distContract.isProofValid(
           claim.index,
           claim.amount,
+          address,
           claim.proof
         ),
       };

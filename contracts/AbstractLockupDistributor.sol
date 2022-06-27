@@ -58,10 +58,11 @@ abstract contract AbstractLockupDistributor {
     function isProofValid(
         uint256 _index,
         uint256 _amount,
+        address _account,
         bytes32[] calldata _merkleProof
     ) external view returns (bool) {
         // Verify the Merkle proof.
-        bytes32 node = keccak256(abi.encodePacked(_index, msg.sender, _amount));
+        bytes32 node = keccak256(abi.encodePacked(_index, _account, _amount));
         return MerkleProof.verify(_merkleProof, merkleRoot, node);
     }
 
