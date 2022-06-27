@@ -1,41 +1,54 @@
 import json
 from brownie import *
 
-DEV_MODE = True  # TODO change this (!!!)
-f = open("./scripts/claims_dev.json" if DEV_MODE else "./scripts/claims.json")
-merkle_root = json.load(f)["merkleRoot"]
+MANDATORY_END_BLOCK = 15333935  # TODO change this (!!!)
+OPTIONAL_END_BLOCK = 15333935  # TODO change this (!!!)
+EPOCH = 86400  # 1 day
 
 
-def main(output_file=None):
+def main(
+    output_file=None,
+):
+    mandatory_lockup_claims = open(
+        "./scripts/{}_data/mandatory_lockup_claims.json".format(web3.chain_id)
+    )
+    optional_lockup_claims = open(
+        "./scripts/{}_data/optional_lockup_claims.json".format(web3.chain_id)
+    )
+    mandatory_lockup_merkle_root = json.load(mandatory_lockup_claims)["merkleRoot"]
+    optional_lockup_merkle_root = json.load(optional_lockup_claims)["merkleRoot"]
+
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")
     token = run("deploy_token")
 
-    epoch = 86400  # 1 day
     rewards = run("deploy_rewards", "main", (token.address,))
-    staking = run("deploy_staking", "main", (token.address, epoch, rewards.address))
+    staking = run("deploy_staking", "main", (token.address, EPOCH, rewards.address))
 
     timelock_controller = Timelock.deploy([accounts[0]], [accounts[0]])
 
     governance = Governance.deploy(staking, timelock_controller)
 
-    mandatory_end_block = 15333935  # TODO change this (!!!)
-    optional_end_block = 15333935  # TODO change this (!!!)
-
     merkle_mandatory = run(
         "deploy_mandatory_lockup_distributor",
         "main",
-        (token.address, merkle_root, staking.address, mandatory_end_block),
+        (
+            token.address,
+            mandatory_lockup_merkle_root,
+            staking.address,
+            MANDATORY_END_BLOCK,
+        ),
     )
     merkle_optional = run(
         "deploy_optional_lockup_distributor",
         "main",
-        (token.address, merkle_root, staking.address, optional_end_block),
+        (
+            token.address,
+            optional_lockup_merkle_root,
+            staking.address,
+            OPTIONAL_END_BLOCK,
+        ),
     )
-
-    if DEV_MODE:
-        token.transfer(merkle_mandatory, 50000 * 10e18, {"from": accounts[0]})
-        token.transfer(merkle_optional, 50000 * 10e18, {"from": accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
