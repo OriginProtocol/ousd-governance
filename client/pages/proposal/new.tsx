@@ -15,6 +15,7 @@ import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
+import Wrapper from "components/Wrapper";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
@@ -118,28 +119,36 @@ const ProposalNew: NextPage = () => {
   };
 
   if (!web3Provider) {
-    return <Disconnected />;
-  }
-
-  if (votePower.lt(proposalThreshold)) {
     return (
-      <Card>
-        <div className="text-center">
-          <p className="mt-2 font-medium">
-            Minimum required vote power for a proposal is{" "}
-            {proposalThreshold.toString()} votes.
-            <br />
-            <br />
-            You have {truncateBalance(ethers.utils.formatUnits(votePower))}{" "}
-            votes.
-          </p>
-        </div>
-      </Card>
+      <Wrapper narrow>
+        <Disconnected />
+      </Wrapper>
     );
   }
 
+  /*if (votePower.lt(proposalThreshold)) {
+    return (
+      <Wrapper narrow>
+        <Card>
+          <div className="text-center">
+            <p className="mt-2 font-medium">
+              Minimum required vote power for a proposal is{" "}
+              {proposalThreshold.toString()} votes.
+              <br />
+              <br />
+              You have {truncateBalance(
+                ethers.utils.formatUnits(votePower)
+              )}{" "}
+              votes.
+            </p>
+          </div>
+        </Card>
+      </Wrapper>
+    );
+  }*/
+
   return (
-    <>
+    <Wrapper narrow>
       <PageTitle>New Proposal</PageTitle>
       <CardGroup>
         <Card>
@@ -227,7 +236,7 @@ const ProposalNew: NextPage = () => {
           />
         </Card>
       </CardGroup>
-    </>
+    </Wrapper>
   );
 };
 

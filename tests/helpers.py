@@ -1,15 +1,23 @@
 from brownie import chain
 
+H = 3600
 DAY = 86400
 WEEK = 7 * DAY
+MAXTIME = 4 * 365 * DAY
+TOL = 120 / WEEK
 
-def approx(a, b, precision=1e-10):
-    if a == b == 0:
+
+def approx(expected, actual, precision=1e-10):
+    if expected == actual == 0:
         return True
-    return 2 * abs(a - b) / (a + b) <= precision
+    if (expected < 0 and actual > 0) or (actual < 0 and expected > 0):
+        return False
+    return abs(expected - actual) / abs(expected) <= precision
+
 
 def floor_week(timestamp):
     return timestamp - (timestamp % WEEK)
+
 
 # Mine `amount` blocks using hardhat_mine, defaults to the length of the governance
 # voting period (45818 blocks ~1 week )

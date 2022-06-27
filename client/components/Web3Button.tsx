@@ -1,12 +1,13 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { providers } from "ethers";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, FunctionComponent } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
 import { INFURA_ID, mainnetNetworkUrl } from "constants/index";
 import { toast } from "react-toastify";
+import classNames from "classnames";
 
 const providerOptions = {
   walletconnect: {
@@ -52,9 +53,14 @@ if (typeof window !== "undefined") {
     cacheProvider: true,
     providerOptions,
   });
+  useStore.setState({ web3Modal });
 }
 
-export const Web3Button = () => {
+interface Web3ButtonProps {
+  inPage?: Boolean;
+}
+
+export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
   const { provider, web3Provider, address } = useStore();
 
   const resetWeb3State = useStore((state) => state.reset);
@@ -125,7 +131,7 @@ export const Web3Button = () => {
     }
   }, [connect]);
 
-  if (!networkInfo.correct) {
+  if (web3Provider && !networkInfo.correct) {
     return (
       <button
         className="btn btn-primary btn-error btn-sm rounded-btn"
@@ -144,6 +150,12 @@ export const Web3Button = () => {
       </button>
     );
   }
+
+  const defaultClassName = classNames("", {
+    "btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary":
+      !inPage,
+    "btn btn-primary btn-lg rounded-full": inPage,
+  });
 
   return web3Provider ? (
     <div className="dropdown relative">
@@ -173,11 +185,8 @@ export const Web3Button = () => {
       </div>
     </div>
   ) : (
-    <button
-      className="btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary"
-      onClick={connect}
-    >
-      Connect
+    <button className={defaultClassName} onClick={connect}>
+      {inPage ? "Connect wallet" : "Connect"}
     </button>
   );
 };

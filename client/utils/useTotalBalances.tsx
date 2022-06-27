@@ -1,23 +1,36 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo } from "utils/index";
+import { useNetworkInfo, useClaimIsOpen } from "utils/index";
 
 const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
   const { web3Provider, contracts } = useStore();
 
   useEffect(() => {
-    const loadTotalSupply = async () =>
+    const loadTotalSupplyOfOgv = async () =>
       await contracts.OriginDollarGovernance.totalSupply();
 
-    if (web3Provider && networkInfo.correct && contracts.loaded) {
-      Promise.all([loadTotalSupply()]).then(([totalSupply]) => {
-        useStore.setState({
-          totalBalances: {
-            totalSupply,
-          },
-        });
-      });
+    const loadTotalLockedUpOgv = async () =>
+      await contracts.OriginDollarGovernance.balanceOf(
+        contracts.OgvStaking.address
+      );
+
+    if (
+      useClaimIsOpen &&
+      web3Provider &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
+      Promise.all([loadTotalSupplyOfOgv(), loadTotalLockedUpOgv()]).then(
+        ([totalSupplyOfOgv, totalLockedUpOgv]) => {
+          useStore.setState({
+            totalBalances: {
+              totalSupplyOfOgv,
+              totalLockedUpOgv,
+            },
+          });
+        }
+      );
     }
   }, [networkInfo, web3Provider, contracts]);
 };

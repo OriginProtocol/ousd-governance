@@ -37,6 +37,11 @@ a {
   @apply border-b;
 }
 
+[data-theme="origin-theme"] .table th:first-child {
+  position: relative;
+  z-index: 1;
+}
+
 [data-theme="origin-theme"] .table tbody > tr:last-of-type {
   border-bottom: 0;
 }

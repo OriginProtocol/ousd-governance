@@ -1,7 +1,6 @@
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo } from "utils/index";
+import { useNetworkInfo, claimIsOpen } from "utils/index";
 import moment from "moment";
 
 const useAccountBalances = () => {
@@ -13,44 +12,36 @@ const useAccountBalances = () => {
 
   // Load users governance token balance and vote power
   useEffect(() => {
-    const loadBalance = async () => {
+    const loadOgvBalance = async () => {
       return await contracts.OriginDollarGovernance.balanceOf(address);
     };
 
-    const loadVotePower = async () => {
-      return await contracts.VoteLockerCurve.balanceOf(address);
+    const loadLockedUpOgvBalance = () => 0; // @TODO Total lockup amounts from db for this address
+
+    const loadVeOgvBalance = async () => {
+      return await contracts.OgvStaking.balanceOf(address);
     };
 
-    const loadExistingLockup = async () => {
-      const lockup = await contracts.VoteLockerCurve.getLockup(address);
-      return {
-        amount: lockup[0],
-        end: lockup[1],
-      };
-    };
-
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (
+      claimIsOpen() &&
+      web3Provider &&
+      address &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
       Promise.all([
-        loadBalance(),
-        loadVotePower(),
-        loadExistingLockup(),
+        loadOgvBalance(),
+        loadLockedUpOgvBalance(),
+        loadVeOgvBalance(),
         web3Provider.getBlock(),
-      ]).then(([ogv, vote_power, existingLockup, lastestBlock]) => {
+      ]).then(([ogv, lockedUpOgv, veOgv, lastestBlock]) => {
         const now = lastestBlock.timestamp;
 
         useStore.setState({
           balances: {
             ogv,
-            vote_power,
-          },
-          existingLockup: {
-            ...existingLockup,
-            existingEndWeeks: !existingLockup.end.eq(ethers.BigNumber.from(0))
-              ? existingLockup.end.sub(now).div(604800).toNumber()
-              : 0,
-            existingEndDate: moment(
-              existingLockup.end.toNumber() * 1000
-            ).format("MMM D, YYYY"),
+            lockedUpOgv,
+            veOgv,
           },
         });
       });
@@ -61,11 +52,17 @@ const useAccountBalances = () => {
     const loadAllowance = async () => {
       return await contracts.OriginDollarGovernance.allowance(
         address,
-        contracts.VoteLockerCurve.address
+        contracts.OgvStaking.address
       );
     };
 
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (
+      claimIsOpen() &&
+      web3Provider &&
+      address &&
+      networkInfo.correct &&
+      contracts.loaded
+    ) {
       Promise.all([loadAllowance()]).then(([ogv_approval]) => {
         useStore.setState({
           allowances: {

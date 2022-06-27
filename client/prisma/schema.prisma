@@ -36,12 +36,13 @@ model Listener {
 }
 
 model Lockup {
-  id       Int @default(autoincrement()) @id
-  address  String
-  amount   String
-  end      String
-  weeks    Int
-  active   Boolean @default(true)
+  lockupId  Int @unique
+  user      String
+  amount    Decimal @db.Decimal(78, 0)
+  end       String
+  weeks     Int
+  points    Decimal @db.Decimal(78, 0)
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("lockups")
 }

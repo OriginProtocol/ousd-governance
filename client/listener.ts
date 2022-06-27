@@ -1,11 +1,12 @@
 import winston from "winston";
+import {BigNumber} from "ethers";
 import Web3 from "web3";
 import schedule from "node-schedule";
 import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
-
+import { claimOpenTimestampPassed } from "utils/index";
 
 const logger = winston.createLogger({
   format: winston.format.simple(),
@@ -14,6 +15,11 @@ const logger = winston.createLogger({
 
 const networkId = process.env.NETWORK_ID;
 const GovernanceContracts = CHAIN_CONTRACTS[networkId];
+
+if(!claimOpenTimestampPassed()) {
+  logger.error("Claim not open yet");
+  process.exit(0);
+}
 
 if (!networkId) {
   logger.error("No network id specified");
@@ -26,7 +32,7 @@ const WEB3_PROVIDER = RPC_URLS[networkId];
 const rpc_provider = new ethers.providers.JsonRpcProvider(WEB3_PROVIDER);
 
 export const governanceTokenContract = new ethers.Contract(
-  GovernanceContracts.VoteLockerCurve.address,
+  GovernanceContracts.OgvStaking.address,
   ["function balanceOf(address owner) view returns (uint256)"],
   rpc_provider
 );
@@ -39,10 +45,10 @@ const contracts = [
     events: ["ProposalCreated"],
   },
   {
-    name: "VoteLockerCurve",
-    address: GovernanceContracts.VoteLockerCurve.address,
-    abi: GovernanceContracts.VoteLockerCurve.abi,
-    events: ["LockupCreated", "LockupUpdated"],
+    name: "OgvStaking",
+    address: GovernanceContracts.OgvStaking.address,
+    abi: GovernanceContracts.OgvStaking.abi,
+    events: ["Stake", "Unstake"],
   },
 ];
 
@@ -60,73 +66,84 @@ const web3 = new Web3(WEB3_PROVIDER);
 
 const ethereumEvents = new EthereumEvents(web3, contracts, options);
 
+const handleProposalCreated = async (event) => {
+  try {
+    await prisma.proposal.create({
+      data: {
+        proposalId: event.values.proposalId,
+        description: event.values.description,
+      },
+    });
+    logger.info("Inserted new proposal");
+  } catch (e) {
+    logger.info(e);
+  }
+};
+
+const handleStake = async (event) => {
+  const now = event.timestamp;
+
+  try {
+    await prisma.lockup.create({
+      data: {
+        user: event.values.user,
+        lockupId: parseInt(event.values.lockupId),
+        amount: parseInt(event.values.amount),
+        end: event.values.end,
+        weeks: Math.round((event.values.end - now) / 604800),
+        points: parseInt(event.values.points),
+      },
+    });
+    logger.info("Inserted lockup");
+  } catch (e) {
+    logger.info(e);
+  }
+}
+
+const handleUnstake = async (event) => {
+  try {
+    await prisma.lockup.delete({
+      where: {
+        lockupId: parseInt(event.values.lockupId),
+      },
+    });
+    logger.info("Removed lockup");
+  } catch (e) {
+    logger.info(e);
+  }
+}
+
+const handleNewVoter = async (event) => {
+  try {
+    await prisma.voter.create({
+      data: {
+        address: event.values.provider,
+        votes: (
+          await governanceTokenContract.balanceOf(event.values.provider)
+        ).toString(),
+        firstSeenBlock: event.blockNumber,
+      },
+    });
+    logger.info("Inserted new voter");
+  } catch (e) {
+    logger.info(e);
+  }
+}
+
 const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
-    const now = event.timestamp;
-    if (event.name == "ProposalCreated") {
-      try {
-        await prisma.proposal.create({
-          data: {
-            proposalId: event.values.proposalId,
-            description: event.values.description,
-          },
-        });
-        logger.info("Inserted new proposal");
-      } catch (e) {
-        // Likely duplicate
-      }
-    } else if(event.name === "LockupCreated") {
-      try {
-        await prisma.lockup.create({
-          data: {
-            address: event.values.provider,
-            amount: event.values.amount,
-            end: event.values.end,
-            weeks: Math.round((event.values.end - now) / 604800),
-          },
-        });
-        logger.info("Inserted new lockup");
-      } catch (e) {
-        // Likely duplicate
-      }
-    } else if(event.name === "LockupUpdated") {
-      try {
-        await prisma.lockup.updateMany({
-          where: {
-            address: event.values.provider,
-          },
-          data: {
-            active: false,
-          }
-        });
-        logger.info("Updated existing lockup(s)");
-        await prisma.lockup.create({
-          data: {
-            address: event.values.provider,
-            amount: event.values.amount,
-            end: event.values.end,
-            weeks: Math.round((event.values.end - now) / 604800),
-          },
-        });
-        logger.info("Inserted new lockup");
-      } catch (e) {
-        // Likely not found
-      }
-    } else {
-      try {
-        await prisma.voter.create({
-          data: {
-            address: event.values.provider,
-            votes: (
-              await governanceTokenContract.balanceOf(event.values.provider)
-            ).toString(),
-            firstSeenBlock: event.blockNumber,
-          },
-        });
-        logger.info("Inserted new voter");
-      } catch (e) {
-        // Likely duplicate
-      }
+    switch(event.name) {
+      case 'ProposalCreated':
+        handleProposalCreated(event);
+        break;
+      case 'Stake':
+        handleStake(event);
+        break;
+      case 'Unstake':
+        handleUnstake(event);
+        break;
+      default:
+        handleNewVoter(event);
     }
   }
 };

@@ -9,3 +9,5 @@ listener/build
 client/networks/governance.localhost.json
 retroactive/progress.json
 .env
+scripts/claims.json
+scripts/claims_dev.json
