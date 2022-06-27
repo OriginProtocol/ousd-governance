@@ -15,7 +15,7 @@ import {
 } from "./contracts";
 import { ethereumEventsOptions, web3 } from "./config";
 
-const AIRDROP_AMOUNT = 400000000;
+const AIRDROP_AMOUNT = bigNumberify("400000000000000000000000000");
 const SNAPSHOT_BLOCK = 14929663;
 const PROGRESS_FILE = "ousd-progress.json";
 

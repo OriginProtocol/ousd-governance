@@ -30,8 +30,6 @@ const SNAPSHOT_BLOCK = 14888133;
 const ANNOUNCE_BLOCK = 14881677;
 const PROGRESS_FILE = "ogn-progress.json";
 
-console.log('OGN airdrop amount', OGN_AIRDROP_AMOUNT.div(1e18).toLocaleString())
-
 let savedProgress;
 try {
   savedProgress = JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
