@@ -9,3 +9,4 @@ listener/build
 client/networks/governance.localhost.json
 .env
 scripts/claims.json
+scripts/claims_dev.json
