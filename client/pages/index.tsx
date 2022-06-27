@@ -10,9 +10,9 @@ import { SectionTitle } from "components/SectionTitle";
 import { LeaderboardTable } from "components/LeaderboardTable";
 import Card from "components/Card";
 import CardGroup from "components/CardGroup";
+import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
-import Layout from "components/layout";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -118,7 +118,7 @@ const Home: NextPage = ({
   }, [contracts, networkInfo.correct]);
 
   return (
-    <Layout>
+    <Wrapper narrow>
       <PageTitle>Overview</PageTitle>
       <CardGroup>
         <VoteStats
@@ -139,7 +139,7 @@ const Home: NextPage = ({
           <LeaderboardTable voters={voters} />
         </Card>
       </CardGroup>
-    </Layout>
+    </Wrapper>
   );
 };
 

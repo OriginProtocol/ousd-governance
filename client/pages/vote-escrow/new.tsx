@@ -1,0 +1,27 @@
+import type { NextPage } from "next";
+import { Disconnected } from "components/Disconnected";
+import { useStore } from "utils/store";
+import Wrapper from "components/Wrapper";
+import { PageTitle } from "components/PageTitle";
+import LockupForm from "components/vote-escrow/LockupForm";
+
+const LockupNew: NextPage = () => {
+  const { web3Provider } = useStore();
+
+  if (!web3Provider) {
+    return (
+      <Wrapper narrow>
+        <Disconnected />
+      </Wrapper>
+    );
+  }
+
+  return (
+    <Wrapper narrow>
+      <PageTitle>New Lockup</PageTitle>
+      <LockupForm />
+    </Wrapper>
+  );
+};
+
+export default LockupNew;

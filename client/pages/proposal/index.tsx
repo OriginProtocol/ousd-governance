@@ -8,8 +8,8 @@ import { Loading } from "components/Loading";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { PageTitle } from "components/PageTitle";
 import Card from "components/Card";
+import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
-import Layout from "components/layout";
 
 export async function getServerSideProps({ res }: { res: any }) {
   res.setHeader(
@@ -74,7 +74,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
   ]);
 
   return (
-    <Layout>
+    <Wrapper narrow>
       <div className="flex items-end justify-between">
         <PageTitle>Proposals</PageTitle>
         {proposals.length > 0 && (
@@ -93,7 +93,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
           <ProposalTable proposalData={proposalData} />
         </Card>
       )}
-    </Layout>
+    </Wrapper>
   );
 };
 

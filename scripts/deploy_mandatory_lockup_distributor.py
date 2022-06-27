@@ -1,7 +1,7 @@
 from brownie import *
 
 
-def main(token_address, staking_address, merkle_root, end_block):
+def main(token_address, merkle_root, staking_address, end_block):
     return MandatoryLockupDistributor.deploy(
         token_address, merkle_root, staking_address, end_block
     )

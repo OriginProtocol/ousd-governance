@@ -33,6 +33,7 @@ def test_claim(mandatory_lockup_distributor, token, staking):
 
 def test_can_not_claim(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
+
     # Transfer to the distributor contract so it has something to lockup
     token.transfer(mandatory_lockup_distributor.address, amount)
     chain.mine(100)

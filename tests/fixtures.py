@@ -90,6 +90,7 @@ def show_transfers(tx, token, staking, distributor_contract):
             ]
         )
     )
+
     for log in tx.logs:
         if log.topics and log.topics[0].hex() == TRANSFER:
             coin = log.address[0:10]

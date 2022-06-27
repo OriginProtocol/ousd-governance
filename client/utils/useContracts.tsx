@@ -31,39 +31,28 @@ const useContracts = () => {
         RPC_URLS[chainId]
       );
 
-      let signer;
-      if (web3Provider) {
-        signer = await web3Provider.getSigner();
-      }
-
-      const provider = web3Provider || networkProvider;
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
+        const contract = new ethers.Contract(
+          definition.address,
+          definition.abi,
+          networkProvider
+        );
         return {
-          [name]: {
-            ...new ethers.Contract(
-              definition.address,
-              definition.abi,
-              signer || provider
-            ),
-            abi: definition.abi,
-          },
+          [name]: contract,
         };
       });
 
       const ousdContracts = Object.entries(OUSDContracts.contracts).map(
         ([name, definition]) => {
+          const contract = new ethers.Contract(
+            definition.address,
+            definition.abi,
+            mainnetProvider
+          );
           return {
-            [name]: {
-              ...new ethers.Contract(
-                definition.address,
-                definition.abi,
-                // This has to be mainnet, as we are using mainnet OUSD contracts, even in testing
-                mainnetProvider
-              ),
-              abi: definition.abi,
-            },
+            [name]: contract,
           };
         }
       );

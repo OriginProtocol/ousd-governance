@@ -35,7 +35,6 @@ def test_claim_with_lockup_duration(optional_lockup_distributor, token, staking)
     chain.mine()
     assert staking.lockups(accounts.default, 0)[0] == amount
 
-
 def test_can_not_claim(optional_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
@@ -43,7 +42,6 @@ def test_can_not_claim(optional_lockup_distributor, token, staking):
     chain.mine(100)
     with brownie.reverts("Can no longer claim. Claim period expired"):
         optional_lockup_distributor.claim(1, amount, merkle_proof, WEEK)
-
 
 def test_burn_remaining_amount(optional_lockup_distributor, token, staking):
     amount = 500000000 * 1e18

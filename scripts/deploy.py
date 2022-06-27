@@ -1,14 +1,16 @@
 import json
 from brownie import *
 
+DEV_MODE = True # TODO change this (!!!)
+f = open('./scripts/claims_dev.json' if DEV_MODE else './scripts/claims.json')
+merkle_root = json.load(f)['merkleRoot']
 
 def main(output_file=None):
     accounts.default = accounts[0]
     # accounts.default = accounts.load("rinkeby_deployer")
     token = run("deploy_token")
 
-    epoch = 86400  # 1 day
-
+    epoch = 86400 # 1 day
     rewards = run("deploy_rewards", "main", (token.address,))
     staking = run("deploy_staking", "main", (token.address, epoch, rewards.address))
 
@@ -16,8 +18,15 @@ def main(output_file=None):
 
     governance = Governance.deploy(staking, timelock_controller)
 
-    merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, "0x0000000000000000000000000000000000000000", staking.address, 14171617))
-    merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, "0x0000000000000000000000000000000000000000", staking.address, 14171617))
+    mandatoryEndBlock = 15333935 # TODO change this (!!!)
+    optionalEndBlock = 15333935 # TODO change this (!!!)
+
+    merkle_mandatory = run("deploy_mandatory_lockup_distributor", "main", (token.address, merkle_root, staking.address, mandatoryEndBlock))
+    merkle_optional = run("deploy_optional_lockup_distributor", "main", (token.address, merkle_root, staking.address, optionalEndBlock))
+
+    if DEV_MODE:
+        token.transfer(merkle_mandatory, 50000 * 10e18, {'from': accounts[0]})
+        token.transfer(merkle_optional, 50000 * 10e18, {'from': accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
@@ -32,8 +41,10 @@ def main(output_file=None):
                 address=timelock_controller.address, abi=timelock_controller.abi
             ),
             Governance=dict(address=governance.address, abi=governance.abi),
+            MandatoryDistributor=dict(address=merkle_mandatory.address, abi=merkle_mandatory.abi),
+            OptionalDistributor=dict(address=merkle_optional.address, abi=merkle_optional.abi)
         )
         with open(output_file, "w+") as f:
             json.dump(output, f, indent=2)
 
-    return (token, rewards, staking, timelock_controller, governance)
+    return (token, staking, timelock_controller, governance, merkle_mandatory, merkle_optional, rewards)
