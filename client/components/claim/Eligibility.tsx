@@ -12,8 +12,10 @@ import CheckIcon from "components/CheckIcon";
 import CrossIcon from "components/CrossIcon";
 import useClaim from "utils/useClaim";
 import { formatCurrency } from "utils/math";
+import ReactTooltip from 'react-tooltip';
 
 const EligibilityItem = ({
+  id,
   showCheckMark,
   itemTitle,
   tokens,
@@ -34,10 +36,18 @@ const EligibilityItem = ({
               src={showOgvToken ? '/ogv.svg' : '/veogv.svg'}
               alt={showOgvToken ? 'OGV' : 'veOGV'}
             />
-            <span>
-              <span className="mr-1">{formatCurrency(utils.formatUnits(tokens, 18))}</span>
-              {showOgvToken ? 'OGV' : 'veOGV'}
-            </span>
+            <ReactTooltip id={id} place="top" type="dark" effect="solid">
+              <span>
+                <span className="mr-1">{utils.formatUnits(tokens, 18)}</span>
+                {showOgvToken ? 'OGV' : 'veOGV'}
+              </span>
+            </ReactTooltip>
+            <div data-tip data-for={id}>
+              <span>
+                <span className="mr-1">{formatCurrency(utils.formatUnits(tokens, 18))}</span>
+                {showOgvToken ? 'OGV' : 'veOGV'}
+              </span>
+            </div>
           </div>
         </td>
       </tr>
@@ -137,24 +147,28 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </thead>
             <tbody>
               <EligibilityItem
+                id="ogn-holder"
                 showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
                 itemTitle="OGN holder"
                 tokens={BigNumber.from(0)} // @TODO change this
                 showOgvToken={true}
               />
               <EligibilityItem
+                id="ousd-lp"
                 showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
                 itemTitle="OUSD liquidity provider"
                 tokens={BigNumber.from(0)} // @TODO change this
                 showOgvToken={true}
               />
               <EligibilityItem
+                id="ousd-holder"
                 showCheckMark={claim.claimData.split.ousd.gt(0)}
                 itemTitle="OUSD holder"
                 tokens={claim.claimData.split.ousd}
                 showOgvToken={false}
               />
               <EligibilityItem
+                id="wousd-holder"
                 showCheckMark={claim.claimData.split.wousd.gt(0)}
                 itemTitle="WOUSD holder"
                 tokens={claim.claimData.split.wousd}
