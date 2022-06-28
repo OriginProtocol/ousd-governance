@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo, useClaimIsOpen } from "utils/index";
+import { useNetworkInfo, claimIsOpen } from "utils/index";
 
 const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
@@ -16,7 +16,7 @@ const useTotalBalances = () => {
       );
 
     if (
-      useClaimIsOpen &&
+      claimIsOpen() &&
       web3Provider &&
       networkInfo.correct &&
       contracts.loaded
