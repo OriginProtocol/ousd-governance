@@ -1,28 +1,32 @@
 import { FunctionComponent } from "react";
 import moment from "moment";
-import useSWR from "swr";
-import { fetcher } from "utils/index";
 import Card from "components/Card";
 import Button from "components/Button";
 import { SectionTitle } from "components/SectionTitle";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
+import { Loading } from "components/Loading";
+import { ethers } from "ethers";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { address } = useStore();
-  const { data } = useSWR(`/api/lockups?account=${address}`, fetcher);
+  const { lockups } = useStore();
+
+  if (!lockups) {
+    return (
+      <Card>
+        <Loading />
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <SectionTitle>
-        {data?.lockups.length > 0
-          ? "Your lockups"
-          : "You have no active lockups"}
+        {lockups.length > 0 ? "Your lockups" : "You have no active lockups"}
       </SectionTitle>
-      {!data && <p>Loading...</p>}
-      {data?.lockups.length > 0 && (
+      {lockups.length > 0 && (
         <table className="table w-full">
           <thead>
             <tr>
@@ -35,7 +39,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.lockups.map((lockup: Object) => (
+            {lockups.map((lockup: Object) => (
               <tr key={lockup.lockupId}>
                 <td>
                   <TokenAmount amount={lockup.amount} />
@@ -57,7 +61,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
         </table>
       )}
       <a className="btn btn-primary btn-lg" href="/vote-escrow/new">
-        Lock up your OGV
+        {lockups.length > 0 ? "Create another lockup" : "Lock up your OGV now"}
       </a>
     </Card>
   );

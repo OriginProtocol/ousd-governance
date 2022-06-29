@@ -11,9 +11,9 @@ import { useStore } from "utils/store";
 interface AccountBalancesProps {}
 
 const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
-  const { balances } = useStore();
+  const { balances, totalOgvLockedUp } = useStore();
+  const { ogv, veOgv } = balances;
 
-  const { ogv, lockedUpOgv, veOgv } = balances;
   return (
     <CardGroup horizontal>
       <Card dark tightPadding>
@@ -34,7 +34,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           <div className="flex space-x-1 items-center">
             <TokenIcon src="/ogv.svg" alt="OGV" />
             <CardStat>
-              <TokenAmount amount={lockedUpOgv} />
+              <TokenAmount amount={totalOgvLockedUp} />
             </CardStat>
           </div>
           <CardDescription>OGV</CardDescription>

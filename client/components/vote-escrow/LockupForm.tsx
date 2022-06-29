@@ -3,13 +3,13 @@ import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useStore } from "utils/store";
-import { Disconnected } from "components/Disconnected";
 import Card from "components/Card";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import Link from "components/Link";
 import RangeInput from "components/RangeInput";
-import AccountBalances from "./AccountBalances";
+import useLockups from "utils/useLockups";
+import useTotalBalances from "utils/useTotalBalances";
 
 interface LockupFormProps {}
 
@@ -110,7 +110,10 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
   const [lockupAmountError, setLockupAmountError] = useState("");
   const [lockupDurationError, setLockupDurationError] = useState("");
 
-  const { reloadAllowances, reloadBalances } = useAccountBalances();
+  const { reloadTotalBalances } = useTotalBalances();
+  const { reloadAccountAllowances, reloadAccountBalances } =
+    useAccountBalances();
+  const { reloadLockups } = useLockups();
 
   const formattedOgvBalance = Number(
     ethers.utils.formatUnits(balances.ogv.toString())
@@ -132,8 +135,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
   const handleApproval = async () => {
     const transaction = await contracts.OriginDollarGovernance.approve(
       contracts.OgvStaking.address,
-      ethers.constants.MaxUint256
-    );
+      ethers.constants.MaxUint256,
+      { gasLimit: 1000000 }
+    ); // @TODO maybe set this to lower
 
     useStore.setState({
       pendingTransactions: [
@@ -142,7 +146,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
           ...transaction,
           onComplete: () => {
             toast.success("Approval has been made", { hideProgressBar: true }),
-              reloadAllowances();
+              reloadAccountAllowances();
           },
         },
       ],
@@ -158,8 +162,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
 
       const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(lockupAmount),
-        duration
-      );
+        duration,
+        { gasLimit: 1000000 }
+      ); // @TODO maybe set this to lower
       useStore.setState({
         pendingTransactions: [
           ...pendingTransactions,
@@ -169,7 +174,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
               toast.success("Lockup confirmed", {
                 hideProgressBar: true,
               });
-              reloadBalances();
+              reloadTotalBalances();
+              reloadAccountBalances();
+              reloadLockups();
               router.push(`/vote-escrow`);
             },
           },
@@ -184,7 +191,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
         <RangeInput
           label="Lock up"
           counterUnit="OGV"
-          min="0"
+          min="1"
           max={formattedOgvBalance}
           value={lockupAmount}
           onChange={(e) => {
@@ -202,7 +209,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
         <RangeInput
           label="For"
           counterUnit="weeks"
-          min="0"
+          min="1"
           max={maxLockupDurationInWeeks}
           value={lockupDuration}
           onChange={(e) => {

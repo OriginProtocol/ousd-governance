@@ -6,6 +6,8 @@ const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
   const { web3Provider, contracts } = useStore();
 
+  const [reloadTotalBalances, setReloadTotalBalances] = useState(0);
+
   useEffect(() => {
     const loadTotalSupplyOfOgv = async () =>
       await contracts.OriginDollarGovernance.totalSupply();
@@ -32,7 +34,13 @@ const useTotalBalances = () => {
         }
       );
     }
-  }, [networkInfo, web3Provider, contracts]);
+  }, [web3Provider, networkInfo.correct, contracts, reloadTotalBalances]);
+
+  return {
+    reloadTotalBalances: () => {
+      setReloadTotalBalances(reloadTotalBalances + 1);
+    },
+  };
 };
 
 export default useTotalBalances;

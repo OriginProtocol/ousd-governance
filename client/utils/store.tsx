@@ -37,7 +37,10 @@ const defaultState: Web3DataType = {
     existingEndWeeks: 0,
     existingEndDate: "",
   },
-  lockups: {},
+  lockups: {
+    lockups: [],
+    totalOgvLockedUp: ethers.BigNumber.from("0"),
+  },
   allowances: {
     ogv: ethers.BigNumber.from("0"),
   },
