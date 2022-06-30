@@ -4,7 +4,11 @@ import { useStore } from "utils/store";
 import useConnectSigner from "utils/useConnectSigner";
 
 const useClaim = () => {
-  const [claim, setClaim] = useState({ hasClaim: false });
+  const emptyClaimState = {
+    optional: { hasClaim: false },
+    mandatory: { hasClaim: false },
+  };
+  const [claim, setClaim] = useState(emptyClaimState);
   const [loaded, setLoaded] = useState(false);
   const [distributorData, setDistributorData] = useState({});
   const { address, contracts, web3Provider } = useStore();
@@ -24,15 +28,21 @@ const useClaim = () => {
 
       const claim = await res.json();
 
-      if (claim.hasClaim) {
-        claim.amount = maybeConvertToBn(claim.amount);
-        if (claim.split) {
-          claim.split.ousd = maybeConvertToBn(claim.split.ousd);
-          claim.split.wousd = maybeConvertToBn(claim.split.wousd);
-        }
-      } else {
+      if (!claim.optional.hasClaim && !claim.mandatory.hasClaim) {
         // nothing else to fetch related to claims.
         setLoaded(true);
+      } else {
+        const transformClaim = (claim) => {
+          claim.amount = maybeConvertToBn(claim.amount);
+          Object.keys(claim.split).map((key) => {
+            claim.split[key] = maybeConvertToBn(claim.split[key]);
+          });
+
+          return claim;
+        };
+
+        claim.optional = transformClaim(claim.optional);
+        claim.mandatory = transformClaim(claim.mandatory);
       }
 
       setClaim(claim);
@@ -40,15 +50,18 @@ const useClaim = () => {
 
     getClaim();
 
-    return () => setClaim({ hasClaim: false });
+    return () => setClaim(emptyClaimState);
   }, [address]);
 
   useEffect(() => {
-    if (!contracts.loaded || !claim.hasClaim) {
+    if (
+      !contracts.loaded ||
+      !(claim.optional.hasClaim || claim.mandatory.hasClaim)
+    ) {
       return;
     }
 
-    const readDistributor = async (distContract) => {
+    const readDistributor = async (distContract, claim) => {
       return {
         isClaimed: await distContract.isClaimed(claim.index),
         isValid: await distContract.isProofValid(
@@ -63,14 +76,18 @@ const useClaim = () => {
     setDistributorData({});
     setLoaded(false);
 
-    Promise.all([
-      readDistributor(contracts.OptionalDistributor),
-      readDistributor(contracts.MandatoryDistributor),
-    ])
-      .then(([optional, mandatory]) => {
-        setDistributorData({
-          optional: {
-            ...optional,
+    const setupDistributors = async () => {
+      try {
+        const distData = {};
+
+        if (claim.optional.hasClaim) {
+          let distributor = await readDistributor(
+            contracts.OptionalDistributor,
+            claim.optional
+          );
+
+          distData.optional = {
+            ...distributor,
             claim: async (duration) => {
               const durationTime = BigNumber.from(duration)
                 .mul(24)
@@ -83,16 +100,24 @@ const useClaim = () => {
                   web3Provider
                 )
               )["claim(uint256,uint256,bytes32[],uint256)"](
-                claim.index,
-                claim.amount,
-                claim.proof,
+                claim.optional.index,
+                claim.optional.amount,
+                claim.optional.proof,
                 durationTime,
-                { gasLimit: 1000000 }
-              ); // @TODO maybe set this to lower
+                { gasLimit: 1000000 } // @TODO maybe set this to lower amount
+              );
             },
-          },
-          mandatory: {
-            ...mandatory,
+          };
+        }
+
+        if (claim.mandatory.hasClaim) {
+          let distributor = await readDistributor(
+            contracts.OptionalDistributor,
+            claim.mandatory
+          );
+
+          distData.mandatory = {
+            ...distributor,
             claim: async () => {
               return (
                 await useConnectSigner(
@@ -100,19 +125,23 @@ const useClaim = () => {
                   web3Provider
                 )
               )["claim(uint256,uint256,bytes32[])"](
-                claim.index,
-                claim.amount,
-                claim.proof,
+                claim.mandatory.index,
+                claim.mandatory.amount,
+                claim.mandatory.proof,
                 { gasLimit: 1000000 }
               ); // @TODO maybe set this to lower
             },
-          },
-        });
+          };
+        }
+
         setLoaded(true);
-      })
-      .catch((error) => {
-        console.log("Error fetching contract distribution state:", error);
-      });
+        setDistributorData(distData);
+      } catch (error) {
+        console.error("Error fetching contract distribution state:", error);
+      }
+    };
+
+    setupDistributors();
   }, [address, contracts.loaded, claim, web3Provider]);
 
   //console.log("DIST DATA", claim, distributorData);

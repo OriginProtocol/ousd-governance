@@ -11,11 +11,20 @@ type Data = {
 };
 
 const isDevMode = process.env.NODE_ENV === "development";
-const { claims } = JSON.parse(
+const { claims: optionalClaims } = JSON.parse(
   fs.readFileSync(
     path.join(
       process.cwd(),
-      isDevMode ? "../scripts/claims_dev.json" : "../scripts/claims.json"
+      `../scripts/${process.env.NETWORK_ID}_data/optional_lockup_claims.json`
+    ),
+    "utf8"
+  )
+);
+const { claims: mandatoryClaims } = JSON.parse(
+  fs.readFileSync(
+    path.join(
+      process.cwd(),
+      `../scripts/${process.env.NETWORK_ID}_data/mandatory_lockup_claims.json`
     ),
     "utf8"
   )
@@ -26,13 +35,20 @@ const handler = (req: NextApiRequest, res: NextApiResponse<Data>) => {
   if (!account)
     return res.status(500).json({ error: "Missing account parameter" });
 
-  const hasClaim = !!claims[account];
-  const index = claims[account]?.index || 0;
-  const amount = claims[account]?.amount || 0;
-  const proof = claims[account]?.proof || [];
-  const split = claims[account]?.split || {};
+  const getClaimDataFromClaims = (claimsSource) => {
+    const hasClaim = !!claimsSource[account];
+    const index = claimsSource[account]?.index || 0;
+    const amount = claimsSource[account]?.amount || 0;
+    const proof = claimsSource[account]?.proof || [];
+    const split = claimsSource[account]?.split || {};
 
-  return res.status(200).json({ index, amount, proof, hasClaim, split });
+    return { index, amount, proof, hasClaim, split };
+  };
+
+  return res.status(200).json({
+    optional: getClaimDataFromClaims(optionalClaims),
+    mandatory: getClaimDataFromClaims(mandatoryClaims),
+  });
 };
 
 export default handler;
