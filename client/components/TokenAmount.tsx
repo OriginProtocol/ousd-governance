@@ -8,7 +8,9 @@ interface TokenAmount {
 
 const TokenAmount: FunctionComponent<TokenAmount> = ({ amount }) => {
   if (typeof amount == "string" || typeof amount == "number") {
-    return numeral(+amount).format("0 a");
+    return numeral(+amount)
+      .format("0 a")
+      .trim();
   }
 
   return numeral(+amount / 1e18).format("0 a");
