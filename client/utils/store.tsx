@@ -49,6 +49,7 @@ const defaultState: Web3DataType = {
     totalSupplyOfOgv: ethers.BigNumber.from("0"),
     totalLockedUpOgv: ethers.BigNumber.from("0"),
   },
+  totalOgvLockedUp: ethers.BigNumber.from("0"),
 };
 
 export const useStore = create<StoreType>((set) => ({

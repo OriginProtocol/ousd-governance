@@ -113,7 +113,7 @@ const useClaim = () => {
       .catch((error) => {
         console.log("Error fetching contract distribution state:", error);
       });
-  }, [address, contracts.loaded, claim, web3Provider]);
+  }, [address, contracts, claim, web3Provider]);
 
   //console.log("DIST DATA", claim, distributorData);
   return {

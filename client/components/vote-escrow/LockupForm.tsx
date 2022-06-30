@@ -61,7 +61,7 @@ const lockupAmountInputMarkers = [
 ];
 const lockupDurationInputMarkers = [
   {
-    label: "0 wks",
+    label: "0",
     value: 0,
   },
   {
@@ -70,7 +70,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "1 yr",
-    value: 52,
+    value: 12,
   },
   {
     label: "",
@@ -78,7 +78,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "2 yrs",
-    value: 104,
+    value: 24,
   },
   {
     label: "",
@@ -86,7 +86,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "3 yrs",
-    value: 156,
+    value: 36,
   },
   {
     label: "",
@@ -94,11 +94,11 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "4 yrs",
-    value: 208,
+    value: 48,
   },
 ];
 
-const maxLockupDurationInWeeks = 52 * 4;
+const maxLockupDurationInMonths = 12 * 4;
 
 const LockupForm: FunctionComponent<LockupFormProps> = () => {
   const { web3Provider, contracts, pendingTransactions, balances, allowances } =
@@ -106,7 +106,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
   const router = useRouter();
 
   const [lockupAmount, setLockupAmount] = useState("0");
-  const [lockupDuration, setLockupDuration] = useState("0"); // In weeks
+  const [lockupDuration, setLockupDuration] = useState("0"); // In months
   const [lockupAmountError, setLockupAmountError] = useState("");
   const [lockupDurationError, setLockupDurationError] = useState("");
 
@@ -122,9 +122,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
     .toString();
 
   const validateForm = async () => {
-    if (lockupDuration > maxLockupDurationInWeeks) {
+    if (lockupDuration > maxLockupDurationInMonths) {
       setLockupDurationError(
-        `Can not lockup for more than ${maxLockupDurationInWeeks} weeks`
+        `Can not lockup for more than ${maxLockupDurationInMonths} months`
       );
       return false;
     }
@@ -157,8 +157,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
     const valid = await validateForm();
 
     if (valid) {
-      const now = (await web3Provider.getBlock()).timestamp;
-      const duration = lockupDuration * 7 * 86400;
+      // const now = (await web3Provider.getBlock()).timestamp;
+      const duration = lockupDuration * 2629746; // Months to seconds
 
       const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(lockupAmount),
@@ -191,7 +191,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
         <RangeInput
           label="Lock up"
           counterUnit="OGV"
-          min="1"
+          min="0"
           max={formattedOgvBalance}
           value={lockupAmount}
           onChange={(e) => {
@@ -208,9 +208,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
         />
         <RangeInput
           label="For"
-          counterUnit="weeks"
-          min="1"
-          max={maxLockupDurationInWeeks}
+          counterUnit="months"
+          min="0"
+          max={maxLockupDurationInMonths}
           value={lockupDuration}
           onChange={(e) => {
             setLockupDuration(e.target.value);

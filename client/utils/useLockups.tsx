@@ -16,6 +16,32 @@ const useLockups = () => {
 
   useEffect(() => {
     const loadLockups = async () => {
+      return Promise.all(
+        data?.lockups.map((lockup) => {
+          const lockupCall = contracts.OgvStaking.lockups(
+            address,
+            lockup.lockupId
+          );
+
+          return Promise.all([lockupCall]).then((lockupOnChain) => {
+            const enrichedLockup = {
+              ...lockup,
+              amount: lockupOnChain[0].amount,
+              end: lockupOnChain[0].end,
+              points: lockupOnChain[0].points,
+            };
+
+            return enrichedLockup;
+          });
+        })
+      ).then((enrichedLockups) => {
+        useStore.setState({
+          lockups: enrichedLockups,
+        });
+      });
+    };
+
+    /*const loadLockups1 = async () => {
       const lockupIds = data?.lockups.map((lockup) => lockup.lockupId);
       const lockupCalls = lockupIds.map(
         async (id) => await contracts.OgvStaking.lockups(address, id)
@@ -36,7 +62,7 @@ const useLockups = () => {
           totalOgvLockedUp,
         });
       });
-    };
+    };*/
 
     if (
       claimIsOpen() &&

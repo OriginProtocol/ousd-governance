@@ -90,7 +90,6 @@ const handleStake = async (event) => {
         lockupId: parseInt(event.values.lockupId),
         amount: parseInt(event.values.amount),
         end: event.values.end,
-        weeks: Math.round((event.values.end - now) / 604800),
         points: parseInt(event.values.points),
       },
     });

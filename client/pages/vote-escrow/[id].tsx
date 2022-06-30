@@ -4,8 +4,31 @@ import { useStore } from "utils/store";
 import Wrapper from "components/Wrapper";
 import { PageTitle } from "components/PageTitle";
 
-const LockupSingle: NextPage = () => {
-  const { web3Provider } = useStore();
+export async function getServerSideProps({
+  res,
+  query,
+}: {
+  res: any;
+  query: any;
+}) {
+  res.setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate");
+
+  return {
+    props: { lockupId: query.id },
+  };
+}
+
+interface LockupSingleProps {
+  lockupId: string;
+}
+
+const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
+  const { web3Provider, lockups } = useStore();
+  const lockup = lockups?.find((lockup) => lockup.id === lockupId);
+
+  console.log(lockups);
+
+  console.log(lockup);
 
   if (!web3Provider) {
     return (
