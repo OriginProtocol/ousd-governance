@@ -143,7 +143,7 @@ const useClaim = () => {
     };
 
     setupDistributors();
-  }, [address, contracts.loaded, claim, web3Provider]);
+  }, [address, contracts, claim, web3Provider]);
 
   return {
     optional: {

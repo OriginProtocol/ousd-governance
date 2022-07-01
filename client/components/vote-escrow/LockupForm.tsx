@@ -10,8 +10,12 @@ import Link from "components/Link";
 import RangeInput from "components/RangeInput";
 import useLockups from "utils/useLockups";
 import useTotalBalances from "utils/useTotalBalances";
+import LockupTable from "components/vote-escrow/LockupTable";
+import moment from "moment";
 
-interface LockupFormProps {}
+interface LockupFormProps {
+  existingLockup?: Object;
+}
 
 const lockupAmountInputMarkers = [
   {
@@ -61,7 +65,7 @@ const lockupAmountInputMarkers = [
 ];
 const lockupDurationInputMarkers = [
   {
-    label: "0 wks",
+    label: "0",
     value: 0,
   },
   {
@@ -70,7 +74,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "1 yr",
-    value: 52,
+    value: 12,
   },
   {
     label: "",
@@ -78,7 +82,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "2 yrs",
-    value: 104,
+    value: 24,
   },
   {
     label: "",
@@ -86,7 +90,7 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "3 yrs",
-    value: 156,
+    value: 36,
   },
   {
     label: "",
@@ -94,19 +98,22 @@ const lockupDurationInputMarkers = [
   },
   {
     label: "4 yrs",
-    value: 208,
+    value: 48,
   },
 ];
 
-const maxLockupDurationInWeeks = 52 * 4;
+const maxLockupDurationInMonths = 12 * 4;
 
-const LockupForm: FunctionComponent<LockupFormProps> = () => {
-  const { web3Provider, contracts, pendingTransactions, balances, allowances } =
-    useStore();
+const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
+  const { contracts, pendingTransactions, balances, allowances } = useStore();
   const router = useRouter();
 
   const [lockupAmount, setLockupAmount] = useState("0");
-  const [lockupDuration, setLockupDuration] = useState("0"); // In weeks
+  const [lockupDuration, setLockupDuration] = useState(
+    !existingLockup
+      ? "0"
+      : moment.unix(existingLockup.end).diff(moment(), "months")
+  ); // In months
   const [lockupAmountError, setLockupAmountError] = useState("");
   const [lockupDurationError, setLockupDurationError] = useState("");
 
@@ -121,10 +128,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
     .toFixed()
     .toString();
 
+  const actionDisabledNewLockup =
+    !lockupAmount ||
+    !lockupDuration ||
+    ethers.utils.parseUnits(lockupAmount).gt(allowances.ogv);
+
+  const actionDisabledExistingLockup =
+    lockupDuration <= moment.unix(existingLockup?.end).diff(moment(), "months");
+
   const validateForm = async () => {
-    if (lockupDuration > maxLockupDurationInWeeks) {
+    if (lockupDuration > maxLockupDurationInMonths) {
       setLockupDurationError(
-        `Can not lockup for more than ${maxLockupDurationInWeeks} weeks`
+        `Can not lockup for more than ${maxLockupDurationInMonths} months`
       );
       return false;
     }
@@ -157,14 +172,15 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
     const valid = await validateForm();
 
     if (valid) {
-      const now = (await web3Provider.getBlock()).timestamp;
-      const duration = lockupDuration * 7 * 86400;
+      // const now = (await web3Provider.getBlock()).timestamp;
+      const duration = lockupDuration * 2629746; // Months to seconds
 
       const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(lockupAmount),
         duration,
         { gasLimit: 1000000 }
       ); // @TODO maybe set this to lower
+
       useStore.setState({
         pendingTransactions: [
           ...pendingTransactions,
@@ -185,32 +201,68 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
     }
   };
 
+  const handleExtend = async () => {
+    const valid = await validateForm();
+
+    if (valid) {
+      const duration = lockupDuration * 2629746; // Months to seconds
+
+      const transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
+        existingLockup.lockupId,
+        duration,
+        { gasLimit: 1000000 }
+      ); // @TODO maybe set this to lower
+
+      useStore.setState({
+        pendingTransactions: [
+          ...pendingTransactions,
+          {
+            ...transaction,
+            onComplete: () => {
+              toast.success("Lockup extended", {
+                hideProgressBar: true,
+              });
+              reloadTotalBalances();
+              reloadAccountBalances();
+              reloadLockups();
+              router.push(`/vote-escrow`);
+            },
+          },
+        ],
+      });
+    }
+  };
+
   return (
     <Card>
       <div className="space-y-2">
+        {!existingLockup ? (
+          <RangeInput
+            label="Lock up"
+            counterUnit="OGV"
+            min="0"
+            max={formattedOgvBalance}
+            value={lockupAmount}
+            onChange={(e) => {
+              setLockupAmount(e.target.value);
+            }}
+            markers={lockupAmountInputMarkers}
+            onMarkerClick={(markerValue) => {
+              if (markerValue) {
+                setLockupAmount(
+                  ((formattedOgvBalance / 100) * markerValue).toString()
+                );
+              }
+            }}
+          />
+        ) : (
+          <LockupTable lockup={existingLockup} />
+        )}
         <RangeInput
-          label="Lock up"
-          counterUnit="OGV"
-          min="1"
-          max={formattedOgvBalance}
-          value={lockupAmount}
-          onChange={(e) => {
-            setLockupAmount(e.target.value);
-          }}
-          markers={lockupAmountInputMarkers}
-          onMarkerClick={(markerValue) => {
-            if (markerValue) {
-              setLockupAmount(
-                ((formattedOgvBalance / 100) * markerValue).toString()
-              );
-            }
-          }}
-        />
-        <RangeInput
-          label="For"
-          counterUnit="weeks"
-          min="1"
-          max={maxLockupDurationInWeeks}
+          label={!existingLockup ? `For` : `Extend your lockup to`}
+          counterUnit="months"
+          min={"0"}
+          max={maxLockupDurationInMonths}
           value={lockupDuration}
           onChange={(e) => {
             setLockupDuration(e.target.value);
@@ -237,13 +289,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = () => {
           <button
             className="btn btn-primary md:btn-lg rounded-full flex-1"
             disabled={
-              !lockupAmount ||
-              !lockupDuration ||
-              ethers.utils.parseUnits(lockupAmount).gt(allowances.ogv)
+              !existingLockup
+                ? actionDisabledNewLockup
+                : actionDisabledExistingLockup
             }
-            onClick={handleLockup}
+            onClick={!existingLockup ? handleLockup : handleExtend}
           >
-            Lockup
+            {!existingLockup ? `Lockup` : `Extend`}
           </button>
         </div>
       </div>
