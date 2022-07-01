@@ -61,22 +61,22 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
 
   const getOgvLockupRewardApy = (veOgv: BigNumber) => {
     const ogvPercentageOfRewards =
-      numeral(veOgv.toString()) / (numeral(totalSupplyVeOgv) + numeral(veOgv.toString()));
+      numeral(veOgv.toString()) /
+      (numeral(totalSupplyVeOgv) + numeral(veOgv.toString()));
     const ogvRewards = stakingRewards * ogvPercentageOfRewards;
-    const valueOfOgvRewards = ogvRewards * ogvPriceBP / 1e4 / 1e18;
-    const valueOfClaimableOgv = claimableOgv * ogvPriceBP / 1e4 / 1e18; 
-    const ogvLockupRewardApr =
-      (valueOfOgvRewards * 12) / valueOfClaimableOgv;
-// 
-//     console.log(
-//       "veOgv", veOgv / 1e18,
-//       "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
-//       "ogvRewards", ogvRewards / 1e18,
-//       "ogvPercentageOfRewards", ogvPercentageOfRewards,
-//       "valueOfOgvRewards", valueOfOgvRewards,
-//       "valueOfClaimableOgv", valueOfClaimableOgv,
-//       "ogvLockupRewardApr", ogvLockupRewardApr
-//     );
+    const valueOfOgvRewards = (ogvRewards * ogvPriceBP) / 1e4 / 1e18;
+    const valueOfClaimableOgv = (claimableOgv * ogvPriceBP) / 1e4 / 1e18;
+    const ogvLockupRewardApr = (valueOfOgvRewards * 12) / valueOfClaimableOgv;
+    //
+    //     console.log(
+    //       "veOgv", veOgv / 1e18,
+    //       "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
+    //       "ogvRewards", ogvRewards / 1e18,
+    //       "ogvPercentageOfRewards", ogvPercentageOfRewards,
+    //       "valueOfOgvRewards", valueOfOgvRewards,
+    //       "valueOfClaimableOgv", valueOfClaimableOgv,
+    //       "ogvLockupRewardApr", ogvLockupRewardApr
+    //     );
 
     return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
   };

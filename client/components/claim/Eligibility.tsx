@@ -1,5 +1,4 @@
 import { FunctionComponent, useCallback } from "react";
-import { utils, BigNumber } from "ethers";
 import Image from "next/image";
 import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
@@ -7,53 +6,8 @@ import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
-import TokenIcon from "components/TokenIcon";
-import CheckIcon from "components/CheckIcon";
-import CrossIcon from "components/CrossIcon";
 import useClaim from "utils/useClaim";
-import { formatCurrency } from "utils/math";
-import ReactTooltip from "react-tooltip";
-
-// TODO separate file
-const EligibilityItem = ({ id, itemTitle, tokens, showOgvToken }) => {
-  tokens = tokens || BigNumber.from(0);
-  const showCheckMark = tokens.gt(0);
-
-  return (
-    <>
-      <tr>
-        <td>
-          <div className="flex space-x-2 items-center">
-            {showCheckMark ? <CheckIcon /> : <CrossIcon />}
-            <span>{itemTitle}</span>
-          </div>
-        </td>
-        <td>
-          <div className="flex space-x-2 items-center">
-            <TokenIcon
-              src={showOgvToken ? "/ogv.svg" : "/veogv.svg"}
-              alt={showOgvToken ? "OGV" : "veOGV"}
-            />
-            <ReactTooltip id={id} place="top" type="dark" effect="solid">
-              <span>
-                <span className="mr-1">{utils.formatUnits(tokens, 18)}</span>
-                {showOgvToken ? "OGV" : "veOGV"}
-              </span>
-            </ReactTooltip>
-            <div data-tip data-for={id}>
-              <span>
-                <span className="mr-1">
-                  {formatCurrency(utils.formatUnits(tokens, 18))}
-                </span>
-                {showOgvToken ? "OGV" : "veOGV"}
-              </span>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </>
-  );
-};
+import EligibilityItem from "components/claim/EligibilityItem";
 
 interface EligibilityProps {
   handleNextStep: () => void;
