@@ -67,16 +67,16 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     const valueOfClaimableOgv = claimableOgv * ogvPriceBP / 1e4 / 1e18; 
     const ogvLockupRewardApr =
       (valueOfOgvRewards * 12) / valueOfClaimableOgv;
-
-    console.log(
-      "veOgv", veOgv / 1e18,
-      "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
-      "ogvRewards", ogvRewards / 1e18,
-      "ogvPercentageOfRewards", ogvPercentageOfRewards,
-      "valueOfOgvRewards", valueOfOgvRewards,
-      "valueOfClaimableOgv", valueOfClaimableOgv,
-      "ogvLockupRewardApr", ogvLockupRewardApr
-    );
+// 
+//     console.log(
+//       "veOgv", veOgv / 1e18,
+//       "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
+//       "ogvRewards", ogvRewards / 1e18,
+//       "ogvPercentageOfRewards", ogvPercentageOfRewards,
+//       "valueOfOgvRewards", valueOfOgvRewards,
+//       "valueOfClaimableOgv", valueOfClaimableOgv,
+//       "ogvLockupRewardApr", ogvLockupRewardApr
+//     );
 
     return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
   };

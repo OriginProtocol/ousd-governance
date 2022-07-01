@@ -1,0 +1,69 @@
+{
+  "merkleRoot": "0xec6b85a27b356b663919338d00c0594df746445a5a0d317ba670e450a7771447",
+  "claims": {
+    "0x8dea6Ef7767e0D6ae7Dd9D144E514D7DFAe75B36": {
+      "index": 0,
+      "amount": {
+        "type": "BigNumber",
+        "hex": "0x0410d586a20a4c0000"
+      },
+      "split": {
+        "ogn": {
+          "type": "BigNumber",
+          "hex": "0x4563918244f40000"
+        },
+        "ognStaking": {
+          "type": "BigNumber",
+          "hex": "0x8ac7230489e80000"
+        },
+        "ousd3Crv": {
+          "type": "BigNumber",
+          "hex": "0xd02ab486cedc0000"
+        },
+        "ousd3CrvGauge": {
+          "type": "BigNumber",
+          "hex": "0x01158e460913d00000"
+        },
+        "convex": {
+          "type": "BigNumber",
+          "hex": "0x015af1d78b58c40000"
+        }
+      },
+      "proof": [
+        "0x5b786c04c290575deaecb0fe5d0ce729991bb3cb0c5c25c073d0d60c57472205"
+      ]
+    },
+    "0x5E687f547d26732A3F1213e1C31432C3EF6810bc": {
+      "index": 1,
+      "amount": {
+        "type": "BigNumber",
+        "hex": "0x0410d586a20a4c0000"
+      },
+      "split": {
+        "ogn": {
+          "type": "BigNumber",
+          "hex": "0x4563918244f40000"
+        },
+        "ognStaking": {
+          "type": "BigNumber",
+          "hex": "0x8ac7230489e80000"
+        },
+        "ousd3Crv": {
+          "type": "BigNumber",
+          "hex": "0xd02ab486cedc0000"
+        },
+        "ousd3CrvGauge": {
+          "type": "BigNumber",
+          "hex": "0x01158e460913d00000"
+        },
+        "convex": {
+          "type": "BigNumber",
+          "hex": "0x015af1d78b58c40000"
+        }
+      },
+      "proof": [
+        "0x7e87926430fe964a0ed53ca1e79b742e495865dadeb897aa44a253c7de5213d8"
+      ]
+    }
+  }
+}
