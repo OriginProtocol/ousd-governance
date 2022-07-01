@@ -1,5 +1,6 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import moment from "moment";
+import { BigNumber, utils } from "ethers";
 import Card from "components/Card";
 import { SectionTitle } from "components/SectionTitle";
 import CardGroup from "components/CardGroup";
@@ -11,42 +12,86 @@ import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
+import { useStore } from "utils/store";
+import numeral from "numeraljs";
 
 interface ClaimOgvProps {}
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
-  const claimableOgv = 100; // @TODO replace with user value
   const claim = useClaim();
-  const maxLockupDurationInWeeks = "208";
+  const { contracts } = useStore();
 
-  //const [lockupAmount, setLockupAmount] = useState(claimableOgv);
+  const maxLockupDurationInWeeks = "208";
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
+  const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
+
+  useEffect(() => {
+    const loadTotalSupplyVeOGV = async () => {
+      if (!contracts.loaded) {
+        return;
+      }
+      try {
+        const totalSupply = await contracts.OgvStaking.totalSupply();
+        // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
+        // of claimers will see insane reward amounts
+        const minTotalSupply = utils.parseUnits("10000000", 18); // 10m of OGV
+        setTotalSupplyVeOgv(
+          totalSupply.lt(minTotalSupply) ? minTotalSupply : totalSupply
+        );
+      } catch (error) {
+        console.error(`Can not fetch veOgv total supply: ${error}`);
+      }
+    };
+    loadTotalSupplyVeOGV();
+  }, [contracts]);
+
+  if (!claim.loaded || !claim.optional.hasClaim) {
+    return <></>;
+  }
+
+  const claimableOgv = claim.optional.amount;
 
   const isValidLockup = lockupDuration > 0;
 
   const votingDecayFactor = 1.8; // @TODO replace with contract value
-  const ogvPrice = 0.15; // @TODO replace with live value
-  const totalVeOgv = 12980905133; // @TODO replace with live value
-  const stakingRewards = 100000000; // @TODO replace with real value
+  const ogvPriceBP = BigNumber.from(1500); // @TODO replace with live value - format is in basis points
+  const stakingRewards = utils.parseUnits("400000000", 18); // (IMPORTANT) confirm before launch 400m OGV is OK
 
-  const getOgvLockupRewardApy = (veOgv: number) => {
-    const ogvPercentageOfRewards = veOgv / (totalVeOgv + veOgv);
+  const getOgvLockupRewardApy = (veOgv: BigNumber) => {
+    const ogvPercentageOfRewards =
+      numeral(veOgv.toString()) / (numeral(totalSupplyVeOgv) + numeral(veOgv.toString()));
     const ogvRewards = stakingRewards * ogvPercentageOfRewards;
-    const valueOfOgvRewards = ogvRewards * ogvPrice;
+    const valueOfOgvRewards = ogvRewards * ogvPriceBP / 1e4 / 1e18;
+    const valueOfClaimableOgv = claimableOgv * ogvPriceBP / 1e4 / 1e18; 
     const ogvLockupRewardApr =
-      (valueOfOgvRewards * 12) / (claimableOgv * ogvPrice);
+      (valueOfOgvRewards * 12) / valueOfClaimableOgv;
+
+    console.log(
+      "veOgv", veOgv / 1e18,
+      "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
+      "ogvRewards", ogvRewards / 1e18,
+      "ogvPercentageOfRewards", ogvPercentageOfRewards,
+      "valueOfOgvRewards", valueOfOgvRewards,
+      "valueOfClaimableOgv", valueOfClaimableOgv,
+      "ogvLockupRewardApr", ogvLockupRewardApr
+    );
 
     return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
   };
 
   const veOgvFromOgvLockup = isValidLockup
-    ? claimableOgv * votingDecayFactor ** (lockupDuration / 52)
-    : 0;
+    ? claimableOgv
+        .mul(Math.round(votingDecayFactor ** (lockupDuration / 52) * 1e8))
+        .div(BigNumber.from(1e8))
+    : BigNumber.from(0);
+
   const ogvLockupRewardApy = getOgvLockupRewardApy(veOgvFromOgvLockup);
 
-  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
+  const maxVeOgvFromOgvLockup = claimableOgv
+    .mul(Math.round(votingDecayFactor ** (208 / 52) * 1e8))
+    .div(BigNumber.from(1e8));
   const maxOgvLockupRewardApy = getOgvLockupRewardApy(maxVeOgvFromOgvLockup);
 
   const now = new Date();
@@ -214,7 +259,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                       <TokenIcon src="/veogv.svg" alt="veOGV" />
                       <span>veOGV</span>
                     </th>
-                    <td className="w-1/4">{veOgvFromOgvLockup.toFixed(2)}</td>
+                    <td className="w-1/4">
+                      <TokenAmount amount={veOgvFromOgvLockup} />
+                    </td>
                   </tr>
                 ) : (
                   <tr>
@@ -223,7 +270,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                       <span>OGV</span>
                     </th>
                     <td className="w-1/4">
-                      {isValidLockup ? 0 : claimableOgv}
+                      <TokenAmount amount={claimableOgv} />
                     </td>
                   </tr>
                 )}
@@ -244,7 +291,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                           </span>
                         </span>
                       </th>
-                      <td className="w-1/4">{claimableOgv.toFixed(2)}</td>
+                      <td className="w-1/4">
+                        <TokenAmount amount={claimableOgv} />
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -254,8 +303,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           {!isValidLockup && (
             <span className="block bg-red-500 text-white px-4 py-3">
               <span className="font-bold">Note:</span> If you don&apos;t lock up
-              your {claimableOgv} OGV, you&apos;ll be missing out on up to{" "}
-              {maxOgvLockupRewardApy.toFixed(2)}% APY in rewards!
+              your <TokenAmount amount={claimableOgv} /> OGV, you&apos;ll be
+              missing out on up to {maxOgvLockupRewardApy.toFixed(2)}% APY in
+              rewards!
             </span>
           )}
           <div className="pt-3">

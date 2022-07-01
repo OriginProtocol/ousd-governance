@@ -89,6 +89,7 @@ const useClaim = () => {
           distData.optional = {
             ...distributor,
             claim: async (duration) => {
+              // the duration for the stake is in seconds
               const durationTime = BigNumber.from(duration)
                 .mul(24)
                 .mul(60)
@@ -144,10 +145,15 @@ const useClaim = () => {
     setupDistributors();
   }, [address, contracts.loaded, claim, web3Provider]);
 
-  //console.log("DIST DATA", claim, distributorData);
   return {
-    claimData: claim,
-    ...distributorData,
+    optional: {
+      ...claim.optional,
+      ...distributorData.optional,
+    },
+    mandatory: {
+      ...claim.mandatory,
+      ...distributorData.mandatory,
+    },
     loaded,
   };
 };

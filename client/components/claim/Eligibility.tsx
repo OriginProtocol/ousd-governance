@@ -14,6 +14,7 @@ import useClaim from "utils/useClaim";
 import { formatCurrency } from "utils/math";
 import ReactTooltip from "react-tooltip";
 
+// TODO separate file
 const EligibilityItem = ({ id, itemTitle, tokens, showOgvToken }) => {
   tokens = tokens || BigNumber.from(0);
   const showCheckMark = tokens.gt(0);
@@ -64,8 +65,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
   const isEligible =
-    claim.loaded &&
-    (claim.claimData.optional.hasClaim || claim.claimData.mandatory.hasClaim);
+    claim.loaded && (claim.optional.hasClaim || claim.mandatory.hasClaim);
   const claimValid =
     (isEligible && claim.optional && claim.optional.isValid) ||
     (claim.mandatory && claim.mandatory.isValid);
@@ -151,43 +151,43 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                 <EligibilityItem
                   id="ogn-holder"
                   itemTitle="OGN holder"
-                  tokens={claim.claimData.optional.split.ogn}
+                  tokens={claim.optional.split.ogn}
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-holder"
                   itemTitle="OUSD holder"
-                  tokens={claim.claimData.mandatory.split.ousd}
+                  tokens={claim.mandatory.split.ousd}
                   showOgvToken={false}
                 />
                 <EligibilityItem
                   id="wousd-holder"
                   itemTitle="WOUSD holder"
-                  tokens={claim.claimData.mandatory.split.wousd}
+                  tokens={claim.mandatory.split.wousd}
                   showOgvToken={false}
                 />
                 <EligibilityItem
                   id="ogn-staker"
                   itemTitle="Staked OGN"
-                  tokens={claim.claimData.optional.split.ognStaking}
+                  tokens={claim.optional.split.ognStaking}
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-3Crv"
                   itemTitle="OUSD 3Pool holder"
-                  tokens={claim.claimData.optional.split.ousd3Crv}
+                  tokens={claim.optional.split.ousd3Crv}
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-3Crv-gauge"
                   itemTitle="Staked OUSD 3Pool"
-                  tokens={claim.claimData.optional.split.ousd3CrvGauge}
+                  tokens={claim.optional.split.ousd3CrvGauge}
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-convex-staker"
                   itemTitle="Staked on Convex"
-                  tokens={claim.claimData.optional.split.convex}
+                  tokens={claim.optional.split.convex}
                   showOgvToken={true}
                 />
               </tbody>
