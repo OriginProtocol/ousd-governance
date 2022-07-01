@@ -25,10 +25,31 @@ const useClaim = () => {
       const claim = await res.json();
 
       if (claim.hasClaim) {
-        claim.amount = maybeConvertToBn(claim.amount);
-        if (claim.split) {
-          claim.split.ousd = maybeConvertToBn(claim.split.ousd);
-          claim.split.wousd = maybeConvertToBn(claim.split.wousd);
+        if (claim.mandatoryLockupClaim) {
+          claim.mandatoryLockupClaim.amount = maybeConvertToBn(
+            claim.mandatoryLockupClaim.amount
+          );
+          if (claim.mandatoryLockupClaim.split) {
+            claim.mandatoryLockupClaim.split.ousd = maybeConvertToBn(
+              claim.mandatoryLockupClaim.split.ousd
+            );
+            claim.mandatoryLockupClaim.split.wousd = maybeConvertToBn(
+              claim.mandatoryLockupClaim.split.wousd
+            );
+          }
+        }
+        if (claim.optionalLockupClaim) {
+          claim.optionalLockupClaim.amount = maybeConvertToBn(
+            claim.optionalLockupClaim.amount
+          );
+          if (claim.optionalLockupClaim.split) {
+            claim.optionalLockupClaim.split.ousd = maybeConvertToBn(
+              claim.optionalLockupClaim.split.ousd
+            );
+            claim.optionalLockupClaim.split.wousd = maybeConvertToBn(
+              claim.optionalLockupClaim.split.wousd
+            );
+          }
         }
       } else {
         // nothing else to fetch related to claims.
@@ -48,14 +69,14 @@ const useClaim = () => {
       return;
     }
 
-    const readDistributor = async (distContract) => {
+    const readDistributor = async (distContract, currentClaim) => {
       return {
-        isClaimed: await distContract.isClaimed(claim.index),
+        isClaimed: await distContract.isClaimed(currentClaim.index),
         isValid: await distContract.isProofValid(
-          claim.index,
-          claim.amount,
+          currentClaim.index,
+          currentClaim.amount,
           address,
-          claim.proof
+          currentClaim.proof
         ),
       };
     };
@@ -64,8 +85,11 @@ const useClaim = () => {
     setLoaded(false);
 
     Promise.all([
-      readDistributor(contracts.OptionalDistributor),
-      readDistributor(contracts.MandatoryDistributor),
+      readDistributor(contracts.OptionalDistributor, claim.optionalLockupClaim),
+      readDistributor(
+        contracts.MandatoryDistributor,
+        claim.mandatoryLockupClaim
+      ),
     ])
       .then(([optional, mandatory]) => {
         setDistributorData({

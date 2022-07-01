@@ -155,30 +155,38 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               <tbody>
                 <EligibilityItem
                   id="ogn-holder"
-                  showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
+                  showCheckMark={claim.claimData.optionalLockupClaim.split.ousd.gt(
+                    0
+                  )} // @TODO change this
                   itemTitle="OGN holder"
-                  tokens={BigNumber.from(0)} // @TODO change this
+                  tokens={claim.claimData.optionalLockupClaim.split.ousd} // @TODO change this
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-lp"
-                  showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
+                  showCheckMark={claim.claimData.optionalLockupClaim.split.wousd.gt(
+                    0
+                  )} // @TODO change this
                   itemTitle="OUSD liquidity provider"
-                  tokens={BigNumber.from(0)} // @TODO change this
+                  tokens={claim.claimData.optionalLockupClaim.split.wousd} // @TODO change this
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-holder"
-                  showCheckMark={claim.claimData.split.ousd.gt(0)}
+                  showCheckMark={claim.claimData.mandatoryLockupClaim.split.ousd.gt(
+                    0
+                  )}
                   itemTitle="OUSD holder"
-                  tokens={claim.claimData.split.ousd}
+                  tokens={claim.claimData.mandatoryLockupClaim.split.ousd}
                   showOgvToken={false}
                 />
                 <EligibilityItem
                   id="wousd-holder"
-                  showCheckMark={claim.claimData.split.wousd.gt(0)}
+                  showCheckMark={claim.claimData.mandatoryLockupClaim.split.wousd.gt(
+                    0
+                  )}
                   itemTitle="WOUSD holder"
-                  tokens={claim.claimData.split.wousd}
+                  tokens={claim.claimData.mandatoryLockupClaim.split.wousd}
                   showOgvToken={false}
                 />
               </tbody>
