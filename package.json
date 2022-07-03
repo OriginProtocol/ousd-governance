@@ -3,7 +3,7 @@
   "license": "MIT",
   "homepage": "https://github.com/originprotocol/ousd-governance",
   "scripts": {
-    "node": "scripts/node.sh fork",
+    "node": "./node.sh fork",
     "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json",
     "generate-merkle-tree": "ts-node generate-merkle-tree.ts",
     "generate-merkle-tree:dev": "CHAIN_ID=31337 ts-node generate-merkle-tree.ts",

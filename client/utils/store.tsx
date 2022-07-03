@@ -37,7 +37,10 @@ const defaultState: Web3DataType = {
     existingEndWeeks: 0,
     existingEndDate: "",
   },
-  lockups: {},
+  lockups: {
+    lockups: [],
+    totalOgvLockedUp: ethers.BigNumber.from("0"),
+  },
   allowances: {
     ogv: ethers.BigNumber.from("0"),
   },
@@ -46,6 +49,7 @@ const defaultState: Web3DataType = {
     totalSupplyOfOgv: ethers.BigNumber.from("0"),
     totalLockedUpOgv: ethers.BigNumber.from("0"),
   },
+  totalOgvLockedUp: ethers.BigNumber.from("0"),
 };
 
 export const useStore = create<StoreType>((set) => ({

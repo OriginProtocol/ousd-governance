@@ -31,13 +31,20 @@ const useContracts = () => {
         RPC_URLS[chainId]
       );
 
+      const provider = web3Provider || networkProvider;
+
+      let signer;
+      if (web3Provider) {
+        signer = await web3Provider.getSigner();
+      }
+
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
         const contract = new ethers.Contract(
           definition.address,
           definition.abi,
-          networkProvider
+          signer || provider
         );
         return {
           [name]: contract,

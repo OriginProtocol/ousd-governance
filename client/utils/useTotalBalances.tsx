@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo, useClaimIsOpen } from "utils/index";
+import { useNetworkInfo, claimIsOpen } from "utils/index";
 
 const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
   const { web3Provider, contracts } = useStore();
+
+  const [reloadTotalBalances, setReloadTotalBalances] = useState(0);
 
   useEffect(() => {
     const loadTotalSupplyOfOgv = async () =>
@@ -16,7 +18,7 @@ const useTotalBalances = () => {
       );
 
     if (
-      useClaimIsOpen &&
+      claimIsOpen() &&
       web3Provider &&
       networkInfo.correct &&
       contracts.loaded
@@ -32,7 +34,13 @@ const useTotalBalances = () => {
         }
       );
     }
-  }, [networkInfo, web3Provider, contracts]);
+  }, [web3Provider, networkInfo.correct, contracts, reloadTotalBalances]);
+
+  return {
+    reloadTotalBalances: () => {
+      setReloadTotalBalances(reloadTotalBalances + 1);
+    },
+  };
 };
 
 export default useTotalBalances;

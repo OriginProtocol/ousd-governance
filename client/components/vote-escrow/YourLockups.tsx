@@ -1,29 +1,41 @@
 import { FunctionComponent } from "react";
 import moment from "moment";
-import useSWR from "swr";
-import { fetcher } from "utils/index";
 import Card from "components/Card";
 import Button from "components/Button";
+import Link from "components/Link";
 import { SectionTitle } from "components/SectionTitle";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
+import { Loading } from "components/Loading";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { address } = useStore();
-  const { data } = useSWR(`/api/lockups?account=${address}`, fetcher);
+  const { lockups } = useStore();
+
+  if (!lockups) {
+    return (
+      <Card>
+        <Loading />
+      </Card>
+    );
+  }
+
+  const handleExtend = () => {
+    return;
+  };
+
+  const handleUnlock = () => {
+    return;
+  };
 
   return (
     <Card>
       <SectionTitle>
-        {data?.lockups.length > 0
-          ? "Your lockups"
-          : "You have no active lockups"}
+        {lockups.length > 0 ? "Your lockups" : "You have no active lockups"}
       </SectionTitle>
-      {!data && <p>Loading...</p>}
-      {data?.lockups.length > 0 && (
-        <table className="table w-full">
+      {lockups.length > 0 && (
+        <table className="table table-compact w-full">
           <thead>
             <tr>
               <th>OGV</th>
@@ -35,30 +47,46 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             </tr>
           </thead>
           <tbody>
-            {data?.lockups.map((lockup: Object) => (
-              <tr key={lockup.lockupId}>
+            {lockups.map((lockup: Object) => (
+              <tr key={`${lockup.lockupId}`}>
                 <td>
                   <TokenAmount amount={lockup.amount} />
                 </td>
-                <td>{lockup.weeks} weeks</td>
-                <td>{moment(parseInt(lockup.end)).format("MMM D, YYYY")}</td>
+                <td>
+                  {moment.unix(lockup.end).diff(moment(), "months")} months
+                </td>
+                <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
                 <td>
                   <TokenAmount amount={lockup.points} />
                 </td>
                 <td>
-                  <Button small>Extend</Button>
+                  <Link
+                    className="btn rounded-full btn-sm"
+                    href={`/vote-escrow/${lockup.lockupId}`}
+                  >
+                    Extend
+                  </Link>
                 </td>
                 <td>
-                  <Button small>Unlock</Button>
+                  <Button
+                    alt
+                    small
+                    disabled={Date.now() / 1000 < lockup.end}
+                    onClick={handleUnlock}
+                  >
+                    Unlock
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-      <a className="btn btn-primary btn-lg" href="/vote-escrow/new">
-        Lock up your OGV
-      </a>
+      <div className="mt-4">
+        <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
+          {lockups.length > 0 ? "Create a new lockup" : "Lock up your OGV now"}
+        </Link>
+      </div>
     </Card>
   );
 };

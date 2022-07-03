@@ -7,13 +7,21 @@ import CardDescription from "components/CardDescription";
 import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
+import { ethers } from "ethers";
 
 interface AccountBalancesProps {}
 
 const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
-  const { balances } = useStore();
+  const { balances, lockups } = useStore();
+  const { ogv, veOgv } = balances;
 
-  const { ogv, lockedUpOgv, veOgv } = balances;
+  const totalOgvLockedUp =
+    lockups &&
+    lockups.length > 0 &&
+    lockups.reduce((total: ethers.BigNumber, lockup) => {
+      return total.add(lockup.amount);
+    }, ethers.BigNumber.from("0"));
+
   return (
     <CardGroup horizontal>
       <Card dark tightPadding>
@@ -34,7 +42,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           <div className="flex space-x-1 items-center">
             <TokenIcon src="/ogv.svg" alt="OGV" />
             <CardStat>
-              <TokenAmount amount={lockedUpOgv} />
+              <TokenAmount amount={totalOgvLockedUp} />
             </CardStat>
           </div>
           <CardDescription>OGV</CardDescription>

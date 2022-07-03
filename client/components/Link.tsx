@@ -26,7 +26,9 @@ const Link: FunctionComponent<LinkProps> = ({
 }) => {
   const router = useRouter();
   const { asPath } = router;
-  const isCurrent = asPath == href.toString();
+  const isCurrent = asPath
+    .replace("/", "")
+    .includes(href.toString().replace("/", ""));
 
   const classes = classNames(className, {
     [currentClassName]: isCurrent,
