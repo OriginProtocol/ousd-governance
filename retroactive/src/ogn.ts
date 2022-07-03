@@ -24,7 +24,7 @@ const OGN_AIRDROP_AMOUNT = bigNumberify("1000000000000000000000000000");
 // Amount of OGV being distributed to participants in the prelaunch LM campaign
 const LM_AIRDROP_AMOUNT = bigNumberify("50000000000000000000000000");
 // When the snapshot should be taken
-const SNAPSHOT_BLOCK = 14888133;
+const SNAPSHOT_BLOCK = 15036444;
 // Announce block, i.e. start of LM campaign
 // https://etherscan.io/block/14881677
 const ANNOUNCE_BLOCK = 14881677;
