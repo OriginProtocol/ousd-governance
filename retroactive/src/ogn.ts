@@ -221,7 +221,7 @@ ethereumEvents.on(
 const calculateRewards = async () => {
   console.log("\n");
   console.log("Calculating OGN rewards");
-  const ognRewards = balanceRewardScore(ognHolders);
+  const ognRewards = balanceRewardScore(Object.fromEntries(Object.entries(ognHolders).filter(([k]) => k !== ognStakingContract.address)));
 
   const ognStakingContractInstance = new ethers.Contract(
     ognStakingContract.address,
