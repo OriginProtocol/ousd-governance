@@ -211,7 +211,7 @@ ethereumEvents.on(
       // Write a CSV for for easier verification
       fs.writeFileSync("../scripts/1_data/optional_lockup_rewards.csv", csv.join("\n"));
       // Write merkle tree claims JSON structure
-      fs.writeFileSync("../scripts/1_data/optional_lockup_rewards.csv", JSON.stringify(claims));
+      fs.writeFileSync("../scripts/1_data/optional_lockup_claims.json", JSON.stringify(claims));
     }
 
     done();
@@ -255,13 +255,15 @@ const calculateRewards = async () => {
   // ANNOUNCE_BLOCK
   console.log("Calculating OUSD3CRV-f rewards");
   const ousd3CrvRewards = cumulativeRewardScore(
-    ousd3Crv,
+    // Exclude OUSD3CRV Gauge from rewards as it will have the most
+    Object.fromEntries(Object.entries(ousd3Crv).filter(([k]) => k !== ousd3CrvGaugeContract.address)),
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
   console.log("Calculating OUSD3CRV-f-gauge rewards");
   const ousd3CrvGaugeRewards = cumulativeRewardScore(
-    ousd3CrvGauge,
+    // Exclude Convex finance voter proxy
+    Object.fromEntries(Object.entries(ousd3CrvGauge).filter(([k]) => k !== "0x989AEb4d175e16225E39E87d0D97A3360524AD80")),
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
