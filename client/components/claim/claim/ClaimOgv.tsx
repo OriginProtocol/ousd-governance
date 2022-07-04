@@ -1,4 +1,4 @@
-import { FunctionComponent, useState, useEffect } from "react";
+import { FunctionComponent, useState, useEffect, useMemo } from "react";
 import moment from "moment";
 import { BigNumber, utils } from "ethers";
 import Card from "components/Card";
@@ -14,6 +14,7 @@ import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
 import { useStore } from "utils/store";
 import numeral from "numeraljs";
+import { getDailyRewardsEmissions } from "utils/apy";
 
 interface ClaimOgvProps {}
 
@@ -47,6 +48,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     loadTotalSupplyVeOGV();
   }, [contracts]);
 
+  const dailyRewardEmissions = useMemo(() => {
+    return getDailyRewardsEmissions()
+  }, [])
+
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
   }
@@ -59,6 +64,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const ogvPriceBP = BigNumber.from(1500); // @TODO replace with live value - format is in basis points
   const stakingRewards = utils.parseUnits("400000000", 18); // (IMPORTANT) confirm before launch 400m OGV is OK
 
+  console.log("EMISSIONTS: ", dailyRewardEmissions)
   const getOgvLockupRewardApy = (veOgv: BigNumber) => {
     const ogvPercentageOfRewards =
       numeral(veOgv.toString()) /
@@ -67,16 +73,16 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     const valueOfOgvRewards = (ogvRewards * ogvPriceBP) / 1e4 / 1e18;
     const valueOfClaimableOgv = (claimableOgv * ogvPriceBP) / 1e4 / 1e18;
     const ogvLockupRewardApr = (valueOfOgvRewards * 12) / valueOfClaimableOgv;
-    //
-    //     console.log(
-    //       "veOgv", veOgv / 1e18,
-    //       "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
-    //       "ogvRewards", ogvRewards / 1e18,
-    //       "ogvPercentageOfRewards", ogvPercentageOfRewards,
-    //       "valueOfOgvRewards", valueOfOgvRewards,
-    //       "valueOfClaimableOgv", valueOfClaimableOgv,
-    //       "ogvLockupRewardApr", ogvLockupRewardApr
-    //     );
+    
+    console.log(
+      "veOgv", veOgv / 1e18,
+      "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
+      "ogvRewards", ogvRewards / 1e18,
+      "ogvPercentageOfRewards", ogvPercentageOfRewards,
+      "valueOfOgvRewards", valueOfOgvRewards,
+      "valueOfClaimableOgv", valueOfClaimableOgv,
+      "ogvLockupRewardApr", ogvLockupRewardApr
+    );
 
     return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
   };
