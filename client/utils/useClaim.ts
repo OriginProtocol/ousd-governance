@@ -12,6 +12,7 @@ const useClaim = () => {
   const [loaded, setLoaded] = useState(false);
   const [distributorData, setDistributorData] = useState({});
   const { address, contracts, web3Provider } = useStore();
+  const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim
 
   const maybeConvertToBn = (amount) => {
     if (typeof amount !== "object" || !amount || amount.hex === undefined)
@@ -154,6 +155,7 @@ const useClaim = () => {
       ...claim.mandatory,
       ...distributorData.mandatory,
     },
+    hasClaim, 
     loaded,
   };
 };
