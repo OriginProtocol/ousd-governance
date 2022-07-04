@@ -55,7 +55,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   }
 
   const isValidLockup = lockupDuration > 0;
-  const claimableOgv = claim.optional.hasClaim ? numeral(claim.optional.amount.div(decimal18).toString()).value() : 0;
+  const claimableOgv = claim.optional.isValid ? numeral(claim.optional.amount.div(decimal18).toString()).value() : 0;
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;
 
