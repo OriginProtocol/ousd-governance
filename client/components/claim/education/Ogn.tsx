@@ -49,7 +49,7 @@ const Ogn: FunctionComponent<OgnProps> = ({ onComplete }) => (
             Origin Story Governance (OGN)
           </h3>
         </div>
-        <Video />
+        <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             <strong>

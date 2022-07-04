@@ -52,7 +52,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
             Origin Dollar (OUSD)
           </h3>
         </div>
-        <Video />
+        <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             <strong>Origin Dollar</strong> — or <strong>OUSD</strong> — is a
