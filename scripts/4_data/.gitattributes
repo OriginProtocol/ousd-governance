@@ -1,0 +1,6 @@
+optional_lockup_claims.json filter=lfs diff=lfs merge=lfs -text
+optional_lockup_rewards.csv filter=lfs diff=lfs merge=lfs -text
+mandatory_lockup_accounts.json filter=lfs diff=lfs merge=lfs -text
+mandatory_lockup_claims.json filter=lfs diff=lfs merge=lfs -text
+mandatory_lockup_rewards.csv filter=lfs diff=lfs merge=lfs -text
+optional_lockup_accounts.json filter=lfs diff=lfs merge=lfs -text
