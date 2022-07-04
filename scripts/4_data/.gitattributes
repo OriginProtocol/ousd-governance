@@ -1,6 +1,3 @@
-optional_lockup_claims.json filter=lfs diff=lfs merge=lfs -text
-optional_lockup_rewards.csv filter=lfs diff=lfs merge=lfs -text
-mandatory_lockup_accounts.json filter=lfs diff=lfs merge=lfs -text
-mandatory_lockup_claims.json filter=lfs diff=lfs merge=lfs -text
-mandatory_lockup_rewards.csv filter=lfs diff=lfs merge=lfs -text
-optional_lockup_accounts.json filter=lfs diff=lfs merge=lfs -text
+version https://git-lfs.github.com/spec/v1
+oid sha256:a327fa011e16bb6ddc86152022822d3248ae784800bc85f750f85e166fd91978
+size 391
