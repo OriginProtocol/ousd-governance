@@ -43,5 +43,4 @@ for (const prefix of ['mandatory_lockup', 'optional_lockup']) {
       `./scripts/${chainId}_data/${prefix}_claims.json`,
       JSON.stringify(claims, null, 2), 'utf-8'
   );
-
 }

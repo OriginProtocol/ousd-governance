@@ -200,7 +200,7 @@ ethereumEvents.on(
 
       const csv = Object.entries(claims).map(
         ([address, data]: [address: string, data: any]) => {
-          return `${address}, ${["ogn", "ousd3Crv", "ousd3CrvGauge", "convex"]
+          return `${address}, ${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
             .map((key) =>
               data.split[key] === undefined ? 0 : data.split[key].toString()
             )
@@ -233,6 +233,12 @@ const calculateRewards = async () => {
         ([k]) => k !== ognStakingContract.address
       )
     )
+  );
+
+  const ognInstance = new ethers.Contract(
+    ognContract.address,
+    ognContract.abi,
+    provider
   );
 
   const ognStakingContractInstance = new ethers.Contract(
@@ -309,7 +315,13 @@ const calculateRewards = async () => {
     return total.add(amount);
   }, bigNumberify(0));
 
-  const totalOgnScore = totalOgnHoldersScore.add(totalOgnStakersScore);
+  const totalOgnScore = totalOgnHoldersScore.add(
+      // Account for mistaken transfers to the staking contract by using
+      // balanceOf rather than summing all the stakes
+      await ognInstance.balanceOf(ognStakingContract.address, {
+        blockTag: SNAPSHOT_BLOCK,
+      })
+  );
 
   const totalOusd3CrvRewardsScore = Object.values(
     ousd3CrvRewards
@@ -338,6 +350,7 @@ const calculateRewards = async () => {
   const addresses = [
     ...new Set(
       Object.keys(ognRewards)
+        .concat(Object.keys(ognStakingRewards))
         .concat(Object.keys(ousd3CrvRewards))
         .concat(Object.keys(ousd3CrvGaugeRewards))
         .concat(Object.keys(convexRewards))
@@ -423,12 +436,6 @@ const calculateRewards = async () => {
         .add(account.split.convex);
     },
     bigNumberify(0)
-  );
-
-  const ognInstance = new ethers.Contract(
-    ognContract.address,
-    ognContract.abi,
-    provider
   );
 
   console.log(`Total OGN score`, totalOgnScore.toString());
