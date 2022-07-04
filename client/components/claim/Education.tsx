@@ -25,7 +25,7 @@ const Education: FunctionComponent<EducationProps> = ({
     setCurrentEducationStep(currentEducationStep + 1);
   };
 
-  const educationSteps = ["OUSD", "OGV", "OGN"];
+  const educationSteps = ["OUSD", "OGN", "OGV"];
 
   return (
     <div className="lg:flex">
@@ -72,9 +72,9 @@ const Education: FunctionComponent<EducationProps> = ({
           <Ousd onComplete={handleNextEducationStep} />
         )}
         {currentEducationStep === 1 && (
-          <Ogv onComplete={handleNextEducationStep} />
+          <Ogn onComplete={handleNextEducationStep} />
         )}
-        {currentEducationStep === 2 && <Ogn onComplete={setCanAdvance} />}
+        {currentEducationStep === 2 && <Ogv onComplete={setCanAdvance} />}
         <div className="mt-6 flex">
           <div className="mr-auto">
             <Button onClick={handlePrevStep} alt>

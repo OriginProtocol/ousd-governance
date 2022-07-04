@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, Dispatch, SetStateAction } from "react";
 import TokenIcon from "components/TokenIcon";
 import Video from "components/Video";
 import Card from "components/Card";
@@ -6,24 +6,32 @@ import CardGroup from "components/CardGroup";
 import Quiz from "components/claim/education/Quiz";
 
 interface OgvProps {
-  onComplete?: () => void;
+  onComplete?: Dispatch<SetStateAction<boolean>>;
 }
 
 const questions = [
   {
-    question: "OGV question 1",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "1",
+    question: "Which of the following is the governance token for OUSD?",
+    answers: ["OGN", "OGV", "GOV", "ODG"],
+    correctAnswer: "OGV",
   },
   {
-    question: "OGV question 2",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "2",
+    question: "Which is the best reason to lock OGV and convert it to veOGV?",
+    answers: [
+      "To keep it from being burned",
+      "veOGV is freely transferable",
+      "To hedge against Bitcoin",
+      "veOGV holders earn fees from OUSD's yield",
+    ],
+    correctAnswer: "veOGV holders earn fees from OUSD's yield",
   },
   {
-    question: "OGV question 3",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "3",
+    question: "How can you earn more as OUSD adoption increases?",
+    answers: [
+      "Wait to claim OGV after OUSD succeeds",
+      "Lock OGV now to get fees and voting power",
+    ],
+    correctAnswer: "Lock OGV now to get fees and voting power",
   },
 ];
 
@@ -66,11 +74,7 @@ const Ogv: FunctionComponent<OgvProps> = ({ onComplete }) => (
       </div>
     </Card>
     <Card>
-      <Quiz
-        questions={questions}
-        onComplete={onComplete}
-        onCompleteMessage="Continue to learn about OGN"
-      />
+      <Quiz questions={questions} onComplete={onComplete} lastQuiz />
     </Card>
   </CardGroup>
 );

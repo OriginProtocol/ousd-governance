@@ -11,19 +11,34 @@ interface OusdProps {
 
 const questions = [
   {
-    question: "OUSD question 1",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "1",
+    question: "Which best describes OUSD?",
+    answers: [
+      "An algorithmic stablecoin",
+      "A governance token",
+      "A fully backed stablecoin",
+      "A staking token",
+    ],
+    correctAnswer: "A fully backed stablecoin",
   },
   {
-    question: "OUSD question 2",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "2",
+    question: "How do you earn yield with OUSD?",
+    answers: [
+      "You get OGV for locking it up",
+      "The balance grows automatically in your wallet",
+      "You stake it in the Origin Vault",
+      "The price goes up over time",
+    ],
+    correctAnswer: "The balance grows automatically in your wallet",
   },
   {
-    question: "OUSD question 3",
-    answers: ["1", "2", "3", "4"],
-    correctAnswer: "3",
+    question: "Who manages OUSD's funds?",
+    answers: [
+      "Origin Protocol's team of Internet pioneers",
+      "Every token holder chooses a strategy",
+      "An elite group of ex-Wall Street traders",
+      "A transparent set of automated smart contracts",
+    ],
+    correctAnswer: "Every token holder chooses a strategy",
   },
 ];
 
@@ -65,7 +80,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
       <Quiz
         questions={questions}
         onComplete={onComplete}
-        onCompleteMessage="Continue to learn about OGV"
+        onCompleteMessage="Continue to learn about OGN"
       />
     </Card>
   </CardGroup>
