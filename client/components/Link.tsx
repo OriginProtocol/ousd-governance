@@ -26,9 +26,9 @@ const Link: FunctionComponent<LinkProps> = ({
 }) => {
   const router = useRouter();
   const { asPath } = router;
-  const isCurrent = asPath
-    .replace("/", "")
-    .includes(href.toString().replace("/", ""));
+  const pathTrimmed = asPath.replace("/", "");
+  const hrefTrimmed = href.toString().replace("/", "");
+  const isCurrent = hrefTrimmed && pathTrimmed.includes(hrefTrimmed);
 
   const classes = classNames(className, {
     [currentClassName]: isCurrent,
