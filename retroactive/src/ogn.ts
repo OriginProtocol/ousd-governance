@@ -406,6 +406,21 @@ const calculateRewards = async () => {
     bigNumberify(0)
   );
 
+  const ognInstance = new ethers.Contract(
+    ognContract.address,
+    ognContract.abi,
+    provider
+  );
+
+  console.log(`Total OGN score`, totalOgnScore.toString())
+  console.log('Total OGN excluding staked', totalOgnHoldersScore.toString())
+  console.log('Total OGN staked (sum)', totalOgnStakersScore.toString())
+  console.log('Total OGN staked (balanceOf)',
+    (await ognInstance.balanceOf(ognStakingContract.address, {
+      blockTag: SNAPSHOT_BLOCK,
+    })).toString()
+  )
+
   console.log(
     `OGN Holding rewards ${totalOgnHoldersScore.mul(100).div(totalOgnScore)}%`
   );
