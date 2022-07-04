@@ -355,19 +355,25 @@ const calculateRewards = async () => {
           .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
-    acc[address] = {
-      amount: ognReward
+
+    const amount = ognReward
+        .add(ognStakingReward)
         .add(ousd3CrvReward)
         .add(ousd3CrvGaugeReward)
-        .add(convexReward),
-      split: {
-        ogn: ognReward,
-        ognStaking: ognStakingReward,
-        ousd3Crv: ousd3CrvReward,
-        ousd3CrvGauge: ousd3CrvGaugeReward,
-        convex: convexReward,
-      },
-    };
+        .add(convexReward);
+
+    if (amount.gt(0)) {
+      acc[address] = {
+        amount,
+        split: {
+          ogn: ognReward,
+          ognStaking: ognStakingReward,
+          ousd3Crv: ousd3CrvReward,
+          ousd3CrvGauge: ousd3CrvGaugeReward,
+          convex: convexReward,
+        },
+      };
+    }
     return acc;
   }, {});
 
