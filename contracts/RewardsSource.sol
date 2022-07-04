@@ -30,16 +30,16 @@ contract RewardsSource is Governable {
     constructor(address ogv_) {
         require(ogv_ != address(0), "Rewards: OGV must be set");
         ogv = ogv_;
-        lastRewardTime = block.timestamp; // No possible rewards from before contract deployed
     }
 
     /// @notice Collect rewards.
-    /// 
+    ///
     /// Can only be called by the contract that will receive the rewards.
     ///
     /// @return rewards OGV collected
     function collectRewards() external returns (uint256) {
         require(msg.sender == rewardsTarget, "Rewards: Not rewardsTarget");
+        require(lastRewardTime > 0, "Rewards: lastRewardTime is zero"); // Ensures initialziation
         if (block.timestamp <= lastRewardTime) {
             return 0;
         }
@@ -115,7 +115,7 @@ contract RewardsSource is Governable {
     ///
     /// The first slope start time may be defined into the future. In this case
     /// there will be no inflation until that first start time is reached.
-    /// 
+    ///
     /// @param slopes inflation slope configuration
     function setInflation(Slope[] memory slopes) external onlyGovernor {
         // slope ends intentionally are overwritten
@@ -142,6 +142,10 @@ contract RewardsSource is Governable {
                 minSlopeStart = slopes[i].start;
             }
             inflationSlopes.push(slopes[i]);
+        }
+        // No rewards can accrue before first setInflation
+        if (lastRewardTime == 0) {
+            lastRewardTime = block.timestamp;
         }
         emit InflationChanged();
     }
