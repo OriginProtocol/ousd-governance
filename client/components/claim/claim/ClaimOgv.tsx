@@ -1,4 +1,4 @@
-import { FunctionComponent, useState, useEffect, useMemo } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import moment from "moment";
 import { BigNumber, utils } from "ethers";
 import Card from "components/Card";
@@ -14,9 +14,10 @@ import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
 import { useStore } from "utils/store";
 import numeral from "numeraljs";
-import { getDailyRewardsEmissions } from "utils/apy";
+import { getRewardsApy } from "utils/apy";
 
 interface ClaimOgvProps {}
+const decimal18 = BigNumber.from("1000000000000000000");
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
@@ -34,71 +35,34 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
         return;
       }
       try {
-        const totalSupply = await contracts.OgvStaking.totalSupply();
+        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
         // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
         // of claimers will see insane reward amounts
-        const minTotalSupply = utils.parseUnits("10000000", 18); // 10m of OGV
+        const minTotalSupply = numeral(100000000); // 100m of OGV
+        const totalSupply = numeral(totalSupplyBn.div(decimal18).toString());
         setTotalSupplyVeOgv(
-          totalSupply.lt(minTotalSupply) ? minTotalSupply : totalSupply
+          totalSupply < minTotalSupply ? minTotalSupply : totalSupply
         );
       } catch (error) {
-        console.error(`Can not fetch veOgv total supply: ${error}`);
+        console.error(`Can not fetch veOgv total supply:`, error);
       }
     };
     loadTotalSupplyVeOGV();
   }, [contracts]);
 
-  const dailyRewardEmissions = useMemo(() => {
-    return getDailyRewardsEmissions()
-  }, [])
-
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
   }
 
-  const claimableOgv = claim.optional.amount;
-
   const isValidLockup = lockupDuration > 0;
+  const claimableOgv = claim.optional.hasClaim ? numeral(claim.optional.amount.div(decimal18).toString()).value() : 0;
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
 
-  const votingDecayFactor = 1.8; // @TODO replace with contract value
-  const ogvPriceBP = BigNumber.from(1500); // @TODO replace with live value - format is in basis points
-  const stakingRewards = utils.parseUnits("400000000", 18); // (IMPORTANT) confirm before launch 400m OGV is OK
-
-  console.log("EMISSIONTS: ", dailyRewardEmissions)
-  const getOgvLockupRewardApy = (veOgv: BigNumber) => {
-    const ogvPercentageOfRewards =
-      numeral(veOgv.toString()) /
-      (numeral(totalSupplyVeOgv) + numeral(veOgv.toString()));
-    const ogvRewards = stakingRewards * ogvPercentageOfRewards;
-    const valueOfOgvRewards = (ogvRewards * ogvPriceBP) / 1e4 / 1e18;
-    const valueOfClaimableOgv = (claimableOgv * ogvPriceBP) / 1e4 / 1e18;
-    const ogvLockupRewardApr = (valueOfOgvRewards * 12) / valueOfClaimableOgv;
-    
-    console.log(
-      "veOgv", veOgv / 1e18,
-      "totalSupplyVeOgv", totalSupplyVeOgv / 1e18,
-      "ogvRewards", ogvRewards / 1e18,
-      "ogvPercentageOfRewards", ogvPercentageOfRewards,
-      "valueOfOgvRewards", valueOfOgvRewards,
-      "valueOfClaimableOgv", valueOfClaimableOgv,
-      "ogvLockupRewardApr", ogvLockupRewardApr
-    );
-
-    return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
-  };
-
-  const veOgvFromOgvLockup = isValidLockup
-    ? claimableOgv
-        .mul(Math.round(votingDecayFactor ** (lockupDuration / 52) * 1e8))
-        .div(BigNumber.from(1e8))
-    : BigNumber.from(0);
-
-  const ogvLockupRewardApy = getOgvLockupRewardApy(veOgvFromOgvLockup);
-
-  const maxVeOgvFromOgvLockup = claimableOgv
-    .mul(Math.round(votingDecayFactor ** (208 / 52) * 1e8))
-    .div(BigNumber.from(1e8));
-  const maxOgvLockupRewardApy = getOgvLockupRewardApy(maxVeOgvFromOgvLockup);
+  const veOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (lockupDuration / 52);
+  const ogvLockupRewardApy = getRewardsApy(veOgvFromOgvLockup, claimableOgv, totalSupplyVeOgv);
+  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
+  const maxOgvLockupRewardApy = getRewardsApy(maxVeOgvFromOgvLockup, claimableOgv, totalSupplyVeOgv);
 
   const now = new Date();
   const lockupEnd = new Date(

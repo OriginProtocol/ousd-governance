@@ -1,3 +1,8 @@
+import { BigNumber } from "ethers";
+import numeral from "numeraljs";
+
+const ogvPriceBP = BigNumber.from(1500); // @TODO replace with live value - format is in basis points
+
 export function getDailyRewardsEmissions(time = Date.now() / 1000) {
   // format: start_timestamp, end_timestamp, daily emissions
   const data = [
@@ -14,4 +19,20 @@ export function getDailyRewardsEmissions(time = Date.now() / 1000) {
 
   // 0 when rewards period has already finished
   return reward ? reward[2] : 0;
+}
+
+export function getRewardsApy(veOgvReceived: numeral, ogvToStake: numeral, totalSupplyVeOgv: numeral) {
+  const ogvPercentageOfRewards = veOgvReceived / (totalSupplyVeOgv + veOgvReceived);
+  const ogvRewardsDaily = getDailyRewardsEmissions() * ogvPercentageOfRewards;
+  const valueOfOgvRewardsYearly = (ogvRewardsDaily * 365.25 * ogvPriceBP) / 1e4;
+  const valueOfOgvToStake = (ogvToStake * ogvPriceBP) / 1e4;
+  const ogvLockupRewardApr = valueOfOgvRewardsYearly  / valueOfOgvToStake;
+
+  /* APR to APY formula:
+   * APY = Math.pow((1 + Periodic Rate), Number of periods) – 1
+   * 
+   * picking 1 (1 year) as a number of periods. Since the rewards are not really going to be
+   * compounding in this case
+   */
+  return (((1 + ogvLockupRewardApr / 1) ** 1) - 1) * 100;  
 }
