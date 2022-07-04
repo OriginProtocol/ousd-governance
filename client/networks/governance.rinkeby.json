@@ -1,6 +1,6 @@
 {
   "OriginDollarGovernance": {
-    "address": "0x3cfE54eB86220d92FF6dfD4f564FD7c4ffCd13F9",
+    "address": "0x80914B31a29375f67a2C88a69ecb33FAE45DDC7E",
     "abi": [
       {
         "inputs": [],
@@ -734,7 +734,7 @@
     ]
   },
   "RewardsSource": {
-    "address": "0x8069B8214b11764924c26363f5a2Bf592144ED78",
+    "address": "0x910A6FAee8d041c4a850a6039Ea3f48612380bEa",
     "abi": [
       {
         "inputs": [
@@ -997,7 +997,7 @@
     ]
   },
   "OgvStaking": {
-    "address": "0x50030D3bD1Ab51ec4a617387DC888671F7CAb25a",
+    "address": "0x720A621914BB2e266A1cf191F588E197269ab9FC",
     "abi": [
       {
         "inputs": [
@@ -1964,7 +1964,7 @@
     ]
   },
   "TimelockController": {
-    "address": "0x29693dE2B62CB447AEe4342155370f43F49b3b9B",
+    "address": "0xd990de0C132c0a10522dFb811ff9B41F0C396dd6",
     "abi": [
       {
         "inputs": [
@@ -2830,7 +2830,7 @@
     ]
   },
   "Governance": {
-    "address": "0x09f28B46F3c3baFbEc833D09D1C46C653059DB0c",
+    "address": "0x634113bE3D58876d09c1D261227FCD934aA732fB",
     "abi": [
       {
         "inputs": [
@@ -4294,7 +4294,7 @@
     ]
   },
   "MandatoryDistributor": {
-    "address": "0x19EA2B99Cc7a2a4bB5EeaC04a5Fb101A3886dF49",
+    "address": "0x56484d68046d4779604d001A7f5Fd0A823912024",
     "abi": [
       {
         "inputs": [
@@ -4499,7 +4499,7 @@
     ]
   },
   "OptionalDistributor": {
-    "address": "0x80bCc28B56589C489c7B97F56EDBed02be27e306",
+    "address": "0x2410E7dE5dcCD871619fB885ad705FA810d2fB89",
     "abi": [
       {
         "inputs": [
