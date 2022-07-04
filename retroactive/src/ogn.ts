@@ -200,7 +200,7 @@ ethereumEvents.on(
 
       const csv = Object.entries(claims).map(
         ([address, data]: [address: string, data: any]) => {
-          return `${address}, ${["ogn", "ousd3Crv", "ousd3CrvGauge", "convex"]
+          return `${address}, ${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
             .map((key) =>
               data.split[key] === undefined ? 0 : data.split[key].toString()
             )
@@ -209,9 +209,15 @@ ethereumEvents.on(
       );
 
       // Write a CSV for for easier verification
-      fs.writeFileSync("../scripts/1_data/optional_lockup_rewards.csv", csv.join("\n"));
+      fs.writeFileSync(
+        "../scripts/1_data/optional_lockup_rewards.csv",
+        csv.join("\n")
+      );
       // Write merkle tree claims JSON structure
-      fs.writeFileSync("../scripts/1_data/optional_lockup_accounts.json", JSON.stringify(claims));
+      fs.writeFileSync(
+        "../scripts/1_data/optional_lockup_accounts.json",
+        JSON.stringify(claims)
+      );
     }
 
     done();
@@ -221,7 +227,19 @@ ethereumEvents.on(
 const calculateRewards = async () => {
   console.log("\n");
   console.log("Calculating OGN rewards");
-  const ognRewards = balanceRewardScore(Object.fromEntries(Object.entries(ognHolders).filter(([k]) => k !== ognStakingContract.address)));
+  const ognRewards = balanceRewardScore(
+    Object.fromEntries(
+      Object.entries(ognHolders).filter(
+        ([k]) => k !== ognStakingContract.address
+      )
+    )
+  );
+
+  const ognInstance = new ethers.Contract(
+    ognContract.address,
+    ognContract.abi,
+    provider
+  );
 
   const ognStakingContractInstance = new ethers.Contract(
     ognStakingContract.address,
@@ -256,14 +274,22 @@ const calculateRewards = async () => {
   console.log("Calculating OUSD3CRV-f rewards");
   const ousd3CrvRewards = cumulativeRewardScore(
     // Exclude OUSD3CRV Gauge from rewards as it will have the most
-    Object.fromEntries(Object.entries(ousd3Crv).filter(([k]) => k !== ousd3CrvGaugeContract.address)),
+    Object.fromEntries(
+      Object.entries(ousd3Crv).filter(
+        ([k]) => k !== ousd3CrvGaugeContract.address
+      )
+    ),
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
   console.log("Calculating OUSD3CRV-f-gauge rewards");
   const ousd3CrvGaugeRewards = cumulativeRewardScore(
     // Exclude Convex finance voter proxy
-    Object.fromEntries(Object.entries(ousd3CrvGauge).filter(([k]) => k !== "0x989AEb4d175e16225E39E87d0D97A3360524AD80")),
+    Object.fromEntries(
+      Object.entries(ousd3CrvGauge).filter(
+        ([k]) => k !== "0x989AEb4d175e16225E39E87d0D97A3360524AD80"
+      )
+    ),
     SNAPSHOT_BLOCK,
     ANNOUNCE_BLOCK
   );
@@ -289,7 +315,13 @@ const calculateRewards = async () => {
     return total.add(amount);
   }, bigNumberify(0));
 
-  const totalOgnScore = totalOgnHoldersScore.add(totalOgnStakersScore);
+  const totalOgnScore = totalOgnHoldersScore.add(
+      // Account for mistaken transfers to the staking contract by using
+      // balanceOf rather than summing all the stakes
+      await ognInstance.balanceOf(ognStakingContract.address, {
+        blockTag: SNAPSHOT_BLOCK,
+      })
+  );
 
   const totalOusd3CrvRewardsScore = Object.values(
     ousd3CrvRewards
@@ -318,6 +350,7 @@ const calculateRewards = async () => {
   const addresses = [
     ...new Set(
       Object.keys(ognRewards)
+        .concat(Object.keys(ognStakingRewards))
         .concat(Object.keys(ousd3CrvRewards))
         .concat(Object.keys(ousd3CrvGaugeRewards))
         .concat(Object.keys(convexRewards))
@@ -355,19 +388,24 @@ const calculateRewards = async () => {
           .div(totalLiquidityMiningScore)
       : bigNumberify(0);
 
-    acc[address] = {
-      amount: ognReward
-        .add(ousd3CrvReward)
-        .add(ousd3CrvGaugeReward)
-        .add(convexReward),
-      split: {
-        ogn: ognReward,
-        ognStaking: ognStakingReward,
-        ousd3Crv: ousd3CrvReward,
-        ousd3CrvGauge: ousd3CrvGaugeReward,
-        convex: convexReward,
-      },
-    };
+    const amount = ognReward
+      .add(ognStakingReward)
+      .add(ousd3CrvReward)
+      .add(ousd3CrvGaugeReward)
+      .add(convexReward);
+
+    if (amount.gt(0)) {
+      acc[address] = {
+        amount,
+        split: {
+          ogn: ognReward,
+          ognStaking: ognStakingReward,
+          ousd3Crv: ousd3CrvReward,
+          ousd3CrvGauge: ousd3CrvGaugeReward,
+          convex: convexReward,
+        },
+      };
+    }
     return acc;
   }, {});
 
@@ -398,6 +436,18 @@ const calculateRewards = async () => {
         .add(account.split.convex);
     },
     bigNumberify(0)
+  );
+
+  console.log(`Total OGN score`, totalOgnScore.toString());
+  console.log("Total OGN excluding staked", totalOgnHoldersScore.toString());
+  console.log("Total OGN staked (sum)", totalOgnStakersScore.toString());
+  console.log(
+    "Total OGN staked (balanceOf)",
+    (
+      await ognInstance.balanceOf(ognStakingContract.address, {
+        blockTag: SNAPSHOT_BLOCK,
+      })
+    ).toString()
   );
 
   console.log(
