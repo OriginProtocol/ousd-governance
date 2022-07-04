@@ -9,8 +9,8 @@ import { utils } from "ethers";
 const MerkleTest: NextPage = () => {
   const { optional } = useClaim();
   const { address } = useStore();
-  if (!optional){
-    return (<></>);
+  if (!optional) {
+    return <></>;
   }
 
   const { index, amount, proof, hasClaim, split } = optional;

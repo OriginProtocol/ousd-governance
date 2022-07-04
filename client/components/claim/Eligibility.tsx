@@ -18,8 +18,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
-  const isEligible =
-    claim.loaded && claim.hasClaim;
+  const isEligible = claim.loaded && claim.hasClaim;
   const claimValid =
     (isEligible && claim.optional && claim.optional.isValid) ||
     (claim.mandatory && claim.mandatory.isValid);

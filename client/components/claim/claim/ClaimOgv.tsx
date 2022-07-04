@@ -53,14 +53,25 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   }
 
   const isValidLockup = lockupDuration > 0;
-  const claimableOgv = claim.optional.isValid ? numeral(claim.optional.amount.div(decimal18).toString()).value() : 0;
+  const claimableOgv = claim.optional.isValid
+    ? numeral(claim.optional.amount.div(decimal18).toString()).value()
+    : 0;
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;
 
-  const veOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (lockupDuration / 52);
-  const ogvLockupRewardApy = getRewardsApy(veOgvFromOgvLockup, claimableOgv, totalSupplyVeOgv);
+  const veOgvFromOgvLockup =
+    claimableOgv * votingDecayFactor ** (lockupDuration / 52);
+  const ogvLockupRewardApy = getRewardsApy(
+    veOgvFromOgvLockup,
+    claimableOgv,
+    totalSupplyVeOgv
+  );
   const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
-  const maxOgvLockupRewardApy = getRewardsApy(maxVeOgvFromOgvLockup, claimableOgv, totalSupplyVeOgv);
+  const maxOgvLockupRewardApy = getRewardsApy(
+    maxVeOgvFromOgvLockup,
+    claimableOgv,
+    totalSupplyVeOgv
+  );
 
   const now = new Date();
   const lockupEnd = new Date(
