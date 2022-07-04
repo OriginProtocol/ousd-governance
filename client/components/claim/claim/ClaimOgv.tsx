@@ -40,9 +40,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
         // of claimers will see insane reward amounts
         const minTotalSupply = numeral(100000000); // 100m of OGV
         const totalSupply = numeral(totalSupplyBn.div(decimal18).toString());
-        setTotalSupplyVeOgv(
-          totalSupply < minTotalSupply ? minTotalSupply : totalSupply
-        );
+        setTotalSupplyVeOgv(Math.max(totalSupply, minTotalSupply));
       } catch (error) {
         console.error(`Can not fetch veOgv total supply:`, error);
       }
