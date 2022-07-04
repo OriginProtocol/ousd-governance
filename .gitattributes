@@ -1,3 +1,2 @@
 scripts/1_data/** filter=lfs diff=lfs merge=lfs -text
 scripts/4_data/** filter=lfs diff=lfs merge=lfs -text
-scripts/31337_data/** filter=lfs diff=lfs merge=lfs -text
