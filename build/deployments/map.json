@@ -11,5 +11,31 @@
       "0xab2916819462f0Be4f209Be5a491AFAf1Bd56263",
       "0x88aa574f0Acf17775973eBB786d34ADdB43aD42E"
     ]
+  },
+  "4": {
+    "ERC1967Proxy": [
+      "0x7d7d5d91f18604A4Cf57106ea0a2697c87AB9030"
+    ],
+    "Governance": [
+      "0xE28EFBE3f8bEe0fE9Ba69DfEF4a72d378B28D506"
+    ],
+    "MandatoryLockupDistributor": [
+      "0xf6a8F07d34F9e65c27091102d76E6fDcF9853bca"
+    ],
+    "OgvStaking": [
+      "0x63B84F186D9887EC2FD869fA8E7D02309bA1579F"
+    ],
+    "OptionalLockupDistributor": [
+      "0x4b6bCD72397459839F3C917f30e119c87BD0F3D5"
+    ],
+    "OriginDollarGovernance": [
+      "0x4c45FD1732aB2B96Dd742D97536b9AD49b1a5307"
+    ],
+    "RewardsSource": [
+      "0x60b09612BF3721E9C14379dBd3f795d42BE63423"
+    ],
+    "Timelock": [
+      "0x041d962Bf5B27ec1b5a43936EC3D088C39D9c588"
+    ]
   }
 }
