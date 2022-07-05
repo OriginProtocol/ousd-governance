@@ -18,8 +18,13 @@ def main(
     mandatory_lockup_merkle_root = json.load(mandatory_lockup_claims)["merkleRoot"]
     optional_lockup_merkle_root = json.load(optional_lockup_claims)["merkleRoot"]
 
-    accounts.default = accounts[0]
-    # accounts.default = accounts.load("rinkeby_deployer")
+    if web3.chain_id == 1:
+        accounts.default = accounts.load("deployer")
+    elif web3.chain_id == 4:
+        accounts.default = accounts.load("rinkeby_deployer")
+    else:
+        accounts.default = accounts[0]
+
     token = run("deploy_token")
 
     rewards = run("deploy_rewards", "main", (token.address,))
@@ -51,9 +56,11 @@ def main(
     )
 
     # if dev environment fund the contracts
-    if web3.chain_id == 31337:
-        token.transfer(merkle_mandatory.address, 100000*1e18, {'from': accounts[0]})
-        token.transfer(merkle_optional.address, 100000*1e18, {'from': accounts[0]})
+    if web3.chain_id == 31337 or web3.chain_id == 4:
+        token.transfer(
+            merkle_mandatory.address, 100000000 * 1e18, {"from": accounts[0]}
+        )
+        token.transfer(merkle_optional.address, 100000000 * 1e18, {"from": accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
