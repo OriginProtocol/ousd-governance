@@ -55,8 +55,8 @@ const Quiz: FunctionComponent<QuizProps> = ({
     } else {
       setStatus({
         type: "error",
-        message: "Try again",
-        note: "Don't worry, you'll still get the airdrop",
+        message: "Sorry, that's incorrect",
+        note: "",
       });
       setCanProgress(false);
 
@@ -64,6 +64,23 @@ const Quiz: FunctionComponent<QuizProps> = ({
         onComplete(false);
       }
     }
+  };
+
+  const handleResetQuestion = () => {
+    setStatus({
+      type: "",
+      message: "",
+      note: "",
+    });
+    setCurrentAnswer("");
+    setCanProgress(false);
+
+    if (currentQuestion < questions.length) {
+      setCurrentQuestion(currentQuestion);
+      setCurrentAnswers(shuffle(questions[currentQuestion].answers));
+    }
+
+    return;
   };
 
   const handleNextQuestion = () => {
@@ -119,7 +136,8 @@ const Quiz: FunctionComponent<QuizProps> = ({
                       "bg-green-200 border-green-400": isCurrent && isCorrect,
                       "bg-orange-200 border-orange-400":
                         isCurrent && !isCorrect,
-                      "border-gray-300 hover:bg-gray-100": !isCurrent,
+                      "border-gray-300 hover:bg-gray-100 disabled:bg-white":
+                        !isCurrent,
                     }
                   );
 
@@ -128,6 +146,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
                       <button
                         className={answerClasses}
                         onClick={() => handleAnswer(answer)}
+                        disabled={status.type !== ""}
                       >
                         <span className={discClasses}>
                           {isCurrent ? (
@@ -167,6 +186,11 @@ const Quiz: FunctionComponent<QuizProps> = ({
               </p>
             )}
           </div>
+        )}
+        {!canProgress && status?.type === "error" && (
+          <Button onClick={handleResetQuestion} large fullWidth alt>
+            Try Again
+          </Button>
         )}
         {canProgress && !quizComplete && (
           <Button onClick={handleNextQuestion} large fullWidth>
