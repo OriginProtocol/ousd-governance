@@ -19,7 +19,7 @@ interface ClaimVeOgvProps {}
 
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const claim = useClaim();
-  if (!claim.loaded || !claim.optional.hasClaim) {
+  if (!claim.loaded || !claim.mandatory.hasClaim) {
     return <></>;
   }
 
