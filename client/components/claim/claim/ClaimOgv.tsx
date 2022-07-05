@@ -88,20 +88,20 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             </Card>
             <Card alt tightPadding>
               <div className="space-y-1">
-                <CardLabel>Lockup reward</CardLabel>
+                <CardLabel>Lock-up reward</CardLabel>
                 <div className="flex space-x-1 items-center">
                   <CardStat>
                     {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}%
                   </CardStat>
                 </div>
-                <CardDescription>APY</CardDescription>
+                <CardDescription>vAPY</CardDescription>
               </div>
             </Card>
           </CardGroup>
           <div className="space-y-2">
             {/*<div>
                           <RangeInput
-                            label="Lock up your"
+                            label="Lock your"
                             counterUnit="OGV"
                             min={"0"}
                             max={claimableOgv}
@@ -164,7 +164,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                           </div>*/}
             <div>
               <RangeInput
-                label="Lock up your OGV for"
+                label="Lock your OGV for"
                 counterUnit="weeks"
                 min="0"
                 max={maxLockupDurationInWeeks}
@@ -271,9 +271,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
           {!isValidLockup && (
             <span className="block bg-red-500 text-white px-4 py-3">
-              <span className="font-bold">Note:</span> If you don&apos;t lock up
-              your <TokenAmount amount={claimableOgv} /> OGV, you&apos;ll be
-              missing out on up to {maxOgvLockupRewardApy.toFixed(2)}% APY in
+              <span className="font-bold">Note:</span> If you don&apos;t lock
+              your OGV, you&apos;ll be missing out on up to {maxOgvLockupRewardApy.toFixed(2)}% vAPY in
               rewards!
             </span>
           )}

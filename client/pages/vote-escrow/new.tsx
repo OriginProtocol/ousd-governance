@@ -19,7 +19,7 @@ const LockupNew: NextPage = () => {
 
   return (
     <Wrapper narrow>
-      <PageTitle>New Lockup</PageTitle>
+      <PageTitle>New Lock-up</PageTitle>
       <LockupForm />
       <div className="mt-6">
         <Link className="btn rounded-full" href={`/vote-escrow`}>
