@@ -23,7 +23,7 @@ const EligibilityItem: FunctionComponent<EligibilityItemProps> = ({
   const isEligible = tokens.gt(0);
 
   if (!isEligible) {
-    return "";
+    return <></>;
   }
 
   return (
