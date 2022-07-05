@@ -16,6 +16,7 @@ import {RewardsSource} from "./RewardsSource.sol";
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
     uint256 public immutable epoch;
+    uint256 public immutable minStakeDuration;
 
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
@@ -54,10 +55,12 @@ contract OgvStaking is ERC20Votes {
     constructor(
         address ogv_,
         uint256 epoch_,
+        uint256 minStakeDuration_,
         address rewardsSource_
     ) ERC20("", "") ERC20Permit("veOGV") {
         ogv = ERC20(ogv_);
         epoch = epoch_;
+        minStakeDuration = minStakeDuration_;
         rewardsSource = RewardsSource(rewardsSource_);
     }
 
@@ -214,7 +217,7 @@ contract OgvStaking is ERC20Votes {
         view
         returns (uint256, uint256)
     {
-        require(duration >= 7 days, "Staking: Too short");
+        require(duration >= minStakeDuration, "Staking: Too short");
         require(duration <= 1461 days, "Staking: Too long");
         uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
         uint256 end = start + duration;
