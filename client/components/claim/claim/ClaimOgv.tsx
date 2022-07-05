@@ -272,8 +272,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           {!isValidLockup && (
             <span className="block bg-red-500 text-white px-4 py-3">
               <span className="font-bold">Note:</span> If you don&apos;t lock
-              your OGV, you&apos;ll be missing out on up to {maxOgvLockupRewardApy.toFixed(2)}% vAPY in
-              rewards!
+              your OGV, you&apos;ll be missing out on up to{" "}
+              {maxOgvLockupRewardApy.toFixed(2)}% vAPY in rewards!
             </span>
           )}
           <div className="pt-3">
