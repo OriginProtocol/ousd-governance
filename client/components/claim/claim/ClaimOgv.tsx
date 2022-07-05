@@ -15,9 +15,9 @@ import useClaim from "utils/useClaim";
 import { useStore } from "utils/store";
 import numeral from "numeraljs";
 import { getRewardsApy } from "utils/apy";
+import { decimal18Bn } from "utils";
 
 interface ClaimOgvProps {}
-const decimal18 = BigNumber.from("1000000000000000000");
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
@@ -39,7 +39,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
         // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
         // of claimers will see insane reward amounts
         const minTotalSupply = numeral(100000000); // 100m of OGV
-        const totalSupply = numeral(totalSupplyBn.div(decimal18).toString());
+        const totalSupply = numeral(totalSupplyBn.div(decimal18Bn).toString());
         setTotalSupplyVeOgv(Math.max(totalSupply, minTotalSupply));
       } catch (error) {
         console.error(`Can not fetch veOgv total supply:`, error);
@@ -54,7 +54,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
 
   const isValidLockup = lockupDuration > 0;
   const claimableOgv = claim.optional.isValid
-    ? numeral(claim.optional.amount.div(decimal18).toString()).value()
+    ? numeral(claim.optional.amount.div(decimal18Bn).toString()).value()
     : 0;
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;

@@ -20,14 +20,18 @@ const EligibilityItem: FunctionComponent<EligibilityItemProps> = ({
   showOgvToken,
 }) => {
   tokens = tokens || BigNumber.from(0);
-  const showCheckMark = tokens.gt(0);
+  const isEligible = tokens.gt(0);
+
+  if (!isEligible) {
+    return '';
+  }
 
   return (
     <>
       <tr>
         <td>
           <div className="flex space-x-2 items-center">
-            {showCheckMark ? <CheckIcon /> : <CrossIcon />}
+            <CheckIcon />
             <span>{itemTitle}</span>
           </div>
         </td>

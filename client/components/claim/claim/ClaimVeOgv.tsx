@@ -11,13 +11,23 @@ import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
+import { decimal18Bn } from "utils";
+import numeral from "numeraljs";
 
 interface ClaimVeOgvProps {}
 
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const claim = useClaim();
-  const claimableVeOgv = 100; // @TODO replace with user value
-  const votingDecayFactor = 1.8; // @TODO replace with contract value
+  if (!claim.loaded || !claim.optional.hasClaim) {
+    return <></>;
+  }
+
+  const claimableVeOgv = claim.mandatory.isValid
+    ? numeral(claim.mandatory.amount.div(decimal18Bn).toString()).value()
+    : 0;
+
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
 
   const now = new Date();
 

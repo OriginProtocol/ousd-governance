@@ -114,7 +114,7 @@ const useClaim = () => {
 
         if (claim.mandatory.hasClaim) {
           let distributor = await readDistributor(
-            contracts.OptionalDistributor,
+            contracts.MandatoryDistributor,
             claim.mandatory
           );
 
