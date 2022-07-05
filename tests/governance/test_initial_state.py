@@ -16,7 +16,7 @@ def test_voting_delay(governance):
 
 
 def test_voting_period(governance):
-    assert governance.votingPeriod() == 45818  # 1 week in blocks
+    assert governance.votingPeriod() == 32727  # 1 week in blocks
 
 
 def test_quorum(governance, web3):
