@@ -2,6 +2,8 @@
 pragma solidity 0.8.10;
 
 import "forge-std/Test.sol";
+import "../../contracts/upgrades/RewardsSourceProxy.sol";
+import "../../contracts/upgrades/OgvStakingProxy.sol";
 import "../../contracts/OgvStaking.sol";
 import "../../contracts/RewardsSource.sol";
 import "../../contracts/tests/MockOgv.sol";
@@ -22,7 +24,16 @@ contract OgvStakingTest is Test {
         vm.startPrank(team);
         ogv = new MockOgv();
         source = new RewardsSource(address(ogv));
+
+        RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
+        rewardsProxy.initialize(address(source), team, '');
+        source = RewardsSource(address(rewardsProxy));
+
         staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
+        OgvStakingProxy stakingProxy = new OgvStakingProxy();
+        stakingProxy.initialize(address(staking), team, '');
+        staking = OgvStaking(address(stakingProxy));
+
         source.setRewardsTarget(address(staking));
         vm.stopPrank();
 

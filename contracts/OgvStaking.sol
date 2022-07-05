@@ -10,9 +10,9 @@ import {RewardsSource} from "./RewardsSource.sol";
 /// @author Daniel Von Fange
 /// @notice Provides staking, vote power history, vote delegation, and rewards
 /// distribution.
-/// 
+///
 /// The balance received for staking (and thus the voting power and rewards
-/// distribution) goes up exponentially by the end of the staked period. 
+/// distribution) goes up exponentially by the end of the staked period.
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
     uint256 public immutable epoch; // timestamp
@@ -29,7 +29,7 @@ contract OgvStaking is ERC20Votes {
 
     // 3. Reward Storage
     ERC20 public immutable ogv; // Must not allow reentrancy
-    RewardsSource public rewardsSource;
+    RewardsSource public immutable rewardsSource;
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
@@ -114,14 +114,11 @@ contract OgvStaking is ERC20Votes {
     /// epoch.
     ///
     /// Any rewards previously earned will be paid out.
-    /// 
+    ///
     /// @notice Stake OGV for myself.
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
-    function stake(
-        uint256 amount,
-        uint256 duration
-    ) external {
+    function stake(uint256 amount, uint256 duration) external {
         _stake(amount, duration, msg.sender);
     }
 
@@ -176,9 +173,9 @@ contract OgvStaking is ERC20Votes {
     ///
     /// The stake end time is computed from the current time + duration, just
     /// like it is for new stakes. So a new stake for seven days duration and
-    /// an old stake extended with a seven days duration would have the same 
+    /// an old stake extended with a seven days duration would have the same
     /// end.
-    /// 
+    ///
     /// If an extend is made before the start of staking, the start time for
     /// the new stake is shifted forwards to the start of staking, which also
     /// shifts forward the end date.
@@ -237,7 +234,7 @@ contract OgvStaking is ERC20Votes {
     /// rewards at this time.
     ///
     /// @param user to preview rewards for
-    /// @return OGV rewards amount 
+    /// @return OGV rewards amount
     function previewRewards(address user) external view returns (uint256) {
         uint256 supply = totalSupply();
         if (supply == 0) {
@@ -251,7 +248,7 @@ contract OgvStaking is ERC20Votes {
     }
 
     /// @dev Internal function to handle rewards accounting.
-    /// 
+    ///
     /// 1. Collect new rewards for everyone
     /// 2. Calculate this user's rewards and accounting
     /// 3. Distribute this user's rewards
@@ -260,7 +257,7 @@ contract OgvStaking is ERC20Votes {
     ///
     /// This will always update the user's rewardDebtPerShare to match
     /// accRewardPerShare, which is essential to the accounting.
-    /// 
+    ///
     /// @param user to collect rewards for
     function _collectRewards(address user) internal {
         uint256 supply = totalSupply();
