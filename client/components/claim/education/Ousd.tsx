@@ -55,17 +55,12 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
         <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
-            <strong>Origin Dollar</strong> — or <strong>OUSD</strong> — is a
-            stablecoin that gives you access to some of the{" "}
-            <strong>best yields in DeFi</strong> with{" "}
-            <strong>none of the hassle</strong>.
+            Origin Dollar — or OUSD — is a stablecoin that gives you access to
+            some of the best yields in DeFi with none of the hassle.
           </p>
           <p>
-            “<strong>Stablecoins</strong>” offer the{" "}
-            <strong>
-              benefits of cryptocurrencies without the price volatility
-            </strong>
-            .
+            “Stablecoins” offer the benefits of cryptocurrencies without the
+            price volatility .
           </p>
           <p>
             What separates OUSD from ordinary stablecoins is that it grows in
@@ -74,14 +69,11 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
             anywhere around the world.
           </p>
           <p>
-            OUSD&apos;s price is pegged to the dollar and it&apos;s{" "}
-            <strong>backed 1:1 by the most trusted collateral in crypto</strong>
-            , which means it can be redeemed anytime.
+            OUSD&apos;s price is pegged to the dollar and it&apos;s backed 1:1
+            by the most trusted collateral in crypto , which means it can be
+            redeemed anytime.
           </p>
-          <p>
-            Simply put:{" "}
-            <strong>imagine your wallet filled with OUSD bills</strong>
-          </p>
+          <p>Simply put: imagine your wallet filled with OUSD bills</p>
           <ul className="list-outside list-disc space-y-2 ml-4">
             <li>
               If you kept that OUSD in your wallet, then your wallet would fill
