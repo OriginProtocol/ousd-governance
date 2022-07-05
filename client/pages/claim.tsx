@@ -12,7 +12,7 @@ import { BigNumber } from "ethers";
 interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(0);
   const steps = ["Check eligibility", "Learn about Origin", "Claim airdrop"];
 
   const handleNextStep = () => setCurrentStep(currentStep + 1);
