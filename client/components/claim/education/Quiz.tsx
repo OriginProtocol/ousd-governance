@@ -3,6 +3,7 @@ import classNames from "classnames";
 import Button from "components/Button";
 import CheckIconWhite from "components/CheckIconWhite";
 import CrossIconWhite from "components/CrossIconWhite";
+import { shuffle } from "lodash";
 
 interface QuizQuestion {
   question: string;
@@ -24,6 +25,9 @@ const Quiz: FunctionComponent<QuizProps> = ({
   lastQuiz,
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [currentAnswers, setCurrentAnswers] = useState(
+    shuffle(questions[currentQuestion].answers)
+  );
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [status, setStatus] = useState({
     type: "",
@@ -73,6 +77,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
 
     if (currentQuestion < questions.length) {
       setCurrentQuestion(currentQuestion + 1);
+      setCurrentAnswers(shuffle(questions[currentQuestion + 1].answers));
     }
 
     return;
@@ -87,7 +92,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
       </span>
       <div className="space-y-4">
         {questions.map((q, index) => {
-          const { question, answers, correctAnswer } = q;
+          const { question, correctAnswer } = q;
 
           if (index !== currentQuestion) return null;
 
@@ -95,7 +100,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
             <div key={question} className="space-y-4">
               <h3 className="text-xl font-bold">{question}</h3>
               <ul className="space-y-2">
-                {answers.map((answer, index) => {
+                {currentAnswers.map((answer, index) => {
                   const isCurrent = currentAnswer === answer;
                   const isCorrect = currentAnswer === correctAnswer;
 
