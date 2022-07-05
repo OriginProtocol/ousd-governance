@@ -3,12 +3,10 @@ import { claimIsOpen } from "utils";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const regEx = /\.(.*)$/;
-  const apiRegEx = /^\/api\/.*/;
-  const redirectException = regEx.test(pathname) || apiRegEx.test(pathname);
+  const homeRegEx = /^\/$/;
 
   // If the claim hasn't started
-  if (!redirectException && pathname !== "/claim" && claimIsOpen()) {
+  if (homeRegEx.test(pathname) && claimIsOpen()) {
     // Redirect everything to /claim
     const claimUrl = req.nextUrl.clone();
     claimUrl.pathname = "/claim";
