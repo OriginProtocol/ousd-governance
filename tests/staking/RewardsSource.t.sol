@@ -1,4 +1,5 @@
 import "forge-std/Test.sol";
+import "../../contracts/upgrades/RewardsSourceProxy.sol";
 import "../../contracts/RewardsSource.sol";
 import "../../contracts/tests/MockOgv.sol";
 
@@ -19,6 +20,12 @@ contract RewardsSourceTest is Test {
         vm.startPrank(team);
         ogv = new MockOgv();
         rewards = new RewardsSource(address(ogv));
+
+        // Setup Rewards Proxy
+        RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
+        rewardsProxy.initialize(address(rewards), team, '');
+        rewards = RewardsSource(address(rewardsProxy));
+        // Configure Rewards
         rewards.setRewardsTarget(address(staking));
         vm.stopPrank();
     }
@@ -138,8 +145,14 @@ contract RewardsSourceTest is Test {
 
     function testRewardSlopesNoSlopes() public {
         vm.prank(team);
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](0);
-        rewards.setInflation(slopes);
+        RewardsSource.Slope[] memory someSlopes = new RewardsSource.Slope[](1);
+        someSlopes[0].start = uint64(1 days / 2);
+        someSlopes[0].ratePerDay = 4 ether;
+        rewards.setInflation(someSlopes);
+
+        vm.prank(team);
+        RewardsSource.Slope[] memory noSlopes = new RewardsSource.Slope[](0);
+        rewards.setInflation(noSlopes);
 
         vm.startPrank(staking);
         assertEq(rewards.collectRewards(), 0 ether, "a");
