@@ -32,6 +32,10 @@ export function getRewardsApy(
   ogvToStake: numeral,
   totalSupplyVeOgv: numeral
 ) {
+  if (totalSupplyVeOgv === 0 || ogvToStake === 0 || veOgvReceived === 0) {
+    return 0;
+  }
+
   const ogvPercentageOfRewards =
     veOgvReceived / (totalSupplyVeOgv + veOgvReceived);
   const ogvRewardsDaily = getDailyRewardsEmissions() * ogvPercentageOfRewards;

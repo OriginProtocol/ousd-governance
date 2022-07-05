@@ -58,6 +58,19 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     now.getTime() + lockupDuration * 7 * 24 * 60 * 60 * 1000
   );
 
+  let claimButtonText = "";
+  if (isValidLockup && claim.optional.state === "ready") {
+    claimButtonText = "Claim and lock";
+  } else if (claim.optional.state === "ready") {
+    claimButtonText = "Claim";
+  } else if (claim.optional.state === "waiting-for-user") {
+    claimButtonText = "Please Confirm Transaction";
+  } else if (claim.optional.state === "waiting-for-network") {
+    claimButtonText = "Waiting to be mined";
+  } else if (claim.optional.state === "claimed") {
+    claimButtonText = "Claimed";
+  }
+
   return (
     <Card>
       <div className="divide-y space-y-6">
@@ -272,9 +285,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               onClick={async () => {
                 claim.optional.claim(parseInt(lockupDuration));
               }}
+              disabled={claim.optional.state !== "ready"}
               large
             >
-              {isValidLockup ? `Claim and lock` : `Claim`}
+              {claimButtonText}
             </Button>
           </div>
         </div>

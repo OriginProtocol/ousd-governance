@@ -141,3 +141,7 @@ export function claimIsOpen() {
   if (!claimOpensTimestamp() || !claimClosesTimestamp()) return false;
   return now > claimOpensTimestamp() && now < claimClosesTimestamp();
 }
+
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

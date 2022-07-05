@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { useStore } from "utils/store";
 import useConnectSigner from "utils/useConnectSigner";
-import { decimal18Bn } from "utils";
+import { decimal18Bn, sleep } from "utils";
 import numeral from "numeraljs";
 
 const useClaim = () => {
@@ -18,6 +18,14 @@ const useClaim = () => {
     useState(null);
   const { address, contracts, web3Provider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
+  /*
+   * ready -> ready to start claiming
+   * waiting-for-user -> waiting for user to confirm the transaction
+   * waiting-for-network -> waiting for nodes to mine the transaction
+   * claimed -> already claimed
+   */
+  const [mandatoryClaimState, setMandatoryClaimState] = useState("ready");
+  const [optionalClaimState, setOptionalClaimState] = useState("ready");
 
   const maybeConvertToBn = (amount) => {
     if (typeof amount !== "object" || !amount || amount.hex === undefined)
@@ -67,9 +75,13 @@ const useClaim = () => {
       return;
     }
 
-    const readDistributor = async (distContract, claim) => {
+    const readDistributor = async (distContract, claim, claimStateSetter) => {
+      const isClaimed = await distContract.isClaimed(claim.index);
+      if (isClaimed) {
+        claimStateSetter("claimed");
+      }
       return {
-        isClaimed: await distContract.isClaimed(claim.index),
+        isClaimed,
         isValid: await distContract.isProofValid(
           claim.index,
           claim.amount,
@@ -89,7 +101,8 @@ const useClaim = () => {
         if (claim.optional.hasClaim) {
           let distributor = await readDistributor(
             contracts.OptionalDistributor,
-            claim.optional
+            claim.optional,
+            setOptionalClaimState
           );
 
           distData.optional = {
@@ -101,18 +114,43 @@ const useClaim = () => {
                 .mul(60)
                 .mul(60)
                 .mul(7);
-              return (
-                await useConnectSigner(
-                  contracts.OptionalDistributor,
-                  web3Provider
-                )
-              )["claim(uint256,uint256,bytes32[],uint256)"](
-                claim.optional.index,
-                claim.optional.amount,
-                claim.optional.proof,
-                durationTime,
-                { gasLimit: 1000000 } // @TODO maybe set this to lower amount
-              );
+
+              setOptionalClaimState("waiting-for-user");
+              let claimResult;
+              try {
+                claimResult = await (
+                  await useConnectSigner(
+                    contracts.OptionalDistributor,
+                    web3Provider
+                  )
+                )["claim(uint256,uint256,bytes32[],uint256)"](
+                  claim.optional.index,
+                  claim.optional.amount,
+                  claim.optional.proof,
+                  durationTime,
+                  { gasLimit: 1000000 } // @TODO maybe set this to lower amount
+                );
+              } catch (e) {
+                setOptionalClaimState("ready");
+                throw e;
+              }
+
+              setOptionalClaimState("waiting-for-network");
+              let receipt;
+              try {
+                receipt = await contracts.rpcProvider.waitForTransaction(
+                  claimResult.hash
+                );
+                // sleep for 5 seconds on development so it is more noticeable
+                if (process.env.NODE_ENV === "development") {
+                  await sleep(5000);
+                }
+              } catch (e) {
+                setOptionalClaimState("ready");
+                throw e;
+              }
+
+              setOptionalClaimState("claimed");
             },
           };
         }
@@ -120,23 +158,49 @@ const useClaim = () => {
         if (claim.mandatory.hasClaim) {
           let distributor = await readDistributor(
             contracts.MandatoryDistributor,
-            claim.mandatory
+            claim.mandatory,
+            setMandatoryClaimState
           );
 
           distData.mandatory = {
             ...distributor,
             claim: async () => {
-              return (
-                await useConnectSigner(
-                  contracts.MandatoryDistributor,
-                  web3Provider
-                )
-              )["claim(uint256,uint256,bytes32[])"](
-                claim.mandatory.index,
-                claim.mandatory.amount,
-                claim.mandatory.proof,
-                { gasLimit: 1000000 }
-              ); // @TODO maybe set this to lower
+              setMandatoryClaimState("waiting-for-user");
+              let claimResult;
+              try {
+                claimResult = await (
+                  await useConnectSigner(
+                    contracts.MandatoryDistributor,
+                    web3Provider
+                  )
+                )["claim(uint256,uint256,bytes32[])"](
+                  claim.mandatory.index,
+                  claim.mandatory.amount,
+                  claim.mandatory.proof,
+                  { gasLimit: 1000000 }
+                ); // @TODO maybe set this to lower
+              } catch (e) {
+                setMandatoryClaimState("ready");
+                throw e;
+              }
+
+              setMandatoryClaimState("waiting-for-network");
+              let receipt;
+              try {
+                receipt = await contracts.rpcProvider.waitForTransaction(
+                  claimResult.hash
+                );
+                // sleep for 5 seconds on development so it is more noticeable
+                if (process.env.NODE_ENV === "development") {
+                  await sleep(5000);
+                }
+              } catch (e) {
+                setMandatoryClaimState("ready");
+                throw e;
+              }
+
+              setMandatoryClaimState("claimed");
+              return;
             },
           };
         }
@@ -173,10 +237,12 @@ const useClaim = () => {
 
   return {
     optional: {
+      state: optionalClaimState,
       ...claim.optional,
       ...distributorData.optional,
     },
     mandatory: {
+      state: mandatoryClaimState,
       ...claim.mandatory,
       ...distributorData.mandatory,
     },

@@ -57,6 +57,17 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
     now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
   );
 
+  let claimButtonText = "";
+  if (claim.mandatory.state === "ready") {
+    claimButtonText = "Claim";
+  } else if (claim.mandatory.state === "waiting-for-user") {
+    claimButtonText = "Please Confirm Transaction";
+  } else if (claim.mandatory.state === "waiting-for-network") {
+    claimButtonText = "Waiting to be mined";
+  } else if (claim.mandatory.state === "claimed") {
+    claimButtonText = "Claimed";
+  }
+
   return (
     <Card>
       <div className="space-y-4">
@@ -156,9 +167,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             onClick={async () => {
               claim.mandatory.claim();
             }}
+            disabled={claim.mandatory.state !== "ready"}
             large
           >
-            Claim
+            {claimButtonText}
           </Button>
         </div>
       </div>
