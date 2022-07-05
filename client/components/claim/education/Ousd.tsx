@@ -60,7 +60,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
           </p>
           <p>
             “Stablecoins” offer the benefits of cryptocurrencies without the
-            price volatility .
+            price volatility.
           </p>
           <p>
             What separates OUSD from ordinary stablecoins is that it grows in
@@ -70,7 +70,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
           </p>
           <p>
             OUSD&apos;s price is pegged to the dollar and it&apos;s backed 1:1
-            by the most trusted collateral in crypto , which means it can be
+            by the most trusted collateral in crypto, which means it can be
             redeemed anytime.
           </p>
           <p>Simply put: imagine your wallet filled with OUSD bills</p>

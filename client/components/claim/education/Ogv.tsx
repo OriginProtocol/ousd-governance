@@ -52,7 +52,7 @@ const Ogv: FunctionComponent<OgvProps> = ({ onComplete }) => (
           <p>
             OGV lets you own a piece of the future growth of OUSD. You can claim
             OGV and lock it for up for anywhere from 1 week to 4 years to
-            maximize your earnings and voting power .
+            maximize your earnings and voting power.
           </p>
           <p>
             When OGV is locked, it&apos;s converted into veOGV (or

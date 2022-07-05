@@ -53,12 +53,12 @@ const Ogn: FunctionComponent<OgnProps> = ({ onComplete }) => (
           <p>
             OGN is your key to earning ETH rewards from the Origin Story
             platform , which has powered record-breaking NFT drops from 3LAU,
-            Paris Hilton, BT, Trevor Jones, Don Diablo , and more.
+            Paris Hilton, BT, Trevor Jones, Don Diablo, and more.
           </p>
           <p>
             Our mission is to bring NFTs to everyone with the simplest and most
             trusted way for creators to launch and grow their NFT communities
-            and collections .
+            and collections.
           </p>
           <p>
             Origin Story lowers the barriers of entry for creators to mint their
@@ -71,11 +71,11 @@ const Ogn: FunctionComponent<OgnProps> = ({ onComplete }) => (
           <p>
             That means you can buy OGN tokens and “stake” them and earn part of
             the commissions that Origin Story makes on NFT primary and secondary
-            sales .
+            sales.
           </p>
           <p>
             With Origin Story rapidly expanding its platform to include trusted
-            official marketplaces, token-gated access to exclusive experiences ,
+            official marketplaces, token-gated access to exclusive experiences,
             and more, OGN token holders will also benefit as the Origin Story
             platform grows.
           </p>
