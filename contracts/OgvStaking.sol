@@ -15,8 +15,8 @@ import {RewardsSource} from "./RewardsSource.sol";
 /// distribution) goes up exponentially by the end of the staked period. 
 contract OgvStaking is ERC20Votes {
     // 1. Core Storage
-    uint256 public immutable epoch;
-    uint256 public immutable minStakeDuration;
+    uint256 public immutable epoch; // timestamp
+    uint256 public immutable minStakeDuration; // in seconds
 
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
