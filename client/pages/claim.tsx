@@ -7,6 +7,7 @@ import Eligibility from "@/components/claim/Eligibility";
 import HoldingPage from "components/holding/Page";
 import Claim from "components/claim/Claim";
 import { claimOpenTimestampPassed, claimIsOpen } from "utils";
+import { BigNumber } from "ethers";
 
 interface ClaimPageProps {}
 

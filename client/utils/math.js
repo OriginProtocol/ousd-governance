@@ -1,3 +1,9 @@
+import { utils } from "ethers";
+
+export function formatBnCurrency(value, tokenDecimals = 18) {
+  return formatCurrency(utils.formatUnits(value, tokenDecimals));
+}
+
 export function formatCurrency(value, decimals, truncate = true) {
   // avoid false formatting of e - notated numbers
   if (value < Math.pow(10, decimals * -1)) {

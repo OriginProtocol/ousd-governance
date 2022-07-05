@@ -50,6 +50,11 @@ def main(
         ),
     )
 
+    # if dev environment fund the contracts
+    if web3.chain_id == 31337:
+        token.transfer(merkle_mandatory.address, 100000*1e18, {'from': accounts[0]})
+        token.transfer(merkle_optional.address, 100000*1e18, {'from': accounts[0]})
+
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
     timelock_controller.grantRole(web3.keccak(text="EXECUTOR_ROLE"), governance)

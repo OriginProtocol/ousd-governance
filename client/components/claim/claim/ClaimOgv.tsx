@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import moment from "moment";
 import Card from "components/Card";
 import { SectionTitle } from "components/SectionTitle";
@@ -11,48 +11,62 @@ import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
+import numeral from "numeraljs";
+import { getRewardsApy } from "utils/apy";
+import { decimal18Bn } from "utils";
 
 interface ClaimOgvProps {}
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
-  const claimableOgv = 100; // @TODO replace with user value
   const claim = useClaim();
-  const maxLockupDurationInWeeks = "208";
 
-  //const [lockupAmount, setLockupAmount] = useState(claimableOgv);
+  const maxLockupDurationInWeeks = "208";
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
+  if (!claim.loaded || !claim.optional.hasClaim) {
+    return <></>;
+  }
 
   const isValidLockup = lockupDuration > 0;
-
-  const votingDecayFactor = 1.8; // @TODO replace with contract value
-  const ogvPrice = 0.15; // @TODO replace with live value
-  const totalVeOgv = 12980905133; // @TODO replace with live value
-  const stakingRewards = 100000000; // @TODO replace with real value
-
-  const getOgvLockupRewardApy = (veOgv: number) => {
-    const ogvPercentageOfRewards = veOgv / (totalVeOgv + veOgv);
-    const ogvRewards = stakingRewards * ogvPercentageOfRewards;
-    const valueOfOgvRewards = ogvRewards * ogvPrice;
-    const ogvLockupRewardApr =
-      (valueOfOgvRewards * 12) / (claimableOgv * ogvPrice);
-
-    return ((1 + ogvLockupRewardApr / 12) ** 12 - 1) * 100;
-  };
-
-  const veOgvFromOgvLockup = isValidLockup
-    ? claimableOgv * votingDecayFactor ** (lockupDuration / 52)
+  const claimableOgv = claim.optional.isValid
+    ? numeral(claim.optional.amount.div(decimal18Bn).toString()).value()
     : 0;
-  const ogvLockupRewardApy = getOgvLockupRewardApy(veOgvFromOgvLockup);
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
 
+  const veOgvFromOgvLockup =
+    claimableOgv * votingDecayFactor ** (lockupDuration / 52);
+  const ogvLockupRewardApy = getRewardsApy(
+    veOgvFromOgvLockup,
+    claimableOgv,
+    totalSupplyVeOgv
+  );
   const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
-  const maxOgvLockupRewardApy = getOgvLockupRewardApy(maxVeOgvFromOgvLockup);
+  const maxOgvLockupRewardApy = getRewardsApy(
+    maxVeOgvFromOgvLockup,
+    claimableOgv,
+    totalSupplyVeOgv
+  );
 
   const now = new Date();
   const lockupEnd = new Date(
     now.getTime() + lockupDuration * 7 * 24 * 60 * 60 * 1000
   );
+
+  let claimButtonText = "";
+  if (isValidLockup && claim.optional.state === "ready") {
+    claimButtonText = "Claim and lock";
+  } else if (claim.optional.state === "ready") {
+    claimButtonText = "Claim";
+  } else if (claim.optional.state === "waiting-for-user") {
+    claimButtonText = "Please Confirm Transaction";
+  } else if (claim.optional.state === "waiting-for-network") {
+    claimButtonText = "Waiting to be mined";
+  } else if (claim.optional.state === "claimed") {
+    claimButtonText = "Claimed";
+  }
 
   return (
     <Card>
@@ -214,7 +228,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                       <TokenIcon src="/veogv.svg" alt="veOGV" />
                       <span>veOGV</span>
                     </th>
-                    <td className="w-1/4">{veOgvFromOgvLockup.toFixed(2)}</td>
+                    <td className="w-1/4">
+                      <TokenAmount amount={veOgvFromOgvLockup} />
+                    </td>
                   </tr>
                 ) : (
                   <tr>
@@ -223,7 +239,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                       <span>OGV</span>
                     </th>
                     <td className="w-1/4">
-                      {isValidLockup ? 0 : claimableOgv}
+                      <TokenAmount amount={claimableOgv} />
                     </td>
                   </tr>
                 )}
@@ -244,7 +260,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                           </span>
                         </span>
                       </th>
-                      <td className="w-1/4">{claimableOgv.toFixed(2)}</td>
+                      <td className="w-1/4">
+                        <TokenAmount amount={claimableOgv} />
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -254,8 +272,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           {!isValidLockup && (
             <span className="block bg-red-500 text-white px-4 py-3">
               <span className="font-bold">Note:</span> If you don&apos;t lock up
-              your {claimableOgv} OGV, you&apos;ll be missing out on up to{" "}
-              {maxOgvLockupRewardApy.toFixed(2)}% APY in rewards!
+              your <TokenAmount amount={claimableOgv} /> OGV, you&apos;ll be
+              missing out on up to {maxOgvLockupRewardApy.toFixed(2)}% APY in
+              rewards!
             </span>
           )}
           <div className="pt-3">
@@ -263,9 +282,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               onClick={async () => {
                 claim.optional.claim(parseInt(lockupDuration));
               }}
+              disabled={claim.optional.state !== "ready"}
               large
             >
-              {isValidLockup ? `Claim and lock` : `Claim`}
+              {claimButtonText}
             </Button>
           </div>
         </div>

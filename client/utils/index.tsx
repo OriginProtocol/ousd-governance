@@ -4,6 +4,7 @@ import { useStore } from "utils/store";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
+export const decimal18Bn = BigNumber.from("1000000000000000000");
 
 /**
  * Truncates an ethereum address to the format 0x0000…0000
@@ -139,4 +140,8 @@ export function claimOpenTimestampPassed() {
 export function claimIsOpen() {
   if (!claimOpensTimestamp() || !claimClosesTimestamp()) return false;
   return now > claimOpensTimestamp() && now < claimClosesTimestamp();
+}
+
+export function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -9,24 +9,39 @@ import TokenAmount from "components/TokenAmount";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import Button from "components/Button";
-import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
+import { decimal18Bn } from "utils";
+import numeral from "numeraljs";
+import { getRewardsApy } from "utils/apy";
 
 interface ClaimVeOgvProps {}
 
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const claim = useClaim();
-  const claimableVeOgv = 100; // @TODO replace with user value
-  const votingDecayFactor = 1.8; // @TODO replace with contract value
+  if (!claim.loaded || !claim.mandatory.hasClaim) {
+    return <></>;
+  }
+
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
+  const claimableVeOgv = claim.mandatory.isValid
+    ? numeral(claim.mandatory.amount.div(decimal18Bn).toString()).value()
+    : 0;
+
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
 
   const now = new Date();
-
   const veOgvFromVeOgvClaim =
     (claimableVeOgv / 4) * votingDecayFactor ** (52 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (104 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (156 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (208 / 52);
-  const veOgvLockupRewardApy = 123.45; // @TODO replace with real calculated value
+
+  const veOgvLockupRewardApy = getRewardsApy(
+    veOgvFromVeOgvClaim,
+    claimableVeOgv,
+    totalSupplyVeOgv
+  );
 
   const fourYearsFromNow = new Date(
     now.getTime() + 4 * 365 * 24 * 60 * 60 * 1000
@@ -40,6 +55,17 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const oneYearFromNow = new Date(
     now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
   );
+
+  let claimButtonText = "";
+  if (claim.mandatory.state === "ready") {
+    claimButtonText = "Claim";
+  } else if (claim.mandatory.state === "waiting-for-user") {
+    claimButtonText = "Please Confirm Transaction";
+  } else if (claim.mandatory.state === "waiting-for-network") {
+    claimButtonText = "Waiting to be mined";
+  } else if (claim.mandatory.state === "claimed") {
+    claimButtonText = "Claimed";
+  }
 
   return (
     <Card>
@@ -140,9 +166,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             onClick={async () => {
               claim.mandatory.claim();
             }}
+            disabled={claim.mandatory.state !== "ready"}
             large
           >
-            Claim
+            {claimButtonText}
           </Button>
         </div>
       </div>

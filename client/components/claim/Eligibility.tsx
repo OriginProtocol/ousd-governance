@@ -1,5 +1,4 @@
 import { FunctionComponent, useCallback } from "react";
-import { utils, BigNumber } from "ethers";
 import Image from "next/image";
 import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
@@ -7,55 +6,8 @@ import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
-import TokenIcon from "components/TokenIcon";
-import CheckIcon from "components/CheckIcon";
-import CrossIcon from "components/CrossIcon";
 import useClaim from "utils/useClaim";
-import { formatCurrency } from "utils/math";
-import ReactTooltip from "react-tooltip";
-
-const EligibilityItem = ({
-  id,
-  showCheckMark,
-  itemTitle,
-  tokens,
-  showOgvToken,
-}) => {
-  return (
-    <>
-      <tr>
-        <td>
-          <div className="flex space-x-2 items-center">
-            {showCheckMark ? <CheckIcon /> : <CrossIcon />}
-            <span>{itemTitle}</span>
-          </div>
-        </td>
-        <td>
-          <div className="flex space-x-2 items-center">
-            <TokenIcon
-              src={showOgvToken ? "/ogv.svg" : "/veogv.svg"}
-              alt={showOgvToken ? "OGV" : "veOGV"}
-            />
-            <ReactTooltip id={id} place="top" type="dark" effect="solid">
-              <span>
-                <span className="mr-1">{utils.formatUnits(tokens, 18)}</span>
-                {showOgvToken ? "OGV" : "veOGV"}
-              </span>
-            </ReactTooltip>
-            <div data-tip data-for={id}>
-              <span>
-                <span className="mr-1">
-                  {formatCurrency(utils.formatUnits(tokens, 18))}
-                </span>
-                {showOgvToken ? "OGV" : "veOGV"}
-              </span>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </>
-  );
-};
+import EligibilityItem from "components/claim/EligibilityItem";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -66,14 +18,10 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
-
-  const isEligible = claim.loaded && claim.claimData.hasClaim;
+  const isEligible = claim.loaded && claim.hasClaim;
   const claimValid =
-    isEligible &&
-    claim.optional &&
-    claim.mandatory &&
-    claim.optional.isValid &&
-    claim.mandatory.isValid;
+    (isEligible && claim.optional && claim.optional.isValid) ||
+    (claim.mandatory && claim.mandatory.isValid);
 
   const resetWeb3State = useStore((state) => state.reset);
 
@@ -155,31 +103,45 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               <tbody>
                 <EligibilityItem
                   id="ogn-holder"
-                  showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
                   itemTitle="OGN holder"
-                  tokens={BigNumber.from(0)} // @TODO change this
-                  showOgvToken={true}
-                />
-                <EligibilityItem
-                  id="ousd-lp"
-                  showCheckMark={BigNumber.from(0).gt(0)} // @TODO change this
-                  itemTitle="OUSD liquidity provider"
-                  tokens={BigNumber.from(0)} // @TODO change this
+                  tokens={claim.optional.split.ogn}
                   showOgvToken={true}
                 />
                 <EligibilityItem
                   id="ousd-holder"
-                  showCheckMark={claim.claimData.split.ousd.gt(0)}
                   itemTitle="OUSD holder"
-                  tokens={claim.claimData.split.ousd}
+                  tokens={claim.mandatory.split.ousd}
                   showOgvToken={false}
                 />
                 <EligibilityItem
                   id="wousd-holder"
-                  showCheckMark={claim.claimData.split.wousd.gt(0)}
                   itemTitle="WOUSD holder"
-                  tokens={claim.claimData.split.wousd}
+                  tokens={claim.mandatory.split.wousd}
                   showOgvToken={false}
+                />
+                <EligibilityItem
+                  id="ogn-staker"
+                  itemTitle="Staked OGN"
+                  tokens={claim.optional.split.ognStaking}
+                  showOgvToken={true}
+                />
+                <EligibilityItem
+                  id="ousd-3Crv"
+                  itemTitle="OUSD 3Pool holder"
+                  tokens={claim.optional.split.ousd3Crv}
+                  showOgvToken={true}
+                />
+                <EligibilityItem
+                  id="ousd-3Crv-gauge"
+                  itemTitle="Staked OUSD 3Pool"
+                  tokens={claim.optional.split.ousd3CrvGauge}
+                  showOgvToken={true}
+                />
+                <EligibilityItem
+                  id="ousd-convex-staker"
+                  itemTitle="Staked on Convex"
+                  tokens={claim.optional.split.convex}
+                  showOgvToken={true}
                 />
               </tbody>
             </table>
