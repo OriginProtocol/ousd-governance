@@ -25,8 +25,6 @@ export default function VoteEscrow() {
       <CardGroup>
         <AccountBalances />
         <YourLockups />
-        <SectionTitle>Total Stats</SectionTitle>
-        <OgvTotalStats alt />
       </CardGroup>
     </Wrapper>
   );
