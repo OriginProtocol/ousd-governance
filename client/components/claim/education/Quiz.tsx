@@ -38,10 +38,8 @@ const Quiz: FunctionComponent<QuizProps> = ({
 
   const quizComplete = currentQuestion === questions.length - 1;
 
-  const handleAnswer = (answer: string) => {
-    setCurrentAnswer(answer);
-
-    if (answer === questions[currentQuestion].correctAnswer) {
+  const handleSubmitAnswer = () => {
+    if (currentAnswer === questions[currentQuestion].correctAnswer) {
       setStatus({
         type: "success",
         message: "That's right!",
@@ -124,8 +122,10 @@ const Quiz: FunctionComponent<QuizProps> = ({
                   const discClasses = classNames(
                     "bg-gray-500 text-white font-bold h-8 w-8 p-2 flex items-center justify-center rounded-full",
                     {
-                      "bg-green-500": isCurrent && isCorrect,
-                      "bg-orange-500": isCurrent && !isCorrect,
+                      "bg-green-500":
+                        isCurrent && isCorrect && status?.type === "success",
+                      "bg-orange-500":
+                        isCurrent && !isCorrect && status?.type === "error",
                       "bg-gray-500": !isCurrent,
                     }
                   );
@@ -133,9 +133,12 @@ const Quiz: FunctionComponent<QuizProps> = ({
                   const answerClasses = classNames(
                     "border rounded p-3 flex items-center space-x-3 w-full",
                     {
-                      "bg-green-200 border-green-400": isCurrent && isCorrect,
+                      "bg-green-200 border-green-400":
+                        isCorrect && status?.type === "success",
                       "bg-orange-200 border-orange-400":
-                        isCurrent && !isCorrect,
+                        !isCorrect && status?.type === "error",
+                      "border-gray-400 bg-gray-300":
+                        isCurrent && status?.type === "",
                       "border-gray-300 hover:bg-gray-100 disabled:bg-white":
                         !isCurrent,
                     }
@@ -145,11 +148,11 @@ const Quiz: FunctionComponent<QuizProps> = ({
                     <li key={answer}>
                       <button
                         className={answerClasses}
-                        onClick={() => handleAnswer(answer)}
+                        onClick={() => setCurrentAnswer(answer)}
                         disabled={status.type !== ""}
                       >
                         <span className={discClasses}>
-                          {isCurrent ? (
+                          {isCurrent && status.type !== "" ? (
                             <>
                               {isCorrect ? (
                                 <CheckIconWhite />
@@ -186,6 +189,11 @@ const Quiz: FunctionComponent<QuizProps> = ({
               </p>
             )}
           </div>
+        )}
+        {!canProgress && currentAnswer && status?.type === "" && (
+          <Button onClick={handleSubmitAnswer} large fullWidth>
+            Submit Answer
+          </Button>
         )}
         {!canProgress && status?.type === "error" && (
           <Button onClick={handleResetQuestion} large fullWidth alt>
