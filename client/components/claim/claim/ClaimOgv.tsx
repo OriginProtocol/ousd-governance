@@ -27,27 +27,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
-  const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
-
-  useEffect(() => {
-    const loadTotalSupplyVeOGV = async () => {
-      if (!contracts.loaded) {
-        return;
-      }
-      try {
-        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
-        // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
-        // of claimers will see insane reward amounts
-        const minTotalSupply = numeral(100000000); // 100m of OGV
-        const totalSupply = numeral(totalSupplyBn.div(decimal18Bn).toString());
-        setTotalSupplyVeOgv(Math.max(totalSupply, minTotalSupply));
-      } catch (error) {
-        console.error(`Can not fetch veOgv total supply:`, error);
-      }
-    };
-    loadTotalSupplyVeOGV();
-  }, [contracts]);
-
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
   }

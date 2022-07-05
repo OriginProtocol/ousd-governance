@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { useStore } from "utils/store";
 import useConnectSigner from "utils/useConnectSigner";
+import { decimal18Bn } from "utils";
+import numeral from "numeraljs";
 
 const useClaim = () => {
   const emptyClaimState = {
@@ -11,6 +13,9 @@ const useClaim = () => {
   const [claim, setClaim] = useState(emptyClaimState);
   const [loaded, setLoaded] = useState(false);
   const [distributorData, setDistributorData] = useState({});
+  const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
+  const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
+    useState(null);
   const { address, contracts, web3Provider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
 
@@ -146,6 +151,26 @@ const useClaim = () => {
     setupDistributors();
   }, [address, contracts, claim, web3Provider]);
 
+  useEffect(() => {
+    const loadTotalSupplyVeOGV = async () => {
+      if (!contracts.loaded) {
+        return;
+      }
+      try {
+        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
+        setTotalSupplyVeOgv(totalSupplyBn);
+        // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
+        // of claimers will see insane reward amounts
+        const minTotalSupply = numeral(100000000); // 100m of OGV
+        const totalSupply = numeral(totalSupplyBn.div(decimal18Bn).toString());
+        setTotalSupplyVeOgvAdjusted(Math.max(totalSupply, minTotalSupply));
+      } catch (error) {
+        console.error(`Can not fetch veOgv total supply:`, error);
+      }
+    };
+    loadTotalSupplyVeOGV();
+  }, [contracts]);
+
   return {
     optional: {
       ...claim.optional,
@@ -154,6 +179,12 @@ const useClaim = () => {
     mandatory: {
       ...claim.mandatory,
       ...distributorData.mandatory,
+    },
+    staking: {
+      // total supply adjusted for APY, with min amount - type: numeral
+      totalSupplyVeOgvAdjusted: totalSupplyVeOgvAdjusted,
+      // actual totalSupply - type: BigNumber
+      totalSupplyVeOgv: totalSupplyVeOgv,
     },
     hasClaim,
     loaded,

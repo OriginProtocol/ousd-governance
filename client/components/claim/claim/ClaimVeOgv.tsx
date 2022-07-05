@@ -13,6 +13,7 @@ import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
 import { decimal18Bn } from "utils";
 import numeral from "numeraljs";
+import { getRewardsApy } from "utils/apy";
 
 interface ClaimVeOgvProps {}
 
@@ -22,6 +23,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
     return <></>;
   }
 
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   const claimableVeOgv = claim.mandatory.isValid
     ? numeral(claim.mandatory.amount.div(decimal18Bn).toString()).value()
     : 0;
@@ -30,13 +32,17 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const votingDecayFactor = 1.8;
 
   const now = new Date();
-
   const veOgvFromVeOgvClaim =
     (claimableVeOgv / 4) * votingDecayFactor ** (52 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (104 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (156 / 52) +
     (claimableVeOgv / 4) * votingDecayFactor ** (208 / 52);
-  const veOgvLockupRewardApy = 123.45; // @TODO replace with real calculated value
+
+  const veOgvLockupRewardApy = getRewardsApy(
+    veOgvFromVeOgvClaim,
+    claimableVeOgv,
+    totalSupplyVeOgv
+  );
 
   const fourYearsFromNow = new Date(
     now.getTime() + 4 * 365 * 24 * 60 * 60 * 1000
