@@ -120,7 +120,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
                   const isCorrect = currentAnswer === correctAnswer;
 
                   const discClasses = classNames(
-                    "bg-gray-500 text-white font-bold h-8 w-8 p-2 flex items-center justify-center rounded-full",
+                    "flex-shrink-0 bg-gray-500 text-white font-bold h-8 w-8 p-2 flex items-center justify-center rounded-full",
                     {
                       "bg-green-500":
                         isCurrent && isCorrect && status?.type === "success",
@@ -131,7 +131,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
                   );
 
                   const answerClasses = classNames(
-                    "border rounded p-3 flex items-center space-x-3 w-full",
+                    "text-left border rounded p-3 flex items-center space-x-3 w-full",
                     {
                       "bg-green-200 border-green-400":
                         isCorrect && status?.type === "success",
