@@ -24,6 +24,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInWeeks
   );
+  const [error, setError] = useState<string>(null);
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
@@ -277,10 +278,27 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               rewards!
             </span>
           )}
+          {error && (
+            <span className="block bg-red-500 text-white px-3 py-2">
+              {error}
+            </span>
+          )}
           <div className="pt-3">
             <Button
               onClick={async () => {
-                claim.optional.claim(parseInt(lockupDuration));
+                setError(null);
+                try {
+                  const receipt = await claim.optional.claim(
+                    parseInt(lockupDuration)
+                  );
+
+                  if (receipt.status === 0) {
+                    setError("Error claiming tokens!");
+                  }
+                } catch (e) {
+                  setError("Error claiming tokens!", e);
+                  throw e;
+                }
               }}
               disabled={claim.optional.state !== "ready"}
               large
