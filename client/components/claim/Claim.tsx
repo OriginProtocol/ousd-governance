@@ -12,6 +12,7 @@ import { Web3Button } from "components/Web3Button";
 import OgvTotalStats from "components/OgvTotalStats";
 import ClaimOgv from "components/claim/claim/ClaimOgv";
 import ClaimVeOgv from "components/claim/claim/ClaimVeOgv";
+import useClaim from "utils/useClaim";
 
 interface ClaimProps {
   handlePrevStep: () => void;
@@ -19,7 +20,7 @@ interface ClaimProps {
 
 const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   const { web3Provider } = useStore();
-  const isEligible = true; // @TODO replace with real check
+  const { hasClaim } = useClaim();
 
   useEffect(() => {
     // @TODO Replace with real lockup data
@@ -73,7 +74,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
     );
   }
 
-  if (!isEligible) {
+  if (!hasClaim) {
     return (
       <Wrapper narrow>
         <Card>

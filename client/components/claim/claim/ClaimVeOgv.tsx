@@ -76,12 +76,12 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             <div className="space-y-1">
               <CardLabel>Your eligibility</CardLabel>
               <div className="flex space-x-1 items-center">
-                <TokenIcon src="/veogv.svg" alt="veOGV" />
+                <TokenIcon src="/ogv.svg" alt="OGV" />
                 <CardStat>
                   <TokenAmount amount={claimableVeOgv} />
                 </CardStat>
               </div>
-              <CardDescription>veOGV</CardDescription>
+              <CardDescription>OGV</CardDescription>
             </div>
           </Card>
           <Card alt tightPadding>
