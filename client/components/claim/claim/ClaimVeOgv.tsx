@@ -86,11 +86,11 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
           </Card>
           <Card alt tightPadding>
             <div className="space-y-1">
-              <CardLabel>Lockup reward</CardLabel>
+              <CardLabel>Lock-up reward</CardLabel>
               <div className="flex space-x-1 items-center">
                 <CardStat>{veOgvLockupRewardApy.toFixed(2)}%</CardStat>
               </div>
-              <CardDescription>APY</CardDescription>
+              <CardDescription>vAPY</CardDescription>
             </div>
           </Card>
         </CardGroup>

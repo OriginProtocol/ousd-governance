@@ -84,7 +84,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       )}
       <div className="mt-4">
         <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
-          {lockups.length > 0 ? "Create a new lockup" : "Lock up your OGV now"}
+          {lockups.length > 0 ? "Create a new lock-up" : "Lock your OGV now"}
         </Link>
       </div>
     </Card>

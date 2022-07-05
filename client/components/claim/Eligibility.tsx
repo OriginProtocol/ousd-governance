@@ -42,7 +42,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     <>
       <Card>
         <div>
-          <SectionTitle>Check Your Eligibility</SectionTitle>
+          <SectionTitle>Check your eligibility</SectionTitle>
           {!web3Provider ? (
             <>
               <p className="text-sm text-gray-600">
@@ -115,7 +115,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                 />
                 <EligibilityItem
                   id="wousd-holder"
-                  itemTitle="WOUSD holder"
+                  itemTitle="wOUSD holder"
                   tokens={claim.mandatory.split.wousd}
                   showOgvToken={false}
                 />
