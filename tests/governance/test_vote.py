@@ -169,7 +169,7 @@ def test_late_vote_extends_quorum(
         "Set voting delay",
         {"from": accounts[0]},
     )
-    mine_blocks(web3, "0xB2C8")  # 50 less than is required for vote end
+    mine_blocks(web3, "0x7fa5")  # 50 less than is required for vote end
     governance.castVote(tx.return_value, 1, {"from": alice})
     proposal = governance.proposals(tx.return_value)
     # Extends for a day beyond the current block

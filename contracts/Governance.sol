@@ -19,7 +19,7 @@ contract Governance is
         Governor("OUSD Governance")
         GovernorSettings(
             1, /* 1 block */
-            45818, /* 1 week */
+            32727, /* 5 days */
             5000000 * 1e18
         )
         GovernorVotes(_token)
