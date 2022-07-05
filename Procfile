@@ -1,2 +1,2 @@
-web: node server.js
-worker: node worker.js
+web: yarn run start:web
+worker: yarn run start:listener
