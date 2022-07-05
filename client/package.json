@@ -13,7 +13,6 @@
     "dev": "NODE_ENV=dev rm -f .next/server/listener.js && npm-run-all -p dev:listener dev:web",
     "build": "next build && npx prisma migrate deploy",
     "start": "yarn run npm-run-all --continue-on-error -p start:listener start:web",
-    "start:production:once_contracts_deployed": "npm-run-all -p start:listener start:web",
     "start:listener": "node .next/server/listener.js",
     "start:web": "next start",
     "lint": "next lint",
