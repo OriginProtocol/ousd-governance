@@ -21,9 +21,10 @@ const questions = [
       "To keep it from being burned",
       "veOGV is freely transferable",
       "To hedge against Bitcoin",
-      "veOGV holders earn fees from OUSD's yield",
+      "veOGV holders earn fees from OUSD's yield and staking rewards",
     ],
-    correctAnswer: "veOGV holders earn fees from OUSD's yield",
+    correctAnswer:
+      "veOGV holders earn fees from OUSD's yield and staking rewards",
   },
   {
     question: "How can you earn more as OUSD adoption increases?",

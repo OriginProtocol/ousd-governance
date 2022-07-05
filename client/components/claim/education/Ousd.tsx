@@ -15,10 +15,10 @@ const questions = [
     answers: [
       "An algorithmic stablecoin",
       "A governance token",
-      "A fully backed stablecoin",
+      "A fully backed stablecoin that generates yield",
       "A staking token",
     ],
-    correctAnswer: "A fully backed stablecoin",
+    correctAnswer: "A fully backed stablecoin that generates yield",
   },
   {
     question: "How do you earn yield with OUSD?",
@@ -38,7 +38,7 @@ const questions = [
       "An elite group of ex-Wall Street traders",
       "A transparent set of automated smart contracts",
     ],
-    correctAnswer: "Every token holder chooses a strategy",
+    correctAnswer: "A transparent set of automated smart contracts",
   },
 ];
 

@@ -22,8 +22,7 @@ const questions = [
     correctAnswer: "NFT borrowing and lending",
   },
   {
-    question:
-      "Which of the following is the governance token for Origin Story?",
+    question: "Which of the following is the token for Origin Story?",
     answers: ["OUSD", "OGV", "OGN", "DOGE"],
     correctAnswer: "OGN",
   },
