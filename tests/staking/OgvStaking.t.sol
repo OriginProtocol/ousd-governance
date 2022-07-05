@@ -18,6 +18,7 @@ contract OgvStakingTest is Test {
     address team = address(0x44);
 
     uint256 constant EPOCH = 1 days;
+    uint256 constant MIN_STAKE_DURATION = 7 days;
 
     function setUp() public {
         vm.startPrank(team);
@@ -28,7 +29,7 @@ contract OgvStakingTest is Test {
         rewardsProxy.initialize(address(source), team, '');
         source = RewardsSource(address(rewardsProxy));
 
-        staking = new OgvStaking(address(ogv), EPOCH, address(source));
+        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
         OgvStakingProxy stakingProxy = new OgvStakingProxy();
         stakingProxy.initialize(address(staking), team, '');
         staking = OgvStaking(address(stakingProxy));
@@ -138,7 +139,7 @@ contract OgvStakingTest is Test {
     function testStakeTooShort() public {
         vm.prank(alice);
         vm.expectRevert("Staking: Too short");
-        staking.stake(1 ether, 1 days, alice);
+        staking.stake(1 ether, 6 days, alice);
     }
 
     function testExtend() public {
