@@ -9,7 +9,6 @@ import TokenAmount from "components/TokenAmount";
 import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import Button from "components/Button";
-import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
 import { decimal18Bn } from "utils";
 import numeral from "numeraljs";
@@ -77,12 +76,12 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             <div className="space-y-1">
               <CardLabel>Your eligibility</CardLabel>
               <div className="flex space-x-1 items-center">
-                <TokenIcon src="/ogv.svg" alt="OGV" />
+                <TokenIcon src="/veogv.svg" alt="veOGV" />
                 <CardStat>
                   <TokenAmount amount={claimableVeOgv} />
                 </CardStat>
               </div>
-              <CardDescription>OGV</CardDescription>
+              <CardDescription>veOGV</CardDescription>
             </div>
           </Card>
           <Card alt tightPadding>

@@ -1,6 +1,5 @@
 import { FunctionComponent, useState, useEffect } from "react";
 import moment from "moment";
-import { BigNumber, utils } from "ethers";
 import Card from "components/Card";
 import { SectionTitle } from "components/SectionTitle";
 import CardGroup from "components/CardGroup";
@@ -12,7 +11,6 @@ import CardDescription from "components/CardDescription";
 import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
-import { useStore } from "utils/store";
 import numeral from "numeraljs";
 import { getRewardsApy } from "utils/apy";
 import { decimal18Bn } from "utils";
@@ -21,7 +19,6 @@ interface ClaimOgvProps {}
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
-  const { contracts } = useStore();
 
   const maxLockupDurationInWeeks = "208";
   const [lockupDuration, setLockupDuration] = useState(
