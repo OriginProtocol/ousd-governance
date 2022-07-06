@@ -20,9 +20,9 @@ interface ClaimOgvProps {}
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
 
-  const maxLockupDurationInWeeks = "208";
+  const maxLockupDurationInMonths = 12 * 4;
   const [lockupDuration, setLockupDuration] = useState(
-    maxLockupDurationInWeeks
+    maxLockupDurationInMonths
   );
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
@@ -52,8 +52,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
 
   const now = new Date();
   const lockupEnd = new Date(
-    now.getTime() + lockupDuration * 7 * 24 * 60 * 60 * 1000
-  );
+    now.getTime() + lockupDuration * 2629746 * 1000
+  ); // Months to seconds to miliseconds
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -102,16 +102,16 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             <div>
               <RangeInput
                 label="Lock your OGV for"
-                counterUnit="weeks"
+                counterUnit="months"
                 min="0"
-                max={maxLockupDurationInWeeks}
+                max={maxLockupDurationInMonths}
                 value={lockupDuration}
                 onChange={(e) => {
                   setLockupDuration(e.target.value);
                 }}
                 markers={[
                   {
-                    label: "0 wks",
+                    label: "0",
                     value: 0,
                   },
                   {
@@ -120,7 +120,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "1 yr",
-                    value: 52,
+                    value: 12,
                   },
                   {
                     label: "",
@@ -128,7 +128,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "2 yrs",
-                    value: 104,
+                    value: 24,
                   },
                   {
                     label: "",
@@ -136,7 +136,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "3 yrs",
-                    value: 156,
+                    value: 36,
                   },
                   {
                     label: "",
@@ -144,7 +144,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "4 yrs",
-                    value: 208,
+                    value: 48,
                   },
                 ]}
                 onMarkerClick={(markerValue) => {
