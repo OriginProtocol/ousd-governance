@@ -19,6 +19,7 @@ const Button: FunctionComponent<ButtonProps> = ({
   disabled,
   fullWidth,
   alt,
+  white,
 }) => {
   const className = classNames("btn rounded-full", {
     "btn-lg h-[3.25rem] min-h-[3.25rem]": large,
@@ -26,6 +27,8 @@ const Button: FunctionComponent<ButtonProps> = ({
     "w-full": fullWidth,
     "btn-primary": !alt,
     "btn-primary btn-outline": alt,
+    "bg-white hover:bg-gray-100 active:bg-gray-100 focus:bg-gray-100 text-accent":
+      white,
   });
 
   return (
