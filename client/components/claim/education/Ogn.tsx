@@ -22,7 +22,8 @@ const questions = [
     correctAnswer: "NFT borrowing and lending",
   },
   {
-    question: "Which of the following is the token for Origin Story?",
+    question:
+      "Which of the following is the value accrual token for Origin Story?",
     answers: ["OUSD", "OGV", "OGN", "DOGE"],
     correctAnswer: "OGN",
   },
@@ -62,14 +63,14 @@ const Ogn: FunctionComponent<OgnProps> = ({ onComplete }) => (
           </p>
           <p>
             Origin Story lowers the barriers of entry for creators to mint their
-            first NFT and create more value for their collectors.
+            first NFTs and create more value for their collectors.
           </p>
           <p>
-            With OGN, Origin Story&apos;s dedicated governance token, you get a
-            piece of the action.
+            With OGN, Origin Story&apos;s dedicated value accrual token, you get
+            a piece of the action.
           </p>
           <p>
-            That means you can buy OGN tokens and “stake” them and earn part of
+            That means you can buy OGN tokens and “stake” them to earn part of
             the commissions that Origin Story makes on NFT primary and secondary
             sales.
           </p>
