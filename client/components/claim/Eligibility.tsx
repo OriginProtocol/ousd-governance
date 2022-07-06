@@ -42,7 +42,6 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     <>
       <Card>
         <div>
-          <SectionTitle>Check your eligibility</SectionTitle>
           {!web3Provider ? (
             <>
               <p className="text-sm text-gray-600">
@@ -56,105 +55,109 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
           ) : (
             <>
               {isEligible ? (
-                <>
+                <div className="space-y-2">
                   {claimValid ? (
-                    <div className="bg-accent text-white font-bold px-2 py-4 text-center text-lg">
-                      <p className="">
-                        {truncateEthAddress(address)} is eligible to claim!
-                      </p>
-                    </div>
+                    <>
+                      <div>
+                        <p className="text-accent font-bold text-center text-lg">
+                          {truncateEthAddress(address)} is eligible to claim!
+                        </p>
+                      </div>
+                      {canAdvance && (
+                        <Button onClick={handleNextStep} large fullWidth>
+                          Continue
+                        </Button>
+                      )}
+                    </>
                   ) : (
-                    <div className="bg-orange-500 text-white font-bold px-2 py-4 text-center text-lg">
-                      <p className="">
+                    <div>
+                      <p className="text-orange-500 font-bold text-center text-lg">
                         {truncateEthAddress(address)} has an invalid claim
                         proof!
                       </p>
                     </div>
                   )}
-                </>
+                </div>
               ) : (
                 <>
-                  <div className="bg-gray-500 text-white font-bold px-2 py-4 text-center text-lg">
-                    <p className="">
+                  <div>
+                    <p className="text-gray-500 font-bold text-center text-lg">
                       Unfortunately, {truncateEthAddress(address)} isn&apos;t
                       eligible to claim
                     </p>
                   </div>
                 </>
               )}
-              <div className="mt-2">
-                <button
-                  className="text-sm text-gray-500 underline ml-auto block"
-                  onClick={handleDisconnect}
-                >
-                  Try another address
-                </button>
-              </div>
+              {!isEligible && (
+                <div className="mt-2">
+                  <button
+                    className="text-sm text-gray-500 underline ml-auto block"
+                    onClick={handleDisconnect}
+                  >
+                    Try another address
+                  </button>
+                </div>
+              )}
             </>
           )}
           {isEligible && (
-            <table className="table w-full mt-6">
-              <thead>
-                <tr>
-                  <th>Eligibility Criteria</th>
-                  <th>Tokens</th>
-                </tr>
-              </thead>
-              <tbody>
-                <EligibilityItem
-                  id="ogn-holder"
-                  itemTitle="OGN holder"
-                  tokens={claim.optional.split.ogn}
-                  showOgvToken={true}
-                />
-                <EligibilityItem
-                  id="ousd-holder"
-                  itemTitle="OUSD holder"
-                  tokens={claim.mandatory.split.ousd}
-                  showOgvToken={false}
-                />
-                <EligibilityItem
-                  id="wousd-holder"
-                  itemTitle="wOUSD holder"
-                  tokens={claim.mandatory.split.wousd}
-                  showOgvToken={false}
-                />
-                <EligibilityItem
-                  id="ogn-staker"
-                  itemTitle="Staked OGN"
-                  tokens={claim.optional.split.ognStaking}
-                  showOgvToken={true}
-                />
-                <EligibilityItem
-                  id="ousd-3Crv"
-                  itemTitle="OUSD 3Pool holder"
-                  tokens={claim.optional.split.ousd3Crv}
-                  showOgvToken={true}
-                />
-                <EligibilityItem
-                  id="ousd-3Crv-gauge"
-                  itemTitle="Staked OUSD 3Pool"
-                  tokens={claim.optional.split.ousd3CrvGauge}
-                  showOgvToken={true}
-                />
-                <EligibilityItem
-                  id="ousd-convex-staker"
-                  itemTitle="Staked on Convex"
-                  tokens={claim.optional.split.convex}
-                  showOgvToken={true}
-                />
-              </tbody>
-            </table>
+            <div className="space-y-2">
+              <table className="table w-full mt-6">
+                <thead>
+                  <tr>
+                    <th>Eligibility Criteria</th>
+                    <th>Tokens</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <EligibilityItem
+                    id="ogn-holder"
+                    itemTitle="OGN holder"
+                    tokens={claim.optional.split.ogn}
+                    showOgvToken={true}
+                  />
+                  <EligibilityItem
+                    id="ousd-holder"
+                    itemTitle="OUSD holder"
+                    tokens={claim.mandatory.split.ousd}
+                    showOgvToken={false}
+                  />
+                  <EligibilityItem
+                    id="wousd-holder"
+                    itemTitle="wOUSD holder"
+                    tokens={claim.mandatory.split.wousd}
+                    showOgvToken={false}
+                  />
+                  <EligibilityItem
+                    id="ogn-staker"
+                    itemTitle="Staked OGN"
+                    tokens={claim.optional.split.ognStaking}
+                    showOgvToken={true}
+                  />
+                  <EligibilityItem
+                    id="ousd-3Crv"
+                    itemTitle="OUSD 3Pool holder"
+                    tokens={claim.optional.split.ousd3Crv}
+                    showOgvToken={true}
+                  />
+                  <EligibilityItem
+                    id="ousd-3Crv-gauge"
+                    itemTitle="Staked OUSD 3Pool"
+                    tokens={claim.optional.split.ousd3CrvGauge}
+                    showOgvToken={true}
+                  />
+                  <EligibilityItem
+                    id="ousd-convex-staker"
+                    itemTitle="Staked on Convex"
+                    tokens={claim.optional.split.convex}
+                    showOgvToken={true}
+                  />
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </Card>
-      <div className="mt-6 flex">
-        <div className="ml-auto">
-          <Button onClick={handleNextStep} disabled={!canAdvance}>
-            Learn about Origin &rarr;
-          </Button>
-        </div>
-      </div>
     </>
   );
 };
