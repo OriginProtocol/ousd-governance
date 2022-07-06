@@ -154,7 +154,8 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
   const defaultClassName = classNames("", {
     "btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary":
       !inPage,
-    "btn btn-primary btn-lg rounded-full": inPage,
+    "btn btn-primary btn-lg rounded-full w-full h-[3.25rem] min-h-[3.25rem]":
+      inPage,
   });
 
   return web3Provider ? (

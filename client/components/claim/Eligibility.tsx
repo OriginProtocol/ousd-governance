@@ -1,6 +1,5 @@
 import { FunctionComponent, useCallback } from "react";
 import Image from "next/image";
-import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
@@ -8,6 +7,8 @@ import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
 import useClaim from "utils/useClaim";
 import EligibilityItem from "components/claim/EligibilityItem";
+import Icon from "@mdi/react";
+import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -41,66 +42,112 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   return (
     <>
       <Card>
-        <div>
+        <div className="text-center">
           {!web3Provider ? (
-            <>
-              <p className="text-sm text-gray-600">
-                Connect your wallet below to learn if you&apos;re eligible to
-                claim.
+            <div className="space-y-4">
+              <Icon path={mdiWallet} size={2} className="text-accent mx-auto" />
+              <h2 className="text-2xl font-bold">
+                Connect your wallet to get started
+              </h2>
+              <p className="text-sm max-w-sm mx-auto">
+                We will automatically determine eligibility based on your wallet
+                address.
               </p>
               <div className="pt-6">
                 <Web3Button inPage />
               </div>
-            </>
+            </div>
           ) : (
             <>
               {isEligible ? (
                 <div className="space-y-2">
                   {claimValid ? (
-                    <>
-                      <div>
-                        <p className="text-accent font-bold text-center text-lg">
-                          {truncateEthAddress(address)} is eligible to claim!
-                        </p>
+                    <div className="mb-20">
+                      <div className="space-y-4 bg-accent text-white -m-10 p-10">
+                        <Icon
+                          path={mdiCheckCircle}
+                          size={2}
+                          className="text-white mx-auto"
+                        />
+                        <h2 className="text-2xl font-bold">
+                          You are eligible!
+                        </h2>
+                        <div>
+                          <p className="text-sm max-w-sm mx-auto">
+                            <span className="font-bold">Your address:</span>
+                            <br />
+                            <span className="truncate block">{address}</span>
+                          </p>
+                          <div className="pt-9">
+                            <Button
+                              fullWidth
+                              large
+                              white
+                              onClick={handleNextStep}
+                            >
+                              Continue
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      {canAdvance && (
-                        <Button onClick={handleNextStep} large fullWidth>
-                          Continue
-                        </Button>
-                      )}
-                    </>
+                    </div>
                   ) : (
-                    <div>
-                      <p className="text-orange-500 font-bold text-center text-lg">
-                        {truncateEthAddress(address)} has an invalid claim
-                        proof!
-                      </p>
+                    <div className="space-y-4">
+                      <Icon
+                        path={mdiAlertCircle}
+                        size={2}
+                        className="text-orange-500 mx-auto"
+                      />
+                      <h2 className="text-2xl font-bold">
+                        This address has an invalid claim proof
+                      </h2>
+                      <div>
+                        <p className="text-sm max-w-sm mx-auto">
+                          <span className="font-bold">Your address:</span>
+                          <br />
+                          <span className="truncate block">{address}</span>
+                        </p>
+                        <div className="pt-9">
+                          <Button
+                            fullWidth
+                            large
+                            alt
+                            onClick={handleDisconnect}
+                          >
+                            Try another address
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <>
+                <div className="space-y-4">
+                  <Icon
+                    path={mdiAlertCircle}
+                    size={2}
+                    className="text-[#dd0a0a] mx-auto"
+                  />
+                  <h2 className="text-2xl font-bold">
+                    Unfortunately, this address is not eligible
+                  </h2>
                   <div>
-                    <p className="text-gray-500 font-bold text-center text-lg">
-                      Unfortunately, {truncateEthAddress(address)} isn&apos;t
-                      eligible to claim
+                    <p className="text-sm max-w-sm mx-auto">
+                      <span className="font-bold">Your address:</span>
+                      <br />
+                      <span className="truncate block">{address}</span>
                     </p>
+                    <div className="pt-9">
+                      <Button fullWidth large alt onClick={handleDisconnect}>
+                        Try another address
+                      </Button>
+                    </div>
                   </div>
-                </>
-              )}
-              {!isEligible && (
-                <div className="mt-2">
-                  <button
-                    className="text-sm text-gray-500 underline ml-auto block"
-                    onClick={handleDisconnect}
-                  >
-                    Try another address
-                  </button>
                 </div>
               )}
             </>
           )}
-          {isEligible && (
+          {isEligible && claimValid && (
             <div className="space-y-2">
               <table className="table w-full mt-6">
                 <thead>

@@ -20,6 +20,8 @@
     "prettier:fix": "prettier --write '{components,constants,lib,pages,utils}/**/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
+    "@mdi/js": "^6.9.96",
+    "@mdi/react": "^1.6.0",
     "@prisma/client": "^3.10.0",
     "@tailwindcss/typography": "^0.5.2",
     "@types/lodash": "^4.14.182",
