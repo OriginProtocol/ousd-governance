@@ -1,5 +1,4 @@
 import { FunctionComponent, ChangeEventHandler } from "react";
-import { ethers } from "ethers";
 import TokenAmount from "components/TokenAmount";
 
 interface RangeInputProps {
@@ -11,6 +10,7 @@ interface RangeInputProps {
   markers?: object[];
   onChange: ChangeEventHandler<HTMLInputElement>;
   onMarkerClick?: (marker: string) => void;
+  hideLabel?: Boolean;
 }
 
 const RangeInput: FunctionComponent<RangeInputProps> = ({
@@ -22,20 +22,20 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
   markers,
   onChange,
   onMarkerClick,
+  hideLabel,
 }) => (
   <>
-    <label className="label">
-      <span className="label-text text-lg flex justify-between items-center w-full">
-        <span>
-          {label}&nbsp;
-          <TokenAmount amount={value} />
-          &nbsp;{counterUnit}
+    {!hideLabel && (
+      <label className="label">
+        <span className="label-text text-lg flex justify-between items-center w-full">
+          <span>
+            {label}&nbsp;
+            <TokenAmount amount={value} />
+            &nbsp;{counterUnit}
+          </span>
         </span>
-        {/*<span className="text-sm text-gray-500">
-          <TokenAmount amount={value} /> {counterUnit}
-</span>*/}
-      </span>
-    </label>
+      </label>
+    )}
     <div>
       <input
         className="range range-lg range-accent"

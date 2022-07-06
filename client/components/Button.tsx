@@ -21,7 +21,7 @@ const Button: FunctionComponent<ButtonProps> = ({
   alt,
   white,
 }) => {
-  const className = classNames("btn rounded-full", {
+  const className = classNames("btn rounded-full normal-case", {
     "btn-lg h-[3.25rem] min-h-[3.25rem]": large,
     "btn-sm": small,
     "w-full": fullWidth,
