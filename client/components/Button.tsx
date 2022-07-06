@@ -21,10 +21,11 @@ const Button: FunctionComponent<ButtonProps> = ({
   alt,
 }) => {
   const className = classNames("btn rounded-full", {
-    "btn-lg": large,
+    "btn-lg h-[3.25rem] min-h-[3.25rem]": large,
     "btn-sm": small,
     "w-full": fullWidth,
     "btn-primary": !alt,
+    "btn-primary btn-outline": alt,
   });
 
   return (

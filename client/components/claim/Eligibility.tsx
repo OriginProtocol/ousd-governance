@@ -8,7 +8,7 @@ import { truncateEthAddress } from "utils/index";
 import useClaim from "utils/useClaim";
 import EligibilityItem from "components/claim/EligibilityItem";
 import Icon from "@mdi/react";
-import { mdiWallet } from "@mdi/js";
+import { mdiWallet, mdiExclamation, mdiAlertCircle } from "@mdi/js";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -44,7 +44,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
       <Card>
         <div className="text-center">
           {!web3Provider ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Icon path={mdiWallet} size={2} className="text-accent mx-auto" />
               <h2 className="text-2xl font-bold">
                 Connect your wallet to get started
@@ -84,23 +84,27 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                   )}
                 </div>
               ) : (
-                <>
+                <div className="space-y-4">
+                  <Icon
+                    path={mdiAlertCircle}
+                    size={2}
+                    className="text-[#dd0a0a] mx-auto"
+                  />
+                  <h2 className="text-2xl font-bold">
+                    Unfortunately, this address is not eligible
+                  </h2>
                   <div>
-                    <p className="text-gray-500 font-bold text-center text-lg">
-                      Unfortunately, {truncateEthAddress(address)} isn&apos;t
-                      eligible to claim
+                    <p className="text-sm max-w-sm mx-auto">
+                      <span className="font-bold">Your address:</span>
+                      <br />
+                      {address}
                     </p>
+                    <div className="pt-9">
+                      <Button fullWidth large alt onClick={handleDisconnect}>
+                        Try another address
+                      </Button>
+                    </div>
                   </div>
-                </>
-              )}
-              {!isEligible && (
-                <div className="mt-2">
-                  <button
-                    className="text-sm text-gray-500 underline ml-auto block"
-                    onClick={handleDisconnect}
-                  >
-                    Try another address
-                  </button>
                 </div>
               )}
             </>
