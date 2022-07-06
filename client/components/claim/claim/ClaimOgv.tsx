@@ -37,13 +37,13 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const votingDecayFactor = 1.8;
 
   const veOgvFromOgvLockup =
-    claimableOgv * votingDecayFactor ** (lockupDuration / 52);
+    claimableOgv * votingDecayFactor ** (lockupDuration / 12);
   const ogvLockupRewardApy = getRewardsApy(
     veOgvFromOgvLockup,
     claimableOgv,
     totalSupplyVeOgv
   );
-  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
+  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (48 / 12);
   const maxOgvLockupRewardApy = getRewardsApy(
     maxVeOgvFromOgvLockup,
     claimableOgv,
@@ -51,9 +51,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   );
 
   const now = new Date();
-  const lockupEnd = new Date(
-    now.getTime() + lockupDuration * 2629746 * 1000
-  ); // Months to seconds to miliseconds
+  const lockupEnd = new Date(now.getTime() + lockupDuration * 2629746 * 1000); // Months to seconds to miliseconds
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -216,7 +214,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           <div className="pt-3">
             <Button
               onClick={async () => {
-                claim.optional.claim(parseInt(lockupDuration));
+                const duration = lockupDuration * 2629746; // Months to seconds
+                claim.optional.claim(duration);
               }}
               disabled={claim.optional.state !== "ready"}
               large

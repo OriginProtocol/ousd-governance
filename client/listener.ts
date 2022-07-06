@@ -81,16 +81,11 @@ const handleProposalCreated = async (event) => {
 };
 
 const handleStake = async (event) => {
-  const now = event.timestamp;
-
   try {
     await prisma.lockup.create({
       data: {
         user: event.values.user,
         lockupId: parseInt(event.values.lockupId),
-        amount: parseInt(event.values.amount),
-        end: event.values.end,
-        points: parseInt(event.values.points),
       },
     });
     logger.info("Inserted lockup");
