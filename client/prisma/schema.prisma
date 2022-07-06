@@ -43,5 +43,6 @@ model Lockup {
   points    Decimal @db.Decimal(78, 0)
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([user], type: BTree)
   @@map("lockups")
 }
