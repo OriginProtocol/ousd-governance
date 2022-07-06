@@ -108,13 +108,6 @@ const useClaim = () => {
           distData.optional = {
             ...distributor,
             claim: async (duration) => {
-              // the duration for the stake is in seconds
-              const durationTime = BigNumber.from(duration)
-                .mul(24)
-                .mul(60)
-                .mul(60)
-                .mul(7);
-
               setOptionalClaimState("waiting-for-user");
               let claimResult;
               try {
@@ -127,7 +120,7 @@ const useClaim = () => {
                   claim.optional.index,
                   claim.optional.amount,
                   claim.optional.proof,
-                  durationTime,
+                  duration,
                   { gasLimit: 1000000 } // @TODO maybe set this to lower amount
                 );
               } catch (e) {

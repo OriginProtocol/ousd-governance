@@ -20,9 +20,9 @@ interface ClaimOgvProps {}
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
 
-  const maxLockupDurationInWeeks = "208";
+  const maxLockupDurationInMonths = 12 * 4;
   const [lockupDuration, setLockupDuration] = useState(
-    maxLockupDurationInWeeks
+    maxLockupDurationInMonths
   );
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
@@ -37,13 +37,13 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const votingDecayFactor = 1.8;
 
   const veOgvFromOgvLockup =
-    claimableOgv * votingDecayFactor ** (lockupDuration / 52);
+    claimableOgv * votingDecayFactor ** (lockupDuration / 12);
   const ogvLockupRewardApy = getRewardsApy(
     veOgvFromOgvLockup,
     claimableOgv,
     totalSupplyVeOgv
   );
-  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (208 / 52);
+  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (48 / 12);
   const maxOgvLockupRewardApy = getRewardsApy(
     maxVeOgvFromOgvLockup,
     claimableOgv,
@@ -51,9 +51,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   );
 
   const now = new Date();
-  const lockupEnd = new Date(
-    now.getTime() + lockupDuration * 7 * 24 * 60 * 60 * 1000
-  );
+  const lockupEnd = new Date(now.getTime() + lockupDuration * 2629746 * 1000); // Months to seconds to miliseconds
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -99,82 +97,19 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             </Card>
           </CardGroup>
           <div className="space-y-2">
-            {/*<div>
-                          <RangeInput
-                            label="Lock your"
-                            counterUnit="OGV"
-                            min={"0"}
-                            max={claimableOgv}
-                            value={lockupAmount}
-                            onChange={(e) => {
-                              setLockupAmount(e.target.value);
-                            }}
-                            markers={[
-                              {
-                                label: "0%",
-                                value: 0,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "20%",
-                                value: 20,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "40%",
-                                value: 40,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "60%",
-                                value: 60,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "80%",
-                                value: 80,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "100%",
-                                value: 100,
-                              },
-                            ]}
-                            onMarkerClick={(markerValue) => {
-                              if (markerValue) {
-                                setLockupAmount((claimableOgv / 100) * markerValue);
-                              }
-                            }}
-                          />
-                          </div>*/}
             <div>
               <RangeInput
                 label="Lock your OGV for"
-                counterUnit="weeks"
+                counterUnit="months"
                 min="0"
-                max={maxLockupDurationInWeeks}
+                max={maxLockupDurationInMonths}
                 value={lockupDuration}
                 onChange={(e) => {
                   setLockupDuration(e.target.value);
                 }}
                 markers={[
                   {
-                    label: "0 wks",
+                    label: "0",
                     value: 0,
                   },
                   {
@@ -183,7 +118,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "1 yr",
-                    value: 52,
+                    value: 12,
                   },
                   {
                     label: "",
@@ -191,7 +126,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "2 yrs",
-                    value: 104,
+                    value: 24,
                   },
                   {
                     label: "",
@@ -199,7 +134,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "3 yrs",
-                    value: 156,
+                    value: 36,
                   },
                   {
                     label: "",
@@ -207,7 +142,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   },
                   {
                     label: "4 yrs",
-                    value: 208,
+                    value: 48,
                   },
                 ]}
                 onMarkerClick={(markerValue) => {
@@ -279,7 +214,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           <div className="pt-3">
             <Button
               onClick={async () => {
-                claim.optional.claim(parseInt(lockupDuration));
+                const duration = lockupDuration * 2629746; // Months to seconds
+                claim.optional.claim(duration);
               }}
               disabled={claim.optional.state !== "ready"}
               large
