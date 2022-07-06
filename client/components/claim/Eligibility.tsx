@@ -1,6 +1,5 @@
 import { FunctionComponent, useCallback } from "react";
 import Image from "next/image";
-import { SectionTitle } from "components/SectionTitle";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
@@ -8,6 +7,8 @@ import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils/index";
 import useClaim from "utils/useClaim";
 import EligibilityItem from "components/claim/EligibilityItem";
+import Icon from "@mdi/react";
+import { mdiWallet } from "@mdi/js";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -41,17 +42,21 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   return (
     <>
       <Card>
-        <div>
+        <div className="text-center">
           {!web3Provider ? (
-            <>
-              <p className="text-sm text-gray-600">
-                Connect your wallet below to learn if you&apos;re eligible to
-                claim.
+            <div className="space-y-3">
+              <Icon path={mdiWallet} size={2} className="text-accent mx-auto" />
+              <h2 className="text-2xl font-bold">
+                Connect your wallet to get started
+              </h2>
+              <p className="text-sm max-w-sm mx-auto">
+                We will automatically determine eligibility based on your wallet
+                address.
               </p>
               <div className="pt-6">
                 <Web3Button inPage />
               </div>
-            </>
+            </div>
           ) : (
             <>
               {isEligible ? (
