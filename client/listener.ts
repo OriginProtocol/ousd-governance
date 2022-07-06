@@ -148,8 +148,8 @@ const handleEvents = async (blockNumber, events, done) => {
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
-  logger.info("Got confirmed block");
-  handleEvents(blockNumber, events, done);
+  logger.info(`Got confirmed block ${blockNumber}`);
+  await handleEvents(blockNumber, events, done);
   const existingLastBlock = await prisma.listener.findFirst();
   if (existingLastBlock) {
     await prisma.listener.update({
