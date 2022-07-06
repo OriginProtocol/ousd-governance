@@ -99,69 +99,6 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             </Card>
           </CardGroup>
           <div className="space-y-2">
-            {/*<div>
-                          <RangeInput
-                            label="Lock your"
-                            counterUnit="OGV"
-                            min={"0"}
-                            max={claimableOgv}
-                            value={lockupAmount}
-                            onChange={(e) => {
-                              setLockupAmount(e.target.value);
-                            }}
-                            markers={[
-                              {
-                                label: "0%",
-                                value: 0,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "20%",
-                                value: 20,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "40%",
-                                value: 40,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "60%",
-                                value: 60,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "80%",
-                                value: 80,
-                              },
-                              {
-                                label: "",
-                                value: 0,
-                              },
-                              {
-                                label: "100%",
-                                value: 100,
-                              },
-                            ]}
-                            onMarkerClick={(markerValue) => {
-                              if (markerValue) {
-                                setLockupAmount((claimableOgv / 100) * markerValue);
-                              }
-                            }}
-                          />
-                          </div>*/}
             <div>
               <RangeInput
                 label="Lock your OGV for"
