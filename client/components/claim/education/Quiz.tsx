@@ -9,6 +9,7 @@ interface QuizQuestion {
   question: string;
   answers: Array<string>;
   correctAnswer: string;
+  canAdvance?: Boolean;
 }
 
 interface QuizProps {
@@ -16,6 +17,7 @@ interface QuizProps {
   onComplete?: () => void | Dispatch<SetStateAction<boolean>>;
   onCompleteMessage?: string;
   lastQuiz?: Boolean;
+  handleNextStep?: () => void;
 }
 
 const Quiz: FunctionComponent<QuizProps> = ({
@@ -23,6 +25,7 @@ const Quiz: FunctionComponent<QuizProps> = ({
   onComplete,
   onCompleteMessage,
   lastQuiz,
+  handleNextStep,
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [currentAnswers, setCurrentAnswers] = useState(
@@ -208,6 +211,11 @@ const Quiz: FunctionComponent<QuizProps> = ({
         {onComplete && quizComplete && canProgress && !lastQuiz && (
           <Button onClick={onComplete} large fullWidth>
             Continue
+          </Button>
+        )}
+        {quizComplete && canProgress && lastQuiz && handleNextStep && (
+          <Button onClick={handleNextStep} large fullWidth>
+            Claim Airdrop
           </Button>
         )}
       </div>
