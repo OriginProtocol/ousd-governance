@@ -1,7 +1,6 @@
 import { FunctionComponent, useState } from "react";
 import classNames from "classnames";
 import Card from "components/Card";
-import Button from "components/Button";
 import Ogn from "@/components/claim/education/Ogn";
 import Ousd from "@/components/claim/education/Ousd";
 import Ogv from "@/components/claim/education/Ogv";
@@ -9,15 +8,10 @@ import Sticky from "react-sticky-el";
 
 interface EducationProps {
   handleNextStep: () => void;
-  handlePrevStep: () => void;
 }
 
-const Education: FunctionComponent<EducationProps> = ({
-  handleNextStep,
-  handlePrevStep,
-}) => {
+const Education: FunctionComponent<EducationProps> = ({ handleNextStep }) => {
   const [currentEducationStep, setCurrentEducationStep] = useState(0);
-  const [canAdvance, setCanAdvance] = useState(false);
 
   const handleNextEducationStep = () => {
     window && window.scrollTo(0, 0);
@@ -69,19 +63,7 @@ const Education: FunctionComponent<EducationProps> = ({
         {currentEducationStep === 1 && (
           <Ogn onComplete={handleNextEducationStep} />
         )}
-        {currentEducationStep === 2 && <Ogv onComplete={setCanAdvance} />}
-        <div className="mt-6 flex">
-          <div className="mr-auto">
-            <Button onClick={handlePrevStep} alt>
-              &larr; Check eligibility
-            </Button>
-          </div>
-          <div className="ml-auto">
-            <Button onClick={handleNextStep} disabled={!canAdvance}>
-              Claim airdrop &rarr;
-            </Button>
-          </div>
-        </div>
+        {currentEducationStep === 2 && <Ogv handleNextStep={handleNextStep} />}
       </div>
     </div>
   );

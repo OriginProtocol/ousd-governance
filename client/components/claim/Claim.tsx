@@ -90,20 +90,11 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
   }
 
   return (
-    <>
-      <CardGroup>
-        <OgvTotalStats />
-        <ClaimOgv />
-        <ClaimVeOgv />
-      </CardGroup>
-      <div className="mt-6 flex">
-        <div className="mr-auto">
-          <Button onClick={handlePrevStep} alt>
-            &larr; Learn about Origin
-          </Button>
-        </div>
-      </div>
-    </>
+    <CardGroup>
+      <OgvTotalStats />
+      <ClaimOgv />
+      <ClaimVeOgv />
+    </CardGroup>
   );
 };
 
