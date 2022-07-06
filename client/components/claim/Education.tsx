@@ -24,7 +24,7 @@ const Education: FunctionComponent<EducationProps> = ({
     setCurrentEducationStep(currentEducationStep + 1);
   };
 
-  const educationSteps = ["OUSD", "OGN", "OGV"];
+  const educationSteps = ["OUSD", "OGV", "OGN"];
 
   return (
     <div className="lg:flex">
