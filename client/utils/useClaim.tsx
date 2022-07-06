@@ -16,7 +16,7 @@ const useClaim = () => {
   const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
   const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
     useState(null);
-  const { address, contracts, web3Provider } = useStore();
+  const { address, contracts, web3Provider, rpcProvider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
   /*
    * ready -> ready to start claiming
@@ -70,7 +70,7 @@ const useClaim = () => {
   useEffect(() => {
     if (
       !contracts.loaded ||
-      !(claim.optional.hasClaim || claim.mandatory.hasClaim)
+      !(claim.optional.impl.hasClaim || claim.mandatory.impl.hasClaim)
     ) {
       return;
     }
@@ -100,7 +100,7 @@ const useClaim = () => {
 
         if (claim.optional.hasClaim) {
           let distributor = await readDistributor(
-            contracts.OptionalDistributor,
+            contracts.OptionalDistributor.impl,
             claim.optional,
             setOptionalClaimState
           );
@@ -120,7 +120,7 @@ const useClaim = () => {
               try {
                 claimResult = await (
                   await useConnectSigner(
-                    contracts.OptionalDistributor,
+                    contracts.OptionalDistributor.impl,
                     web3Provider
                   )
                 )["claim(uint256,uint256,bytes32[],uint256)"](
@@ -138,7 +138,7 @@ const useClaim = () => {
               setOptionalClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await contracts.rpcProvider.waitForTransaction(
+                receipt = await rpcProvider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable
@@ -157,7 +157,7 @@ const useClaim = () => {
 
         if (claim.mandatory.hasClaim) {
           let distributor = await readDistributor(
-            contracts.MandatoryDistributor,
+            contracts.MandatoryDistributor.impl,
             claim.mandatory,
             setMandatoryClaimState
           );
@@ -170,7 +170,7 @@ const useClaim = () => {
               try {
                 claimResult = await (
                   await useConnectSigner(
-                    contracts.MandatoryDistributor,
+                    contracts.MandatoryDistributor.impl,
                     web3Provider
                   )
                 )["claim(uint256,uint256,bytes32[])"](
@@ -187,7 +187,7 @@ const useClaim = () => {
               setMandatoryClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await contracts.rpcProvider.waitForTransaction(
+                receipt = await rpcProvider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable
@@ -221,7 +221,7 @@ const useClaim = () => {
         return;
       }
       try {
-        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
+        const totalSupplyBn = await contracts.impl.OgvStaking.totalSupply();
         setTotalSupplyVeOgv(totalSupplyBn);
         // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
         // of claimers will see insane reward amounts

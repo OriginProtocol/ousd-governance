@@ -47,7 +47,10 @@ const useContracts = () => {
           signer || provider
         );
         return {
-          [name]: contract,
+          [name]: {
+            impl: contract,
+            abi: definition.abi,
+          },
         };
       });
 
@@ -58,8 +61,12 @@ const useContracts = () => {
             definition.abi,
             mainnetProvider
           );
+
           return {
-            [name]: contract,
+            [name]: {
+              impl: contract,
+              abi: definition.abi,
+            },
           };
         }
       );
@@ -69,9 +76,9 @@ const useContracts = () => {
       );
 
       contracts.loaded = true;
-      contracts.rpcProvider = networkProvider;
       useStore.setState({
         contracts,
+        rpcProvider: networkProvider,
       });
     };
     if (claimIsOpen()) {

@@ -34,7 +34,7 @@ const ProposalNew: NextPage = () => {
 
   useEffect(() => {
     const loadProposalThreshold = async () => {
-      setProposalThreshold(await contracts.Governance.proposalThreshold());
+      setProposalThreshold(await contracts.Governance.impl.proposalThreshold());
     };
     if (contracts.loaded) {
       loadProposalThreshold();
@@ -44,7 +44,7 @@ const ProposalNew: NextPage = () => {
   // Load users vote power
   useEffect(() => {
     const loadVotePower = async () => {
-      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
+      const votePower = await contracts.VoteLockerCurve.impl.balanceOf(address);
       setVotePower(votePower);
     };
     if (web3Provider && address && contracts.loaded) {
@@ -88,7 +88,7 @@ const ProposalNew: NextPage = () => {
     let transaction;
 
     try {
-      transaction = await contracts.Governance[
+      transaction = await contracts.impl.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
         proposalActions.targets,

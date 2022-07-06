@@ -10,11 +10,11 @@ const useTotalBalances = () => {
 
   useEffect(() => {
     const loadTotalSupplyOfOgv = async () =>
-      await contracts.OriginDollarGovernance.totalSupply();
+      await contracts.OriginDollarGovernance.impl.totalSupply();
 
     const loadTotalLockedUpOgv = async () =>
-      await contracts.OriginDollarGovernance.balanceOf(
-        contracts.OgvStaking.address
+      await contracts.OriginDollarGovernance.impl.balanceOf(
+        contracts.OgvStaking.impl.address
       );
 
     if (

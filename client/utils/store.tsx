@@ -27,6 +27,8 @@ const defaultState: Web3DataType = {
   contracts: {
     loaded: false,
   },
+  contractsAbi: {},
+  rpcProvider: null,
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),
