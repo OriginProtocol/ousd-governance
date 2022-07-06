@@ -7,13 +7,12 @@ import Eligibility from "@/components/claim/Eligibility";
 import HoldingPage from "components/holding/Page";
 import Claim from "components/claim/Claim";
 import { claimOpenTimestampPassed, claimIsOpen } from "utils";
-import { BigNumber } from "ethers";
 
 interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const steps = ["Check eligibility", "Learn about Origin", "Claim airdrop"];
+  const steps = ["Check Eligibility", "Learn about Origin", "Claim Airdrop"];
 
   const handleNextStep = () => setCurrentStep(currentStep + 1);
   const handlePrevStep = () => setCurrentStep(currentStep - 1);
