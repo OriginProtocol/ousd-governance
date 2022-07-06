@@ -133,16 +133,16 @@ const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
     switch(event.name) {
       case 'ProposalCreated':
-        handleProposalCreated(event);
+        await handleProposalCreated(event);
         break;
       case 'Stake':
-        handleStake(event);
+        await handleStake(event);
         break;
       case 'Unstake':
-        handleUnstake(event);
+        await handleUnstake(event);
         break;
       default:
-        handleNewVoter(event);
+        await handleNewVoter(event);
     }
   }
 };
