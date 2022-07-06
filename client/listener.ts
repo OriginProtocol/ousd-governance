@@ -133,23 +133,23 @@ const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
     switch(event.name) {
       case 'ProposalCreated':
-        handleProposalCreated(event);
+        await handleProposalCreated(event);
         break;
       case 'Stake':
-        handleStake(event);
+        await handleStake(event);
         break;
       case 'Unstake':
-        handleUnstake(event);
+        await handleUnstake(event);
         break;
       default:
-        handleNewVoter(event);
+        await handleNewVoter(event);
     }
   }
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
   logger.info("Got confirmed block");
-  handleEvents(blockNumber, events, done);
+  await handleEvents(blockNumber, events, done);
   const existingLastBlock = await prisma.listener.findFirst();
   if (existingLastBlock) {
     await prisma.listener.update({
