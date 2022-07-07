@@ -211,11 +211,11 @@ ethereumEvents.on(
 
       const csv = Object.entries(claims).map(
         ([address, data]: [address: string, data: any]) => {
-          return `${address}, ${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
+          return `${address},${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
             .map((key) =>
               data.split[key] === undefined ? 0 : data.split[key].toString()
             )
-            .join(",")}, ${data.amount}`;
+            .join(",")},${data.amount}`;
         }
       );
 
@@ -245,6 +245,8 @@ const calculateRewards = async () => {
       )
     )
   );
+
+  console.log(Object.values(ognRewards).filter((v: object) => bigNumberify(v).gt(0)).length, "OGN holders with balance > 0");
 
   const ognInstance = new ethers.Contract(
     ognContract.address,
@@ -450,7 +452,7 @@ const calculateRewards = async () => {
   );
 
   console.log(`Total OGN score`, totalOgnScore.toString());
-  console.log("Total OGN excluding staked", totalOgnHoldersScore.toString());
+  console.log("Total OGN holders score", totalOgnHoldersScore.toString());
   console.log("Total OGN staked (sum)", totalOgnStakersScore.toString());
   console.log(
     "Total OGN staked (balanceOf)",
