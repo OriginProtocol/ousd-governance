@@ -18,10 +18,10 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
-  const { loaded } = claim;
-  const isEligible = claim.loaded && claim.hasClaim;
+  const { loaded, hasClaim } = claim;
+
   const claimValid =
-    (isEligible && claim.optional && claim.optional.isValid) ||
+    (hasClaim && claim.optional && claim.optional.isValid) ||
     (claim.mandatory && claim.mandatory.isValid);
 
   const resetWeb3State = useStore((state) => state.reset);
@@ -37,10 +37,12 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     [web3Modal, provider, resetWeb3State]
   );
 
-  if (!address || !loaded) {
+  if (web3Provider && !loaded) {
     return (
       <Card>
-        <Loading large />
+        <div className="py-20">
+          <Loading large />
+        </div>
       </Card>
     );
   }
@@ -65,7 +67,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </div>
           ) : (
             <>
-              {isEligible ? (
+              {hasClaim ? (
                 <div className="space-y-2">
                   {claimValid ? (
                     <div className="mb-20">
@@ -153,7 +155,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               )}
             </>
           )}
-          {isEligible && claimValid && (
+          {hasClaim && claimValid && (
             <div className="space-y-2">
               <table className="table w-full mt-6">
                 <thead>
