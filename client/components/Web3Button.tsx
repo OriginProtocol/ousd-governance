@@ -13,7 +13,7 @@ const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider, // required
     options: {
-      rpc: RPC_URLS
+      rpc: RPC_URLS,
     },
   },
   "custom-walletlink": {
