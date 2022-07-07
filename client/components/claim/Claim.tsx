@@ -52,7 +52,7 @@ const Claim: FunctionComponent<ClaimProps> = ({ handlePrevStep }) => {
           : truncateEthAddress(address);
 
       toast.success(
-        `${shortAddress} just locked up ${ogvLockedUp} OGV for ${durationInWeeks} weeks`,
+        `${shortAddress} just locked ${ogvLockedUp} OGV for ${durationInWeeks} weeks`,
         {
           hideProgressBar: true,
           position: "bottom-right",
