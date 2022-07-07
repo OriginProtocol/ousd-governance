@@ -45,9 +45,7 @@ const Ogn: FunctionComponent<OgnProps> = ({ handleNextStep }) => (
       <div className="space-y-4">
         <div className="flex items-center space-x-1">
           <TokenIcon src="/ogn-coin.svg" alt="OGN" />
-          <h3 className="text-lg leading-6 font-medium">
-            Origin Token (OGN)
-          </h3>
+          <h3 className="text-lg leading-6 font-medium">Origin Token (OGN)</h3>
         </div>
         <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">

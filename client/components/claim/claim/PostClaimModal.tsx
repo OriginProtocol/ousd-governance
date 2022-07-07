@@ -131,8 +131,8 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                   <Icon path={mdiArrowDown} size={0.9} className="text-white" />
                 </div>
                 <p className="text-xl">
-                  ...<strong>earn ETH</strong> when you take your OGN on our
-                  Origin Story NFT Platform.
+                  ...<strong>earn ETH</strong> when you stake OGN on Origin
+                  Story.
                 </p>
                 <Link
                   className="flex justify-center"
