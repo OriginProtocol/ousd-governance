@@ -148,7 +148,13 @@ const useClaim = () => {
                 throw e;
               }
 
-              setOptionalClaimState("claimed");
+              if (receipt.status === 1) {
+                setOptionalClaimState("claimed");
+              } else {
+                setOptionalClaimState("ready");
+              }
+
+              return receipt;
             },
           };
         }
@@ -199,8 +205,13 @@ const useClaim = () => {
                 throw e;
               }
 
-              setMandatoryClaimState("claimed");
-              return;
+              if (receipt.status === 1) {
+                setMandatoryClaimState("claimed");
+              } else {
+                setMandatoryClaimState("ready");
+              }
+
+              return receipt;
             },
           };
         }

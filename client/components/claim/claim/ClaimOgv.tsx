@@ -26,6 +26,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInMonths
   );
+  const [error, setError] = useState<string>(null);
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
@@ -255,12 +256,29 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               as {maxOgvLockupRewardApy.toFixed(2)}% vAPY
             </div>
           )}
+          {error && (
+            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
+              {error}
+            </div>
+          )}
           <div>
             <Button
               onClick={async () => {
                 sethideModal(false);
+                setError(null);
+
                 const duration = lockupDuration * 2629746; // Months to seconds
-                claim.optional.claim(duration);
+
+                try {
+                  const receipt = await claim.optional.claim(duration);
+
+                  if (receipt.status === 0) {
+                    setError("Error claiming tokens!");
+                  }
+                } catch (e) {
+                  setError("Error claiming tokens!", e);
+                  throw e;
+                }
               }}
               disabled={claim.optional.state !== "ready"}
               large

@@ -19,13 +19,12 @@ interface ClaimVeOgvProps {}
 
 const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   const claim = useClaim();
-
+  const [error, setError] = useState<string>(null);
   const [hideModal, sethideModal] = useState(true);
 
   if (!claim.loaded || !claim.mandatory.hasClaim) {
     return <></>;
   }
-
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   const claimableVeOgv = claim.mandatory.isValid
     ? numeral(claim.mandatory.amount.div(decimal18Bn).toString()).value()
@@ -229,11 +228,28 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
               </CardGroup>
             </div>
+            {error && (
+              <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
+                {error}
+              </div>
+            )}
             <div>
               <Button
                 onClick={async () => {
                   sethideModal(false);
-                  claim.mandatory.claim();
+                  setError(null);
+                  try {
+                    const receipt = await claim.mandatory.claim();
+
+                    if (receipt.status === 0) {
+                      setError("Can not claim tokens");
+                    }
+                  } catch (e) {
+                    setError("Error claiming tokens!", e);
+                    throw e;
+                  }
+
+                  sethideModal(false);
                 }}
                 disabled={claim.mandatory.state !== "ready"}
                 large
