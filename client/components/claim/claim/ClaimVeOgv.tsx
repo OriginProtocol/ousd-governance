@@ -107,7 +107,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               </tr>
             </tbody>
           </table>
-          <p className="text-gray-600 text-sm">You are locking up:</p>
+          <p className="text-gray-600 text-sm">You are locking:</p>
           <table className="table table-compact w-full">
             <tbody>
               <tr>
