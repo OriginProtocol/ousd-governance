@@ -11,6 +11,8 @@ import "../../contracts/tests/MockOgv.sol";
 contract OgvStakingTest is Test {
     MockOgv ogv;
     OgvStaking staking;
+    OgvStaking stakingImpl;
+    OgvStakingProxy stakingProxy;
     RewardsSource source;
 
     address alice = address(0x42);
@@ -26,12 +28,20 @@ contract OgvStakingTest is Test {
         source = new RewardsSource(address(ogv));
 
         RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
-        rewardsProxy.initialize(address(source), team, '');
+        rewardsProxy.initialize(address(source), team, "");
         source = RewardsSource(address(rewardsProxy));
 
-        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
-        OgvStakingProxy stakingProxy = new OgvStakingProxy();
-        stakingProxy.initialize(address(staking), team, '');
+        stakingImpl = new OgvStaking(
+            address(ogv),
+            EPOCH,
+            MIN_STAKE_DURATION,
+            address(source)
+        );
+        bytes memory initCommand = hex"8129fc1c";
+        stakingProxy = new OgvStakingProxy(
+            address(stakingImpl),
+            bytes(initCommand)
+        );
         staking = OgvStaking(address(stakingProxy));
 
         source.setRewardsTarget(address(staking));
@@ -422,6 +432,28 @@ contract OgvStakingTest is Test {
         vm.warp(EPOCH + 30 days);
         vm.prank(alice);
         staking.unstake(1);
+    }
+
+    function testCanUpgrade() public {
+        vm.startPrank(team);
+        OgvStaking newImpl = new OgvStaking(
+            address(ogv),
+            1,
+            2,
+            address(source)
+        );
+        OgvStaking(address(stakingProxy)).upgradeTo(address(newImpl));
+        OgvStaking newStaking = OgvStaking(address(stakingProxy));
+        assertEq(newStaking.epoch(), 1);
+        assertEq(newStaking.minStakeDuration(), 2);
+    }
+
+    function testCannotReinitialize() public {
+        vm.expectRevert("Initializable: contract is already initialized");
+        stakingImpl.initialize();
+
+        vm.expectRevert("Initializable: contract is already initialized");
+        staking.initialize();
     }
 
     function testFuzzCanAlwaysWithdraw(

@@ -17,10 +17,15 @@ import {RewardsSource} from "./RewardsSource.sol";
 ///
 /// The balance received for staking (and thus the voting power and rewards
 /// distribution) goes up exponentially by the end of the staked period.
-contract OgvStaking is Initializable, OwnableUpgradeable, UUPSUpgradeable, ERC20VotesUpgradeable {
+contract OgvStaking is
+    Initializable,
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    ERC20VotesUpgradeable
+{
     // 1. Core Storage
-    uint256 public epoch = 86400; // timestamp
-    uint256 public minStakeDuration = 604800; // in seconds
+    uint256 public immutable epoch; // timestamp
+    uint256 public immutable minStakeDuration; // in seconds
 
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
@@ -32,8 +37,8 @@ contract OgvStaking is Initializable, OwnableUpgradeable, UUPSUpgradeable, ERC20
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
-    ERC20 public ogv; // Must not allow reentrancy
-    RewardsSource public rewardsSource;
+    ERC20 public immutable ogv; // Must not allow reentrancy
+    RewardsSource public immutable rewardsSource;
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
@@ -54,12 +59,23 @@ contract OgvStaking is Initializable, OwnableUpgradeable, UUPSUpgradeable, ERC20
     );
     event Reward(address indexed user, uint256 amount);
 
-    function configure(
+    // 1. Core Functions
+
+    constructor(
         address ogv_,
+        uint256 epoch_,
+        uint256 minStakeDuration_,
         address rewardsSource_
-    ) public onlyOwner {
+    ) {
         ogv = ERC20(ogv_);
+        epoch = epoch_;
+        minStakeDuration = minStakeDuration_;
         rewardsSource = RewardsSource(rewardsSource_);
+        _disableInitializers(); // Security requirement for UUPSUpgradeable
+    }
+
+    function initialize() external initializer {
+        __Ownable_init();
     }
 
     function name() public pure override returns (string memory) {
@@ -278,6 +294,7 @@ contract OgvStaking is Initializable, OwnableUpgradeable, UUPSUpgradeable, ERC20
         emit Reward(user, netRewards);
     }
 
+    /// @dev For internal use by UUSP upgrades
     function _authorizeUpgrade(address newImplementation)
         internal
         override
