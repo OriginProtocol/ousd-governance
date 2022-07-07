@@ -10,7 +10,7 @@ const useHistoricalLockupToasts = () => {
   // 13.13 seconds is average block time (on 7.7.2022) ~
   const blocksToLookBack = 1300; // roughly 2 days
   const SECONDS_IN_A_MONTH = 2592000;
-  const [recentLockups, setRecentLocups] = useState([]);
+  const [recentLockups, setRecentLockups] = useState([]);
   const [newEvent, setNewEvent] = useState(null);
 
   const displayToast = async (event) => {
@@ -50,7 +50,7 @@ const useHistoricalLockupToasts = () => {
     if (!newEvent) {
       return;
     }
-    setRecentLocups([
+    setRecentLockups([
       ...recentLockups,
       {
         shown: false,
@@ -83,7 +83,7 @@ const useHistoricalLockupToasts = () => {
         blocksToLookBack
       );
 
-      setRecentLocups(
+      setRecentLockups(
         events.map((event) => {
           return {
             shown: false,
@@ -129,7 +129,7 @@ const useHistoricalLockupToasts = () => {
           latestEvent.rawEvent.transactionHash
       );
 
-      setRecentLocups([...otherEvents, latestEvent]);
+      setRecentLockups([...otherEvents, latestEvent]);
 
       displayToast(latestEvent.rawEvent);
     }, random(5000, 20000, true));
