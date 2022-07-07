@@ -32,10 +32,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
 
   const now = new Date();
   const veOgvFromVeOgvClaim =
-    (claimableVeOgv / 4) * votingDecayFactor ** (52 / 52) +
-    (claimableVeOgv / 4) * votingDecayFactor ** (104 / 52) +
-    (claimableVeOgv / 4) * votingDecayFactor ** (156 / 52) +
-    (claimableVeOgv / 4) * votingDecayFactor ** (208 / 52);
+    (claimableVeOgv / 4) * votingDecayFactor ** (12 / 12) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (24 / 12) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (36 / 12) +
+    (claimableVeOgv / 4) * votingDecayFactor ** (48 / 12);
 
   const veOgvLockupRewardApy = getRewardsApy(
     veOgvFromVeOgvClaim,
@@ -58,9 +58,9 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
 
   let claimButtonText = "";
   if (claim.mandatory.state === "ready") {
-    claimButtonText = "Claim";
+    claimButtonText = "Lock OGV & claim veOGV";
   } else if (claim.mandatory.state === "waiting-for-user") {
-    claimButtonText = "Please Confirm Transaction";
+    claimButtonText = "Please confirm transaction";
   } else if (claim.mandatory.state === "waiting-for-network") {
     claimButtonText = "Waiting to be mined";
   } else if (claim.mandatory.state === "claimed") {
@@ -69,108 +69,121 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
 
   return (
     <Card>
-      <div className="space-y-4">
-        <SectionTitle>Claim veOGV</SectionTitle>
-        <CardGroup horizontal twoCol>
-          <Card alt tightPadding>
-            <div className="space-y-1">
-              <CardLabel>Your eligibility</CardLabel>
-              <div className="flex space-x-1 items-center">
-                <TokenIcon src="/ogv.svg" alt="OGV" />
-                <CardStat>
-                  <TokenAmount amount={claimableVeOgv} />
-                </CardStat>
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Total claimable pre-locked OGV</h2>
+          <CardGroup>
+            <Card alt tightPadding noShadow>
+              <div className="flex">
+                <div className="flex space-x-[0.4rem] items-end">
+                  <TokenIcon large src="/ogv.svg" alt="OGV" />
+                  <CardStat large>
+                    <TokenAmount amount={claimableVeOgv} />
+                  </CardStat>
+                  <CardDescription large>OGV</CardDescription>
+                </div>
               </div>
-              <CardDescription>OGV</CardDescription>
+            </Card>
+            <div className="space-y-2">
+              <span className="text-sm">Lockup reward</span>
+              <Card tightPadding noShadow dark>
+                <div className="flex">
+                  <div className="flex space-x-2 items-end">
+                    <CardStat large>
+                      {veOgvLockupRewardApy.toFixed(2)}%
+                    </CardStat>
+                    <CardDescription large>vAPY</CardDescription>
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
-          <Card alt tightPadding>
-            <div className="space-y-1">
-              <CardLabel>Lock-up reward</CardLabel>
-              <div className="flex space-x-1 items-center">
-                <CardStat>{veOgvLockupRewardApy.toFixed(2)}%</CardStat>
+          </CardGroup>
+          <div className="pt-2">
+            <CardGroup twoCol horizontal>
+              <div className="space-y-2 flex flex-col">
+                <span className="text-sm">You are locking up</span>
+                <Card tightPadding noShadow>
+                  <div className="divide-y space-y-2">
+                    <div className="flex flex-col space-y-1 relative">
+                      <div className="flex space-x-[0.4rem] items-end">
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
+                        <CardStat>
+                          <TokenAmount amount={claimableVeOgv / 4} />
+                        </CardStat>
+                        <CardDescription large>OGV</CardDescription>
+                      </div>
+                      <div className="block text-xs italic ml-9 text-gray-400">
+                        Unlocks {moment(oneYearFromNow).format("MMM D, YYYY")}
+                      </div>
+                    </div>
+                    <div className="flex flex-col space-y-1 relative pt-2">
+                      <div className="flex space-x-[0.4rem] items-end">
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
+                        <CardStat>
+                          <TokenAmount amount={claimableVeOgv / 4} />
+                        </CardStat>
+                        <CardDescription large>OGV</CardDescription>
+                      </div>
+                      <div className="block text-xs italic ml-9 text-gray-400">
+                        Unlocks {moment(twoYearsFromNow).format("MMM D, YYYY")}
+                      </div>
+                    </div>
+                    <div className="flex flex-col space-y-1 relative pt-2">
+                      <div className="flex space-x-[0.4rem] items-end">
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
+                        <CardStat>
+                          <TokenAmount amount={claimableVeOgv / 4} />
+                        </CardStat>
+                        <CardDescription large>OGV</CardDescription>
+                      </div>
+                      <div className="block text-xs italic ml-9 text-gray-400">
+                        Unlocks{" "}
+                        {moment(threeYearsFromNow).format("MMM D, YYYY")}
+                      </div>
+                    </div>
+                    <div className="flex flex-col space-y-1 relative pt-2">
+                      <div className="flex space-x-[0.4rem] items-end">
+                        <TokenIcon src="/ogv.svg" alt="OGV" />
+                        <CardStat>
+                          <TokenAmount amount={claimableVeOgv / 4} />
+                        </CardStat>
+                        <CardDescription large>OGV</CardDescription>
+                      </div>
+                      <div className="block text-xs italic ml-9 text-gray-400">
+                        Unlocks {moment(fourYearsFromNow).format("MMM D, YYYY")}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </div>
-              <CardDescription>vAPY</CardDescription>
-            </div>
-          </Card>
-        </CardGroup>
-        <div className="space-y-2 pt-3">
-          <p className="text-gray-600 text-sm">You are claiming:</p>
-          <table className="table table-compact w-full">
-            <tbody>
-              <tr>
-                <th className="flex items-center space-x-2">
-                  <TokenIcon src="/veogv.svg" alt="veOGV" />
-                  <span>veOGV</span>
-                </th>
-                <td className="w-1/4">{veOgvFromVeOgvClaim.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p className="text-gray-600 text-sm">You are locking up:</p>
-          <table className="table table-compact w-full">
-            <tbody>
-              <tr>
-                <th className="flex items-center space-x-2">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>
-                    OGV
-                    <span className="block text-xs text-gray-500 font-normal italic">
-                      unlocks {moment(oneYearFromNow).format("MMM D, YYYY")}
-                    </span>
-                  </span>
-                </th>
-                <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
-              </tr>
-              <tr>
-                <th className="flex items-center space-x-2">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>
-                    OGV
-                    <span className="block text-xs text-gray-500 font-normal italic">
-                      unlocks {moment(twoYearsFromNow).format("MMM D, YYYY")}
-                    </span>
-                  </span>
-                </th>
-                <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
-              </tr>
-              <tr>
-                <th className="flex items-center space-x-2">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>
-                    OGV
-                    <span className="block text-xs text-gray-500 font-normal italic">
-                      unlocks {moment(threeYearsFromNow).format("MMM D, YYYY")}
-                    </span>
-                  </span>
-                </th>
-                <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
-              </tr>
-              <tr>
-                <th className="flex items-center space-x-2">
-                  <TokenIcon src="/ogv.svg" alt="OGV" />
-                  <span>
-                    OGV
-                    <span className="block text-xs text-gray-500 font-normal italic">
-                      unlocks {moment(fourYearsFromNow).format("MMM D, YYYY")}
-                    </span>
-                  </span>
-                </th>
-                <td className="w-1/4">{(claimableVeOgv / 4).toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="pt-3">
-          <Button
-            onClick={async () => {
-              claim.mandatory.claim();
-            }}
-            disabled={claim.mandatory.state !== "ready"}
-            large
-          >
-            {claimButtonText}
-          </Button>
+              <div className="space-y-2 flex flex-col">
+                <span className="text-sm">You are claiming</span>
+                <Card tightPadding noShadow>
+                  <div className="flex">
+                    <div className="flex space-x-[0.4rem] items-end">
+                      <TokenIcon large src="/veogv.svg" alt="veOGV" />
+                      <CardStat large>
+                        <TokenAmount amount={veOgvFromVeOgvClaim} />
+                      </CardStat>
+                      <CardDescription large>veOGV</CardDescription>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </CardGroup>
+          </div>
+          <div className="pt-3">
+            <Button
+              onClick={async () => {
+                claim.mandatory.claim();
+              }}
+              disabled={claim.mandatory.state !== "ready"}
+              large
+              fullWidth
+            >
+              {claimButtonText}
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

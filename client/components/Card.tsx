@@ -27,6 +27,7 @@ const Card: FunctionComponent<CardProps> = ({
       "p-6 md:p-10": !tightPadding && !noPadding,
       "bg-gray-100": alt && !dark,
       "shadow-lg": !noShadow,
+      "px-4 py-5 md:px-5 md:py-6": tightPadding && !noPadding && noShadow,
     }
   );
 

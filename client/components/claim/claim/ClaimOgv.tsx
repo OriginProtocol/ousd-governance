@@ -1,9 +1,6 @@
-import { FunctionComponent, useState, useEffect } from "react";
-import moment from "moment";
+import { FunctionComponent, useState } from "react";
 import Card from "components/Card";
-import { SectionTitle } from "components/SectionTitle";
 import CardGroup from "components/CardGroup";
-import CardLabel from "components/CardLabel";
 import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import CardStat from "components/CardStat";
@@ -239,7 +236,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             as {maxOgvLockupRewardApy.toFixed(2)}% vAPY
           </div>
         )}
-        <div className="pt-3">
+        <div>
           <Button
             onClick={async () => {
               const duration = lockupDuration * 2629746; // Months to seconds
