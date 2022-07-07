@@ -1012,6 +1012,11 @@
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "minStakeDuration_",
+            "type": "uint256"
+          },
+          {
             "internalType": "address",
             "name": "rewardsSource_",
             "type": "address"
@@ -1635,6 +1640,19 @@
           {
             "internalType": "uint256",
             "name": "points",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "minStakeDuration",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
             "type": "uint256"
           }
         ],

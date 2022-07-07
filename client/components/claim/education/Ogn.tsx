@@ -22,8 +22,7 @@ const questions = [
     correctAnswer: "NFT borrowing and lending",
   },
   {
-    question:
-      "Which of the following is the governance token for Origin Story?",
+    question: "Which of the following is the token for Origin Story?",
     answers: ["OUSD", "OGV", "OGN", "DOGE"],
     correctAnswer: "OGN",
   },
@@ -52,54 +51,33 @@ const Ogn: FunctionComponent<OgnProps> = ({ onComplete }) => (
         <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
-            <strong>
-              OGN is your key to earning ETH rewards from the Origin Story
-              platform
-            </strong>
-            , which has powered{" "}
-            <strong>
-              record-breaking NFT drops from 3LAU, Paris Hilton, BT, Trevor
-              Jones, Don Diablo
-            </strong>
-            , and more.
+            OGN is your key to earning ETH rewards from the Origin Story
+            platform , which has powered record-breaking NFT drops from 3LAU,
+            Paris Hilton, BT, Trevor Jones, Don Diablo, and more.
           </p>
           <p>
-            Our mission is to bring <strong>NFTs to everyone</strong> with the{" "}
-            <strong>simplest</strong> and <strong>most trusted way</strong> for
-            creators to{" "}
-            <strong>
-              launch and grow their NFT communities and collections
-            </strong>
-            .
+            Our mission is to bring NFTs to everyone with the simplest and most
+            trusted way for creators to launch and grow their NFT communities
+            and collections.
           </p>
           <p>
-            Origin Story <strong>lowers the barriers of entry</strong> for
-            creators to mint their first NFT and{" "}
-            <strong>create more value for their collectors</strong>.
+            Origin Story lowers the barriers of entry for creators to mint their
+            first NFT and create more value for their collectors.
           </p>
           <p>
-            <strong>With OGN</strong>, Origin Story&apos;s dedicated governance
-            token, <strong>you get a piece of the action</strong>.
+            With OGN, Origin Story&apos;s dedicated governance token, you get a
+            piece of the action.
           </p>
           <p>
-            That means you can buy OGN tokens and “stake” them and{" "}
-            <strong>
-              earn part of the commissions that Origin Story makes on NFT
-              primary and secondary sales
-            </strong>
-            .
+            That means you can buy OGN tokens and “stake” them and earn part of
+            the commissions that Origin Story makes on NFT primary and secondary
+            sales.
           </p>
           <p>
-            With <strong>Origin Story rapidly expanding its platform</strong> to
-            include trusted official{" "}
-            <strong>
-              marketplaces, token-gated access to exclusive experiences
-            </strong>
-            , and more,{" "}
-            <strong>
-              OGN token holders will also benefit as the Origin Story platform
-              grows.
-            </strong>
+            With Origin Story rapidly expanding its platform to include trusted
+            official marketplaces, token-gated access to exclusive experiences,
+            and more, OGN token holders will also benefit as the Origin Story
+            platform grows.
           </p>
         </div>
       </div>

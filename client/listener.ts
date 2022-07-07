@@ -81,16 +81,11 @@ const handleProposalCreated = async (event) => {
 };
 
 const handleStake = async (event) => {
-  const now = event.timestamp;
-
   try {
     await prisma.lockup.create({
       data: {
         user: event.values.user,
         lockupId: parseInt(event.values.lockupId),
-        amount: parseInt(event.values.amount),
-        end: event.values.end,
-        points: parseInt(event.values.points),
       },
     });
     logger.info("Inserted lockup");
@@ -133,23 +128,23 @@ const handleEvents = async (blockNumber, events, done) => {
   for (const event of events) {
     switch(event.name) {
       case 'ProposalCreated':
-        handleProposalCreated(event);
+        await handleProposalCreated(event);
         break;
       case 'Stake':
-        handleStake(event);
+        await handleStake(event);
         break;
       case 'Unstake':
-        handleUnstake(event);
+        await handleUnstake(event);
         break;
       default:
-        handleNewVoter(event);
+        await handleNewVoter(event);
     }
   }
 };
 
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
-  logger.info("Got confirmed block");
-  handleEvents(blockNumber, events, done);
+  logger.info(`Got confirmed block ${blockNumber}`);
+  await handleEvents(blockNumber, events, done);
   const existingLastBlock = await prisma.listener.findFirst();
   if (existingLastBlock) {
     await prisma.listener.update({

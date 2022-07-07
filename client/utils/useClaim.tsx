@@ -27,6 +27,9 @@ const useClaim = () => {
   const [mandatoryClaimState, setMandatoryClaimState] = useState("ready");
   const [optionalClaimState, setOptionalClaimState] = useState("ready");
 
+  const [mandatoryTxReceipt, setMandatoryTxReceipt] = useState("");
+  const [optionalTxReceipt, setOptionalTxReceipt] = useState("");
+
   const maybeConvertToBn = (amount) => {
     if (typeof amount !== "object" || !amount || amount.hex === undefined)
       return null;
@@ -108,13 +111,6 @@ const useClaim = () => {
           distData.optional = {
             ...distributor,
             claim: async (duration) => {
-              // the duration for the stake is in seconds
-              const durationTime = BigNumber.from(duration)
-                .mul(24)
-                .mul(60)
-                .mul(60)
-                .mul(7);
-
               setOptionalClaimState("waiting-for-user");
               let claimResult;
               try {
@@ -127,9 +123,10 @@ const useClaim = () => {
                   claim.optional.index,
                   claim.optional.amount,
                   claim.optional.proof,
-                  durationTime,
+                  duration,
                   { gasLimit: 1000000 } // @TODO maybe set this to lower amount
                 );
+                setOptionalTxReceipt(claimResult.hash);
               } catch (e) {
                 setOptionalClaimState("ready");
                 throw e;
@@ -147,6 +144,7 @@ const useClaim = () => {
                 }
               } catch (e) {
                 setOptionalClaimState("ready");
+                setOptionalTxReceipt("");
                 throw e;
               }
 
@@ -185,6 +183,7 @@ const useClaim = () => {
                   claim.mandatory.proof,
                   { gasLimit: 1000000 }
                 ); // @TODO maybe set this to lower
+                setMandatoryTxReceipt(claimResult.hash);
               } catch (e) {
                 setMandatoryClaimState("ready");
                 throw e;
@@ -202,6 +201,7 @@ const useClaim = () => {
                 }
               } catch (e) {
                 setMandatoryClaimState("ready");
+                setMandatoryTxReceipt("");
                 throw e;
               }
 
@@ -251,11 +251,13 @@ const useClaim = () => {
       state: optionalClaimState,
       ...claim.optional,
       ...distributorData.optional,
+      receipt: optionalTxReceipt,
     },
     mandatory: {
       state: mandatoryClaimState,
       ...claim.mandatory,
       ...distributorData.mandatory,
+      receipt: mandatoryTxReceipt,
     },
     staking: {
       // total supply adjusted for APY, with min amount - type: numeral

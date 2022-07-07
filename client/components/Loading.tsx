@@ -1,12 +1,17 @@
-export const Loading = ({ small = false }) => {
-  const classNames = !small
-    ? "inline mr-2 w-8 h-8 text-gray-200 animate-spin fill-blue-600"
-    : "w-4 h-4 text-gray-200 animate-spin fill-blue-600";
+import classNames from "classnames";
+
+const Loading = ({ small = false, large = false }) => {
+  const className = classNames("", {
+    "inline mr-2 w-8 h-8 text-gray-200 animate-spin fill-accent": !small,
+    "w-4 h-4 text-gray-200 animate-spin fill-accent": small,
+    "w-16 h-16": large,
+  });
+
   return (
     <div className="text-center">
       <svg
         role="status"
-        className={classNames}
+        className={className}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -23,3 +28,5 @@ export const Loading = ({ small = false }) => {
     </div>
   );
 };
+
+export { Loading };

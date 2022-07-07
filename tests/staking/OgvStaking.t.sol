@@ -2,6 +2,8 @@
 pragma solidity 0.8.10;
 
 import "forge-std/Test.sol";
+import "../../contracts/upgrades/RewardsSourceProxy.sol";
+import "../../contracts/upgrades/OgvStakingProxy.sol";
 import "../../contracts/OgvStaking.sol";
 import "../../contracts/RewardsSource.sol";
 import "../../contracts/tests/MockOgv.sol";
@@ -16,12 +18,22 @@ contract OgvStakingTest is Test {
     address team = address(0x44);
 
     uint256 constant EPOCH = 1 days;
+    uint256 constant MIN_STAKE_DURATION = 7 days;
 
     function setUp() public {
         vm.startPrank(team);
         ogv = new MockOgv();
         source = new RewardsSource(address(ogv));
-        staking = new OgvStaking(address(ogv), EPOCH, address(source));
+
+        RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
+        rewardsProxy.initialize(address(source), team, '');
+        source = RewardsSource(address(rewardsProxy));
+
+        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
+        OgvStakingProxy stakingProxy = new OgvStakingProxy();
+        stakingProxy.initialize(address(staking), team, '');
+        staking = OgvStaking(address(stakingProxy));
+
         source.setRewardsTarget(address(staking));
         vm.stopPrank();
 
@@ -127,7 +139,7 @@ contract OgvStakingTest is Test {
     function testStakeTooShort() public {
         vm.prank(alice);
         vm.expectRevert("Staking: Too short");
-        staking.stake(1 ether, 1 days, alice);
+        staking.stake(1 ether, 6 days, alice);
     }
 
     function testExtend() public {

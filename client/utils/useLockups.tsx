@@ -41,29 +41,6 @@ const useLockups = () => {
       });
     };
 
-    /*const loadLockups1 = async () => {
-      const lockupIds = data?.lockups.map((lockup) => lockup.lockupId);
-      const lockupCalls = lockupIds.map(
-        async (id) => await contracts.OgvStaking.lockups(address, id)
-      );
-
-      Promise.all(lockupCalls).then((lockups) => {
-        const lockupAmounts = lockups.map((lockup) => lockup.amount);
-
-        const totalOgvLockedUp = lockupAmounts.reduce(
-          (total: ethers.BigNumber, amount) => {
-            return total.add(amount);
-          },
-          ethers.BigNumber.from("0")
-        );
-
-        useStore.setState({
-          lockups,
-          totalOgvLockedUp,
-        });
-      });
-    };*/
-
     if (
       claimIsOpen() &&
       web3Provider &&
