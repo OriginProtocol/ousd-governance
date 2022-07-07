@@ -42,13 +42,17 @@ const cumulativeRewardScore = (
               // Ignore amounts less than 0, this can happen with OUSD due to
               // the rebased yield not being included
               if (bigNumberify(amount).lt(0)) return acc;
-              // Block number of history event is lower than the
-              // rewardFromBlock, ignore
-              if (blockNumber < rewardFromBlock) return acc;
 
-              // The history entry might have a block number lower than the start of rewards, so
-              // set it to the highest of the two
-              let firstBlock = Math.max(rewardFromBlock, blockNumber);
+              const nextBlockNumber = history[currentIndex + 1] && history[currentIndex + 1].blockNumber
+              if (nextBlockNumber && nextBlockNumber < rewardFromBlock) {
+                // Next blockNumber is still below reward from block, move on
+                return acc
+              }
+
+              // We start calculating rewards from the rewardFromBlock if
+              // blockNumber is below that, or we just use blockNumber
+              const firstBlock = Math.max(rewardFromBlock, blockNumber)
+
               let lastBlock: number;
               if (currentIndex === history.length - 1) {
                 // Last history entry, use the difference between the given
