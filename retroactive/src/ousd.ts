@@ -95,8 +95,12 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
     );
   }
 
-  // Save the progress every 50000 blocks
-  if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK) {
+  // Save the progress every 50000 blocks OR on the block before the snapshot
+  // block. The block before is used so that when it restarts it will resume
+  // from the block before, process the final block, and then generate the
+  // data. If the snapshot block was used directly it'd keep processing the
+  // snapshot block and adding any data every time it was run.
+  if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK - 1) {
     savedProgress = {
       blockNumber,
       ousdHolders,
