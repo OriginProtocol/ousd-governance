@@ -1,14 +1,13 @@
 import { FunctionComponent, useCallback } from "react";
-import Image from "next/image";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
 import { useStore } from "utils/store";
-import { truncateEthAddress } from "utils/index";
 import useClaim from "utils/useClaim";
 import EligibilityItem from "components/claim/EligibilityItem";
 import Icon from "@mdi/react";
 import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
+import { Loading } from "components/Loading";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -19,6 +18,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
+  const { loaded } = claim;
   const isEligible = claim.loaded && claim.hasClaim;
   const claimValid =
     (isEligible && claim.optional && claim.optional.isValid) ||
@@ -37,7 +37,13 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     [web3Modal, provider, resetWeb3State]
   );
 
-  const canAdvance = web3Provider && isEligible;
+  if (!address || !loaded) {
+    return (
+      <Card>
+        <Loading large />
+      </Card>
+    );
+  }
 
   return (
     <>
