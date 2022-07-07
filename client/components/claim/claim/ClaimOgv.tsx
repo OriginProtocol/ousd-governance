@@ -66,6 +66,11 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     claimButtonText = "Claimed";
   }
 
+  const showModal =
+    claim.optional.state === "waiting-for-user" ||
+    claim.optional.state === "waiting-for-network" ||
+    claim.optional.state === "claimed";
+
   return (
     <>
       <Card>
@@ -262,7 +267,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
         </div>
       </Card>
-      <PostClaimModal show />
+      <PostClaimModal show={showModal} claim={claim.optional} />
     </>
   );
 };
