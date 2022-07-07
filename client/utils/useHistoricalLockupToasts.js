@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { sample, random, maxBy } from "lodash";
+import { sample, random, maxBy, includes } from "lodash";
 import { useStore } from "utils/store";
 import { toast } from "react-toastify";
 import { utils } from "ethers";
 import { truncateEthAddress } from "utils";
 
 const useHistoricalLockupToasts = () => {
-  const { web3Provider, contracts } = useStore();
+  const { web3Provider, contracts, recentLockups } = useStore();
   // 13.13 seconds is average block time (on 7.7.2022) ~
   const blocksToLookBack = 1300; // roughly 2 days
   const SECONDS_IN_A_MONTH = 2592000;
-  const [recentLockups, setRecentLockups] = useState([]);
-  const [newEvent, setNewEvent] = useState(null);
 
   const displayToast = async (event) => {
     const address = event.args[0];
@@ -42,37 +40,47 @@ const useHistoricalLockupToasts = () => {
     );
   };
 
-  /* because of the way event listener handler code does not get access to updated
-   * react component state. Separate useEffect is needed to handle populating the
-   * recent lockups array.
-   */
-  useEffect(() => {
-    if (!newEvent) {
-      return;
-    }
-    setRecentLockups([
-      ...recentLockups,
-      {
-        shown: false,
-        rawEvent: newEvent,
-      },
-    ]);
-    setNewEvent(null);
-  }, [newEvent]);
-
   useEffect(() => {
     const newStakeListener = (...params) => {
       const event = params[params.length - 1];
+      // fetch actual state, and not a version that was added to function
+      const recentLockups = useStore.getState().recentLockups;
+
+      const addEvent = (event, showIt) => {
+        useStore.setState({
+          recentLockups: [
+            ...recentLockups,
+            {
+              shown: !showIt,
+              rawEvent: event,
+            },
+          ],
+        });
+      };
 
       /* TODO: decide whether to add event to array of events and show at a predictable pace
        * OR show events immediately in real-time
        */
-      // setNewEvent(event); // add at predictable pace
-      displayToast(event); // show immediately
+
+      // OPTION 1: uncomment this for show new event at predictable pace
+      //addEvent(event, true);
+
+      // OPTION 2: show event immediately
+      // sometimes listener will fetch events that have already happened
+      if (
+        !includes(
+          recentLockups.map((e) => e.rawEvent.transactionHash),
+          event.transactionHash
+        )
+      ) {
+        addEvent(event, false);
+        displayToast(event);
+      }
     };
 
     const getPastStakes = async () => {
-      if (!contracts.loaded) {
+      // contracts not loaded or lockups already initialized
+      if (!contracts.loaded || recentLockups.length > 0) {
         return;
       }
 
@@ -83,14 +91,14 @@ const useHistoricalLockupToasts = () => {
         blocksToLookBack
       );
 
-      setRecentLockups(
-        events.map((event) => {
+      useStore.setState({
+        recentLockups: events.map((event) => {
           return {
             shown: false,
             rawEvent: event,
           };
-        })
-      );
+        }),
+      });
 
       // subscribe for events only after past events have already been fetched
       OgvStaking.on(stakesFilter, newStakeListener);
@@ -108,7 +116,7 @@ const useHistoricalLockupToasts = () => {
       // unsubscribe
       OgvStaking.off(stakesFilter, newStakeListener);
     };
-  }, [contracts]);
+  }, [contracts, recentLockups]);
 
   useEffect(() => {
     const alertLoop = setInterval(async () => {
@@ -129,7 +137,9 @@ const useHistoricalLockupToasts = () => {
           latestEvent.rawEvent.transactionHash
       );
 
-      setRecentLockups([...otherEvents, latestEvent]);
+      useStore.setState({
+        recentLockups: [...otherEvents, latestEvent],
+      });
 
       displayToast(latestEvent.rawEvent);
     }, random(5000, 20000, true));
