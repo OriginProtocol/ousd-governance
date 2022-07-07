@@ -1,9 +1,7 @@
 import { FunctionComponent, useState } from "react";
 import moment from "moment";
 import Card from "components/Card";
-import { SectionTitle } from "components/SectionTitle";
 import CardGroup from "components/CardGroup";
-import CardLabel from "components/CardLabel";
 import TokenIcon from "components/TokenIcon";
 import TokenAmount from "components/TokenAmount";
 import CardStat from "components/CardStat";
@@ -13,6 +11,8 @@ import useClaim from "utils/useClaim";
 import { decimal18Bn } from "utils";
 import numeral from "numeraljs";
 import { getRewardsApy } from "utils/apy";
+import Icon from "@mdi/react";
+import { mdiArrowRight } from "@mdi/js";
 
 interface ClaimVeOgvProps {}
 
@@ -203,9 +203,18 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </div>
                 </Card>
               </div>
+              <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
+              <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
+              <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[107px] sm:mt-[5px] -ml-[16px] sm:-ml-[8px]">
+                <Icon
+                  path={mdiArrowRight}
+                  size={0.7}
+                  className="text-gray-400"
+                />
+              </div>
             </CardGroup>
           </div>
-          <div className="pt-3">
+          <div>
             <Button
               onClick={async () => {
                 claim.mandatory.claim();

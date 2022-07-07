@@ -12,7 +12,7 @@ import numeral from "numeraljs";
 import { getRewardsApy } from "utils/apy";
 import { decimal18Bn } from "utils";
 import Icon from "@mdi/react";
-import { mdiAlertCircle } from "@mdi/js";
+import { mdiAlertCircle, mdiArrowRight } from "@mdi/js";
 
 interface ClaimOgvProps {}
 
@@ -226,6 +226,15 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                     </div>
                   </div>
                 </Card>
+              </div>
+              <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
+              <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
+              <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[5px] -ml-[16px] sm:-ml-[8px]">
+                <Icon
+                  path={mdiArrowRight}
+                  size={0.7}
+                  className="text-gray-400"
+                />
               </div>
             </CardGroup>
           )}
