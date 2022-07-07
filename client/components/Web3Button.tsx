@@ -5,7 +5,7 @@ import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
-import { INFURA_ID, mainnetNetworkUrl } from "constants/index";
+import { RPC_URLS, mainnetNetworkUrl } from "constants/index";
 import { toast } from "react-toastify";
 import classNames from "classnames";
 
@@ -13,7 +13,7 @@ const providerOptions = {
   walletconnect: {
     package: WalletConnectProvider, // required
     options: {
-      infuraId: INFURA_ID, // required
+      rpc: RPC_URLS,
     },
   },
   "custom-walletlink": {

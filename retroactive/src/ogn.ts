@@ -456,6 +456,7 @@ const calculateRewards = async () => {
   console.log(
     `OGN Staking rewards ${totalOgnStakersScore.mul(100).div(totalOgnScore)}%`
   );
+  console.log('Total LM score', totalLiquidityMiningScore.toString())
   console.log(
     `OUSD3CRV-f-rewards ${totalOusd3CrvRewardsScore
       .mul(100)

@@ -2,10 +2,8 @@ import LocalGovernanceContracts from "../networks/governance.localhost.json";
 import RinkebyGovernanceContracts from "../networks/governance.rinkeby.json";
 import MainnetGovernanceContracts from "../networks/governance.mainnet.json";
 
-export const INFURA_ID = "460f40a260564ac4a4f4b3fffb032dad";
-export const mainnetNetworkUrl = `https://mainnet.infura.io/v3/${INFURA_ID}`;
-export const rinkebyNetworkUrl =
-  "https://eth-rinkeby.alchemyapi.io/v2/i4XEfcs5ZohhedGPYPK72GBrz6mBpjAP";
+export const mainnetNetworkUrl = process.env.WEB3_PROVIDER;
+export const rinkebyNetworkUrl = process.env.WEB3_PROVIDER;
 
 export const RPC_URLS = {
   1: mainnetNetworkUrl,
