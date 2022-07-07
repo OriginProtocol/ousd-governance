@@ -16,7 +16,8 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = bigNumberify("400000000000000000000000000");
-const SNAPSHOT_BLOCK = 15036444;
+// https://etherscan.io/block/15087759
+const SNAPSHOT_BLOCK = 15087759;
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
