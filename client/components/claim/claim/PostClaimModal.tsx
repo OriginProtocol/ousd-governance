@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, Dispatch, SetStateAction } from "react";
 import Modal from "components/Modal";
 import { Loading } from "components/Loading";
 import Link from "components/Link";
@@ -15,16 +15,22 @@ import Image from "next/image";
 interface PostClaimModalProps {
   show: Boolean;
   claim: Object;
+  handleClose: Dispatch<SetStateAction<boolean>>;
+  didLock?: Boolean;
+  veOgv?: Number;
 }
 
 const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
   show,
   claim,
+  handleClose,
+  didLock,
+  veOgv,
 }) => {
-  const { state } = claim;
+  const { state, amount, receipt } = claim;
 
   return (
-    <Modal show={show}>
+    <Modal show={show} handleClose={handleClose}>
       <div className="text-center">
         {"waiting-for-user" === state && (
           <div className="py-5 md:py-10 space-y-6">
@@ -48,12 +54,21 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
             <div className="space-y-2">
               <h2 className="font-bold text-3xl">Processing transaction</h2>
               <p className="text-gray-500 text-lg">
-                Locking up 75 OGV and claiming 787 veOGV...
+                {didLock ? (
+                  <>
+                    Locking up <TokenAmount amount={amount} /> OGV and claiming{" "}
+                    <TokenAmount amount={veOgv} /> veOGV...
+                  </>
+                ) : (
+                  <>
+                    Claiming <TokenAmount amount={amount} /> OGV...
+                  </>
+                )}
               </p>
             </div>
             <Link
               newWindow
-              href="https://etherscan.io"
+              href={`https://etherscan.io/tx/${receipt}`}
               className="inline-flex items-center space-x-1 text-sm hover:underline"
             >
               <span>View explorer</span>
@@ -66,39 +81,43 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
             <div className="space-y-6">
               <h2 className="font-bold text-3xl">Success!</h2>
               <div className="space-y-3">
-                <CardGroup horizontal twoCol>
+                <CardGroup horizontal={didLock} twoCol={didLock}>
                   <div className="space-y-2 flex flex-col">
-                    <span className="text-sm">You have locked</span>
+                    <span className="text-sm">
+                      {didLock ? "You have locked" : "You have claimed"}
+                    </span>
                     <Card tightPadding noShadow alt>
                       <div className="flex justify-center">
                         <div className="flex space-x-[0.4rem] items-end">
                           <TokenIcon large src="/ogv.svg" alt="OGV" />
                           <CardStat large>
-                            <TokenAmount amount={10} />
+                            <TokenAmount amount={amount} />
                           </CardStat>
                           <CardDescription large>OGV</CardDescription>
                         </div>
                       </div>
                     </Card>
                   </div>
-                  <div className="space-y-2 flex flex-col">
-                    <span className="text-sm">You have claimed</span>
-                    <Card tightPadding noShadow alt>
-                      <div className="flex justify-center">
-                        <div className="flex space-x-[0.4rem] items-end">
-                          <TokenIcon large src="/veogv.svg" alt="veOGV" />
-                          <CardStat large>
-                            <TokenAmount amount={10} />
-                          </CardStat>
-                          <CardDescription large>veOGV</CardDescription>
+                  {didLock && (
+                    <div className="space-y-2 flex flex-col">
+                      <span className="text-sm">You have claimed</span>
+                      <Card tightPadding noShadow alt>
+                        <div className="flex justify-center">
+                          <div className="flex space-x-[0.4rem] items-end">
+                            <TokenIcon large src="/veogv.svg" alt="veOGV" />
+                            <CardStat large>
+                              <TokenAmount amount={veOgv} />
+                            </CardStat>
+                            <CardDescription large>veOGV</CardDescription>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
-                  </div>
+                      </Card>
+                    </div>
+                  )}
                 </CardGroup>
                 <Link
                   newWindow
-                  href="https://etherscan.io"
+                  href={`https://etherscan.io/tx/${receipt}`}
                   className="inline-flex items-center space-x-1 text-sm hover:underline"
                 >
                   <span>View explorer</span>

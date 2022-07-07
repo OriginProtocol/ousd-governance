@@ -20,6 +20,8 @@ interface ClaimOgvProps {}
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
 
+  const [hideModal, sethideModal] = useState(true);
+
   const maxLockupDurationInMonths = 12 * 4;
   const [lockupDuration, setLockupDuration] = useState(
     maxLockupDurationInMonths
@@ -50,8 +52,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     totalSupplyVeOgv
   );
 
-  const now = new Date();
-  const lockupEnd = new Date(now.getTime() + lockupDuration * 2629746 * 1000); // Months to seconds to miliseconds
+  // const now = new Date();
+  // const lockupEnd = new Date(now.getTime() + lockupDuration * 2629746 * 1000); // Months to seconds to miliseconds
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -67,9 +69,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   }
 
   const showModal =
-    claim.optional.state === "waiting-for-user" ||
-    claim.optional.state === "waiting-for-network" ||
-    claim.optional.state === "claimed";
+    !hideModal &&
+    (claim.optional.state === "waiting-for-user" ||
+      claim.optional.state === "waiting-for-network" ||
+      claim.optional.state === "claimed");
 
   return (
     <>
@@ -255,6 +258,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           <div>
             <Button
               onClick={async () => {
+                sethideModal(false);
                 const duration = lockupDuration * 2629746; // Months to seconds
                 claim.optional.claim(duration);
               }}
@@ -267,7 +271,13 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
         </div>
       </Card>
-      <PostClaimModal show={showModal} claim={claim.optional} />
+      <PostClaimModal
+        handleClose={sethideModal}
+        show={showModal}
+        claim={claim.optional}
+        didLock={isValidLockup}
+        veOgv={veOgvFromOgvLockup}
+      />
     </>
   );
 };

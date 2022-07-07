@@ -1,10 +1,9 @@
-import { FunctionComponent, ReactNode } from "react";
-import Button from "components/Button";
+import { FunctionComponent, ReactNode, Dispatch, SetStateAction } from "react";
 import classNames from "classnames";
 
 interface ModalProps {
   show: Boolean;
-  handleClose?: () => void;
+  handleClose?: Dispatch<SetStateAction<boolean>>;
   children: ReactNode;
 }
 
@@ -18,11 +17,8 @@ const Modal: FunctionComponent<ModalProps> = ({
   });
 
   return (
-    <div className={className} style={{ marginTop: 0 }}>
-      <div className="modal-box bg-white">
-        {children}
-        {handleClose && <Button onClick={handleClose}>Close</Button>}
-      </div>
+    <div className={className} style={{ marginTop: 0 }} onClick={handleClose}>
+      <div className="modal-box bg-white">{children}</div>
     </div>
   );
 };
