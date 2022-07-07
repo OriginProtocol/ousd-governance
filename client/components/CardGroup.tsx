@@ -16,7 +16,7 @@ const CardGroup: FunctionComponent<CardGroupProps> = ({
   fourCol,
   dontStackOnMobile,
 }) => {
-  const classes = classNames("w-full", {
+  const classes = classNames("w-full relative", {
     "grid gap-2": horizontal,
     "space-y-5": !horizontal,
     "sm:grid-cols-2": twoCol,
