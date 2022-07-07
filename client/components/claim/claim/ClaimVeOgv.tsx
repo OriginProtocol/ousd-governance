@@ -146,7 +146,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             <div className="">
               <CardGroup twoCol horizontal>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are locking up</span>
+                  <span className="text-sm">You are locking</span>
                   <Card tightPadding noShadow>
                     <div className="divide-y space-y-2">
                       <div className="flex flex-col relative">

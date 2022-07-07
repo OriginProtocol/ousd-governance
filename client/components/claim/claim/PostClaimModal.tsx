@@ -56,7 +56,7 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
               <p className="text-gray-500 text-lg">
                 {didLock ? (
                   <>
-                    Locking up <TokenAmount amount={amount} /> OGV and claiming{" "}
+                    Locking <TokenAmount amount={amount} /> OGV and claiming{" "}
                     <TokenAmount amount={veOgv} /> veOGV...
                   </>
                 ) : (

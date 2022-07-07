@@ -95,7 +95,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">
-              Lock up your OGV &amp; earn rewards
+              Lock your OGV &amp; earn rewards
             </h2>
             <div>
               <RangeInput
@@ -211,7 +211,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             ) : (
               <CardGroup horizontal twoCol>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are locking up</span>
+                  <span className="text-sm">You are locking</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
@@ -252,8 +252,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
           {!isValidLockup && (
             <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
-              Warning: by not locking up your OGV you are missing out on as much
-              as {maxOgvLockupRewardApy.toFixed(2)}% vAPY
+              Warning: by not locking your OGV you are missing out on as much as{" "}
+              {maxOgvLockupRewardApy.toFixed(2)}% vAPY
             </div>
           )}
           {error && (
