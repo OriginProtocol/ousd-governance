@@ -9,6 +9,8 @@ interface ButtonProps {
   disabled?: Boolean;
   fullWidth?: Boolean;
   alt?: Boolean;
+  white?: Boolean;
+  black?: Boolean;
 }
 
 const Button: FunctionComponent<ButtonProps> = ({
@@ -20,8 +22,9 @@ const Button: FunctionComponent<ButtonProps> = ({
   fullWidth,
   alt,
   white,
+  black,
 }) => {
-  const className = classNames("btn rounded-full", {
+  const className = classNames("btn rounded-full normal-case space-x-2", {
     "btn-lg h-[3.25rem] min-h-[3.25rem]": large,
     "btn-sm": small,
     "w-full": fullWidth,
@@ -29,6 +32,8 @@ const Button: FunctionComponent<ButtonProps> = ({
     "btn-primary btn-outline": alt,
     "bg-white hover:bg-gray-100 active:bg-gray-100 focus:bg-gray-100 text-accent":
       white,
+    "bg-black text-white border-black hover:bg-gray-900 hover:border-gray-900":
+      black,
   });
 
   return (

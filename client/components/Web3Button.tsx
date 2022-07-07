@@ -1,5 +1,5 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { providers } from "ethers";
+import { providers, utils } from "ethers";
 import { useCallback, useEffect, FunctionComponent } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
@@ -89,7 +89,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
       const newAccount: string =
         accounts.length === 0 ? undefined : accounts[0];
       let storeUpdate = {
-        address: newAccount,
+        address: utils.getAddress(newAccount), // ensure checksum address to prevent excess state updates
       };
       resetWeb3State();
 

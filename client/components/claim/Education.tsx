@@ -18,7 +18,7 @@ const Education: FunctionComponent<EducationProps> = ({ handleNextStep }) => {
     setCurrentEducationStep(currentEducationStep + 1);
   };
 
-  const educationSteps = ["OUSD", "OGN", "OGV"];
+  const educationSteps = ["OUSD", "OGV", "OGN"];
 
   return (
     <div className="lg:flex">
@@ -61,9 +61,9 @@ const Education: FunctionComponent<EducationProps> = ({ handleNextStep }) => {
           <Ousd onComplete={handleNextEducationStep} />
         )}
         {currentEducationStep === 1 && (
-          <Ogn onComplete={handleNextEducationStep} />
+          <Ogv onComplete={handleNextEducationStep} />
         )}
-        {currentEducationStep === 2 && <Ogv handleNextStep={handleNextStep} />}
+        {currentEducationStep === 2 && <Ogn handleNextStep={handleNextStep} />}
       </div>
     </div>
   );

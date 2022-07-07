@@ -1,8 +1,6 @@
 import { BigNumber } from "ethers";
 import numeral from "numeraljs";
 
-const ogvPriceBP = BigNumber.from(1500); // @TODO replace with live value - format is in basis points
-
 export function getDailyRewardsEmissions(time = Date.now() / 1000) {
   // format: start_timestamp, end_timestamp, daily emissions
   const data = [
@@ -39,9 +37,9 @@ export function getRewardsApy(
   const ogvPercentageOfRewards =
     veOgvReceived / (totalSupplyVeOgv + veOgvReceived);
   const ogvRewardsDaily = getDailyRewardsEmissions() * ogvPercentageOfRewards;
-  const valueOfOgvRewardsYearly = (ogvRewardsDaily * 365.25 * ogvPriceBP) / 1e4;
-  const valueOfOgvToStake = (ogvToStake * ogvPriceBP) / 1e4;
-  const ogvLockupRewardApr = valueOfOgvRewardsYearly / valueOfOgvToStake;
+  const ogvRewardsYearly = ogvRewardsDaily * 365.25;
+  // No need to use actual prices since originating tokens and reward tokens have the same price
+  const ogvLockupRewardApr = ogvRewardsYearly / ogvToStake;
 
   /* APR to APY formula:
    * APY = Math.pow((1 + Periodic Rate), Number of periods) – 1
