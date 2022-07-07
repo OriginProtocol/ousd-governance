@@ -1,14 +1,13 @@
 import { FunctionComponent, useCallback } from "react";
-import Image from "next/image";
 import Card from "components/Card";
 import { Web3Button } from "components/Web3Button";
 import Button from "components/Button";
 import { useStore } from "utils/store";
-import { truncateEthAddress } from "utils/index";
 import useClaim from "utils/useClaim";
 import EligibilityItem from "components/claim/EligibilityItem";
 import Icon from "@mdi/react";
 import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
+import { Loading } from "components/Loading";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -19,9 +18,10 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
-  const isEligible = claim.loaded && claim.hasClaim;
+  const { loaded, hasClaim } = claim;
+
   const claimValid =
-    (isEligible && claim.optional && claim.optional.isValid) ||
+    (hasClaim && claim.optional && claim.optional.isValid) ||
     (claim.mandatory && claim.mandatory.isValid);
 
   const resetWeb3State = useStore((state) => state.reset);
@@ -37,7 +37,15 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     [web3Modal, provider, resetWeb3State]
   );
 
-  const canAdvance = web3Provider && isEligible;
+  if (web3Provider && !loaded) {
+    return (
+      <Card>
+        <div className="py-20">
+          <Loading large />
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -59,7 +67,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </div>
           ) : (
             <>
-              {isEligible ? (
+              {hasClaim ? (
                 <div className="space-y-2">
                   {claimValid ? (
                     <div className="mb-20">
@@ -147,7 +155,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
               )}
             </>
           )}
-          {isEligible && claimValid && (
+          {hasClaim && claimValid && (
             <div className="space-y-2">
               <table className="table w-full mt-6">
                 <thead>
