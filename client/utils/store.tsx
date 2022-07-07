@@ -41,6 +41,7 @@ const defaultState: Web3DataType = {
     lockups: [],
     totalOgvLockedUp: ethers.BigNumber.from("0"),
   },
+  recentLockups: [],
   allowances: {
     ogv: ethers.BigNumber.from("0"),
   },
