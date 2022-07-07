@@ -10,6 +10,10 @@ import {UUPSUpgradeable} from "OpenZeppelin/openzeppelin-contracts-upgradeable@4
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {RewardsSource} from "./RewardsSource.sol";
 
+contract UpgradeGap {
+    uint256[1000] _gap;
+}
+
 /// @title OGV Staking
 /// @author Daniel Von Fange
 /// @notice Provides staking, vote power history, vote delegation, and rewards
@@ -21,6 +25,7 @@ contract OgvStaking is
     Initializable,
     OwnableUpgradeable,
     UUPSUpgradeable,
+    UpgradeGap,
     ERC20VotesUpgradeable
 {
     // 1. Core Storage
