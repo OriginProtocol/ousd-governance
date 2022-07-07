@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
+import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
+import {ERC20VotesUpgradeable} from "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import {OwnableUpgradeable} from "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/OwnableUpgradeable.sol";
+import {Initializable} from "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/UUPSUpgradeable.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {RewardsSource} from "./RewardsSource.sol";
 
@@ -13,10 +17,10 @@ import {RewardsSource} from "./RewardsSource.sol";
 ///
 /// The balance received for staking (and thus the voting power and rewards
 /// distribution) goes up exponentially by the end of the staked period.
-contract OgvStaking is ERC20Votes {
+contract OgvStaking is Initializable, OwnableUpgradeable, UUPSUpgradeable, ERC20VotesUpgradeable {
     // 1. Core Storage
-    uint256 public immutable epoch; // timestamp
-    uint256 public immutable minStakeDuration; // in seconds
+    uint256 public epoch = 86400; // timestamp
+    uint256 public minStakeDuration = 604800; // in seconds
 
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
@@ -28,8 +32,8 @@ contract OgvStaking is ERC20Votes {
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
-    ERC20 public immutable ogv; // Must not allow reentrancy
-    RewardsSource public immutable rewardsSource;
+    ERC20 public ogv; // Must not allow reentrancy
+    RewardsSource public rewardsSource;
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
@@ -50,17 +54,11 @@ contract OgvStaking is ERC20Votes {
     );
     event Reward(address indexed user, uint256 amount);
 
-    // 1. Core Functions
-
-    constructor(
+    function configure(
         address ogv_,
-        uint256 epoch_,
-        uint256 minStakeDuration_,
         address rewardsSource_
-    ) ERC20("", "") ERC20Permit("veOGV") {
+    ) public onlyOwner {
         ogv = ERC20(ogv_);
-        epoch = epoch_;
-        minStakeDuration = minStakeDuration_;
         rewardsSource = RewardsSource(rewardsSource_);
     }
 
@@ -279,4 +277,10 @@ contract OgvStaking is ERC20Votes {
         ogv.transfer(user, netRewards);
         emit Reward(user, netRewards);
     }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 }
