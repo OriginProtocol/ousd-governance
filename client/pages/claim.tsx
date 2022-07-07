@@ -33,12 +33,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
             {currentStep == 0 && (
               <Eligibility handleNextStep={handleNextStep} />
             )}
-            {currentStep == 1 && (
-              <Education
-                handlePrevStep={handlePrevStep}
-                handleNextStep={handleNextStep}
-              />
-            )}
+            {currentStep == 1 && <Education handleNextStep={handleNextStep} />}
             {currentStep == 2 && <Claim handlePrevStep={handlePrevStep} />}
           </Wrapper>
         </>

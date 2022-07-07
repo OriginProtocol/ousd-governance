@@ -92,7 +92,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
       <Quiz
         questions={questions}
         onComplete={onComplete}
-        onCompleteMessage="Continue to learn about OGN"
+        onCompleteMessage="Continue to learn about OGV"
       />
     </Card>
   </CardGroup>
