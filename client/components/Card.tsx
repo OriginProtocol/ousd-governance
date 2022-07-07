@@ -7,6 +7,7 @@ interface CardProps {
   tightPadding?: Boolean;
   noPadding?: Boolean;
   alt?: Boolean;
+  noShadow?: Boolean;
 }
 
 const Card: FunctionComponent<CardProps> = ({
@@ -15,15 +16,18 @@ const Card: FunctionComponent<CardProps> = ({
   tightPadding,
   noPadding,
   alt,
+  noShadow,
 }) => {
   const classes = classNames(
-    "overflow-x-auto w-full shadow-lg rounded-lg border h-full",
+    "overflow-x-auto w-full rounded-lg border h-full",
     {
       "bg-secondary-focus text-white border-black": dark && !alt,
       "bg-white text-black": !dark && !alt,
       "p-4 md:p-5": tightPadding && !noPadding,
       "p-6 md:p-10": !tightPadding && !noPadding,
       "bg-gray-100": alt && !dark,
+      "shadow-lg": !noShadow,
+      "px-4 py-5 md:px-5 md:py-6": tightPadding && !noPadding && noShadow,
     }
   );
 

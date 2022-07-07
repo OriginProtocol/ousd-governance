@@ -6,7 +6,7 @@ import CardGroup from "components/CardGroup";
 import Quiz from "components/claim/education/Quiz";
 
 interface OgvProps {
-  handleNextStep: () => void;
+  onComplete?: Dispatch<SetStateAction<boolean>>;
 }
 
 const questions = [
@@ -36,7 +36,7 @@ const questions = [
   },
 ];
 
-const Ogv: FunctionComponent<OgvProps> = ({ handleNextStep }) => (
+const Ogv: FunctionComponent<OgvProps> = ({ onComplete }) => (
   <CardGroup>
     <Card>
       <div className="space-y-4">
@@ -77,7 +77,11 @@ const Ogv: FunctionComponent<OgvProps> = ({ handleNextStep }) => (
       </div>
     </Card>
     <Card>
-      <Quiz questions={questions} lastQuiz handleNextStep={handleNextStep} />
+      <Quiz
+        questions={questions}
+        onComplete={onComplete}
+        onCompleteMessage="Continue to learn about OGN"
+      />
     </Card>
   </CardGroup>
 );

@@ -59,8 +59,8 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
             some of the best yields in DeFi with none of the hassle.
           </p>
           <p>
-            “Stablecoins” offer the benefits of cryptocurrencies without the
-            price volatility.
+            Stablecoins offer the benefits of cryptocurrencies without the price
+            volatility.
           </p>
           <p>
             What separates OUSD from ordinary stablecoins is that it grows in
@@ -92,7 +92,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
       <Quiz
         questions={questions}
         onComplete={onComplete}
-        onCompleteMessage="Continue to learn about OGN"
+        onCompleteMessage="Continue to learn about OGV"
       />
     </Card>
   </CardGroup>

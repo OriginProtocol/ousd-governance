@@ -32,7 +32,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   return (
     <Card>
       <SectionTitle>
-        {lockups.length > 0 ? "Your lockups" : "You have no active lockups"}
+        {lockups.length > 0 ? "Your lock-ups" : "You have no active lock-ups"}
       </SectionTitle>
       {lockups.length > 0 && (
         <table className="table table-compact w-full">
