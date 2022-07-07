@@ -70,7 +70,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   return (
     <Card>
       <div className="space-y-8">
-        <div className="space-y-4">
+        <div className="space-y-8">
           <h2 className="text-2xl font-bold">Total claimable pre-locked OGV</h2>
           <CardGroup>
             <Card alt tightPadding noShadow>
@@ -84,10 +84,43 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
               </div>
             </Card>
-            <div className="space-y-2">
-              <span className="text-sm">Lockup reward</span>
+          </CardGroup>
+          <CardGroup twoCol horizontal>
+            <div className="space-y-2 flex flex-col">
+              <span className="text-sm">Lockup periods</span>
+              <Card alt tightPadding noShadow>
+                <div className="divide-y space-y-2">
+                  <div className="flex">
+                    <div className="flex space-x-2 items-end">
+                      <CardStat>12</CardStat>
+                      <CardDescription large>Months</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex space-x-2 items-end pt-2">
+                      <CardStat>24</CardStat>
+                      <CardDescription large>Months</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex space-x-2 items-end pt-2">
+                      <CardStat>36</CardStat>
+                      <CardDescription large>Months</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="flex space-x-2 items-end pt-2">
+                      <CardStat>48</CardStat>
+                      <CardDescription large>Months</CardDescription>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+            <div className="space-y-2 flex flex-col">
+              <span className="text-sm">Lockup rewards</span>
               <Card tightPadding noShadow dark>
-                <div className="flex">
+                <div className="flex items-center">
                   <div className="flex space-x-2 items-end">
                     <CardStat large>
                       {veOgvLockupRewardApy.toFixed(2)}%
@@ -98,13 +131,13 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               </Card>
             </div>
           </CardGroup>
-          <div className="pt-2">
+          <div className="">
             <CardGroup twoCol horizontal>
               <div className="space-y-2 flex flex-col">
                 <span className="text-sm">You are locking up</span>
                 <Card tightPadding noShadow>
                   <div className="divide-y space-y-2">
-                    <div className="flex flex-col space-y-1 relative">
+                    <div className="flex flex-col relative">
                       <div className="flex space-x-[0.4rem] items-end">
                         <TokenIcon src="/ogv.svg" alt="OGV" />
                         <CardStat>
@@ -116,7 +149,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                         Unlocks {moment(oneYearFromNow).format("MMM D, YYYY")}
                       </div>
                     </div>
-                    <div className="flex flex-col space-y-1 relative pt-2">
+                    <div className="flex flex-col relative pt-2">
                       <div className="flex space-x-[0.4rem] items-end">
                         <TokenIcon src="/ogv.svg" alt="OGV" />
                         <CardStat>
@@ -128,7 +161,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                         Unlocks {moment(twoYearsFromNow).format("MMM D, YYYY")}
                       </div>
                     </div>
-                    <div className="flex flex-col space-y-1 relative pt-2">
+                    <div className="flex flex-col relative pt-2">
                       <div className="flex space-x-[0.4rem] items-end">
                         <TokenIcon src="/ogv.svg" alt="OGV" />
                         <CardStat>
@@ -141,7 +174,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                         {moment(threeYearsFromNow).format("MMM D, YYYY")}
                       </div>
                     </div>
-                    <div className="flex flex-col space-y-1 relative pt-2">
+                    <div className="flex flex-col relative pt-2">
                       <div className="flex space-x-[0.4rem] items-end">
                         <TokenIcon src="/ogv.svg" alt="OGV" />
                         <CardStat>
