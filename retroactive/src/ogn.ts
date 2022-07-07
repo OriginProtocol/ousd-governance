@@ -201,7 +201,13 @@ ethereumEvents.on(
     if (blockNumber === SNAPSHOT_BLOCK) {
       ethereumEvents.stop();
 
-      const claims = await calculateRewards();
+      const unsortedClaims = await calculateRewards();
+      const claims = Object.keys(unsortedClaims)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = unsortedClaims[key];
+          return accumulator;
+        }, {});
 
       const csv = Object.entries(claims).map(
         ([address, data]: [address: string, data: any]) => {

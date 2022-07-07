@@ -111,7 +111,14 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 
   if (blockNumber === SNAPSHOT_BLOCK) {
     ethereumEvents.stop();
-    const claims = calculateRewards();
+
+    const unsortedClaims = calculateRewards();
+    const claims = Object.keys(unsortedClaims)
+      .sort()
+      .reduce((accumulator, key) => {
+        accumulator[key] = unsortedClaims[key];
+        return accumulator;
+      }, {});
 
     const csv = Object.entries(claims).map(
       ([address, data]: [address: string, data: any]) => {
