@@ -9,7 +9,7 @@ const useHistoricalLockupToasts = () => {
   const { web3Provider, contracts } = useStore();
   // 13.13 seconds is average block time (on 7.7.2022) ~
   const blocksToLookBack = 1300; // roughly 2 days
-  const SECONDS_IN_A_MONTH = 2629743;
+  const SECONDS_IN_A_MONTH = 2592000;
   const [recentLockups, setRecentLocups] = useState([]);
   const [newEvent, setNewEvent] = useState(null);
 
