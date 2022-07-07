@@ -26,7 +26,7 @@ Fork test after deploy:
 from world import *
 ogv = Contract.from_explorer('0x9c354503C38481a7A7a51629142963F98eCC12D0')
 rewards = Contract.from_explorer('0x7d82e86cf1496f9485a8ea04012afeb3c7489397')
-stakingImpl = Contract.from_explorer('0x8d0c2b11e60c9335772f9c37fa69a6c1ceba6f05')
+stakingImpl = Contract.from_explorer('0xfdf51e8497e9d64c595a49cf4df526ece47be393')
 staking = Contract.from_abi('staking', '0xFdb16A6900Ce90Cb27Afec95dc274D27E0d61b87', stakingImpl.abi)
 
 DEPLOYER_ALT = '0x71F78361537A6f7B6818e7A760c8bC0146D93f50';
