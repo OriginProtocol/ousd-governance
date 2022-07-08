@@ -14,6 +14,7 @@ import { getRewardsApy } from "utils/apy";
 import Icon from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
 import PostClaimModal from "./PostClaimModal";
+import ApyToolTip from "components/claim/claim/ApyTooltip";
 
 interface ClaimVeOgvProps {}
 
@@ -106,10 +107,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               </p>
             </div>
             <CardGroup twoCol horizontal>
-              <div className="space-y-2 flex flex-col">
+              <div className="space-y-2 flex flex-col sm:w-2/3">
                 <span className="text-sm">Staking periods</span>
-                <Card alt tightPadding noShadow>
-                  <div className="divide-y space-y-2">
+                <Card alt noPadding noShadow>
+                  <div className="divide-y p-2 space-y-2">
                     <div className="flex">
                       <div className="flex space-x-2 items-end">
                         <CardStat>12</CardStat>
@@ -137,10 +138,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </div>
                 </Card>
               </div>
-              <div className="space-y-2 flex flex-col">
-                <span className="text-sm">Variable APY</span>
-                <Card tightPadding noShadow dark>
-                  <div className="flex items-center">
+              <div className="flex flex-col sm:text-right sm:w-2/3 sm:ml-auto">
+                <ApyToolTip />
+                <Card noPadding noShadow dark>
+                  <div className="flex p-2 flex-col sm:items-end">
                     <div className="flex space-x-2 items-end">
                       <CardStat large>
                         {veOgvLockupRewardApy.toFixed(2)}
@@ -151,7 +152,8 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </Card>
               </div>
             </CardGroup>
-            <div className="">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Your claim summary</h2>
               <CardGroup twoCol horizontal>
                 <div className="space-y-2 flex flex-col">
                   <span className="text-sm">You are staking</span>

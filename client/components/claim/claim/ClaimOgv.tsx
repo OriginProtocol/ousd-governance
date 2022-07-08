@@ -13,8 +13,8 @@ import { getRewardsApy } from "utils/apy";
 import { decimal18Bn } from "utils";
 import PostClaimModal from "./PostClaimModal";
 import Icon from "@mdi/react";
-import { mdiAlertCircle, mdiArrowRight } from "@mdi/js";
-import ReactTooltip from "react-tooltip";
+import { mdiArrowRight } from "@mdi/js";
+import ApyToolTip from "components/claim/claim/ApyTooltip";
 
 interface ClaimOgvProps {}
 
@@ -120,36 +120,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                     </Card>
                   </div>
                   <div className="flex flex-col sm:text-right sm:w-2/3 sm:ml-auto">
-                    <ReactTooltip
-                      id="variable-apy"
-                      place="right"
-                      type="light"
-                      effect="solid"
-                      borderColor="#dddddd"
-                      border
-                      className="text-left shadow-xl rounded-2xl w-[230px] mr-4 opaque-tooltip"
-                    >
-                      <p className="text-sm text-[#626262] py-3">
-                        The variable APY indicates the addtional OGV that you
-                        would receive over time based on the current number of
-                        stakers and inflation schedule. This yield will change
-                        as more users stake and OUSD grows.
-                      </p>
-                    </ReactTooltip>
-                    <div>
-                      <div
-                        data-tip
-                        data-for="variable-apy"
-                        className="inline-flex space-x-1 items-center sm:justify-end w-auto mb-2"
-                      >
-                        <span className="text-sm">Variable APY</span>
-                        <Icon
-                          path={mdiAlertCircle}
-                          size={0.75}
-                          className="text-secondary mx-auto"
-                        />
-                      </div>
-                    </div>
+                    <ApyToolTip />
                     <Card
                       noPadding
                       noShadow
