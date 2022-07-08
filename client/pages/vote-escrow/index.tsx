@@ -22,7 +22,6 @@ export default function VoteEscrow() {
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
         <AccountBalances />
-
         <YourLockups />
       </CardGroup>
     </Wrapper>
