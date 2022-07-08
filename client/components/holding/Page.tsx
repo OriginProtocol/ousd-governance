@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactNode } from "react";
+import { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import Countdown, { CountdownRendererFn } from "react-countdown";
 import { PageTitle } from "../PageTitle";
 import { SectionTitle } from "../SectionTitle";
@@ -32,14 +32,22 @@ const renderer: CountdownRendererFn = ({ days, hours, minutes, seconds }) => (
 
 const HoldingPage = () => {
   const { claim } = useStore();
-  let date = new Date(0);
-  date.setUTCSeconds(parseInt(claim.claimOpensTs || "0"));
+  const [date, setDate] = useState(null);
+
+  // Super weird workaround so that NextJs doesn't report client/server render miss match
+  useEffect(() => {
+    setTimeout(() => {
+      let date = new Date(0);
+      date.setUTCSeconds(parseInt(claim.claimOpensTs || "0"));
+      setDate(date);
+    }, 1);
+  }, []);
 
   return (
     <>
       <PageTitle>OGV token launch countdown</PageTitle>
       <CardGroup>
-        <Countdown date={date} renderer={renderer} />
+        {date && <Countdown date={date} renderer={renderer} />}
         <Card>
           <SectionTitle>
             <div className="flex items-center justify-between">
