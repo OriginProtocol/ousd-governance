@@ -24,7 +24,8 @@ const OGN_AIRDROP_AMOUNT = bigNumberify("1000000000000000000000000000");
 // Amount of OGV being distributed to participants in the prelaunch LM campaign
 const LM_AIRDROP_AMOUNT = bigNumberify("50000000000000000000000000");
 // When the snapshot should be taken
-const SNAPSHOT_BLOCK = 15036444;
+// https://etherscan.io/block/15087759
+const SNAPSHOT_BLOCK = 15087759;
 // Announce block, i.e. start of LM campaign
 // https://etherscan.io/block/14881677
 const ANNOUNCE_BLOCK = 14881677;
@@ -180,8 +181,12 @@ ethereumEvents.on(
       );
     }
 
-    // Save the progress every 50000 blocks or at the end
-    if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK) {
+    // Save the progress every 50000 blocks OR on the block before the snapshot
+    // block. The block before is used so that when it restarts it will resume
+    // from the block before, process the final block, and then generate the
+    // data. If the snapshot block was used directly it'd keep processing the
+    // snapshot block and adding any data every time it was run.
+    if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK - 1) {
       savedProgress = {
         blockNumber,
         ognHolders,
@@ -196,15 +201,21 @@ ethereumEvents.on(
     if (blockNumber === SNAPSHOT_BLOCK) {
       ethereumEvents.stop();
 
-      const claims = await calculateRewards();
+      const unsortedClaims = await calculateRewards();
+      const claims = Object.keys(unsortedClaims)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = unsortedClaims[key];
+          return accumulator;
+        }, {});
 
       const csv = Object.entries(claims).map(
         ([address, data]: [address: string, data: any]) => {
-          return `${address}, ${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
+          return `${address},${["ogn", "ognStaking", "ousd3Crv", "ousd3CrvGauge", "convex"]
             .map((key) =>
               data.split[key] === undefined ? 0 : data.split[key].toString()
             )
-            .join(",")}, ${data.amount}`;
+            .join(",")},${data.amount}`;
         }
       );
 
@@ -234,6 +245,8 @@ const calculateRewards = async () => {
       )
     )
   );
+
+  console.log(Object.values(ognRewards).filter((v: object) => bigNumberify(v).gt(0)).length, "OGN holders with balance > 0");
 
   const ognInstance = new ethers.Contract(
     ognContract.address,
@@ -439,7 +452,7 @@ const calculateRewards = async () => {
   );
 
   console.log(`Total OGN score`, totalOgnScore.toString());
-  console.log("Total OGN excluding staked", totalOgnHoldersScore.toString());
+  console.log("Total OGN holders score", totalOgnHoldersScore.toString());
   console.log("Total OGN staked (sum)", totalOgnStakersScore.toString());
   console.log(
     "Total OGN staked (balanceOf)",
