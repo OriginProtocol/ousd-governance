@@ -35,7 +35,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           <thead>
             <tr>
               <th>OGV</th>
-              <th>Duration</th>
+              <th>Duration left</th>
               <th>Lockup ends</th>
               <th>veOGV</th>
               <th>&nbsp;</th>
