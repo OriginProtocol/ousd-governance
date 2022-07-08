@@ -38,6 +38,11 @@ export const navItems = [
     href: "/claim",
     label: "Claim",
   },
+  {
+    href: "https://ousd.com/swap",
+    label: "Get OUSD",
+    external: true,
+  },
 ];
 
 export const SECONDS_IN_A_MONTH = 2592000;

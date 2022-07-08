@@ -47,12 +47,14 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               </div>
               {!hideNav && (
                 <ul className="space-x-10 font-light hidden lg:flex">
-                  {navItems.map(({ href, label }) => (
+                  {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
                         className="text-sm text-white hover:underline"
                         currentClassName="font-normal"
                         href={href}
+                        type={external ? "external" : "internal"}
+                        newWindow={external}
                       >
                         {label}
                       </Link>
@@ -99,13 +101,17 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               />
             </button>
             <ul className="w-full text-2xl mt-6">
-              {navItems.map(({ href, label }) => (
+              {navItems.map(({ href, label, external }) => (
                 <li key={label}>
                   <Link
                     className="px-6 py-3 block hover:text-gray-700 text-black border-l-4 border-white"
                     currentClassName="font-normal border-primary"
                     href={href}
-                    onClick={() => setMenuIsOpen(false)}
+                    onClick={
+                      !external ? () => setMenuIsOpen(false) : () => null
+                    }
+                    type={external ? "external" : "internal"}
+                    newWindow={external}
                   >
                     {label}
                   </Link>
