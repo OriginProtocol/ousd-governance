@@ -86,8 +86,8 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                     <span className="text-sm">
                       {didLock ? "You have locked" : "You have claimed"}
                     </span>
-                    <Card tightPadding noShadow alt>
-                      <div className="flex justify-center">
+                    <Card noPadding noShadow alt>
+                      <div className="flex justify-center p-2">
                         <div className="flex space-x-[0.4rem] items-end">
                           <TokenIcon large src="/ogv.svg" alt="OGV" />
                           <CardStat large>
@@ -101,8 +101,8 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                   {didLock && (
                     <div className="space-y-2 flex flex-col">
                       <span className="text-sm">You have claimed</span>
-                      <Card tightPadding noShadow alt>
-                        <div className="flex justify-center">
+                      <Card noPadding noShadow alt>
+                        <div className="flex justify-center p-2">
                           <div className="flex space-x-[0.4rem] items-end">
                             <TokenIcon large src="/veogv.svg" alt="veOGV" />
                             <CardStat large>
