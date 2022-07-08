@@ -95,8 +95,12 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">
-              Lock your OGV &amp; earn rewards
+              Stake your OGV to get maximum rewards and voting power
             </h2>
+            <p className="text-gray-500 text-lg leading-snug">
+              Staking OGV is converted to non-transferable veOGV, which allows
+              you to claim additional OGV and participate in governance.
+            </p>
             <div>
               <RangeInput
                 label=""
