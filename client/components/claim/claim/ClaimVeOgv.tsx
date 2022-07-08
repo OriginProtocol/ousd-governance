@@ -14,6 +14,7 @@ import { getRewardsApy } from "utils/apy";
 import Icon from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
 import PostClaimModal from "./PostClaimModal";
+import ApyToolTip from "components/claim/claim/ApyTooltip";
 
 interface ClaimVeOgvProps {}
 
@@ -61,7 +62,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
 
   let claimButtonText = "";
   if (claim.mandatory.state === "ready") {
-    claimButtonText = "Lock OGV & claim veOGV";
+    claimButtonText = "Claim & Stake OGV";
   } else if (claim.mandatory.state === "waiting-for-user") {
     claimButtonText = "Please confirm transaction";
   } else if (claim.mandatory.state === "waiting-for-network") {
@@ -79,11 +80,9 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   return (
     <>
       <Card>
-        <div className="space-y-8">
+        <div className="space-y-7">
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold">
-              Total claimable pre-locked OGV
-            </h2>
+            <h2 className="text-2xl font-bold">Total claimable staked OGV</h2>
             <CardGroup>
               <Card alt tightPadding noShadow>
                 <div className="flex">
@@ -97,11 +96,21 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
               </Card>
             </CardGroup>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold">
+                Your OGV will be staked automatically for rewards and voting
+                power
+              </h2>
+              <p className="text-gray-500 text-lg leading-snug">
+                Staked OGV is converted to non-transferrable veOGV, which allows
+                you to claim additional OGV and participate in governance.
+              </p>
+            </div>
             <CardGroup twoCol horizontal>
-              <div className="space-y-2 flex flex-col">
-                <span className="text-sm">Lockup periods</span>
-                <Card alt tightPadding noShadow>
-                  <div className="divide-y space-y-2">
+              <div className="space-y-2 flex flex-col sm:w-2/3">
+                <span className="text-sm">Staking periods</span>
+                <Card alt noPadding noShadow>
+                  <div className="divide-y p-2 space-y-2">
                     <div className="flex">
                       <div className="flex space-x-2 items-end">
                         <CardStat>12</CardStat>
@@ -129,24 +138,25 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </div>
                 </Card>
               </div>
-              <div className="space-y-2 flex flex-col">
-                <span className="text-sm">Lockup rewards</span>
-                <Card tightPadding noShadow dark>
-                  <div className="flex items-center">
+              <div className="flex flex-col sm:text-right sm:w-2/3 sm:ml-auto">
+                <ApyToolTip />
+                <Card noPadding noShadow dark>
+                  <div className="flex p-2 flex-col sm:items-end">
                     <div className="flex space-x-2 items-end">
                       <CardStat large>
-                        {veOgvLockupRewardApy.toFixed(2)}%
+                        {veOgvLockupRewardApy.toFixed(2)}
                       </CardStat>
-                      <CardDescription large>vAPY</CardDescription>
+                      <CardDescription large>%</CardDescription>
                     </div>
                   </div>
                 </Card>
               </div>
             </CardGroup>
-            <div className="">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Your claim summary</h2>
               <CardGroup twoCol horizontal>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are locking</span>
+                  <span className="text-sm">You are staking</span>
                   <Card tightPadding noShadow>
                     <div className="divide-y space-y-2">
                       <div className="flex flex-col relative">
@@ -204,7 +214,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are claiming</span>
+                  <span className="text-sm">You get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
@@ -219,10 +229,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
                 <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
                 <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
-                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[107px] sm:mt-[5px] -ml-[16px] sm:-ml-[8px]">
+                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[107px] sm:mt-[6px] -ml-[16px] sm:-ml-[8px]">
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.66}
                     className="text-gray-400"
                   />
                 </div>
