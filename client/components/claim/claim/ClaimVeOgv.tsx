@@ -61,7 +61,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
 
   let claimButtonText = "";
   if (claim.mandatory.state === "ready") {
-    claimButtonText = "Lock OGV & claim veOGV";
+    claimButtonText = "Claim & Stake OGV";
   } else if (claim.mandatory.state === "waiting-for-user") {
     claimButtonText = "Please confirm transaction";
   } else if (claim.mandatory.state === "waiting-for-network") {
@@ -79,11 +79,9 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   return (
     <>
       <Card>
-        <div className="space-y-8">
+        <div className="space-y-7">
           <div className="space-y-8">
-            <h2 className="text-2xl font-bold">
-              Total claimable pre-locked OGV
-            </h2>
+            <h2 className="text-2xl font-bold">Total claimable staked OGV</h2>
             <CardGroup>
               <Card alt tightPadding noShadow>
                 <div className="flex">
@@ -97,9 +95,19 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
               </Card>
             </CardGroup>
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold">
+                Your OGV will be staked automatically for rewards and voting
+                power
+              </h2>
+              <p className="text-gray-500 text-lg leading-snug">
+                Staked OGV is converted to non-transferrable veOGV, which allows
+                you to claim additional OGV and participate in governance.
+              </p>
+            </div>
             <CardGroup twoCol horizontal>
               <div className="space-y-2 flex flex-col">
-                <span className="text-sm">Lockup periods</span>
+                <span className="text-sm">Staking periods</span>
                 <Card alt tightPadding noShadow>
                   <div className="divide-y space-y-2">
                     <div className="flex">
@@ -130,14 +138,14 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </Card>
               </div>
               <div className="space-y-2 flex flex-col">
-                <span className="text-sm">Lockup rewards</span>
+                <span className="text-sm">Variable APY</span>
                 <Card tightPadding noShadow dark>
                   <div className="flex items-center">
                     <div className="flex space-x-2 items-end">
                       <CardStat large>
-                        {veOgvLockupRewardApy.toFixed(2)}%
+                        {veOgvLockupRewardApy.toFixed(2)}
                       </CardStat>
-                      <CardDescription large>vAPY</CardDescription>
+                      <CardDescription large>%</CardDescription>
                     </div>
                   </div>
                 </Card>
@@ -146,7 +154,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
             <div className="">
               <CardGroup twoCol horizontal>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are locking</span>
+                  <span className="text-sm">You are staking</span>
                   <Card tightPadding noShadow>
                     <div className="divide-y space-y-2">
                       <div className="flex flex-col relative">
@@ -204,7 +212,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are claiming</span>
+                  <span className="text-sm">You get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
