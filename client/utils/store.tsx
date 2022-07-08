@@ -37,6 +37,10 @@ const defaultState: Web3DataType = {
     existingEndWeeks: 0,
     existingEndDate: "",
   },
+  claim: {
+    claimOpensTs: process.env.CLAIM_OPENS,
+    claimClosesTs: process.env.CLAIM_CLOSES,
+  },
   lockups: {
     lockups: [],
     totalOgvLockedUp: ethers.BigNumber.from("0"),
