@@ -3,7 +3,7 @@ from brownie import *
 
 MANDATORY_END_BLOCK = 15333935  # TODO change this (!!!)
 OPTIONAL_END_BLOCK = 15333935  # TODO change this (!!!)
-EPOCH = 86400  # 1 day
+EPOCH = 1657584000  # start of rewards: Tuesday, July 12, 2022 12:00:00 AM UTC
 
 
 def main(
