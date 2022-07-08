@@ -14,11 +14,20 @@ const AdminUtils = () => {
   const setClaimsOpenTs = (claimOpensTs) => {
     useStore.setState({
       claim: {
-        claimOpensTs,
-        claimClosesTs: process.env.CLAIM_CLOSES,
+        ...useStore.getState().claim,
+        claimOpensTs
       },
     });
   };
+
+  const skipEducation = () => {
+    useStore.setState({
+      claim: {
+        ...useStore.getState().claim,
+        currentStep: 2
+      }
+    });
+  }
 
   const buttonClass = "px-2 py-1 my-1 border border-black rounded-md";
   return (
@@ -47,6 +56,12 @@ const AdminUtils = () => {
           }}
         >
           Reset Open Claims
+        </button>
+        <button
+          className={buttonClass}
+          onClick={skipEducation}
+        >
+          Skip Education
         </button>
       </div>
     )
