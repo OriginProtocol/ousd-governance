@@ -40,6 +40,7 @@ const defaultState: Web3DataType = {
   claim: {
     claimOpensTs: process.env.CLAIM_OPENS,
     claimClosesTs: process.env.CLAIM_CLOSES,
+    currentStep: 0
   },
   lockups: {
     lockups: [],

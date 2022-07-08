@@ -6,16 +6,27 @@ import Education from "@/components/claim/Education";
 import Eligibility from "@/components/claim/Eligibility";
 import HoldingPage from "components/holding/Page";
 import Claim from "components/claim/Claim";
+import { useStore } from "utils/store";
 import { claimOpenTimestampPassed, claimIsOpen } from "utils";
 
 interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const { claim } = useStore();
+  const { currentStep } = claim;
+
+  const updateCurrentStep = (stepChange) => {
+    useStore.setState({
+      claim: {
+        ...claim,
+        currentStep: currentStep + stepChange
+      }
+    });
+  }
   const steps = ["Check Eligibility", "Learn about Origin", "Claim Airdrop"];
 
-  const handleNextStep = () => setCurrentStep(currentStep + 1);
-  const handlePrevStep = () => setCurrentStep(currentStep - 1);
+  const handleNextStep = () => updateCurrentStep(+1);
+  const handlePrevStep = () => updateCurrentStep(-1);
 
   const [claimOpenTsPassed, setClaimOpenTsPassed] = useState(
     claimOpenTimestampPassed()
@@ -33,7 +44,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
       clearInterval(claimOpensTimer);
     };
   }, []);
-
+  
   return (
     <div className="space-y-6">
       {!claimOpenTsPassed && (
