@@ -79,7 +79,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   return (
     <>
       <Card>
-        <div className="space-y-8">
+        <div className="space-y-7">
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Total claimable OGV</h2>
             <Card alt tightPadding noShadow>
@@ -233,7 +233,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               </div>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Your claim summary</h2>
             {!isValidLockup ? (
               <div className="space-y-2 flex flex-col">
                 <span className="text-sm">You are claiming</span>
@@ -252,7 +253,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             ) : (
               <CardGroup horizontal twoCol>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are locking</span>
+                  <span className="text-sm">You are staking</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
@@ -266,7 +267,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You are claiming</span>
+                  <span className="text-sm">Today you get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
@@ -281,10 +282,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                 </div>
                 <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
                 <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
-                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[5px] -ml-[16px] sm:-ml-[8px]">
+                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[6px] -ml-[16px] sm:-ml-[8px]">
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.66}
                     className="text-gray-400"
                   />
                 </div>

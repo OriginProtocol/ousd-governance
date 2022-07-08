@@ -219,10 +219,10 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                 </div>
                 <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
                 <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
-                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[107px] sm:mt-[5px] -ml-[16px] sm:-ml-[8px]">
+                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[107px] sm:mt-[6px] -ml-[16px] sm:-ml-[8px]">
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.66}
                     className="text-gray-400"
                   />
                 </div>
