@@ -4,6 +4,7 @@ import { useStore } from "utils/store";
 import useConnectSigner from "utils/useConnectSigner";
 import { decimal18Bn, sleep } from "utils";
 import numeral from "numeraljs";
+import useTotalBalances from "utils/useTotalBalances";
 
 const useClaim = () => {
   const emptyClaimState = {
@@ -36,6 +37,8 @@ const useClaim = () => {
 
     return BigNumber.from(amount.hex);
   };
+
+  const { reloadTotalBalances } = useTotalBalances();
 
   useEffect(() => {
     const getClaim = async () => {
@@ -150,6 +153,7 @@ const useClaim = () => {
 
               if (receipt.status === 1) {
                 setOptionalClaimState("claimed");
+                reloadTotalBalances();
               } else {
                 setOptionalClaimState("ready");
               }
@@ -207,6 +211,7 @@ const useClaim = () => {
 
               if (receipt.status === 1) {
                 setMandatoryClaimState("claimed");
+                reloadTotalBalances();
               } else {
                 setMandatoryClaimState("ready");
               }

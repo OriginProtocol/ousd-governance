@@ -12,6 +12,7 @@ import useLockups from "utils/useLockups";
 import useTotalBalances from "utils/useTotalBalances";
 import LockupTable from "components/vote-escrow/LockupTable";
 import moment from "moment";
+import { SECONDS_IN_A_MONTH } from "../../constants/index";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -172,8 +173,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     const valid = await validateForm();
 
     if (valid) {
-      // const now = (await web3Provider.getBlock()).timestamp;
-      const duration = lockupDuration * 2629746; // Months to seconds
+      const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
 
       const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(lockupAmount),
@@ -205,7 +205,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     const valid = await validateForm();
 
     if (valid) {
-      const duration = lockupDuration * 2629746; // Months to seconds
+      const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
 
       const transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
         existingLockup.lockupId,

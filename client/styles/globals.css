@@ -74,3 +74,7 @@ a {
   border-color: hsl(var(--suc,var(--nc)) / calc(var(--tw-text-opacity) / 2));
 }
 
+.opaque-tooltip {
+  opacity: 1 !important;
+  border-radius: 0.5rem !important;
+}

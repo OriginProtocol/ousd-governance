@@ -22,7 +22,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
   );
 
   const mobileMenuClassNames = classNames(
-    "flex bg-white z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
+    "flex flex-col pt-8 bg-white z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
     {
       "-right-full": !menuIsOpen,
       "right-0": menuIsOpen,
@@ -47,12 +47,14 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               </div>
               {!hideNav && (
                 <ul className="space-x-10 font-light hidden lg:flex">
-                  {navItems.map(({ href, label }) => (
+                  {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
                         className="text-sm text-white hover:underline"
                         currentClassName="font-normal"
                         href={href}
+                        type={external ? "external" : "internal"}
+                        newWindow={external}
                       >
                         {label}
                       </Link>
@@ -88,7 +90,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
           />
           <div className={mobileMenuClassNames}>
             <button
-              className="absolute top-10 right-6"
+              className="w-[18px] h-[17px] ml-auto mr-6"
               onClick={() => setMenuIsOpen(false)}
             >
               <Image
@@ -98,14 +100,18 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 alt="Close Menu"
               />
             </button>
-            <ul className="mt-auto w-full text-2xl mb-10">
-              {navItems.map(({ href, label }) => (
+            <ul className="w-full text-2xl mt-6">
+              {navItems.map(({ href, label, external }) => (
                 <li key={label}>
                   <Link
                     className="px-6 py-3 block hover:text-gray-700 text-black border-l-4 border-white"
                     currentClassName="font-normal border-primary"
                     href={href}
-                    onClick={() => setMenuIsOpen(false)}
+                    onClick={
+                      !external ? () => setMenuIsOpen(false) : () => null
+                    }
+                    type={external ? "external" : "internal"}
+                    newWindow={external}
                   >
                     {label}
                   </Link>

@@ -86,8 +86,8 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                     <span className="text-sm">
                       {didLock ? "You have locked" : "You have claimed"}
                     </span>
-                    <Card tightPadding noShadow alt>
-                      <div className="flex justify-center">
+                    <Card noPadding noShadow alt>
+                      <div className="flex justify-center p-2">
                         <div className="flex space-x-[0.4rem] items-end">
                           <TokenIcon large src="/ogv.svg" alt="OGV" />
                           <CardStat large>
@@ -101,8 +101,8 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                   {didLock && (
                     <div className="space-y-2 flex flex-col">
                       <span className="text-sm">You have claimed</span>
-                      <Card tightPadding noShadow alt>
-                        <div className="flex justify-center">
+                      <Card noPadding noShadow alt>
+                        <div className="flex justify-center p-2">
                           <div className="flex space-x-[0.4rem] items-end">
                             <TokenIcon large src="/veogv.svg" alt="veOGV" />
                             <CardStat large>
@@ -131,22 +131,22 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                   <Icon path={mdiArrowDown} size={0.9} className="text-white" />
                 </div>
                 <p className="text-xl">
-                  ...<strong>earn ETH</strong> when you take your OGN on our
-                  Origin Story NFT Platform.
+                  ...<strong>earn ETH</strong> when you stake OGN on Origin
+                  Story.
                 </p>
                 <Link
                   className="flex justify-center"
-                  href="https://www.story.xyz"
+                  href="https://www.story.xyz/#/stake"
                 >
                   <Image
-                    width="229"
-                    height="38"
-                    src="/os-logo@2x.png"
+                    width="243.6"
+                    height="43.6"
+                    src="/origin_story_logo_white.svg"
                     alt="Origin Story"
                   />
                 </Link>
                 <Link
-                  href="https://www.story.xyz"
+                  href="https://www.story.xyz/#/stake"
                   className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary bg-black text-white border-black hover:bg-gray-900 hover:border-gray-900"
                 >
                   <span>Earn ETH rewards</span>

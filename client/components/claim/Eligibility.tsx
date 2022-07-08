@@ -71,7 +71,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                 <div className="space-y-2">
                   {claimValid ? (
                     <div className="mb-20">
-                      <div className="space-y-4 bg-accent text-white -m-10 p-10">
+                      <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
                         <Icon
                           path={mdiCheckCircle}
                           size={2}
@@ -156,12 +156,14 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </>
           )}
           {hasClaim && claimValid && (
-            <div className="space-y-2">
-              <table className="table w-full mt-6">
+            <div className="space-y-2 -mt-[50px] sm:-mt-0">
+              <table className="w-full table sm:mt-6">
                 <thead>
-                  <tr>
-                    <th>Eligibility Criteria</th>
-                    <th>Tokens</th>
+                  <tr className="border-none">
+                    <th className="hidden sm:table-cell sm:border-b">
+                      Eligibility Criteria
+                    </th>
+                    <th className="hidden sm:table-cell sm:border-b">Tokens</th>
                   </tr>
                 </thead>
                 <tbody>
