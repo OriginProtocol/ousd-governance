@@ -173,8 +173,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     const valid = await validateForm();
 
     if (valid) {
-      // const now = (await web3Provider.getBlock()).timestamp;
-      const duration = lockupDuration * 2629746; // Months to seconds
+      const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
 
       const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
         ethers.utils.parseUnits(lockupAmount),
