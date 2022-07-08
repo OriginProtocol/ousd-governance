@@ -251,9 +251,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             )}
           </div>
           {!isValidLockup && (
-            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
-              Warning: by not locking your OGV you are missing out on as much as{" "}
-              {maxOgvLockupRewardApy.toFixed(2)}% vAPY
+            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center text-[#dd0a0a]">
+              Warning: If you don&apos;t lock your OGV, you&apos;ll miss out on
+              the {maxOgvLockupRewardApy.toFixed(2)}% vAPY and maximized voting
+              power.
             </div>
           )}
           {error && (
