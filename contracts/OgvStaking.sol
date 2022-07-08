@@ -216,10 +216,8 @@ contract OgvStaking is ERC20Votes {
     {
         require(duration >= minStakeDuration, "Staking: Too short");
         require(duration <= 1461 days, "Staking: Too long");
-        //uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
-        uint256 start = block.timestamp;
+        uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
         uint256 end = start + duration;
-        //uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
         uint256 endYearpoc = (duration * 1e18) / 365 days;
         uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
         return ((amount * multiplier) / 1e18, end);
