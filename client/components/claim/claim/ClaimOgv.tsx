@@ -14,6 +14,7 @@ import { decimal18Bn } from "utils";
 import PostClaimModal from "./PostClaimModal";
 import Icon from "@mdi/react";
 import { mdiAlertCircle, mdiArrowRight } from "@mdi/js";
+import { SECONDS_IN_A_MONTH } from "../../../constants/index";
 
 interface ClaimOgvProps {}
 
@@ -52,9 +53,6 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     claimableOgv,
     totalSupplyVeOgv
   );
-
-  // const now = new Date();
-  // const lockupEnd = new Date(now.getTime() + lockupDuration * 2629746 * 1000); // Months to seconds to miliseconds
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -268,7 +266,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                 sethideModal(false);
                 setError(null);
 
-                const duration = lockupDuration * 2629746; // Months to seconds
+                const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
 
                 try {
                   const receipt = await claim.optional.claim(duration);
