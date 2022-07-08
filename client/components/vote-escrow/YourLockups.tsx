@@ -15,7 +15,8 @@ import useLockups from "utils/useLockups";
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups, pendingTransactions, contracts } = useStore();
+  const { lockups, pendingTransactions, contracts, balances } = useStore();
+  const { ogv } = balances;
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
   const { reloadLockups } = useLockups();
@@ -105,11 +106,17 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      <div className="mt-4">
-        <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
-          {lockups.length > 0 ? "Create a new lock-up" : "Lock your OGV now"}
-        </Link>
-      </div>
+      {ogv.gt(0) ? (
+        <div className="mt-4">
+          <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
+            {lockups.length > 0 ? "Create a new lock-up" : "Lock your OGV now"}
+          </Link>
+        </div>
+      ) : (
+        <p className="text-gray-600 pt-4">
+          You currently have no OGV to stake.
+        </p>
+      )}
     </Card>
   );
 };

@@ -3,8 +3,6 @@ import CardGroup from "components/CardGroup";
 import Wrapper from "components/Wrapper";
 import AccountBalances from "components/vote-escrow/AccountBalances";
 import YourLockups from "components/vote-escrow/YourLockups";
-import OgvTotalStats from "components/OgvTotalStats";
-import { SectionTitle } from "components/SectionTitle";
 import { Disconnected } from "components/Disconnected";
 import { useStore } from "utils/store";
 
@@ -24,6 +22,7 @@ export default function VoteEscrow() {
       <PageTitle>Vote Escrow</PageTitle>
       <CardGroup>
         <AccountBalances />
+
         <YourLockups />
       </CardGroup>
     </Wrapper>
