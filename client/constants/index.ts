@@ -39,3 +39,5 @@ export const navItems = [
     label: "Claim",
   },
 ];
+
+export const SECONDS_IN_A_MONTH = 2592000;
