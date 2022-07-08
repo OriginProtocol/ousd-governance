@@ -29,7 +29,7 @@ const useHistoricalLockupToasts = () => {
         : truncateEthAddress(address);
 
     toast.success(
-      `${shortAddress} just locked up ${utils.formatUnits(
+      `${shortAddress} recently staked ${utils.formatUnits(
         ogvLockedUp,
         18
       )} OGV for ${durationInMonths} months`,

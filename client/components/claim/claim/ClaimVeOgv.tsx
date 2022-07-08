@@ -214,7 +214,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You get</span>
+                  <span className="text-sm">Today you get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">

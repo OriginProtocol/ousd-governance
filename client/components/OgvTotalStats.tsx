@@ -39,7 +39,7 @@ const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = ({ alt }) => {
       <div>
         <Card dark={!alt} alt={alt} tightPadding>
           <div className="space-y-1">
-            <CardLabel>Locked</CardLabel>
+            <CardLabel>Staked</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" />
               <CardStat>
@@ -53,7 +53,7 @@ const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = ({ alt }) => {
       <div>
         <Card dark={!alt} alt={alt} tightPadding>
           <div className="space-y-1">
-            <CardLabel>% locked</CardLabel>
+            <CardLabel>% staked</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" />
               <CardStat>{totalPercentageOfLockedUpOgv.toFixed(2)}%</CardStat>

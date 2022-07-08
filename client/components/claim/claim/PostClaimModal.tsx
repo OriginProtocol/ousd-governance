@@ -36,15 +36,14 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
           <div className="py-5 md:py-10 space-y-6">
             <Icon path={mdiWallet} size={3} className="text-accent mx-auto" />
             <div className="space-y-2">
-              <h2 className="font-bold text-3xl">
-                Confirm transaction in wallet
-              </h2>
+              <h2 className="font-bold text-3xl">Confirm in wallet</h2>
               <p className="text-gray-500 text-lg">
-                Approve the transaction to lock and claim your tokens
+                Approve the transaction to claim {didLock && "and stake "} your
+                tokens
               </p>
             </div>
             <p className="text-gray-500 text-sm">
-              Please check your wallet and approve the transactions
+              Please check your wallet and approve the transaction
             </p>
           </div>
         )}

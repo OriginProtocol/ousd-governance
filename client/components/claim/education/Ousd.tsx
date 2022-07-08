@@ -55,8 +55,8 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
         <Video id="5r_GV4CVvXU" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
-            Origin Dollar — or OUSD — is a stablecoin that gives you access to
-            some of the best yields in DeFi with none of the hassle.
+            Origin Dollar (OUSD) is a stablecoin that gives you access to some
+            of the best yields in DeFi with none of the hassle.
           </p>
           <p>
             Stablecoins offer the benefits of cryptocurrencies without the price
@@ -73,7 +73,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
             by the most trusted collateral in crypto, which means it can be
             redeemed anytime.
           </p>
-          <p>Simply put: imagine your wallet filled with OUSD bills</p>
+          <p>Simply put: imagine your wallet filled with OUSD bills.</p>
           <ul className="list-outside list-disc space-y-2 ml-4">
             <li>
               If you kept that OUSD in your wallet, then your wallet would fill
