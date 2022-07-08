@@ -1,6 +1,7 @@
 import { FunctionComponent, ReactNode } from "react";
 import Header from "components/Header";
 import Footer from "components/Footer";
+import AdminUtils from "components/AdminUtils";
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ const Layout: FunctionComponent<LayoutProps> = ({ children, hideNav }) => (
         <div className="relative z-5">{children}</div>
       </div>
     </div>
+    <AdminUtils />
     <Footer />
   </div>
 );
