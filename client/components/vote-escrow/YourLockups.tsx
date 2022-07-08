@@ -7,11 +7,18 @@ import { SectionTitle } from "components/SectionTitle";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
+import { toast } from "react-toastify";
+import useAccountBalances from "utils/useAccountBalances";
+import useTotalBalances from "utils/useTotalBalances";
+import useLockups from "utils/useLockups";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups } = useStore();
+  const { lockups, pendingTransactions, contracts } = useStore();
+  const { reloadTotalBalances } = useTotalBalances();
+  const { reloadAccountBalances } = useAccountBalances();
+  const { reloadLockups } = useLockups();
 
   if (!lockups) {
     return (
@@ -21,8 +28,28 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     );
   }
 
-  const handleUnlock = () => {
-    return;
+  const handleUnlock = async (lockupId) => {
+    const transaction = await contracts.OgvStaking["unstake(uint256)"](
+      lockupId,
+      { gasLimit: 1000000 }
+    ); // @TODO maybe set this to lower
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Lockup unstaked", {
+              hideProgressBar: true,
+            });
+            reloadTotalBalances();
+            reloadAccountBalances();
+            reloadLockups();
+          },
+        },
+      ],
+    });
   };
 
   return (
@@ -68,7 +95,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                     white
                     small
                     disabled={Date.now() / 1000 < lockup.end}
-                    onClick={handleUnlock}
+                    onClick={() => handleUnlock(lockup.lockupId)}
                   >
                     Unlock
                   </Button>
