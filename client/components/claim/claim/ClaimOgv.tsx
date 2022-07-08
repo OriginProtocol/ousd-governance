@@ -93,109 +93,116 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               </div>
             </Card>
           </div>
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">
-              Stake your OGV to get maximum rewards and voting power
-            </h2>
-            <p className="text-gray-500 text-lg leading-snug">
-              Staking OGV is converted to non-transferable veOGV, which allows
-              you to claim additional OGV and participate in governance.
-            </p>
-            <div>
-              <RangeInput
-                label=""
-                counterUnit=""
-                min="0"
-                max={maxLockupDurationInMonths}
-                value={lockupDuration}
-                onChange={(e) => {
-                  setLockupDuration(e.target.value);
-                }}
-                hideLabel
-                markers={[
-                  {
-                    label: "0",
-                    value: 0,
-                  },
-                  {
-                    label: "",
-                    value: 0,
-                  },
-                  {
-                    label: "1 yr",
-                    value: 12,
-                  },
-                  {
-                    label: "",
-                    value: 0,
-                  },
-                  {
-                    label: "2 yrs",
-                    value: 24,
-                  },
-                  {
-                    label: "",
-                    value: 0,
-                  },
-                  {
-                    label: "3 yrs",
-                    value: 36,
-                  },
-                  {
-                    label: "",
-                    value: 0,
-                  },
-                  {
-                    label: "4 yrs",
-                    value: 48,
-                  },
-                ]}
-                onMarkerClick={(markerValue) => {
-                  if (markerValue) {
-                    setLockupDuration(markerValue);
-                  }
-                }}
-              />
+          <div className="space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-2xl font-bold">
+                  Stake your OGV to get maximum rewards and voting power
+                </h2>
+                <p className="text-gray-500 text-lg leading-snug">
+                  Staking OGV is converted to non-transferable veOGV, which
+                  allows you to claim additional OGV and participate in
+                  governance.
+                </p>
+              </div>
+              <div className="space-y-6">
+                <CardGroup horizontal twoCol>
+                  <div className="space-y-2 flex flex-col sm:w-2/3">
+                    <span className="text-sm">Stake duration</span>
+                    <Card alt noPadding noShadow>
+                      <div className="flex p-2">
+                        <div className="flex space-x-2 items-end">
+                          <CardStat large>{lockupDuration}</CardStat>
+                          <CardDescription large>Months</CardDescription>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                  <div className="space-y-2 flex flex-col sm:text-right sm:w-2/3 sm:ml-auto">
+                    <span className="text-sm">Variable APY</span>
+                    <Card
+                      noPadding
+                      noShadow
+                      alt={!isValidLockup}
+                      dark={isValidLockup}
+                    >
+                      <div className="flex p-2 flex-col sm:items-end">
+                        <div className="flex space-x-2 items-end">
+                          <CardStat large>
+                            {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}
+                          </CardStat>
+                          <CardDescription large>%</CardDescription>
+                          {!isValidLockup && (
+                            <Icon
+                              path={mdiAlertCircle}
+                              size={1}
+                              className="text-[#dd0a0a] mx-auto"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                </CardGroup>
+                <div>
+                  <RangeInput
+                    label=""
+                    counterUnit=""
+                    min="0"
+                    max={maxLockupDurationInMonths}
+                    value={lockupDuration}
+                    onChange={(e) => {
+                      setLockupDuration(e.target.value);
+                    }}
+                    hideLabel
+                    markers={[
+                      {
+                        label: "0",
+                        value: 0,
+                      },
+                      {
+                        label: "",
+                        value: 0,
+                      },
+                      {
+                        label: "1 yr",
+                        value: 12,
+                      },
+                      {
+                        label: "",
+                        value: 0,
+                      },
+                      {
+                        label: "2 yrs",
+                        value: 24,
+                      },
+                      {
+                        label: "",
+                        value: 0,
+                      },
+                      {
+                        label: "3 yrs",
+                        value: 36,
+                      },
+                      {
+                        label: "",
+                        value: 0,
+                      },
+                      {
+                        label: "4 yrs",
+                        value: 48,
+                      },
+                    ]}
+                    onMarkerClick={(markerValue) => {
+                      if (markerValue) {
+                        setLockupDuration(markerValue);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <CardGroup horizontal twoCol>
-            <div className="space-y-2 flex flex-col">
-              <span className="text-sm">Lockup period</span>
-              <Card alt tightPadding noShadow>
-                <div className="flex">
-                  <div className="flex space-x-2 items-end">
-                    <CardStat large>{lockupDuration}</CardStat>
-                    <CardDescription large>Months</CardDescription>
-                  </div>
-                </div>
-              </Card>
-            </div>
-            <div className="space-y-2 flex flex-col">
-              <span className="text-sm">Lockup reward</span>
-              <Card
-                tightPadding
-                noShadow
-                alt={!isValidLockup}
-                dark={isValidLockup}
-              >
-                <div className="flex">
-                  <div className="flex space-x-2 items-end">
-                    <CardStat large>
-                      {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}%
-                    </CardStat>
-                    <CardDescription large>vAPY</CardDescription>
-                    {!isValidLockup && (
-                      <Icon
-                        path={mdiAlertCircle}
-                        size={1}
-                        className="text-[#dd0a0a] mx-auto"
-                      />
-                    )}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </CardGroup>
           <div className="space-y-2">
             {!isValidLockup ? (
               <div className="space-y-2 flex flex-col">
