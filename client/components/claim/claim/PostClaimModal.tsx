@@ -38,7 +38,7 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
             <div className="space-y-2">
               <h2 className="font-bold text-3xl">Confirm in wallet</h2>
               <p className="text-gray-500 text-lg">
-                Approve the transaction to claim {didLock && "and stake "} your
+                Approve the transaction to claim {didLock && "and stake "}your
                 tokens
               </p>
             </div>
