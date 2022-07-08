@@ -13,7 +13,7 @@ import { getRewardsApy } from "utils/apy";
 import { decimal18Bn } from "utils";
 import PostClaimModal from "./PostClaimModal";
 import Icon from "@mdi/react";
-import { mdiAlertCircle, mdiArrowRight } from "@mdi/js";
+import { mdiArrowRight } from "@mdi/js";
 import { SECONDS_IN_A_MONTH } from "../../../constants/index";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 
