@@ -21,10 +21,6 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     );
   }
 
-  const handleExtend = () => {
-    return;
-  };
-
   const handleUnlock = () => {
     return;
   };
@@ -61,7 +57,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 </td>
                 <td>
                   <Link
-                    className="btn rounded-full btn-sm"
+                    className="btn rounded-full btn-sm btn-primary"
                     href={`/vote-escrow/${lockup.lockupId}`}
                   >
                     Extend
@@ -69,7 +65,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 </td>
                 <td>
                   <Button
-                    alt
+                    white
                     small
                     disabled={Date.now() / 1000 < lockup.end}
                     onClick={handleUnlock}
