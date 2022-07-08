@@ -22,7 +22,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
   );
 
   const mobileMenuClassNames = classNames(
-    "flex bg-white z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
+    "flex flex-col pt-8 bg-white z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
     {
       "-right-full": !menuIsOpen,
       "right-0": menuIsOpen,
@@ -88,7 +88,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
           />
           <div className={mobileMenuClassNames}>
             <button
-              className="absolute top-10 right-6"
+              className="w-[18px] h-[17px] ml-auto mr-6"
               onClick={() => setMenuIsOpen(false)}
             >
               <Image
@@ -98,7 +98,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 alt="Close Menu"
               />
             </button>
-            <ul className="mt-auto w-full text-2xl mb-10">
+            <ul className="w-full text-2xl mt-6">
               {navItems.map(({ href, label }) => (
                 <li key={label}>
                   <Link

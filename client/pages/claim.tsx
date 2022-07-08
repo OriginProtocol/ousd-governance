@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import Wrapper from "components/Wrapper";
 import StepTracker from "components/StepTracker";
@@ -17,14 +17,31 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
   const handleNextStep = () => setCurrentStep(currentStep + 1);
   const handlePrevStep = () => setCurrentStep(currentStep - 1);
 
+  const [claimOpenTsPassed, setClaimOpenTsPassed] = useState(
+    claimOpenTimestampPassed()
+  );
+  const [claimOpen, setClaimOpen] = useState(claimIsOpen());
+
+  useEffect(() => {
+    // check every second so component re-renders when counter reaches 0
+    const claimOpensTimer = setInterval(() => {
+      setClaimOpenTsPassed(claimOpenTimestampPassed());
+      setClaimOpen(claimIsOpen());
+    }, 1000);
+
+    return () => {
+      clearInterval(claimOpensTimer);
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
-      {!claimOpenTimestampPassed() && (
+      {!claimOpenTsPassed && (
         <Wrapper narrow>
           <HoldingPage />
         </Wrapper>
       )}
-      {claimIsOpen() && (
+      {claimOpen && (
         <>
           <Wrapper narrow>
             <StepTracker currentStep={currentStep} steps={steps} />
