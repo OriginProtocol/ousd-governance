@@ -59,9 +59,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
-    claimButtonText = "Lock OGV & claim veOGV";
+    claimButtonText = "Claim & Stake OGV";
   } else if (claim.optional.state === "ready") {
-    claimButtonText = "Yes, I want to claim and miss out on rewards";
+    claimButtonText = "Claim OGV";
   } else if (claim.optional.state === "waiting-for-user") {
     claimButtonText = "Please confirm transaction";
   } else if (claim.optional.state === "waiting-for-network") {
@@ -153,7 +153,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                     <Card
                       noPadding
                       noShadow
-                      alt={!isValidLockup}
+                      red={!isValidLockup}
                       dark={isValidLockup}
                     >
                       <div className="flex p-2 flex-col sm:items-end">
@@ -162,13 +162,6 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                             {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}
                           </CardStat>
                           <CardDescription large>%</CardDescription>
-                          {!isValidLockup && (
-                            <Icon
-                              path={mdiAlertCircle}
-                              size={1}
-                              className="text-[#dd0a0a] mx-auto"
-                            />
-                          )}
                         </div>
                       </div>
                     </Card>
@@ -295,8 +288,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           {!isValidLockup && (
             <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center text-[#dd0a0a]">
               Warning: If you don&apos;t lock your OGV, you&apos;ll miss out on
-              the {maxOgvLockupRewardApy.toFixed(2)}% vAPY and maximized voting
-              power.
+              the {maxOgvLockupRewardApy.toFixed(2)}% variable APY and maximized
+              voting power.
             </div>
           )}
           {error && (
@@ -326,6 +319,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
               disabled={claim.optional.state !== "ready"}
               large
               fullWidth
+              red={!isValidLockup}
             >
               {claimButtonText}
             </Button>

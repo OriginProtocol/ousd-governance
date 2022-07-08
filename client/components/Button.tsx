@@ -11,6 +11,7 @@ interface ButtonProps {
   alt?: Boolean;
   white?: Boolean;
   black?: Boolean;
+  red?: Boolean;
 }
 
 const Button: FunctionComponent<ButtonProps> = ({
@@ -23,6 +24,7 @@ const Button: FunctionComponent<ButtonProps> = ({
   alt,
   white,
   black,
+  red,
 }) => {
   const className = classNames("btn rounded-full normal-case space-x-2", {
     "btn-lg h-[3.25rem] min-h-[3.25rem]": large,
@@ -34,6 +36,8 @@ const Button: FunctionComponent<ButtonProps> = ({
       white,
     "bg-black text-white border-black hover:bg-gray-900 hover:border-gray-900":
       black,
+    "bg-[#dd0a0a] border-[#dd0a0a] hover:bg-[#f52424] hover:border-[#f52424]":
+      red,
   });
 
   return (
