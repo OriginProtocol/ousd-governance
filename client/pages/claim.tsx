@@ -19,10 +19,10 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
     useStore.setState({
       claim: {
         ...claim,
-        currentStep: currentStep + stepChange
-      }
+        currentStep: currentStep + stepChange,
+      },
     });
-  }
+  };
   const steps = ["Check Eligibility", "Learn about Origin", "Claim Airdrop"];
 
   const handleNextStep = () => updateCurrentStep(+1);
@@ -44,7 +44,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
       clearInterval(claimOpensTimer);
     };
   }, []);
-  
+
   return (
     <div className="space-y-6">
       {!claimOpenTsPassed && (
