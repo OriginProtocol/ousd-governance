@@ -28,14 +28,14 @@ const EligibilityItem: FunctionComponent<EligibilityItemProps> = ({
 
   return (
     <>
-      <tr>
-        <td>
+      <tr className="flex flex-col sm:table-row items-center py-3 space-y-2">
+        <td className="p-0 sm:p-4">
           <div className="flex space-x-2 items-center">
             <CheckIcon />
             <span>{itemTitle}</span>
           </div>
         </td>
-        <td>
+        <td className="p-0 sm:p-4">
           <div className="flex space-x-2 items-center">
             <TokenIcon
               src={showOgvToken ? "/ogv.svg" : "/veogv.svg"}
