@@ -136,17 +136,17 @@ const PostClaimModalProps: FunctionComponent<PostClaimModalProps> = ({
                 </p>
                 <Link
                   className="flex justify-center"
-                  href="https://www.story.xyz"
+                  href="https://www.story.xyz/#/stake"
                 >
                   <Image
-                    width="229"
-                    height="38"
-                    src="/os-logo@2x.png"
+                    width="243.6"
+                    height="43.6"
+                    src="/origin_story_logo_white.svg"
                     alt="Origin Story"
                   />
                 </Link>
                 <Link
-                  href="https://www.story.xyz"
+                  href="https://www.story.xyz/#/stake"
                   className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary bg-black text-white border-black hover:bg-gray-900 hover:border-gray-900"
                 >
                   <span>Earn ETH rewards</span>
