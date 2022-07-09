@@ -1,16 +1,11 @@
 {
   "1": {
-    "ERC1967Proxy": [
-      "0xFdb16A6900Ce90Cb27Afec95dc274D27E0d61b87",
-      "0x9c354503C38481a7A7a51629142963F98eCC12D0"
+    "Governance": [
+      "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA"
     ],
-    "OriginDollarGovernance": [
-      "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
+    "Timelock": [
+      "0xac126C98cFc7c55a9F944770cb17d7065688C577"
     ],
-    "VoteLockerCurve": [
-      "0xab2916819462f0Be4f209Be5a491AFAf1Bd56263",
-      "0x88aa574f0Acf17775973eBB786d34ADdB43aD42E"
-    ]
   },
   "4": {
     "ERC1967Proxy": [
