@@ -37,7 +37,8 @@ model Listener {
 }
 
 model Lockup {
-  lockupId  Int @unique
+  id        Int @default(autoincrement()) @id
+  lockupId  Int
   user      String
   createdAt DateTime @default(now()) @map("created_at")
 
