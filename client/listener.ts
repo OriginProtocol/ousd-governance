@@ -6,7 +6,6 @@ import { ethers } from "ethers";
 import EthereumEvents from "ethereum-events";
 import prisma, { Prisma } from "lib/prisma";
 import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
-import { claimOpenTimestampPassed } from "utils/index";
 
 const logger = winston.createLogger({
   format: winston.format.simple(),
@@ -15,11 +14,6 @@ const logger = winston.createLogger({
 
 const networkId = process.env.NETWORK_ID;
 const GovernanceContracts = CHAIN_CONTRACTS[networkId];
-
-if(!claimOpenTimestampPassed()) {
-  logger.error("Claim not open yet");
-  process.exit(0);
-}
 
 if (!networkId) {
   logger.error("No network id specified");
@@ -182,7 +176,7 @@ prisma.listener.findFirst().then(async (listener) => {
       listenBlock = Math.abs(listener.lastSeenBlock - blockNumber) > 200 ? blockNumber : listener.lastSeenBlock;
     } else {
       // in production continue where left off last time
-      listener.lastSeenBlock
+      listenBlock = listener.lastSeenBlock
     }
   }
   ethereumEvents.start(listenBlock);
