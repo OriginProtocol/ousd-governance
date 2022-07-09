@@ -42,6 +42,7 @@ model Lockup {
   user      String
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@unique([lockupId, user])
   @@index([user], type: BTree)
   @@map("lockups")
 }
