@@ -5,7 +5,8 @@ export function getDailyRewardsEmissions(time = Date.now() / 1000) {
   // format: start_timestamp, end_timestamp, daily emissions
   const data = [
     [
-      process.env.NODE_ENV === "development" ? 0 : 1657584000,
+      [31337, 4].includes(process.env.NETWORK_ID) ? 0 : 1657584000,
+      1657584000,
       1660176000,
       3333333,
     ],
@@ -36,7 +37,13 @@ export function getRewardsApy(
 
   const ogvPercentageOfRewards =
     veOgvReceived / (totalSupplyVeOgv + veOgvReceived);
-  const ogvRewardsDaily = getDailyRewardsEmissions() * ogvPercentageOfRewards;
+  const dailyEmissions = getDailyRewardsEmissions();
+  if (dailyEmissions === 0) {
+    console.warn(
+      "Reason for APY 0% -> no reward emissions for current timestamp."
+    );
+  }
+  const ogvRewardsDaily = dailyEmissions * ogvPercentageOfRewards;
   const ogvRewardsYearly = ogvRewardsDaily * 365.25;
   // No need to use actual prices since originating tokens and reward tokens have the same price
   const ogvLockupRewardApr = ogvRewardsYearly / ogvToStake;
