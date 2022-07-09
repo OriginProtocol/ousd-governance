@@ -370,14 +370,21 @@ const calculateRewards = async () => {
     ),
   ];
 
+  const exclusionList = (fs.readFileSync("./exclusions.csv", "utf-8")).split("\n").map(ethers.utils.getAddress);
+  for (const excluded of exclusionList) {
+    if (ognRewards[excluded] === undefined) {
+      console.log(excluded, 'not found in OGN rewards')
+    }
+  }
+
   const rewards = addresses.reduce((acc, address) => {
-    const ognReward = ognRewards[address]
+    const ognReward = ognRewards[address] && !exclusionList.includes(address)
       ? bigNumberify(ognRewards[address])
           .mul(OGN_AIRDROP_AMOUNT)
           .div(totalOgnScore)
       : bigNumberify(0);
 
-    const ognStakingReward = ognStakingRewards[address]
+    const ognStakingReward = ognStakingRewards[address] && !exclusionList.includes(address)
       ? bigNumberify(ognStakingRewards[address])
           .mul(OGN_AIRDROP_AMOUNT)
           .div(totalOgnScore)
