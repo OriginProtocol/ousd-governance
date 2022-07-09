@@ -1,6 +1,6 @@
 {
   "OriginDollarGovernance": {
-    "address": "0x7d7d5d91f18604A4Cf57106ea0a2697c87AB9030",
+    "address": "0xBD57cfa27e0Eba08A6Eb526e5736E92073240841",
     "abi": [
       {
         "inputs": [],
@@ -734,7 +734,7 @@
     ]
   },
   "RewardsSource": {
-    "address": "0x60b09612BF3721E9C14379dBd3f795d42BE63423",
+    "address": "0xE0967673a89E22c921aB3c5D8c9ce9429dD55fB2",
     "abi": [
       {
         "inputs": [
@@ -997,7 +997,7 @@
     ]
   },
   "OgvStaking": {
-    "address": "0x63B84F186D9887EC2FD869fA8E7D02309bA1579F",
+    "address": "0xB75137a0651E6D6cAe9AA49b449E017799C9951d",
     "abi": [
       {
         "inputs": [
@@ -1009,6 +1009,11 @@
           {
             "internalType": "uint256",
             "name": "epoch_",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minStakeDuration_",
             "type": "uint256"
           },
           {
@@ -1643,6 +1648,19 @@
       },
       {
         "inputs": [],
+        "name": "minStakeDuration",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
         "name": "name",
         "outputs": [
           {
@@ -1964,7 +1982,7 @@
     ]
   },
   "TimelockController": {
-    "address": "0x041d962Bf5B27ec1b5a43936EC3D088C39D9c588",
+    "address": "0x563045e7981bE87A5C5C598440f3ae9F79e55D0B",
     "abi": [
       {
         "inputs": [
@@ -2830,7 +2848,7 @@
     ]
   },
   "Governance": {
-    "address": "0xE28EFBE3f8bEe0fE9Ba69DfEF4a72d378B28D506",
+    "address": "0xb5c4CD4092792De91846063E087497ad4c37ac16",
     "abi": [
       {
         "inputs": [
@@ -4294,7 +4312,7 @@
     ]
   },
   "MandatoryDistributor": {
-    "address": "0xf6a8F07d34F9e65c27091102d76E6fDcF9853bca",
+    "address": "0xF611cC500eEE7E4e4763A05FE623E2363c86d2Af",
     "abi": [
       {
         "inputs": [
@@ -4499,7 +4517,7 @@
     ]
   },
   "OptionalDistributor": {
-    "address": "0x4b6bCD72397459839F3C917f30e119c87BD0F3D5",
+    "address": "0xcDD21c5544A5B07fab409284cEE6c6097091B589",
     "abi": [
       {
         "inputs": [
