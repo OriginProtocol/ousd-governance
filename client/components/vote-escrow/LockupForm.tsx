@@ -6,7 +6,6 @@ import { useStore } from "utils/store";
 import Card from "components/Card";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
-import Link from "components/Link";
 import RangeInput from "components/RangeInput";
 import useLockups from "utils/useLockups";
 import useTotalBalances from "utils/useTotalBalances";
@@ -115,8 +114,31 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       ? "0"
       : moment.unix(existingLockup.end).diff(moment(), "months")
   ); // In months
+
+  const [approvalStatus, setApprovalStatus] = useState("ready");
+  const [lockupStatus, setLockupStatus] = useState("ready");
+
+  let approvalButtonText = "";
+  if (approvalStatus === "ready") {
+    approvalButtonText = "Approve transfer";
+  } else if (approvalStatus === "waiting-for-user") {
+    approvalButtonText = "Confirm transaction";
+  } else if (approvalStatus === "waiting-for-network") {
+    approvalButtonText = "Waiting to be mined";
+  }
+
+  let buttonText = "";
+  if (lockupStatus === "ready") {
+    buttonText = existingLockup ? "Extend" : "Lock up";
+  } else if (lockupStatus === "waiting-for-user") {
+    buttonText = "Confirm transaction";
+  } else if (lockupStatus === "waiting-for-network") {
+    buttonText = "Waiting to be mined";
+  }
+
   const [lockupAmountError, setLockupAmountError] = useState("");
   const [lockupDurationError, setLockupDurationError] = useState("");
+  const [transactionError, setTransactionError] = useState("");
 
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountAllowances, reloadAccountBalances } =
@@ -130,12 +152,21 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     .toString();
 
   const actionDisabledNewLockup =
-    !lockupAmount ||
-    !lockupDuration ||
-    ethers.utils.parseUnits(lockupAmount).gt(allowances.ogv);
+    lockupAmount === "0" ||
+    lockupDuration === "0" ||
+    ethers.utils.parseUnits(lockupAmount).gt(allowances.ogv) ||
+    lockupStatus === "waiting-for-user" ||
+    lockupStatus === "waiting-for-network" ||
+    approvalStatus === "waiting-for-user" ||
+    approvalStatus === "waiting-for-network";
 
   const actionDisabledExistingLockup =
-    lockupDuration <= moment.unix(existingLockup?.end).diff(moment(), "months");
+    lockupDuration <=
+      moment.unix(existingLockup?.end).diff(moment(), "months") ||
+    lockupStatus === "waiting-for-user" ||
+    lockupStatus === "waiting-for-network" ||
+    approvalStatus === "waiting-for-user" ||
+    approvalStatus === "waiting-for-network";
 
   const validateForm = async () => {
     if (lockupDuration > maxLockupDurationInMonths) {
@@ -149,11 +180,39 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   };
 
   const handleApproval = async () => {
-    const transaction = await contracts.OriginDollarGovernance.approve(
-      contracts.OgvStaking.address,
-      ethers.constants.MaxUint256,
-      { gasLimit: 1000000 }
-    ); // @TODO maybe set this to lower
+    setTransactionError("");
+    setApprovalStatus("waiting-for-user");
+
+    let transaction;
+    try {
+      transaction = await contracts.OriginDollarGovernance.approve(
+        contracts.OgvStaking.address,
+        ethers.constants.MaxUint256,
+        { gasLimit: 1000000 }
+      ); // @TODO maybe set this to lower
+    } catch (e) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+      throw e;
+    }
+
+    setApprovalStatus("waiting-for-network");
+
+    let receipt;
+    try {
+      receipt = await contracts.rpcProvider.waitForTransaction(
+        transaction.hash
+      );
+    } catch (e) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+      throw e;
+    }
+
+    if (receipt.status === 0) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+    }
 
     useStore.setState({
       pendingTransactions: [
@@ -163,6 +222,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           onComplete: () => {
             toast.success("Approval has been made", { hideProgressBar: true }),
               reloadAccountAllowances();
+            setApprovalStatus("ready");
           },
         },
       ],
@@ -174,12 +234,39 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     if (valid) {
       const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
+      setTransactionError("");
+      setLockupStatus("waiting-for-user");
 
-      const transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
-        ethers.utils.parseUnits(lockupAmount),
-        duration,
-        { gasLimit: 1000000 }
-      ); // @TODO maybe set this to lower
+      let transaction;
+      try {
+        transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
+          ethers.utils.parseUnits(lockupAmount),
+          duration,
+          { gasLimit: 1000000 }
+        ); // @TODO maybe set this to lower
+      } catch (e) {
+        setTransactionError("Error locking up!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      setLockupStatus("waiting-for-network");
+
+      let receipt;
+      try {
+        receipt = await contracts.rpcProvider.waitForTransaction(
+          transaction.hash
+        );
+      } catch (e) {
+        setTransactionError("Error locking up!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      if (receipt.status === 0) {
+        setTransactionError("Error locking up!");
+        setLockupStatus("ready");
+      }
 
       useStore.setState({
         pendingTransactions: [
@@ -194,6 +281,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               reloadAccountBalances();
               reloadLockups();
               router.push(`/vote-escrow`);
+              setLockupStatus("ready");
             },
           },
         ],
@@ -206,12 +294,38 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     if (valid) {
       const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
+      setTransactionError("");
+      setLockupStatus("waiting-for-user");
 
-      const transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
-        existingLockup.lockupId,
-        duration,
-        { gasLimit: 1000000 }
-      ); // @TODO maybe set this to lower
+      let transaction;
+      try {
+        transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
+          existingLockup.lockupId,
+          duration,
+          { gasLimit: 1000000 }
+        ); // @TODO maybe set this to lower
+      } catch (e) {
+        setTransactionError("Error extending lockup!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      setLockupStatus("waiting-for-network");
+
+      let receipt;
+      try {
+        receipt = await contracts.rpcProvider.waitForTransaction(
+          transaction.hash
+        );
+      } catch (e) {
+        setTransactionError("Error extending lockup!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      if (receipt.status === 0) {
+        setTransactionError("Error extending lockup!");
+      }
 
       useStore.setState({
         pendingTransactions: [
@@ -226,6 +340,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               reloadAccountBalances();
               reloadLockups();
               router.push(`/vote-escrow`);
+              setLockupStatus("ready");
             },
           },
         ],
@@ -274,17 +389,26 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             }
           }}
         />
+        {transactionError && (
+          <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
+            {transactionError}
+          </div>
+        )}
         <div className="flex pt-6">
           <button
             className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
             disabled={
               !lockupAmount ||
               !lockupDuration ||
-              allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount))
+              allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount)) ||
+              approvalStatus === "waiting-for-user" ||
+              approvalStatus === "waiting-for-network" ||
+              lockupStatus === "waiting-for-user" ||
+              lockupStatus === "waiting-for-network"
             }
             onClick={handleApproval}
           >
-            Approve Transfer
+            {approvalButtonText}
           </button>
           <button
             className="btn btn-primary md:btn-lg rounded-full flex-1"
@@ -295,236 +419,10 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             }
             onClick={!existingLockup ? handleLockup : handleExtend}
           >
-            {!existingLockup ? `Lockup` : `Extend`}
+            {buttonText}
           </button>
         </div>
       </div>
-    </Card>
-  );
-
-  return (
-    <Card>
-      {balances.ogv.gt(0) ? (
-        <div className="space-y-4">
-          {existingLockup.end.gt(0) && (
-            <p className="text-sm text-gray-600">
-              You have an existing lockup. You can increase the amount, the
-              length, or both.
-            </p>
-          )}
-          <div>
-            <RangeInput
-              label="Lockup amount"
-              counterUnit="OGV"
-              min={"1"}
-              max={Number(
-                ethers.utils.formatUnits(
-                  balances.ogv.add(existingLockup.amount).toString()
-                )
-              )
-                .toFixed()
-                .toString()}
-              value={amount}
-              markers={[
-                "0%",
-                "",
-                "20%",
-                "",
-                "40%",
-                "",
-                "60%",
-                "",
-                "80%",
-                "",
-                "100%",
-              ]}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setAmountError("");
-              }}
-            />
-            {existingLockup.end.gt(0) && !bothInputsModified && (
-              <div className="pt-4 flex">
-                <button
-                  className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
-                  disabled={
-                    parseInt(amount) <=
-                    parseInt(
-                      Number(
-                        ethers.utils.formatUnits(
-                          existingLockup.amount.toString()
-                        )
-                      )
-                        .toFixed()
-                        .toString()
-                    )
-                  }
-                  onClick={handleLockup}
-                >
-                  Increase lockup amount
-                </button>
-                <button
-                  className="btn btn-neutral md:btn-lg rounded-full flex-1"
-                  disabled={
-                    parseInt(amount) ===
-                    parseInt(
-                      Number(
-                        ethers.utils.formatUnits(
-                          existingLockup.amount.toString()
-                        )
-                      )
-                        .toFixed()
-                        .toString()
-                    )
-                  }
-                  onClick={() => {
-                    setAmount(
-                      Number(
-                        ethers.utils.formatUnits(
-                          existingLockup.amount.toString()
-                        )
-                      )
-                        .toFixed()
-                        .toString()
-                    );
-                  }}
-                >
-                  Reset
-                </button>
-              </div>
-            )}
-            {amountError && (
-              <label className="label">
-                <span className="label-text-alt text-error-content">
-                  {amountError}
-                </span>
-              </label>
-            )}
-          </div>
-          <div>
-            <RangeInput
-              label="Lockup length"
-              counterUnit="weeks"
-              min="0"
-              max="208"
-              value={weeks}
-              markers={[
-                "0 wks",
-                "",
-                "1 yr",
-                "",
-                "2 yrs",
-                "",
-                "3 yrs",
-                "",
-                "4 yrs",
-              ]}
-              onChange={(e) => {
-                setWeeks(parseInt(e.target.value.replace(/\D+/g, "")));
-                setEndError("");
-              }}
-            />
-            {existingLockup.end.gt(0) && !bothInputsModified && (
-              <div className="pt-4 flex">
-                <button
-                  className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
-                  disabled={weeks <= existingLockup.existingEndWeeks}
-                  onClick={handleLockup}
-                >
-                  Extend lockup length
-                </button>
-                <button
-                  className="btn btn-neutral md:btn-lg rounded-full flex-1"
-                  disabled={weeks === existingLockup.existingEndWeeks}
-                  onClick={() => {
-                    setWeeks(existingLockup.existingEndWeeks);
-                  }}
-                >
-                  Reset
-                </button>
-              </div>
-            )}
-            {endError && (
-              <label className="label">
-                <span className="label-text-alt text-error-content">
-                  {endError}
-                </span>
-              </label>
-            )}
-          </div>
-          {existingLockup.end.gt(0) && bothInputsModified && (
-            <div className="pt-4 flex">
-              <button
-                className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
-                onClick={handleLockup}
-              >
-                Modify lockup
-              </button>
-              <button
-                className="btn btn-neutral md:btn-lg rounded-full flex-1"
-                onClick={() => {
-                  setAmount(
-                    Number(
-                      ethers.utils.formatUnits(existingLockup.amount.toString())
-                    )
-                      .toFixed()
-                      .toString()
-                  );
-                  setWeeks(existingLockup.existingEndWeeks);
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          )}
-          {estimatedVotePower && (
-            <div className="pt-2 text-lg">
-              <span className="font-bold pr-2">Estimated votes</span>{" "}
-              {ethers.utils.commify(Number(estimatedVotePower).toFixed())}
-            </div>
-          )}
-          {!existingLockup.end.gt(0) && (
-            <div className="flex py-3">
-              <button
-                className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
-                disabled={
-                  !amount ||
-                  !weeks ||
-                  allowances.ogv.gte(ethers.utils.parseUnits(amount))
-                }
-                onClick={handleApproval}
-              >
-                Approve Transfer
-              </button>
-              <button
-                className="btn btn-primary md:btn-lg rounded-full flex-1"
-                disabled={
-                  !amount ||
-                  !weeks ||
-                  ethers.utils.parseUnits(amount).gt(allowances.ogv)
-                }
-                onClick={handleLockup}
-              >
-                Lockup
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <p>You need OGV to be able to participate in governance.</p>
-          <div>
-            <Link
-              className="btn btn-primary md:btn-lg rounded-full"
-              href="https://app.uniswap.org/#/swap?chain=mainnet"
-              type="external"
-              newWindow
-            >
-              Get OGV from Uniswap
-            </Link>
-          </div>
-        </div>
-      )}
     </Card>
   );
 };
