@@ -39,12 +39,12 @@ const EligibilityItem: FunctionComponent<EligibilityItemProps> = ({
           <div className="flex space-x-2 items-center">
             <TokenIcon
               src="/ogv.svg"
-              alt={showOgvToken ? "OGV" : "locked OGV"}
+              alt={showOgvToken ? "OGV" : "pre-locked OGV"}
             />
             <ReactTooltip id={id} place="top" type="dark" effect="solid">
               <span>
                 <span className="mr-1">{utils.formatUnits(tokens, 18)}</span>
-                {showOgvToken ? "OGV" : "locked OGV"}
+                {showOgvToken ? "OGV" : "pre-locked OGV"}
               </span>
             </ReactTooltip>
             <div data-tip data-for={id}>
@@ -52,7 +52,7 @@ const EligibilityItem: FunctionComponent<EligibilityItemProps> = ({
                 <span className="mr-1">
                   {formatCurrency(utils.formatUnits(tokens, 18))}
                 </span>
-                {showOgvToken ? "OGV" : "locked OGV"}
+                {showOgvToken ? "OGV" : "pre-locked OGV"}
               </span>
             </div>
           </div>
