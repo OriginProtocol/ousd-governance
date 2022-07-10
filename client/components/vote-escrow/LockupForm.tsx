@@ -115,7 +115,17 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       : moment.unix(existingLockup.end).diff(moment(), "months")
   ); // In months
 
+  const [approvalStatus, setApprovalStatus] = useState("ready");
   const [lockupStatus, setLockupStatus] = useState("ready");
+
+  let approvalButtonText = "";
+  if (approvalStatus === "ready") {
+    approvalButtonText = "Approve transfer";
+  } else if (approvalStatus === "waiting-for-user") {
+    approvalButtonText = "Confirm transaction";
+  } else if (approvalStatus === "waiting-for-network") {
+    approvalButtonText = "Waiting to be mined";
+  }
 
   let buttonText = "";
   if (lockupStatus === "ready") {
@@ -128,6 +138,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
   const [lockupAmountError, setLockupAmountError] = useState("");
   const [lockupDurationError, setLockupDurationError] = useState("");
+  const [transactionError, setTransactionError] = useState("");
 
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountAllowances, reloadAccountBalances } =
@@ -145,13 +156,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     lockupDuration === "0" ||
     ethers.utils.parseUnits(lockupAmount).gt(allowances.ogv) ||
     lockupStatus === "waiting-for-user" ||
-    lockupStatus === "waiting-for-network";
+    lockupStatus === "waiting-for-network" ||
+    approvalStatus === "waiting-for-user" ||
+    approvalStatus === "waiting-for-network";
 
   const actionDisabledExistingLockup =
     lockupDuration <=
       moment.unix(existingLockup?.end).diff(moment(), "months") ||
     lockupStatus === "waiting-for-user" ||
-    lockupStatus === "waiting-for-network";
+    lockupStatus === "waiting-for-network" ||
+    approvalStatus === "waiting-for-user" ||
+    approvalStatus === "waiting-for-network";
+
   const validateForm = async () => {
     if (lockupDuration > maxLockupDurationInMonths) {
       setLockupDurationError(
@@ -164,11 +180,39 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   };
 
   const handleApproval = async () => {
-    const transaction = await contracts.OriginDollarGovernance.approve(
-      contracts.OgvStaking.address,
-      ethers.constants.MaxUint256,
-      { gasLimit: 1000000 }
-    ); // @TODO maybe set this to lower
+    setTransactionError("");
+    setApprovalStatus("waiting-for-user");
+
+    let transaction;
+    try {
+      transaction = await contracts.OriginDollarGovernance.approve(
+        contracts.OgvStaking.address,
+        ethers.constants.MaxUint256,
+        { gasLimit: 1000000 }
+      ); // @TODO maybe set this to lower
+    } catch (e) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+      throw e;
+    }
+
+    setApprovalStatus("waiting-for-network");
+
+    let receipt;
+    try {
+      receipt = await contracts.rpcProvider.waitForTransaction(
+        transaction.hash
+      );
+    } catch (e) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+      throw e;
+    }
+
+    if (receipt.status === 0) {
+      setTransactionError("Error approving!");
+      setApprovalStatus("ready");
+    }
 
     useStore.setState({
       pendingTransactions: [
@@ -178,6 +222,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           onComplete: () => {
             toast.success("Approval has been made", { hideProgressBar: true }),
               reloadAccountAllowances();
+            setApprovalStatus("ready");
           },
         },
       ],
@@ -189,6 +234,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     if (valid) {
       const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
+      setTransactionError("");
       setLockupStatus("waiting-for-user");
 
       let transaction;
@@ -199,11 +245,28 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           { gasLimit: 1000000 }
         ); // @TODO maybe set this to lower
       } catch (e) {
+        setTransactionError("Error locking up!");
         setLockupStatus("ready");
         throw e;
       }
 
       setLockupStatus("waiting-for-network");
+
+      let receipt;
+      try {
+        receipt = await contracts.rpcProvider.waitForTransaction(
+          transaction.hash
+        );
+      } catch (e) {
+        setTransactionError("Error locking up!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      if (receipt.status === 0) {
+        setTransactionError("Error locking up!");
+        setLockupStatus("ready");
+      }
 
       useStore.setState({
         pendingTransactions: [
@@ -231,6 +294,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     if (valid) {
       const duration = lockupDuration * SECONDS_IN_A_MONTH; // Months to seconds
+      setTransactionError("");
       setLockupStatus("waiting-for-user");
 
       let transaction;
@@ -241,11 +305,27 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           { gasLimit: 1000000 }
         ); // @TODO maybe set this to lower
       } catch (e) {
+        setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
         throw e;
       }
 
       setLockupStatus("waiting-for-network");
+
+      let receipt;
+      try {
+        receipt = await contracts.rpcProvider.waitForTransaction(
+          transaction.hash
+        );
+      } catch (e) {
+        setTransactionError("Error extending lockup!");
+        setLockupStatus("ready");
+        throw e;
+      }
+
+      if (receipt.status === 0) {
+        setTransactionError("Error extending lockup!");
+      }
 
       useStore.setState({
         pendingTransactions: [
@@ -309,6 +389,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             }
           }}
         />
+        {transactionError && (
+          <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
+            {transactionError}
+          </div>
+        )}
         <div className="flex pt-6">
           <button
             className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
@@ -316,12 +401,14 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               !lockupAmount ||
               !lockupDuration ||
               allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount)) ||
+              approvalStatus === "waiting-for-user" ||
+              approvalStatus === "waiting-for-network" ||
               lockupStatus === "waiting-for-user" ||
               lockupStatus === "waiting-for-network"
             }
             onClick={handleApproval}
           >
-            Approve Transfer
+            {approvalButtonText}
           </button>
           <button
             className="btn btn-primary md:btn-lg rounded-full flex-1"
