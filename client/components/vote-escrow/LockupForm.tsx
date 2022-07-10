@@ -315,7 +315,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             disabled={
               !lockupAmount ||
               !lockupDuration ||
-              allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount))
+              allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount)) ||
+              lockupStatus === "waiting-for-user" ||
+              lockupStatus === "waiting-for-network"
             }
             onClick={handleApproval}
           >
