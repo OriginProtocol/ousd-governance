@@ -1,7 +1,21 @@
 {
   "1": {
+    "ERC1967Proxy": [
+      "0xFdb16A6900Ce90Cb27Afec95dc274D27E0d61b87",
+      "0x9c354503C38481a7A7a51629142963F98eCC12D0"
+    ],
     "Governance": [
       "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA"
+    ],
+    "MandatoryLockupDistributor": [
+      "0xD667091c2d1DCc8620f4eaEA254CdFB0a176718D"
+    ],
+    "OptionalLockupDistributor": [
+      "0x7aE2334f12a449895AD21d4c255D9DE194fe986f"
+    ],
+    "OriginDollarGovernance": [
+      "0xEd6E3808FCe0C4A52DEa8636933f666c6dea4d1d",
+      "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
     ],
     "Timelock": [
       "0xac126C98cFc7c55a9F944770cb17d7065688C577"
