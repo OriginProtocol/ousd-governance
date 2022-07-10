@@ -45,4 +45,5 @@ export const navItems = [
   },
 ];
 
-export const SECONDS_IN_A_MONTH = 2592000;
+// daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
+export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12
