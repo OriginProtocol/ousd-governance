@@ -10,6 +10,8 @@ import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
 import { Loading } from "components/Loading";
 import Link from "components/Link";
 import { getRewardsApy } from "utils/apy";
+import { filter } from "lodash";
+import { BigNumber } from "ethers";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -21,6 +23,16 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
   const { loaded, hasClaim } = claim;
+
+  const hasOptionalClaim = claim.optional && claim.optional.isValid;
+  const hasMandatoryClaim = claim.mandatory && claim.mandatory.isValid;
+
+  const optionalSplits = filter(claim?.optional?.split, (split) =>
+    split.gte(0)
+  ).length;
+  const mandatorySplits = filter(claim?.mandatory?.split, (split) =>
+    split.gte(0)
+  ).length;
 
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
 
@@ -193,61 +205,103 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </>
           )}
           {hasClaim && claimValid && (
-            <div className="space-y-2 -mt-[50px] sm:-mt-0">
-              <table className="w-full table sm:mt-6">
-                <thead>
-                  <tr className="border-none">
-                    <th className="hidden sm:table-cell sm:border-b">
-                      Eligibility Criteria
-                    </th>
-                    <th className="hidden sm:table-cell sm:border-b">Tokens</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <EligibilityItem
-                    id="ogn-holder"
-                    itemTitle="OGN holder"
-                    tokens={claim.optional.split.ogn}
-                    showOgvToken={true}
-                  />
-                  <EligibilityItem
-                    id="ousd-holder"
-                    itemTitle="OUSD holder"
-                    tokens={claim.mandatory.split.ousd}
-                    showOgvToken={false}
-                  />
-                  <EligibilityItem
-                    id="wousd-holder"
-                    itemTitle="wOUSD holder"
-                    tokens={claim.mandatory.split.wousd}
-                    showOgvToken={false}
-                  />
-                  <EligibilityItem
-                    id="ogn-staker"
-                    itemTitle="Staked OGN"
-                    tokens={claim.optional.split.ognStaking}
-                    showOgvToken={true}
-                  />
-                  <EligibilityItem
-                    id="ousd-3Crv"
-                    itemTitle="OUSD 3Pool holder"
-                    tokens={claim.optional.split.ousd3Crv}
-                    showOgvToken={true}
-                  />
-                  <EligibilityItem
-                    id="ousd-3Crv-gauge"
-                    itemTitle="Staked OUSD 3Pool"
-                    tokens={claim.optional.split.ousd3CrvGauge}
-                    showOgvToken={true}
-                  />
-                  <EligibilityItem
-                    id="ousd-convex-staker"
-                    itemTitle="Staked on Convex"
-                    tokens={claim.optional.split.convex}
-                    showOgvToken={true}
-                  />
-                </tbody>
-              </table>
+            <div className="space-y-10 sm:space-y-0">
+              {hasOptionalClaim && (
+                <div className="space-y-2 sm:-mt-0">
+                  <table className="w-full table sm:mt-6">
+                    <thead>
+                      <tr className="border-none">
+                        <th className="pt-0 text-center sm:text-left sm:table-cell sm:border-b">
+                          Eligibility Criteria
+                        </th>
+                        <th className="hidden pt-0 sm:table-cell sm:border-b">
+                          Tokens
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <EligibilityItem
+                        id="ogn-holder"
+                        itemTitle="OGN holder"
+                        tokens={claim.optional.split.ogn}
+                        showOgvToken={true}
+                      />
+                      <EligibilityItem
+                        id="ogn-staker"
+                        itemTitle="Staked OGN"
+                        tokens={claim.optional.split.ognStaking}
+                        showOgvToken={true}
+                      />
+                      <EligibilityItem
+                        id="ousd-3Crv"
+                        itemTitle="OUSD 3Pool holder"
+                        tokens={claim.optional.split.ousd3Crv}
+                        showOgvToken={true}
+                      />
+                      <EligibilityItem
+                        id="ousd-3Crv-gauge"
+                        itemTitle="Staked OUSD 3Pool"
+                        tokens={claim.optional.split.ousd3CrvGauge}
+                        showOgvToken={true}
+                      />
+                      <EligibilityItem
+                        id="ousd-convex-staker"
+                        itemTitle="Staked on Convex"
+                        tokens={claim.optional.split.convex}
+                        showOgvToken={true}
+                      />
+                      {optionalSplits > 1 && (
+                        <EligibilityItem
+                          id="ogv-total"
+                          itemTitle="Total"
+                          tokens={claim.optional.amount}
+                          showOgvToken={true}
+                          isTotal
+                        />
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {hasMandatoryClaim && (
+                <div className="space-y-2 sm:-mt-0">
+                  <table className="w-full table sm:mt-6">
+                    <thead>
+                      <tr className="border-none">
+                        <th className="pt-0 text-center sm:text-left sm:table-cell sm:border-b">
+                          Eligibility Criteria
+                        </th>
+                        <th className="hidden sm:table-cell sm:border-b">
+                          Tokens
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <EligibilityItem
+                        id="ousd-holder"
+                        itemTitle="OUSD holder"
+                        tokens={claim.mandatory.split.ousd}
+                        showOgvToken={false}
+                      />
+                      <EligibilityItem
+                        id="wousd-holder"
+                        itemTitle="wOUSD holder"
+                        tokens={claim.mandatory.split.wousd}
+                        showOgvToken={false}
+                      />
+                      {mandatorySplits > 1 && (
+                        <EligibilityItem
+                          id="veogv-total"
+                          itemTitle="Total"
+                          tokens={claim.mandatory.amount}
+                          showOgvToken={false}
+                          isTotal
+                        />
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </div>
