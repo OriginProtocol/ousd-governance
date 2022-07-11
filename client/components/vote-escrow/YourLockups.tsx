@@ -66,7 +66,6 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     });
   };
 
-  console.log("LOCKUP 0", (lockups[0].end - Date.now() / 1000)/ SECONDS_IN_A_MONTH)
   return (
     <Card>
       {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}

@@ -64,6 +64,7 @@ def main(
             merkle_mandatory.address, 100000000 * 1e18, {"from": accounts[0]}
         )
         token.transfer(merkle_optional.address, 100000000 * 1e18, {"from": accounts[0]})
+        token.transfer("0x5E687f547d26732A3F1213e1C31432C3EF6810bc", 100000000 * 1e18, {"from": accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
