@@ -18,21 +18,37 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
 
   if (typeof amount == "string" || typeof amount == "number") {
     if (typeof amount == "number" && Number.isInteger(amount))
-      return numeral(+amount)
-        .format("0 a")
-        .trim();
+      return (
+        <span className="uppercase">
+          {numeral(+amount)
+            .format("0 a")
+            .trim()}
+        </span>
+      );
 
     if (typeof amount == "string")
-      return numeral(+amount)
-        .format("0 a")
-        .trim();
+      return (
+        <span className="uppercase">
+          {numeral(+amount)
+            .format("0 a")
+            .trim()}
+        </span>
+      );
 
-    return numeral(+amount)
-      .format(usedFormat)
-      .trim();
+    return (
+      <span className="uppercase">
+        {numeral(+amount)
+          .format(usedFormat)
+          .trim()}
+      </span>
+    );
   }
 
-  return numeral(+amount / 1e18).format(usedFormat);
+  return (
+    <span className="uppercase">
+      {numeral(+amount / 1e18).format(usedFormat)}
+    </span>
+  );
 };
 
 export default TokenAmount;
