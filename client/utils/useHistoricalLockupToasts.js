@@ -5,6 +5,31 @@ import { toast } from "react-toastify";
 import { utils } from "ethers";
 import { truncateEthAddress } from "utils";
 import { SECONDS_IN_A_MONTH } from "../constants/index";
+import TokenAmount from "components/TokenAmount";
+import Link from "components/Link";
+import ExternalLinkIcon from "components/ExternalLinkIcon";
+import numeral from "numeraljs";
+
+const _LockupContent = ({ shortAddress, ogvLockedUp, months, txHash }) => {
+  return (
+    <div>
+      <div>
+        {`${shortAddress} recently staked `}
+        <TokenAmount amount={ogvLockedUp} format="currency" />
+        {` OGV for ${months} months`}
+      </div>
+      <Link
+        href={`https://etherscan.io/tx/${txHash}`}
+        type="external"
+        className="flex content-center mt-2"
+        newWindow={true}
+      >
+        <ExternalLinkIcon isGreen={true} />
+        <div className="ml-2">View on Etherscan</div>
+      </Link>
+    </div>
+  );
+};
 
 const useHistoricalLockupToasts = () => {
   const { web3Provider, contracts, recentLockups } = useStore();
@@ -29,10 +54,12 @@ const useHistoricalLockupToasts = () => {
         : truncateEthAddress(address);
 
     toast.success(
-      `${shortAddress} recently staked ${utils.formatUnits(
-        ogvLockedUp,
-        18
-      )} OGV for ${durationInMonths} months`,
+      <_LockupContent
+        shortAddress={shortAddress}
+        ogvLockedUp={ogvLockedUp}
+        months={durationInMonths}
+        txHash={event.transactionHash}
+      />,
       {
         hideProgressBar: true,
         position: "bottom-right",
@@ -142,7 +169,7 @@ const useHistoricalLockupToasts = () => {
       });
 
       displayToast(latestEvent.rawEvent);
-    }, random(5000, 20000, true));
+    }, random(5000, 12000, true));
 
     return () => clearInterval(alertLoop);
   }, [recentLockups]);
