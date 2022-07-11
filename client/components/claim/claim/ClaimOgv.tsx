@@ -16,6 +16,7 @@ import Icon from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
 import { SECONDS_IN_A_MONTH } from "../../../constants/index";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
+import moment from "moment";
 
 interface ClaimOgvProps {}
 
@@ -74,6 +75,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
       claim.optional.state === "waiting-for-network" ||
       claim.optional.state === "claimed");
 
+  const now = new Date();
+
   return (
     <>
       <Card>
@@ -99,9 +102,9 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                   Stake your OGV to get maximum rewards and voting power
                 </h2>
                 <p className="text-gray-500 text-lg leading-snug">
-                  Staking OGV is converted to non-transferable veOGV, which
-                  allows you to claim additional OGV and participate in
-                  governance.
+                  Staked OGV is converted to non-transferable veOGV, which
+                  allows you to claim additional OGV staking rewards, OUSD fees,
+                  and participate in governance.
                 </p>
               </div>
               <div className="space-y-6">
@@ -217,7 +220,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                 <div className="space-y-2 flex flex-col">
                   <span className="text-sm">You are staking</span>
                   <Card tightPadding noShadow>
-                    <div className="flex">
+                    <div className="flex flex-col">
                       <div className="flex space-x-[0.4rem] items-end">
                         <TokenIcon large src="/ogv.svg" alt="OGV" />
                         <CardStat large>
@@ -225,11 +228,18 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                         </CardStat>
                         <CardDescription large>OGV</CardDescription>
                       </div>
+                      <div className="block text-xs italic ml-11 mt-1 text-gray-400">
+                        Unlocks{" "}
+                        {moment(
+                          now.getTime() +
+                            lockupDuration * SECONDS_IN_A_MONTH * 1000
+                        ).format("MMM D, YYYY")}
+                      </div>
                     </div>
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You get</span>
+                  <span className="text-sm">Today you get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
@@ -244,7 +254,7 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                 </div>
                 <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
                 <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
-                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[6px] -ml-[16px] sm:-ml-[8px]">
+                <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[15px] sm:mt-[6px] -ml-[16px] sm:-ml-[8px]">
                   <Icon
                     path={mdiArrowRight}
                     size={0.66}
@@ -256,8 +266,8 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           </div>
           {!isValidLockup && (
             <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center text-[#dd0a0a]">
-              Warning: If you don&apos;t lock your OGV, you&apos;ll miss out on
-              the {maxOgvLockupRewardApy.toFixed(2)}% variable APY and maximized
+              If you don&apos;t stake your OGV, you&apos;ll miss out on the{" "}
+              {maxOgvLockupRewardApy.toFixed(2)}% variable APY and maximized
               voting power.
             </div>
           )}

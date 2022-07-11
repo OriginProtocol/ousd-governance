@@ -42,8 +42,8 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
 
   return (
     <Wrapper narrow>
-      <PageTitle>Extend Lockup</PageTitle>
-      {!lockup && <p className="text-gray-300">No lockup found.</p>}
+      <PageTitle>Extend Stake</PageTitle>
+      {!lockup && <p className="text-gray-300">No stake found.</p>}
       {lockup && lockup?.user !== address && (
         <p className="text-gray-300">This lockup isn&apos;t yours.</p>
       )}
@@ -51,8 +51,8 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
         <LockupForm existingLockup={lockup} />
       )}
       <div className="mt-6">
-        <Link className="btn rounded-full" href={`/vote-escrow`}>
-          &larr; Back to Vote Escrow
+        <Link className="btn rounded-full" href={`/stake`}>
+          &larr; Back to OGV Staking
         </Link>
       </div>
     </Wrapper>

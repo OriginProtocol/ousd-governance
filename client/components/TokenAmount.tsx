@@ -9,21 +9,26 @@ interface TokenAmount {
 const TokenAmount: FunctionComponent<TokenAmount> = ({ amount }) => {
   if (typeof amount == "string" || typeof amount == "number") {
     if (typeof amount == "number" && Number.isInteger(amount))
-      return numeral(+amount)
-        .format("0 a")
-        .trim();
+      return (
+        <span className="uppercase">
+          {numeral(+amount)
+            .format("0 a")
+            .trim()}
+        </span>
+      );
 
-    if (typeof amount == "string")
-      return numeral(+amount)
-        .format("0 a")
-        .trim();
-
-    return numeral(+amount)
-      .format("0.00 a")
-      .trim();
+    return (
+      <span className="uppercase">
+        {numeral(+amount)
+          .format("0.00 a")
+          .trim()}
+      </span>
+    );
   }
 
-  return numeral(+amount / 1e18).format("0.00 a");
+  return (
+    <span className="uppercase">{numeral(+amount / 1e18).format("0 a")}</span>
+  );
 };
 
 export default TokenAmount;

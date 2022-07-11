@@ -18,9 +18,10 @@ const ApyToolTip: FunctionComponent<ApyToolTipProps> = () => {
         className="text-left shadow-xl rounded-2xl w-[230px] mr-4 opaque-tooltip"
       >
         <p className="text-sm text-[#626262] py-3">
-          The variable APY indicates the addtional OGV that you would receive
-          over time based on the current number of stakers and inflation
-          schedule. This yield will change as more users stake and OUSD grows.
+          The variable APY indicates the percentage of additional OGV that you
+          would receive over time based on the current number of stakers and
+          inflation schedule. This yield will change as more users stake and
+          OUSD grows.
         </p>
       </ReactTooltip>
       <div>

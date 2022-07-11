@@ -8,6 +8,10 @@ import EligibilityItem from "components/claim/EligibilityItem";
 import Icon from "@mdi/react";
 import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
 import { Loading } from "components/Loading";
+import Link from "components/Link";
+import { getRewardsApy } from "utils/apy";
+import { filter } from "lodash";
+import { BigNumber } from "ethers";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -17,14 +21,27 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   handleNextStep,
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
-  const claim = useClaim();
+  let claim = useClaim();
   const { loaded, hasClaim } = claim;
-
-  console.log(claim);
-  // @TODO detect if only has 1 split item so not to show totals
 
   const hasOptionalClaim = claim.optional && claim.optional.isValid;
   const hasMandatoryClaim = claim.mandatory && claim.mandatory.isValid;
+
+  const optionalSplits = filter(claim?.optional?.split, (split) =>
+    split.gte(0)
+  ).length;
+  const mandatorySplits = filter(claim?.mandatory?.split, (split) =>
+    split.gte(0)
+  ).length;
+
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
+
+  // Standard APY figure, assumes 100 OGV locked for max duration
+  const stakingApy = getRewardsApy(
+    100 * 1.8 ** (48 / 12),
+    100,
+    totalSupplyVeOgv
+  );
 
   const claimValid =
     (hasClaim && claim.optional && claim.optional.isValid) ||
@@ -121,15 +138,26 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                           <br />
                           <span className="truncate block">{address}</span>
                         </p>
-                        <div className="pt-9">
-                          <Button
-                            fullWidth
-                            large
-                            alt
+                        <div className="pt-2">
+                          <button
+                            className="text-sm text-gray-600 hover:underline"
                             onClick={handleDisconnect}
                           >
                             Try another address
-                          </Button>
+                          </button>
+                        </div>
+                        <div className="pt-9 space-y-4">
+                          <p className="text-2xl">
+                            OGV stakers earn a {stakingApy.toFixed(2)}% variable
+                            APY
+                          </p>
+                          <Link
+                            href="https://www.huobi.com/exchange/ogv_usdt"
+                            newWindow
+                            className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+                          >
+                            Buy OGV
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -151,10 +179,25 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                       <br />
                       <span className="truncate block">{address}</span>
                     </p>
-                    <div className="pt-9">
-                      <Button fullWidth large alt onClick={handleDisconnect}>
+                    <div className="pt-2">
+                      <button
+                        className="text-sm text-gray-600 hover:underline"
+                        onClick={handleDisconnect}
+                      >
                         Try another address
-                      </Button>
+                      </button>
+                    </div>
+                    <div className="pt-9 space-y-4">
+                      <p className="text-2xl">
+                        OGV stakers earn a {stakingApy.toFixed(2)}% variable APY
+                      </p>
+                      <Link
+                        href="https://www.huobi.com/exchange/ogv_usdt"
+                        newWindow
+                        className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+                      >
+                        Buy OGV
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -162,16 +205,16 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
             </>
           )}
           {hasClaim && claimValid && (
-            <>
+            <div className="space-y-10 sm:space-y-0">
               {hasOptionalClaim && (
                 <div className="space-y-2 sm:-mt-0">
                   <table className="w-full table sm:mt-6">
                     <thead>
                       <tr className="border-none">
-                        <th className="hidden sm:table-cell sm:border-b">
-                          OGV Eligibility Criteria
+                        <th className="pt-0 text-center sm:text-left sm:table-cell sm:border-b">
+                          Eligibility Criteria
                         </th>
-                        <th className="hidden sm:table-cell sm:border-b">
+                        <th className="hidden pt-0 sm:table-cell sm:border-b">
                           Tokens
                         </th>
                       </tr>
@@ -207,13 +250,15 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                         tokens={claim.optional.split.convex}
                         showOgvToken={true}
                       />
-                      <EligibilityItem
-                        id="ogv-total"
-                        itemTitle="Total"
-                        tokens={claim.optional.amount}
-                        showOgvToken={true}
-                        isTotal
-                      />
+                      {optionalSplits > 1 && (
+                        <EligibilityItem
+                          id="ogv-total"
+                          itemTitle="Total"
+                          tokens={claim.optional.amount}
+                          showOgvToken={true}
+                          isTotal
+                        />
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -223,8 +268,8 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                   <table className="w-full table sm:mt-6">
                     <thead>
                       <tr className="border-none">
-                        <th className="hidden sm:table-cell sm:border-b">
-                          veOGV Eligibility Criteria
+                        <th className="pt-0 text-center sm:text-left sm:table-cell sm:border-b">
+                          Eligibility Criteria
                         </th>
                         <th className="hidden sm:table-cell sm:border-b">
                           Tokens
@@ -244,18 +289,20 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                         tokens={claim.mandatory.split.wousd}
                         showOgvToken={false}
                       />
-                      <EligibilityItem
-                        id="veogv-total"
-                        itemTitle="Total"
-                        tokens={claim.mandatory.amount}
-                        showOgvToken={false}
-                        isTotal
-                      />
+                      {mandatorySplits > 1 && (
+                        <EligibilityItem
+                          id="veogv-total"
+                          itemTitle="Total"
+                          tokens={claim.mandatory.amount}
+                          showOgvToken={false}
+                          isTotal
+                        />
+                      )}
                     </tbody>
                   </table>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </Card>

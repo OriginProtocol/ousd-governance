@@ -38,7 +38,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
       </Card>
       <Card dark tightPadding>
         <div className="space-y-1">
-          <CardLabel>Locked</CardLabel>
+          <CardLabel>Staked</CardLabel>
           <div className="flex space-x-1 items-center">
             <TokenIcon src="/ogv.svg" alt="OGV" />
             <CardStat>

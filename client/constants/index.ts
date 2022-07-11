@@ -31,12 +31,17 @@ export const navItems = [
     label: "Leaderboard",
   },*/
   {
-    href: "/vote-escrow",
-    label: "Vote Escrow",
-  },
-  {
     href: "/claim",
     label: "Claim",
+  },
+  {
+    href: "/stake",
+    label: "Stake",
+  },
+  {
+    href: "https://www.huobi.com/exchange/ogv_usdt",
+    label: "Buy OGV",
+    external: true,
   },
   {
     href: "https://ousd.com/swap",
@@ -45,4 +50,5 @@ export const navItems = [
   },
 ];
 
-export const SECONDS_IN_A_MONTH = 2592000;
+// daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
+export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12

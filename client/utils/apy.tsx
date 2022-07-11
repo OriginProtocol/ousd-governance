@@ -5,9 +5,8 @@ export function getDailyRewardsEmissions(time = Date.now() / 1000) {
   // format: start_timestamp, end_timestamp, daily emissions
   const data = [
     [
-      [31337, 4].includes(parseInt(process.env.NETWORK_ID)) ? 0 : 1657584000,
-      1660176000,
-      3333333,
+      //[31337, 4].includes(parseInt(process.env.NETWORK_ID)) ? 0 : 1657584000,
+      0, 1660176000, 3333333,
     ],
     [1660176000, 1665360000, 2666667],
     [1665360000, 1675728000, 1866667],

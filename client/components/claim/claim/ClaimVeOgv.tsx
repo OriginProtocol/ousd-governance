@@ -15,6 +15,7 @@ import Icon from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
 import PostClaimModal from "./PostClaimModal";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
+import { SECONDS_IN_A_MONTH } from "constants/index";
 
 interface ClaimVeOgvProps {}
 
@@ -48,16 +49,16 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   );
 
   const fourYearsFromNow = new Date(
-    now.getTime() + 4 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 48 * SECONDS_IN_A_MONTH * 1000
   );
   const threeYearsFromNow = new Date(
-    now.getTime() + 3 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 36 * SECONDS_IN_A_MONTH * 1000
   );
   const twoYearsFromNow = new Date(
-    now.getTime() + 2 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 24 * SECONDS_IN_A_MONTH * 1000
   );
   const oneYearFromNow = new Date(
-    now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 12 * SECONDS_IN_A_MONTH * 1000
   );
 
   let claimButtonText = "";
@@ -103,7 +104,8 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               </h2>
               <p className="text-gray-500 text-lg leading-snug">
                 Staked OGV is converted to non-transferrable veOGV, which allows
-                you to claim additional OGV and participate in governance.
+                you to claim additional OGV staking rewards, OUSD fees, and
+                participate in governance.
               </p>
             </div>
             <CardGroup twoCol horizontal>
@@ -214,7 +216,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
                   </Card>
                 </div>
                 <div className="space-y-2 flex flex-col">
-                  <span className="text-sm">You get</span>
+                  <span className="text-sm">Today you get</span>
                   <Card tightPadding noShadow>
                     <div className="flex">
                       <div className="flex space-x-[0.4rem] items-end">
