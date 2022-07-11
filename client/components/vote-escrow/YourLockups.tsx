@@ -13,6 +13,7 @@ import useTotalBalances from "utils/useTotalBalances";
 import useLockups from "utils/useLockups";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
+import { SECONDS_IN_A_MONTH } from "../../constants/index";
 
 interface YourLockupsProps {}
 
@@ -65,6 +66,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     });
   };
 
+  console.log("LOCKUP 0", (lockups[0].end - Date.now() / 1000)/ SECONDS_IN_A_MONTH)
   return (
     <Card>
       {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}
@@ -87,7 +89,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                   <TokenAmount amount={lockup.amount} />
                 </td>
                 <td>
-                  {moment.unix(lockup.end).diff(moment(), "months")} months
+                  {Math.ceil((lockup.end - Date.now() / 1000)/ SECONDS_IN_A_MONTH)} months
                 </td>
                 <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
                 <td>

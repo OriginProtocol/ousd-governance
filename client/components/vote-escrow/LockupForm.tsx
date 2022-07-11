@@ -112,7 +112,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const [lockupDuration, setLockupDuration] = useState(
     !existingLockup
       ? "0"
-      : moment.unix(existingLockup.end).diff(moment(), "months")
+      : Math.ceil((existingLockup.end - Date.now() / 1000)/ SECONDS_IN_A_MONTH)
   ); // In months
 
   const [approvalStatus, setApprovalStatus] = useState("ready");
