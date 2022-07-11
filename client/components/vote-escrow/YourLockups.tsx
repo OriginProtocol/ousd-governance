@@ -13,11 +13,13 @@ import useTotalBalances from "utils/useTotalBalances";
 import useLockups from "utils/useLockups";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
+import { SECONDS_IN_A_MONTH } from "../../constants/index";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups, pendingTransactions, contracts, balances } = useStore();
+  const { lockups, pendingTransactions, contracts, balances, blockTimestamp } =
+    useStore();
   const { ogv } = balances;
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
@@ -87,7 +89,10 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                   <TokenAmount amount={lockup.amount} />
                 </td>
                 <td>
-                  {moment.unix(lockup.end).diff(moment(), "months")} months
+                  {Math.floor(
+                    (lockup.end - blockTimestamp) / SECONDS_IN_A_MONTH
+                  )}{" "}
+                  months
                 </td>
                 <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
                 <td>
@@ -105,7 +110,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                   <Button
                     white
                     small
-                    disabled={Date.now() / 1000 < lockup.end}
+                    disabled={blockTimestamp < lockup.end}
                     onClick={() => handleUnlock(lockup.lockupId)}
                   >
                     Unstake

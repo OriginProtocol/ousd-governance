@@ -105,14 +105,20 @@ const lockupDurationInputMarkers = [
 const maxLockupDurationInMonths = 12 * 4;
 
 const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
-  const { contracts, pendingTransactions, balances, allowances } = useStore();
+  const {
+    contracts,
+    pendingTransactions,
+    balances,
+    allowances,
+    blockTimestamp,
+  } = useStore();
   const router = useRouter();
 
   const [lockupAmount, setLockupAmount] = useState("0");
   const [lockupDuration, setLockupDuration] = useState(
     !existingLockup
       ? "0"
-      : moment.unix(existingLockup.end).diff(moment(), "months")
+      : Math.floor((existingLockup.end - blockTimestamp) / SECONDS_IN_A_MONTH)
   ); // In months
 
   const [approvalStatus, setApprovalStatus] = useState("ready");
@@ -162,7 +168,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
   const actionDisabledExistingLockup =
     lockupDuration <=
-      moment.unix(existingLockup?.end).diff(moment(), "months") ||
+      Math.floor((existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH) ||
     lockupStatus === "waiting-for-user" ||
     lockupStatus === "waiting-for-network" ||
     approvalStatus === "waiting-for-user" ||
