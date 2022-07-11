@@ -188,8 +188,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       transaction = await contracts.OriginDollarGovernance.approve(
         contracts.OgvStaking.address,
         ethers.constants.MaxUint256,
-        { gasLimit: 1000000 }
-      ); // @TODO maybe set this to lower
+        { gasLimit: 66983 }
+      );
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
