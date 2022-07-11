@@ -1,6 +1,6 @@
 from brownie import *
 import brownie
-from ..helpers import WEEK
+from ..helpers import WEEK, DAY
 from ..fixtures import mandatory_lockup_distributor, token, rewards, staking
 
 merkle_proof = [
@@ -22,13 +22,13 @@ def test_claim(mandatory_lockup_distributor, token, staking):
     lockup_three = staking.lockups(accounts.default, 2)
     lockup_four = staking.lockups(accounts.default, 3)
     assert lockup_one[0] == amount / 4
-    assert lockup_one[1] == tx.timestamp + 52 * WEEK
+    assert lockup_one[1] == tx.timestamp + 12 * 2629800
     assert lockup_two[0] == amount / 4
-    assert lockup_two[1] == tx.timestamp + 104 * WEEK
+    assert lockup_two[1] == tx.timestamp + 24 * 2629800
     assert lockup_three[0] == amount / 4
-    assert lockup_three[1] == tx.timestamp + 156 * WEEK
+    assert lockup_three[1] == tx.timestamp + 36 * 2629800
     assert lockup_four[0] == amount / 4
-    assert lockup_four[1] == tx.timestamp + 208 * WEEK
+    assert lockup_four[1] == tx.timestamp + 48 * 2629800
 
 
 def test_can_not_claim(mandatory_lockup_distributor, token):

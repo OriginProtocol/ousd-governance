@@ -47,11 +47,11 @@ contract MandatoryLockupDistributor is AbstractLockupDistributor {
 
         IERC20(token).approve(stakingContract, _amount);
 
-        // Create four lockups for a year each
-        IOGVStaking(stakingContract).stake(_amount / 4, 52 weeks, msg.sender);
-        IOGVStaking(stakingContract).stake(_amount / 4, 104 weeks, msg.sender);
-        IOGVStaking(stakingContract).stake(_amount / 4, 156 weeks, msg.sender);
-        IOGVStaking(stakingContract).stake(_amount / 4, 208 weeks, msg.sender);
+        // Create four lockups in 12 month increments (1 month = 2629800 seconds)
+        IOGVStaking(stakingContract).stake(_amount / 4, 2629800 * 12, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 2629800 * 24, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 2629800 * 36, msg.sender);
+        IOGVStaking(stakingContract).stake(_amount / 4, 2629800 * 48, msg.sender);
 
         emit Claimed(_index, msg.sender, _amount);
     }

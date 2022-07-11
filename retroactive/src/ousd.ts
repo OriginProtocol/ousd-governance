@@ -16,7 +16,8 @@ import {
 import { ethereumEventsOptions, web3 } from "./config";
 
 const AIRDROP_AMOUNT = bigNumberify("400000000000000000000000000");
-const SNAPSHOT_BLOCK = 15036444;
+// https://etherscan.io/block/15087759
+const SNAPSHOT_BLOCK = 15087759;
 const PROGRESS_FILE = "ousd-progress.json";
 
 type ProgressFile = {
@@ -94,8 +95,12 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
     );
   }
 
-  // Save the progress every 50000 blocks
-  if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK) {
+  // Save the progress every 50000 blocks OR on the block before the snapshot
+  // block. The block before is used so that when it restarts it will resume
+  // from the block before, process the final block, and then generate the
+  // data. If the snapshot block was used directly it'd keep processing the
+  // snapshot block and adding any data every time it was run.
+  if (blockNumber % 50000 === 0 || blockNumber === SNAPSHOT_BLOCK - 1) {
     savedProgress = {
       blockNumber,
       ousdHolders,
@@ -106,7 +111,14 @@ ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
 
   if (blockNumber === SNAPSHOT_BLOCK) {
     ethereumEvents.stop();
-    const claims = calculateRewards();
+
+    const unsortedClaims = calculateRewards();
+    const claims = Object.keys(unsortedClaims)
+      .sort()
+      .reduce((accumulator, key) => {
+        accumulator[key] = unsortedClaims[key];
+        return accumulator;
+      }, {});
 
     const csv = Object.entries(claims).map(
       ([address, data]: [address: string, data: any]) => {

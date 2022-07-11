@@ -7,11 +7,19 @@ import { SectionTitle } from "components/SectionTitle";
 import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
+import { toast } from "react-toastify";
+import useAccountBalances from "utils/useAccountBalances";
+import useTotalBalances from "utils/useTotalBalances";
+import useLockups from "utils/useLockups";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups } = useStore();
+  const { lockups, pendingTransactions, contracts, balances } = useStore();
+  const { ogv } = balances;
+  const { reloadTotalBalances } = useTotalBalances();
+  const { reloadAccountBalances } = useAccountBalances();
+  const { reloadLockups } = useLockups();
 
   if (!lockups) {
     return (
@@ -21,12 +29,28 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     );
   }
 
-  const handleExtend = () => {
-    return;
-  };
+  const handleUnlock = async (lockupId) => {
+    const transaction = await contracts.OgvStaking["unstake(uint256)"](
+      lockupId,
+      { gasLimit: 1000000 }
+    ); // @TODO maybe set this to lower
 
-  const handleUnlock = () => {
-    return;
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            toast.success("Lockup unstaked", {
+              hideProgressBar: true,
+            });
+            reloadTotalBalances();
+            reloadAccountBalances();
+            reloadLockups();
+          },
+        },
+      ],
+    });
   };
 
   return (
@@ -39,7 +63,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           <thead>
             <tr>
               <th>OGV</th>
-              <th>Duration</th>
+              <th>Duration remaining</th>
               <th>Stake ends</th>
               <th>veOGV</th>
               <th>&nbsp;</th>
@@ -61,7 +85,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 </td>
                 <td>
                   <Link
-                    className="btn rounded-full btn-sm"
+                    className="btn rounded-full btn-sm btn-primary"
                     href={`/stake/${lockup.lockupId}`}
                   >
                     Extend
@@ -69,10 +93,10 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 </td>
                 <td>
                   <Button
-                    alt
+                    white
                     small
                     disabled={Date.now() / 1000 < lockup.end}
-                    onClick={handleUnlock}
+                    onClick={() => handleUnlock(lockup.lockupId)}
                   >
                     Unstake
                   </Button>
@@ -82,11 +106,17 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      <div className="mt-4">
-        <Link className="btn btn-primary btn-lg" href="/stake/new">
-          {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
-        </Link>
-      </div>
+      {ogv.gt(0) ? (
+        <div className="mt-4">
+          <Link className="btn btn-primary btn-lg" href="/stake/new">
+            {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
+          </Link>
+        </div>
+      ) : (
+        <p className="text-gray-600 pt-4">
+          You currently have no OGV to stake.
+        </p>
+      )}
     </Card>
   );
 };

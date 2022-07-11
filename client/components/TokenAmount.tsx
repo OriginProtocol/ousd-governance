@@ -13,12 +13,17 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount }) => {
         .format("0 a")
         .trim();
 
+    if (typeof amount == "string")
+      return numeral(+amount)
+        .format("0 a")
+        .trim();
+
     return numeral(+amount)
       .format("0.00 a")
       .trim();
   }
 
-  return numeral(+amount / 1e18).format("0 a");
+  return numeral(+amount / 1e18).format("0.00 a");
 };
 
 export default TokenAmount;

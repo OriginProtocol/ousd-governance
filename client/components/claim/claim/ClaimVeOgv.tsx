@@ -15,6 +15,7 @@ import Icon from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
 import PostClaimModal from "./PostClaimModal";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
+import { SECONDS_IN_A_MONTH } from "constants/index";
 
 interface ClaimVeOgvProps {}
 
@@ -48,16 +49,16 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
   );
 
   const fourYearsFromNow = new Date(
-    now.getTime() + 4 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 48 * SECONDS_IN_A_MONTH * 1000
   );
   const threeYearsFromNow = new Date(
-    now.getTime() + 3 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 36 * SECONDS_IN_A_MONTH * 1000
   );
   const twoYearsFromNow = new Date(
-    now.getTime() + 2 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 24 * SECONDS_IN_A_MONTH * 1000
   );
   const oneYearFromNow = new Date(
-    now.getTime() + 1 * 365 * 24 * 60 * 60 * 1000
+    now.getTime() + 12 * SECONDS_IN_A_MONTH * 1000
   );
 
   let claimButtonText = "";
