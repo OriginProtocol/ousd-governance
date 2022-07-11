@@ -242,8 +242,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
           ethers.utils.parseUnits(lockupAmount),
           duration,
-          { gasLimit: 1000000 }
-        ); // @TODO maybe set this to lower
+          { gasLimit: 296559 }
+        );
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -302,8 +302,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
           existingLockup.lockupId,
           duration,
-          { gasLimit: 1000000 }
-        ); // @TODO maybe set this to lower
+          { gasLimit: 154727 }
+        );
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
