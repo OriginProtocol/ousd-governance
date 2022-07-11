@@ -21,7 +21,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   handleNextStep,
 }) => {
   const { provider, web3Provider, address, web3Modal } = useStore();
-  let claim = useClaim();
+  const claim = useClaim();
   const { loaded, hasClaim } = claim;
 
   const hasOptionalClaim = claim.optional && claim.optional.isValid;
