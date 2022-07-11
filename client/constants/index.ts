@@ -31,12 +31,17 @@ export const navItems = [
     label: "Leaderboard",
   },*/
   {
+    href: "/claim",
+    label: "Claim",
+  },
+  {
     href: "/stake",
     label: "Stake",
   },
   {
-    href: "/claim",
-    label: "Claim",
+    href: "https://www.huobi.com/exchange/ogv_usdt",
+    label: "Buy OGV",
+    external: true,
   },
   {
     href: "https://ousd.com/swap",
