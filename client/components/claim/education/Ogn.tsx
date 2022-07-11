@@ -47,7 +47,7 @@ const Ogn: FunctionComponent<OgnProps> = ({ handleNextStep }) => (
           <TokenIcon src="/ogn-coin.svg" alt="OGN" />
           <h3 className="text-lg leading-6 font-medium">Origin Token (OGN)</h3>
         </div>
-        <Video id="124T7vvFZNs" />
+        <Video id="eHuRfp6aTsM" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             OGN is your key to earning ETH rewards from the Origin Story
