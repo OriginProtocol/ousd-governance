@@ -8,6 +8,8 @@ import EligibilityItem from "components/claim/EligibilityItem";
 import Icon from "@mdi/react";
 import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
 import { Loading } from "components/Loading";
+import Link from "components/Link";
+import { getRewardsApy } from "utils/apy";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -19,6 +21,15 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
   const { provider, web3Provider, address, web3Modal } = useStore();
   const claim = useClaim();
   const { loaded, hasClaim } = claim;
+
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
+
+  // Standard APY figure, assumes 100 OGV locked for max duration
+  const stakingApy = getRewardsApy(
+    100 * 1.8 ** (48 / 12),
+    100,
+    totalSupplyVeOgv
+  );
 
   const claimValid =
     (hasClaim && claim.optional && claim.optional.isValid) ||
@@ -115,15 +126,26 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                           <br />
                           <span className="truncate block">{address}</span>
                         </p>
-                        <div className="pt-9">
-                          <Button
-                            fullWidth
-                            large
-                            alt
+                        <div className="pt-2">
+                          <button
+                            className="text-sm text-gray-600 hover:underline"
                             onClick={handleDisconnect}
                           >
                             Try another address
-                          </Button>
+                          </button>
+                        </div>
+                        <div className="pt-9 space-y-4">
+                          <p className="text-2xl">
+                            OGV stakers earn a {stakingApy.toFixed(2)}% variable
+                            APY
+                          </p>
+                          <Link
+                            href="https://www.huobi.com/exchange/ogv_usdt"
+                            newWindow
+                            className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+                          >
+                            Buy OGV
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -145,10 +167,25 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                       <br />
                       <span className="truncate block">{address}</span>
                     </p>
-                    <div className="pt-9">
-                      <Button fullWidth large alt onClick={handleDisconnect}>
+                    <div className="pt-2">
+                      <button
+                        className="text-sm text-gray-600 hover:underline"
+                        onClick={handleDisconnect}
+                      >
                         Try another address
-                      </Button>
+                      </button>
+                    </div>
+                    <div className="pt-9 space-y-4">
+                      <p className="text-2xl">
+                        OGV stakers earn a {stakingApy.toFixed(2)}% variable APY
+                      </p>
+                      <Link
+                        href="https://www.huobi.com/exchange/ogv_usdt"
+                        newWindow
+                        className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+                      >
+                        Buy OGV
+                      </Link>
                     </div>
                   </div>
                 </div>
