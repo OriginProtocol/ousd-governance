@@ -127,7 +127,8 @@ const useClaim = () => {
                   claim.optional.amount,
                   claim.optional.proof,
                   duration,
-                  { gasLimit: 1000000 } // @TODO maybe set this to lower amount
+                  // 278048 * 1.5
+                  { gasLimit: 417072 }
                 );
                 setOptionalTxReceipt(claimResult.hash);
               } catch (e) {
@@ -185,8 +186,9 @@ const useClaim = () => {
                   claim.mandatory.index,
                   claim.mandatory.amount,
                   claim.mandatory.proof,
-                  { gasLimit: 1000000 }
-                ); // @TODO maybe set this to lower
+                  // 498316 * 1.5
+                  { gasLimit: 747474 }
+                );
                 setMandatoryTxReceipt(claimResult.hash);
               } catch (e) {
                 setMandatoryClaimState("ready");

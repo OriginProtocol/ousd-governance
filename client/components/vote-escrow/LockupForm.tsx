@@ -188,8 +188,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       transaction = await contracts.OriginDollarGovernance.approve(
         contracts.OgvStaking.address,
         ethers.constants.MaxUint256,
-        { gasLimit: 1000000 }
-      ); // @TODO maybe set this to lower
+        { gasLimit: 144300 }
+      );
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -242,8 +242,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
           ethers.utils.parseUnits(lockupAmount),
           duration,
-          { gasLimit: 1000000 }
-        ); // @TODO maybe set this to lower
+          // 228123 * 1.5
+          { gasLimit: 342184 }
+        );
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -302,8 +303,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
           existingLockup.lockupId,
           duration,
-          { gasLimit: 1000000 }
-        ); // @TODO maybe set this to lower
+          { gasLimit: 195000 }
+        );
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
