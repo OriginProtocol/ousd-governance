@@ -302,7 +302,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
           existingLockup.lockupId,
           duration,
-          { gasLimit: 154727 }
+          { gasLimit: 195000 }
         );
       } catch (e) {
         setTransactionError("Error extending lockup!");
