@@ -62,7 +62,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 <td>
                   <Link
                     className="btn rounded-full btn-sm"
-                    href={`/vote-escrow/${lockup.lockupId}`}
+                    href={`/stake/${lockup.lockupId}`}
                   >
                     Extend
                   </Link>
@@ -83,7 +83,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
         </table>
       )}
       <div className="mt-4">
-        <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
+        <Link className="btn btn-primary btn-lg" href="/stake/new">
           {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
         </Link>
       </div>

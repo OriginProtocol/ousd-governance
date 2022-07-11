@@ -21,7 +21,7 @@ export default function VoteEscrow() {
 
   return (
     <Wrapper narrow>
-      <PageTitle>Vote Escrow</PageTitle>
+      <PageTitle>OGV Staking</PageTitle>
       <CardGroup>
         <AccountBalances />
         <YourLockups />

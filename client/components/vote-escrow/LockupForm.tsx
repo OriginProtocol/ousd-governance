@@ -193,7 +193,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               reloadTotalBalances();
               reloadAccountBalances();
               reloadLockups();
-              router.push(`/vote-escrow`);
+              router.push(`/stake`);
             },
           },
         ],
@@ -219,13 +219,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           {
             ...transaction,
             onComplete: () => {
-              toast.success("Lockup extended", {
+              toast.success("Stake extended", {
                 hideProgressBar: true,
               });
               reloadTotalBalances();
               reloadAccountBalances();
               reloadLockups();
-              router.push(`/vote-escrow`);
+              router.push(`/stake`);
             },
           },
         ],
