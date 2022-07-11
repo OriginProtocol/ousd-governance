@@ -42,10 +42,7 @@ const defaultState: Web3DataType = {
     claimClosesTs: process.env.CLAIM_CLOSES,
     currentStep: 0,
   },
-  lockups: {
-    lockups: [],
-    totalOgvLockedUp: ethers.BigNumber.from("0"),
-  },
+  lockups: [],
   recentLockups: [],
   allowances: {
     ogv: ethers.BigNumber.from("0"),

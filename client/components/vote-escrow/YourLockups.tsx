@@ -11,6 +11,8 @@ import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
 import useTotalBalances from "utils/useTotalBalances";
 import useLockups from "utils/useLockups";
+import useClaim from "utils/useClaim";
+import { getRewardsApy } from "utils/apy";
 
 interface YourLockupsProps {}
 
@@ -20,6 +22,16 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
   const { reloadLockups } = useLockups();
+  const claim = useClaim();
+
+  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
+
+  // Standard APY figure, assumes 100 OGV locked for max duration
+  const stakingApy = getRewardsApy(
+    100 * 1.8 ** (48 / 12),
+    100,
+    totalSupplyVeOgv
+  );
 
   if (!lockups) {
     return (
@@ -55,11 +67,9 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
   return (
     <Card>
-      <SectionTitle>
-        {lockups.length > 0 ? "Your stakes" : "You have no active stakes"}
-      </SectionTitle>
+      {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}
       {lockups.length > 0 && (
-        <table className="table table-compact w-full">
+        <table className="table table-compact w-full mb-4">
           <thead>
             <tr>
               <th>OGV</th>
@@ -106,16 +116,27 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      {ogv.gt(0) ? (
-        <div className="mt-4">
+      {ogv.gt(0) && (
+        <div>
           <Link className="btn btn-primary btn-lg" href="/stake/new">
             {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
           </Link>
         </div>
-      ) : (
-        <p className="text-gray-600 pt-4">
-          You currently have no OGV to stake.
-        </p>
+      )}
+      {ogv.eq(0) && lockups.length === 0 && (
+        <div className="space-y-4">
+          <p className="text-2xl">
+            OGV stakers earn a {stakingApy.toFixed(2)}% variable APY. You can
+            buy OGV now on Huobi and Uniswap.
+          </p>
+          <Link
+            href="https://www.huobi.com/exchange/ogv_usdt"
+            newWindow
+            className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+          >
+            Buy OGV
+          </Link>
+        </div>
       )}
     </Card>
   );
