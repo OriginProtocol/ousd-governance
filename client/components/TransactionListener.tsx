@@ -13,7 +13,13 @@ export const TransactionListener = () => {
   const [isOnClaimPage, setIsOnClaimPage] = useState(false);
 
   useEffect(() => {
-    setIsOnClaimPage(router.pathname === "/claim");
+    const newIsOnClaimPage = router.pathname === "/claim"
+    // navigating away from the claim page
+    if (!newIsOnClaimPage && isOnClaimPage) {
+      // dismiss all toasts that may have been seen on the claim page
+      toast.dismiss();
+    }
+    setIsOnClaimPage(newIsOnClaimPage);
   }, [router.pathname]);
 
   useEffect(() => {
