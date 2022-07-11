@@ -8,7 +8,6 @@ import { SECONDS_IN_A_MONTH } from "../constants/index";
 import TokenAmount from "components/TokenAmount";
 import Link from "components/Link";
 import ExternalLinkIcon from "components/ExternalLinkIcon";
-import numeral from "numeraljs";
 
 const _LockupContent = ({ shortAddress, ogvLockedUp, months, txHash }) => {
   return (
