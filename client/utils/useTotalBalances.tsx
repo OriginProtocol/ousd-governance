@@ -25,10 +25,15 @@ const useTotalBalances = () => {
     ) {
       Promise.all([loadTotalSupplyOfOgv(), loadTotalLockedUpOgv()]).then(
         ([totalSupplyOfOgv, totalLockedUpOgv]) => {
+          const totalPercentageOfLockedUpOgv =
+            totalLockedUpOgv.gt(0) && totalSupplyOfOgv.gt(0)
+              ? (totalLockedUpOgv / totalSupplyOfOgv) * 100
+              : 0;
           useStore.setState({
             totalBalances: {
               totalSupplyOfOgv,
               totalLockedUpOgv,
+              totalPercentageOfLockedUpOgv,
             },
           });
         }

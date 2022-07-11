@@ -14,11 +14,8 @@ interface OgvTotalStatsProps {
 
 const OgvTotalStats: FunctionComponent<OgvTotalStatsProps> = ({ alt }) => {
   const { totalBalances } = useStore();
-  const { totalSupplyOfOgv, totalLockedUpOgv } = totalBalances;
-  const totalPercentageOfLockedUpOgv =
-    totalLockedUpOgv.gt(0) && totalSupplyOfOgv.gt(0)
-      ? (totalLockedUpOgv / totalSupplyOfOgv) * 100
-      : 0;
+  const { totalSupplyOfOgv, totalLockedUpOgv, totalPercentageOfLockedUpOgv } =
+    totalBalances;
 
   return (
     <CardGroup horizontal>
