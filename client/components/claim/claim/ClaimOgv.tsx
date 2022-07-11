@@ -17,11 +17,13 @@ import { mdiArrowRight } from "@mdi/js";
 import { SECONDS_IN_A_MONTH } from "../../../constants/index";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 import moment from "moment";
+import { useStore } from "utils/store";
 
 interface ClaimOgvProps {}
 
 const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
   const claim = useClaim();
+  const { totalLockedUpOgv, totalPercentageOfLockedUpOgv } = useStore().totalBalances;
 
   const [hideModal, sethideModal] = useState(true);
 
@@ -265,10 +267,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
             )}
           </div>
           {!isValidLockup && (
-            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center text-[#dd0a0a]">
+            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-xl text-center text-[#dd0a0a]">
               If you don&apos;t stake your OGV, you&apos;ll miss out on the{" "}
               {maxOgvLockupRewardApy.toFixed(2)}% variable APY and maximized
-              voting power.
+              voting power. <TokenAmount amount={totalLockedUpOgv} format="currency"/> OGV ({totalPercentageOfLockedUpOgv.toFixed(2)}% of the total supply) has already been staked by other users.
             </div>
           )}
           {error && (
