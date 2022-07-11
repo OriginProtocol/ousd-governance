@@ -79,7 +79,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                               opacity-10
                               "
                             />
-                            <span className="text-xs bg-white bg-opacity-10 px-2 py-[0.2rem] rounded-sm !font-light">
+                            <span className="text-xs bg-white bg-opacity-10 px-2 py-[0.2rem] rounded-sm font-bold">
                               {stakingApy.toFixed(2)}% vAPY
                             </span>
                           </div>
