@@ -56,7 +56,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             Origin Dollar (OUSD) is a stablecoin that gives you access to some
-            of the best yields in DeFi with none of the hassle.
+            of the best yields in DeFi with none of the hassles.
           </p>
           <p>
             Stablecoins offer the benefits of cryptocurrencies without the price

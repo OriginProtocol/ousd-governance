@@ -30,9 +30,9 @@ const questions = [
     question: "How can you earn more as OUSD adoption increases?",
     answers: [
       "Wait to claim OGV after OUSD succeeds",
-      "Stake OGV now to get fees and voting power",
+      "Stake OGV now to get rewards, OUSD fees and voting power",
     ],
-    correctAnswer: "Stake OGV now to get fees and voting power",
+    correctAnswer: "Stake OGV now to get rewards, OUSD fees and voting power",
   },
 ];
 
@@ -56,8 +56,8 @@ const Ogv: FunctionComponent<OgvProps> = ({ onComplete }) => (
           </p>
           <p>
             When OGV is staked, it&apos;s converted into veOGV (or
-            “vote-escrowed OGV”) and it becomes non-transferable but it earns
-            fees as OUSD adoption grows.
+            “vote-escrowed OGV”) and becomes non-transferable while earning fees
+            as OUSD adoption grows.
           </p>
           <p>
             As a veOGV holder, your vote impacts the future of OUSD. You decide
