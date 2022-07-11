@@ -54,6 +54,7 @@ const defaultState: Web3DataType = {
     totalPercentageOfLockedUpOgv: 0,
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
+  blockTimestamp: Math.ceil(Date.now() / 1000),
 };
 
 export const useStore = create<StoreType>((set) => ({
