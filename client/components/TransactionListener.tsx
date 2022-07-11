@@ -1,13 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePrevious } from "utils/index";
 import { useStore } from "utils/store";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { isMobile } from "react-device-detect";
+import { useRouter } from "next/router";
 
 export const TransactionListener = () => {
   const { web3Provider, pendingTransactions } = useStore();
-
+  const router = useRouter();
   const prevPendingTransactions = usePrevious(pendingTransactions);
+  const [isOnClaimPage, setIsOnClaimPage] = useState(false);
+
+  useEffect(() => {
+    setIsOnClaimPage(router.pathname === "/claim");
+  }, [router.pathname]);
 
   useEffect(() => {
     if (!prevPendingTransactions) return;
@@ -37,5 +44,17 @@ export const TransactionListener = () => {
     }
   }, [pendingTransactions]);
 
-  return <ToastContainer theme="dark" />;
+  return (
+    <ToastContainer
+      theme="dark"
+      /* to not over clutter the screen show only 2 toasts on mobile device
+       */
+      limit={isMobile ? 2 : 5}
+      /* leave toast opened for 55 seconds when on claim page so other address claim
+       * toasts can fill up 5 notifications limit and then slowly new ones enter and
+       * old ones get removed.
+       */
+      autoClose={isOnClaimPage ? 55000 : 5000}
+    />
+  );
 };
