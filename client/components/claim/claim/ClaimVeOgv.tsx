@@ -104,7 +104,7 @@ const ClaimVeOgv: FunctionComponent<ClaimVeOgvProps> = () => {
               </h2>
               <p className="text-gray-500 text-lg leading-snug">
                 Staked OGV is converted to non-transferrable veOGV, which allows
-                you to claim additional OGV staking rewards, OUSD fees,
+                you to claim additional OGV staking rewards, OUSD fees, and
                 participate in governance.
               </p>
             </div>
