@@ -39,7 +39,7 @@ export const navItems = [
     label: "Stake",
   },
   {
-    href: "https://www.huobi.com/exchange/ogv_usdt",
+    href: "https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet",
     label: "Buy OGV",
     external: true,
   },
