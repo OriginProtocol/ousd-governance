@@ -51,6 +51,7 @@ const defaultState: Web3DataType = {
   totalBalances: {
     totalSupplyOfOgv: ethers.BigNumber.from("0"),
     totalLockedUpOgv: ethers.BigNumber.from("0"),
+    totalPercentageOfLockedUpOgv: 0,
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
 };
