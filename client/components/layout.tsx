@@ -2,6 +2,7 @@ import { FunctionComponent, ReactNode } from "react";
 import Header from "components/Header";
 import Footer from "components/Footer";
 import AdminUtils from "components/AdminUtils";
+import TokenToMetamaskModal from "components/TokenToMetamaskModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,6 +19,12 @@ const Layout: FunctionComponent<LayoutProps> = ({ children, hideNav }) => (
       </div>
     </div>
     <AdminUtils />
+    <TokenToMetamaskModal
+      show={true}
+      handleClose={(close) => {
+        console.log("close", !!close)
+      }}
+    />
     <Footer />
   </div>
 );

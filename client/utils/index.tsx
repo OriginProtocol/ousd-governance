@@ -145,3 +145,29 @@ export function claimIsOpen() {
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function trackOGVInMetaMask(token_address) {
+  return _trackTokenInMetaMask(token_address, "OGV", 'https://governance.ousd.com/ogv.svg');
+}
+
+export function trackVeOGVInMetaMask(token_address) {
+  return _trackTokenInMetaMask(token_address, "veOGV", 'https://governance.ousd.com/veogv.svg');
+}
+
+function _trackTokenInMetaMask(token_address, symbol, imageSrc) {
+  web3.currentProvider.sendAsync(
+    {
+      method: 'metamask_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: token_address,
+          symbol,
+          decimals: 18,
+          image: imageSrc,
+        },
+      },
+    },
+    console.log
+  )
+}

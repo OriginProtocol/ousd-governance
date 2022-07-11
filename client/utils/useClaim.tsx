@@ -17,7 +17,6 @@ const useClaim = () => {
   const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
   const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
     useState(null);
-  const { address, contracts, web3Provider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
   /*
    * ready -> ready to start claiming
