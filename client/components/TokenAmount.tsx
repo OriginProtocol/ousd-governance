@@ -11,6 +11,7 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
   const formatMap = {
     abbreviatedCurrency: "0.00 a",
     currency: "0,0.00",
+    currency_no_decimals: "0,0",
     default: "0.00 a",
   };
 

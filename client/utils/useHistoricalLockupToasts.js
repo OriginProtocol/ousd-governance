@@ -14,7 +14,7 @@ const _LockupContent = ({ shortAddress, ogvLockedUp, months, txHash }) => {
     <div>
       <div>
         {`${shortAddress} recently staked `}
-        <TokenAmount amount={ogvLockedUp} format="currency" />
+        <TokenAmount amount={ogvLockedUp} format="currency_no_decimals" />
         {` OGV for ${months} months`}
       </div>
       <Link
