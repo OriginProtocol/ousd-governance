@@ -242,7 +242,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
           ethers.utils.parseUnits(lockupAmount),
           duration,
-          { gasLimit: 296559 }
+          // 228123 * 1.5
+          { gasLimit: 342184 }
         );
       } catch (e) {
         setTransactionError("Error locking up!");
