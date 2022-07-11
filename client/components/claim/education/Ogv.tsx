@@ -16,7 +16,7 @@ const questions = [
     correctAnswer: "OGV",
   },
   {
-    question: "Which is the best reason to lock OGV and convert it to veOGV?",
+    question: "Which is the best reason to stake OGV and convert it to veOGV?",
     answers: [
       "To keep it from being burned",
       "veOGV is freely transferable",
@@ -30,9 +30,9 @@ const questions = [
     question: "How can you earn more as OUSD adoption increases?",
     answers: [
       "Wait to claim OGV after OUSD succeeds",
-      "Lock OGV now to get fees and voting power",
+      "Stake OGV now to get fees and voting power",
     ],
-    correctAnswer: "Lock OGV now to get fees and voting power",
+    correctAnswer: "Stake OGV now to get fees and voting power",
   },
 ];
 
@@ -51,11 +51,11 @@ const Ogv: FunctionComponent<OgvProps> = ({ onComplete }) => (
           <p>Congratulations, you&apos;re ready to claim your OGV airdrop.</p>
           <p>
             OGV lets you own a piece of the future growth of OUSD. You can claim
-            OGV and lock it for up for anywhere from 1 week to 4 years to
-            maximize your earnings and voting power.
+            OGV and stake it for anywhere from 1 month to 4 years to maximize
+            your earnings and voting power.
           </p>
           <p>
-            When OGV is locked, it&apos;s converted into veOGV (or
+            When OGV is staked, it&apos;s converted into veOGV (or
             “vote-escrowed OGV”) and it becomes non-transferable but it earns
             fees as OUSD adoption grows.
           </p>

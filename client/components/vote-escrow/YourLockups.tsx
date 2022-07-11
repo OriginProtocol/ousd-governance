@@ -56,15 +56,15 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   return (
     <Card>
       <SectionTitle>
-        {lockups.length > 0 ? "Your lock-ups" : "You have no active lock-ups"}
+        {lockups.length > 0 ? "Your stakes" : "You have no active stakes"}
       </SectionTitle>
       {lockups.length > 0 && (
         <table className="table table-compact w-full">
           <thead>
             <tr>
               <th>OGV</th>
-              <th>Duration left</th>
-              <th>Lockup ends</th>
+              <th>Duration remaining</th>
+              <th>Stake ends</th>
               <th>veOGV</th>
               <th>&nbsp;</th>
               <th>&nbsp;</th>
@@ -86,7 +86,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 <td>
                   <Link
                     className="btn rounded-full btn-sm btn-primary"
-                    href={`/vote-escrow/${lockup.lockupId}`}
+                    href={`/stake/${lockup.lockupId}`}
                   >
                     Extend
                   </Link>
@@ -98,7 +98,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                     disabled={Date.now() / 1000 < lockup.end}
                     onClick={() => handleUnlock(lockup.lockupId)}
                   >
-                    Unlock
+                    Unstake
                   </Button>
                 </td>
               </tr>
@@ -108,8 +108,8 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       )}
       {ogv.gt(0) ? (
         <div className="mt-4">
-          <Link className="btn btn-primary btn-lg" href="/vote-escrow/new">
-            {lockups.length > 0 ? "Create a new lock-up" : "Lock your OGV now"}
+          <Link className="btn btn-primary btn-lg" href="/stake/new">
+            {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
           </Link>
         </div>
       ) : (

@@ -51,7 +51,7 @@ const Ogn: FunctionComponent<OgnProps> = ({ handleNextStep }) => (
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             OGN is your key to earning ETH rewards from the Origin Story
-            platform , which has powered record-breaking NFT drops from 3LAU,
+            platform, which has powered record-breaking NFT drops from 3LAU,
             Paris Hilton, BT, Trevor Jones, Don Diablo, and more.
           </p>
           <p>
@@ -68,8 +68,8 @@ const Ogn: FunctionComponent<OgnProps> = ({ handleNextStep }) => (
             a piece of the action.
           </p>
           <p>
-            That means you can buy OGN tokens and “stake” them to earn part of
-            the commissions that Origin Story makes on NFT primary and secondary
+            That means you can buy OGN tokens and stake them to earn part of the
+            commissions that Origin Story makes on NFT primary and secondary
             sales.
           </p>
           <p>
