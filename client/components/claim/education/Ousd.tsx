@@ -52,7 +52,7 @@ const Ousd: FunctionComponent<OusdProps> = ({ onComplete }) => (
             Origin Dollar (OUSD)
           </h3>
         </div>
-        <Video id="5r_GV4CVvXU" />
+        <Video id="W0SGakbCzLw" />
         <div className="text-sm lg:text-base text-gray-800 space-y-4">
           <p>
             Origin Dollar (OUSD) is a stablecoin that gives you access to some
