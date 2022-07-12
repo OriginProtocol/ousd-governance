@@ -39,7 +39,7 @@ export const navItems = [
     label: "Stake",
   },
   {
-    href: "https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet",
+    href: "https://app.uniswap.org/#/swap?inputCurrency=0x8207c1ffc5b6804f6024322ccf34f29c3541ae26&outputCurrency=0x9c354503c38481a7a7a51629142963f98ecc12d0&chain=mainnet",
     label: "Buy OGV",
     external: true,
   },

@@ -93,7 +93,7 @@ const HoldingPage = () => {
           <div className="space-y-4 lg:space-y-0 lg:space-x-4 lg:flex mt-6">
             <a
               className="btn btn-lg btn-primary rounded-full w-full lg:flex-1"
-              href="https://app.uniswap.org/#/swap?outputCurrency=0x8207c1FfC5B6804F6024322CcF34F29c3541Ae26&amp;chain=mainnet"
+              href="https://app.uniswap.org/#/swap?inputCurrency=0x8207c1ffc5b6804f6024322ccf34f29c3541ae26&outputCurrency=0x9c354503c38481a7a7a51629142963f98ecc12d0&chain=mainnet"
               target="_blank"
               rel="noopener noreferrer"
             >
