@@ -152,7 +152,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                             APY
                           </p>
                           <Link
-                            href="https://app.uniswap.org/#/swap?inputCurrency=0x8207c1ffc5b6804f6024322ccf34f29c3541ae26&outputCurrency=0x9c354503c38481a7a7a51629142963f98ecc12d0&chain=mainnet"
+                            href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
                             newWindow
                             className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
                           >
@@ -192,7 +192,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                         OGV stakers earn a {stakingApy.toFixed(2)}% variable APY
                       </p>
                       <Link
-                        href="https://app.uniswap.org/#/swap?inputCurrency=0x8207c1ffc5b6804f6024322ccf34f29c3541ae26&outputCurrency=0x9c354503c38481a7a7a51629142963f98ecc12d0&chain=mainnet"
+                        href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
                         newWindow
                         className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
                       >
