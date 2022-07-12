@@ -12,11 +12,11 @@ const useAccountBalances = () => {
   // Load users governance token balance and vote power
   useEffect(() => {
     const loadOgvBalance = async () => {
-      return await contracts.OriginDollarGovernance.balanceOf(address);
+      return await contracts.OriginDollarGovernance.impl.balanceOf(address);
     };
 
     const loadVeOgvBalance = async () => {
-      return await contracts.OgvStaking.balanceOf(address);
+      return await contracts.OgvStaking.impl.balanceOf(address);
     };
 
     if (
@@ -51,9 +51,9 @@ const useAccountBalances = () => {
 
   useEffect(() => {
     const loadAllowance = async () => {
-      return await contracts.OriginDollarGovernance.allowance(
+      return await contracts.OriginDollarGovernance.impl.allowance(
         address,
-        contracts.OgvStaking.address
+        contracts.OgvStaking.impl.address
       );
     };
 

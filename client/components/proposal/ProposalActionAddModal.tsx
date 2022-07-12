@@ -36,6 +36,7 @@ export const ProposalActionAddModal = ({
     setImplementationAddress("");
   };
 
+  console.log("Conracts", contracts);
   return (
     <div
       id="proposal-add-modal"
@@ -51,7 +52,9 @@ export const ProposalActionAddModal = ({
         {step === 0 && (
           <AddActionContractForm
             onChange={async (contract: any) => {
-              const { abi, address } = contract;
+              const { abi, impl } = contract;
+              const address = impl.address;
+
               // Check contract selected abi for implementation method
               const implementationFunction = abi.find(
                 ({ type, name }: { type: string; name: string }) =>

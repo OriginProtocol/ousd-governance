@@ -46,18 +46,18 @@ export const AddActionContractForm = ({
 
   useEffect(() => {
     if (values.address.length === 42) {
-      const contract = Object.values(contracts).find(
-        (c) => c.address === values.address
+      const contractObj = Object.values(contracts).find(
+        (c) => c.impl.address === values.address
       );
 
-      if (contract) {
+      if (contractObj) {
         changeHandler({
           target: {
             name: "abi",
-            value: contract.abi,
+            value: contractObj.abi,
           },
         });
-        onChange(contract);
+        onChange(contractObj);
       }
     }
   }, [values.address]);
@@ -122,8 +122,11 @@ export const AddActionContractForm = ({
                 {Object.entries(contracts)
                   .filter(([name, contract]) => typeof contract === "object")
                   .map(([name, contract]) => (
-                    <option key={contract.address} value={contract.address}>
-                      {name} {truncateEthAddress(contract.address)}
+                    <option
+                      key={contract.impl.address}
+                      value={contract.impl.address}
+                    >
+                      {name} {truncateEthAddress(contract.impl.address)}
                     </option>
                   ))}
               </select>
