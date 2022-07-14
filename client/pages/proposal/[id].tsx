@@ -3,6 +3,7 @@ import { ProposalDetail } from "components/proposal/ProposalDetail";
 import { PageTitle } from "components/PageTitle";
 import prisma from "lib/prisma";
 import Layout from "components/layout";
+import Seo from "components/Seo";
 
 export async function getServerSideProps({
   res,
@@ -27,6 +28,7 @@ export async function getServerSideProps({
 const ProposalPage: NextPage = ({ proposalId, description }) => {
   return (
     <Layout>
+      <Seo title="Proposal" />
       <PageTitle>Proposal</PageTitle>
       <ProposalDetail proposalId={proposalId} description={description} />
     </Layout>
