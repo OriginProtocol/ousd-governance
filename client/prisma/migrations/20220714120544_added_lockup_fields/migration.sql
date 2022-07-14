@@ -38,7 +38,3 @@ CREATE UNIQUE INDEX "proposals_proposal_id_key" ON "proposals"("proposal_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "voters_address_key" ON "voters"("address");
-
-DELETE FROM lockups;
-UPDATE listener SET last_seen_block=15110907;
-
