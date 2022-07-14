@@ -52,7 +52,11 @@ main()
         npm run generate-merkle-tree:dev
         
         # deploy the contracts
-        npm run deploy:contracts:dev
+        if [ -z "$ACCOUNT_TO_FUND" ]; then
+           npm run deploy:contracts:dev
+        else
+           ACCOUNT_TO_FUND=${ACCOUNT_TO_FUND} npm run deploy:contracts:dev
+        fi
 
         # wait for subprocesses to finish
         for job in `jobs -p`

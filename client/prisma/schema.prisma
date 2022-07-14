@@ -40,6 +40,9 @@ model Lockup {
   id        Int @default(autoincrement()) @id
   lockupId  Int
   user      String
+  amount    Decimal @db.Decimal(78, 0)
+  end       DateTime
+  points    Decimal @db.Decimal(78, 0)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([lockupId, user])
