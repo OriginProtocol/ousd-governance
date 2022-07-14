@@ -74,6 +74,26 @@ const useClaim = () => {
   }, [address]);
 
   useEffect(() => {
+    const loadTotalSupplyVeOGV = async () => {
+      if (!contracts.loaded) {
+        return;
+      }
+      try {
+        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
+        setTotalSupplyVeOgv(totalSupplyBn);
+        // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
+        // of claimers will see insane reward amounts
+        const minTotalSupply = numeral(100000000); // 100m of OGV
+        const totalSupply = numeral(totalSupplyBn.div(decimal18Bn).toString());
+        setTotalSupplyVeOgvAdjusted(Math.max(totalSupply, minTotalSupply));
+      } catch (error) {
+        console.error(`Can not fetch veOgv total supply:`, error);
+      }
+    };
+    loadTotalSupplyVeOGV();
+  }, [contracts]);
+
+  useEffect(() => {
     if (
       !contracts.loaded ||
       !(claim.optional.hasClaim || claim.mandatory.hasClaim)
@@ -232,26 +252,6 @@ const useClaim = () => {
 
     setupDistributors();
   }, [address, contracts, claim, web3Provider]);
-
-  useEffect(() => {
-    const loadTotalSupplyVeOGV = async () => {
-      if (!contracts.loaded) {
-        return;
-      }
-      try {
-        const totalSupplyBn = await contracts.OgvStaking.totalSupply();
-        setTotalSupplyVeOgv(totalSupplyBn);
-        // TODO: verify this that we need to set some minimal total supply. Otherwise the first couple
-        // of claimers will see insane reward amounts
-        const minTotalSupply = numeral(100000000); // 100m of OGV
-        const totalSupply = numeral(totalSupplyBn.div(decimal18Bn).toString());
-        setTotalSupplyVeOgvAdjusted(Math.max(totalSupply, minTotalSupply));
-      } catch (error) {
-        console.error(`Can not fetch veOgv total supply:`, error);
-      }
-    };
-    loadTotalSupplyVeOGV();
-  }, [contracts]);
 
   return {
     optional: {
