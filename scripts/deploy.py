@@ -1,5 +1,6 @@
 import json
 from brownie import *
+import os
 
 EPOCH = 1657584000  # start of rewards: Tuesday, July 12, 2022 12:00:00 AM UTC
 EST_EPOCH_BLOCK = 15124542
@@ -59,11 +60,12 @@ def main(
     )
 
     # if dev environment fund the contracts
-    if web3.chain_id == 31337 or web3.chain_id == 4:
-        token.transfer(
-            merkle_mandatory.address, 100000000 * 1e18, {"from": accounts[0]}
-        )
-        token.transfer(merkle_optional.address, 100000000 * 1e18, {"from": accounts[0]})
+    token.transfer(
+        merkle_mandatory.address, 100000000 * 1e18, {"from": accounts[0]}
+    )
+    token.transfer(merkle_optional.address, 100000000 * 1e18, {"from": accounts[0]})
+    if os.getenv('ACCOUNT_TO_FUND') is not None:
+        token.transfer(os.getenv('ACCOUNT_TO_FUND'), 100000000 * 1e18, {"from": accounts[0]})
 
     # Make the governor the proposer and executor on timelock
     timelock_controller.grantRole(web3.keccak(text="PROPOSER_ROLE"), governance)
