@@ -6,6 +6,7 @@ import Link from "components/Link";
 import { PageTitle } from "components/PageTitle";
 import LockupForm from "components/vote-escrow/LockupForm";
 import { find } from "lodash";
+import Seo from "components/Seo";
 
 export async function getServerSideProps({
   res,
@@ -42,6 +43,7 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
 
   return (
     <Wrapper narrow>
+      <Seo title="Extend Stake" />
       <PageTitle>Extend Stake</PageTitle>
       {!lockup && <p className="text-gray-300">No stake found.</p>}
       {lockup && lockup?.user !== address && (

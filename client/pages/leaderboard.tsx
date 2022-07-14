@@ -4,6 +4,7 @@ import { LeaderboardTable } from "components/LeaderboardTable";
 import Card from "components/Card";
 import prisma from "lib/prisma";
 import Wrapper from "components/Wrapper";
+import Seo from "components/Seo";
 
 export async function getServerSideProps({ res }: { res: any }) {
   const voters = (
@@ -23,6 +24,7 @@ export async function getServerSideProps({ res }: { res: any }) {
 const Leaderboard: NextPage = ({ voters }) => {
   return (
     <Wrapper narrow>
+      <Seo title="Leaderboard" />
       <PageTitle>Leaderboard</PageTitle>
       <Card>
         <LeaderboardTable voters={voters} />

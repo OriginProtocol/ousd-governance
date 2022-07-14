@@ -5,6 +5,7 @@ import Wrapper from "components/Wrapper";
 import { PageTitle } from "components/PageTitle";
 import LockupForm from "components/vote-escrow/LockupForm";
 import Link from "components/Link";
+import Seo from "components/Seo";
 
 const LockupNew: NextPage = () => {
   const { web3Provider } = useStore();
@@ -19,6 +20,7 @@ const LockupNew: NextPage = () => {
 
   return (
     <Wrapper narrow>
+      <Seo title="New Stake" />
       <PageTitle>New Stake</PageTitle>
       <LockupForm />
       <div className="mt-6">
