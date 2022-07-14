@@ -51,7 +51,7 @@ const options = {
   // Confirmed as soon as we've got it. No real problem with reorgs.
   // Don't use an integer here because it is falsy
   confirmations: "0",
-  chunkSize: 10000, // n° of blocks to fetch at a time (default: 10000)
+  chunkSize: 1000, // n° of blocks to fetch at a time (default: 10000)
   concurrency: 10, // maximum n° of concurrent web3 requests (default: 10)
   backoff: 1000, // retry backoff in milliseconds (default: 1000)
 };
