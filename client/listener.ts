@@ -80,6 +80,9 @@ const handleStake = async (event) => {
       data: {
         user: event.values.user,
         lockupId: parseInt(event.values.lockupId),
+        amount: event.values.amount,
+        end: new Date(event.values.end * 1000),
+        points: event.values.points,
       },
     });
     logger.info("Inserted lockup");
@@ -92,7 +95,10 @@ const handleUnstake = async (event) => {
   try {
     await prisma.lockup.delete({
       where: {
-        lockupId: parseInt(event.values.lockupId),
+        lockupId_user: {
+          user: event.values.user,
+          lockupId: parseInt(event.values.lockupId),
+        }
       },
     });
     logger.info("Removed lockup");
