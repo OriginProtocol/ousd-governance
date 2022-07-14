@@ -8,6 +8,7 @@ import HoldingPage from "components/holding/Page";
 import Claim from "components/claim/Claim";
 import { useStore } from "utils/store";
 import { claimOpenTimestampPassed, claimIsOpen } from "utils";
+import Seo from "components/Seo";
 
 interface ClaimPageProps {}
 
@@ -47,6 +48,7 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
 
   return (
     <div className="space-y-6">
+      <Seo title="Claim OGV" />
       {!claimOpenTsPassed && (
         <Wrapper narrow>
           <HoldingPage />

@@ -16,6 +16,7 @@ import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
+import Seo from "components/Seo";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
@@ -149,6 +150,7 @@ const ProposalNew: NextPage = () => {
 
   return (
     <Wrapper narrow>
+      <Seo title="New Proposal" />
       <PageTitle>New Proposal</PageTitle>
       <CardGroup>
         <Card>

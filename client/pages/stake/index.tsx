@@ -5,6 +5,7 @@ import AccountBalances from "components/vote-escrow/AccountBalances";
 import YourLockups from "components/vote-escrow/YourLockups";
 import { Disconnected } from "components/Disconnected";
 import { useStore } from "utils/store";
+import Seo from "components/Seo";
 
 export default function VoteEscrow() {
   const { web3Provider } = useStore();
@@ -19,6 +20,7 @@ export default function VoteEscrow() {
 
   return (
     <Wrapper narrow>
+      <Seo title="Stake OGV" />
       <PageTitle>OGV Staking</PageTitle>
       <CardGroup>
         <AccountBalances />
