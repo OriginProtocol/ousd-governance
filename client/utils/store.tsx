@@ -30,6 +30,7 @@ const defaultState: Web3DataType = {
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),
+    accruedRewards: ethers.BigNumber.from("0"),
   },
   existingLockup: {
     amount: ethers.BigNumber.from(0),
