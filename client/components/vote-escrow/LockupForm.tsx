@@ -135,7 +135,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
   let buttonText = "";
   if (lockupStatus === "ready") {
-    buttonText = existingLockup ? "Extend" : "Lock up";
+    buttonText = existingLockup ? "Extend" : "Stake";
   } else if (lockupStatus === "waiting-for-user") {
     buttonText = "Confirm transaction";
   } else if (lockupStatus === "waiting-for-network") {
@@ -360,7 +360,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       <div className="space-y-2">
         {!existingLockup ? (
           <RangeInput
-            label="Lock up"
+            label="Stake"
             counterUnit="OGV"
             min="0"
             max={formattedOgvBalance}
