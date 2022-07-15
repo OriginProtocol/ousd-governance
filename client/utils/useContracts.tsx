@@ -4,10 +4,11 @@ import { ethers } from "ethers";
 import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
-import { claimIsOpen } from "utils/index";
+import { claimIsOpen, useNetworkInfo } from "utils/index";
 
 const useContracts = () => {
   const { web3Provider, chainId } = useStore();
+  const networkInfo = useNetworkInfo();
 
   useEffect(() => {
     const loadContracts = async () => {
@@ -17,18 +18,14 @@ const useContracts = () => {
         },
       });
 
-      const governanceContractDefinitions = CHAIN_CONTRACTS[chainId];
-
-      // wallet not connected yet
-      if (!governanceContractDefinitions) {
-        return;
-      }
+      const governanceContractDefinitions =
+        CHAIN_CONTRACTS[networkInfo.envNetwork];
 
       const mainnetProvider = new ethers.providers.JsonRpcProvider(
         mainnetNetworkUrl
       );
       const networkProvider = new ethers.providers.JsonRpcProvider(
-        RPC_URLS[chainId]
+        RPC_URLS[networkInfo.envNetwork]
       );
 
       const provider = web3Provider || networkProvider;
