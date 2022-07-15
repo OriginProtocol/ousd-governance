@@ -2,12 +2,12 @@
     "0x8dea6Ef7767e0D6ae7Dd9D144E514D7DFAe75B36": {
         "amount": {
             "type": "BigNumber",
-            "hex": "0x0410d586a20a4c0000"
+            "hex": "0x417C5E1FBDDFE0000"
         },
         "split": {
             "ogn": {
                 "type": "BigNumber",
-                "hex": "0x4563918244f40000"
+                "hex": "0x4C53ECDC18A60000"
             },
             "ognStaking": {
                 "type": "BigNumber",

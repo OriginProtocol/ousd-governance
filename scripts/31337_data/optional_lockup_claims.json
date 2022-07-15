@@ -1,16 +1,16 @@
 {
-  "merkleRoot": "0xec6b85a27b356b663919338d00c0594df746445a5a0d317ba670e450a7771447",
+  "merkleRoot": "0x4285464fa8590f26b43260f1136b637818947bdd5ba963e98357ad197b0c807b",
   "claims": {
     "0x8dea6Ef7767e0D6ae7Dd9D144E514D7DFAe75B36": {
       "index": 0,
       "amount": {
         "type": "BigNumber",
-        "hex": "0x0410d586a20a4c0000"
+        "hex": "0x417C5E1FBDDFE0000"
       },
       "split": {
         "ogn": {
           "type": "BigNumber",
-          "hex": "0x4563918244f40000"
+          "hex": "0x4C53ECDC18A60000"
         },
         "ognStaking": {
           "type": "BigNumber",
@@ -62,7 +62,7 @@
         }
       },
       "proof": [
-        "0x7e87926430fe964a0ed53ca1e79b742e495865dadeb897aa44a253c7de5213d8"
+        "0xf2eb44f1386ed20fe32f388305fe329f8497505cfbd838bc6efd68036fa01fa5"
       ]
     }
   }
