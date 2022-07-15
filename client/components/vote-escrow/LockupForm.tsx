@@ -10,7 +10,6 @@ import RangeInput from "components/RangeInput";
 import useLockups from "utils/useLockups";
 import useTotalBalances from "utils/useTotalBalances";
 import LockupTable from "components/vote-escrow/LockupTable";
-import moment from "moment";
 import { SECONDS_IN_A_MONTH } from "../../constants/index";
 
 interface LockupFormProps {
@@ -244,9 +243,16 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       setLockupStatus("waiting-for-user");
 
       let transaction;
+
+      // If lockup amount === 100% of the user's OGV balance then use the actual balance BigNumber
+      let amountToStake = ethers.utils.parseUnits(lockupAmount);
+      if (lockupAmount === formattedOgvBalance) {
+        amountToStake = balances.ogv; // Prevents rounding
+      }
+
       try {
         transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
-          ethers.utils.parseUnits(lockupAmount),
+          amountToStake,
           duration,
           // 228123 * 1.5
           { gasLimit: 342184 }
