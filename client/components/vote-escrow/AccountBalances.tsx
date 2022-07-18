@@ -24,13 +24,13 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
 
   return (
     <>
-      <CardGroup horizontal>
+      <CardGroup horizontal fourCol>
         <Card dark tightPadding>
           <div className="space-y-1">
             <CardLabel>Balance</CardLabel>
             <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" />
-              <CardStat>
+              <TokenIcon src="/ogv.svg" alt="OGV" small />
+              <CardStat small>
                 <TokenAmount amount={ogv} />
               </CardStat>
             </div>
@@ -41,8 +41,8 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           <div className="space-y-1">
             <CardLabel>Staked</CardLabel>
             <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" />
-              <CardStat>
+              <TokenIcon src="/ogv.svg" alt="OGV" small />
+              <CardStat small>
                 <TokenAmount amount={totalOgvLockedUp} />
               </CardStat>
             </div>
@@ -53,22 +53,20 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           <div className="space-y-1">
             <CardLabel>Vote balance</CardLabel>
             <div className="flex space-x-1 items-center">
-              <TokenIcon src="/veogv.svg" alt="veOGV" />
-              <CardStat>
+              <TokenIcon src="/veogv.svg" alt="veOGV" small />
+              <CardStat small>
                 <TokenAmount amount={veOgv} />
               </CardStat>
             </div>
             <CardDescription>veOGV</CardDescription>
           </div>
         </Card>
-      </CardGroup>
-      <CardGroup>
         <Card dark tightPadding>
           <div className="space-y-1">
             <CardLabel>Accrued Rewards</CardLabel>
             <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" />
-              <CardStat>
+              <TokenIcon src="/ogv.svg" alt="OGV" small />
+              <CardStat small>
                 <TokenAmount amount={accruedRewards} />
               </CardStat>
             </div>
