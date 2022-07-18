@@ -184,11 +184,11 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      <div className="flex space-x-2">
+      <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
         {ogv.gt(0) && (
           <div>
             <Link
-              className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
+              className="w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
               href="/stake/new"
             >
               {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
@@ -202,6 +202,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               disabled={collectRewardsStatus !== "ready"}
               large
               alt
+              fullWidth
             >
               {collectRewardsButtonText}
             </Button>
