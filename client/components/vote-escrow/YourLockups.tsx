@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useState } from "react";
 import moment from "moment";
 import Card from "components/Card";
 import Button from "components/Button";
@@ -20,11 +20,21 @@ interface YourLockupsProps {}
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   const { lockups, pendingTransactions, contracts, balances, blockTimestamp } =
     useStore();
-  const { ogv } = balances;
+  const { ogv, accruedRewards } = balances;
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
   const { reloadLockups } = useLockups();
   const claim = useClaim();
+  const [collectRewardsStatus, setCollectRewardsStatus] = useState("ready");
+
+  let collectRewardsButtonText = "";
+  if (collectRewardsStatus === "ready") {
+    collectRewardsButtonText = "Collect rewards";
+  } else if (collectRewardsStatus === "waiting-for-user") {
+    collectRewardsButtonText = "Confirm transaction";
+  } else if (collectRewardsStatus === "waiting-for-network") {
+    collectRewardsButtonText = "Waiting to be mined";
+  }
 
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
 
@@ -61,6 +71,59 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             reloadTotalBalances();
             reloadAccountBalances();
             reloadLockups();
+          },
+        },
+      ],
+    });
+  };
+
+  const handleCollectRewards = async () => {
+    console.log(accruedRewards);
+    setCollectRewardsStatus("waiting-for-user");
+
+    let transaction;
+    try {
+      transaction = await contracts.OgvStaking["collectRewards()"]({
+        gasLimit: 1000000,
+      }); // @TODO maybe set this to lower
+    } catch (e) {
+      setCollectRewardsStatus("ready");
+      throw e;
+    }
+
+    setCollectRewardsStatus("waiting-for-network");
+
+    let receipt;
+    try {
+      receipt = await contracts.rpcProvider.waitForTransaction(
+        transaction.hash
+      );
+    } catch (e) {
+      setCollectRewardsStatus("ready");
+      throw e;
+    }
+
+    if (receipt.status === 0) {
+      setCollectRewardsStatus("ready");
+    }
+
+    useStore.setState({
+      pendingTransactions: [
+        ...pendingTransactions,
+        {
+          ...transaction,
+          onComplete: () => {
+            if (receipt.status === 0) {
+              toast.error("Error collecting rewards", {
+                hideProgressBar: true,
+              });
+            } else {
+              toast.success("Rewards collected", {
+                hideProgressBar: true,
+              });
+            }
+            setCollectRewardsStatus("ready");
+            reloadAccountBalances();
           },
         },
       ],
@@ -121,13 +184,30 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      {ogv.gt(0) && (
-        <div>
-          <Link className="btn btn-primary btn-lg" href="/stake/new">
-            {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
-          </Link>
-        </div>
-      )}
+      <div className="flex space-x-2">
+        {ogv.gt(0) && (
+          <div>
+            <Link
+              className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
+              href="/stake/new"
+            >
+              {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
+            </Link>
+          </div>
+        )}
+        {accruedRewards.gt(0) && (
+          <div>
+            <Button
+              onClick={handleCollectRewards}
+              disabled={collectRewardsStatus !== "ready"}
+              large
+              alt
+            >
+              {collectRewardsButtonText}
+            </Button>
+          </div>
+        )}
+      </div>
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
           <p className="text-2xl">
