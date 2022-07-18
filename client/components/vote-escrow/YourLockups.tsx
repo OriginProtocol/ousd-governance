@@ -18,9 +18,16 @@ import { SECONDS_IN_A_MONTH } from "../../constants/index";
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups, pendingTransactions, contracts, balances, blockTimestamp } =
-    useStore();
+  const {
+    lockups,
+    pendingTransactions,
+    contracts,
+    balances,
+    blockTimestamp,
+    totalBalances,
+  } = useStore();
   const { ogv, accruedRewards } = balances;
+  const { totalPercentageOfLockedUpOgv } = totalBalances;
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
   const { reloadLockups } = useLockups();
@@ -78,7 +85,6 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   };
 
   const handleCollectRewards = async () => {
-    console.log(accruedRewards);
     setCollectRewardsStatus("waiting-for-user");
 
     let transaction;
@@ -132,6 +138,14 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
   return (
     <Card>
+      <div className="mb-20">
+        <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
+          <h2 className="text-2xl font-bold">
+            {totalPercentageOfLockedUpOgv}% of all OGV is currently staked. OGV
+            stakers earn {stakingApy.toFixed(2)}% variable APY.
+          </h2>
+        </div>
+      </div>
       {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}
       {lockups.length > 0 && (
         <table className="table table-compact w-full mb-4">
@@ -211,10 +225,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       </div>
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
-          <p className="text-2xl">
-            OGV stakers earn a {stakingApy.toFixed(2)}% variable APY. You can
-            buy OGV now on Huobi and Uniswap.
-          </p>
+          <p className="text-2xl">You can buy OGV now on Huobi and Uniswap.</p>
           <Link
             href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
             newWindow
