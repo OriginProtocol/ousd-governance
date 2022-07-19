@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
+import OUSDContracts from "networks/network.mainnet.json";
 
 export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
@@ -48,17 +49,18 @@ export const Reallocation = ({ snapshotHash }) => {
 
     const ProxiedAaveStrategy = new ethers.Contract(
       contracts.AaveStrategyProxy.address,
-      contracts.AaveStrategy.abi,
+      OUSDContracts.contracts.AaveStrategy.abi,
       contracts.AaveStrategy.provider
     );
+
     const ProxiedCompoundStrategy = new ethers.Contract(
       contracts.CompoundStrategyProxy.address,
-      contracts.CompoundStrategy.abi,
+      OUSDContracts.contracts.CompoundStrategy.abi,
       contracts.CompoundStrategy.provider
     );
     const ProxiedConvexStrategy = new ethers.Contract(
       contracts.ConvexStrategyProxy.address,
-      contracts.ConvexStrategy.abi,
+      OUSDContracts.contracts.ConvexStrategy.abi,
       contracts.ConvexStrategy.provider
     );
 
@@ -316,7 +318,7 @@ const StrategyBalanceRow = ({
     const loadBalances = async () => {
       setBalances(
         await Promise.all(
-          proxiedContracts.map((contract) =>
+          proxiedContracts?.map((contract) =>
             contract.checkBalance(asset.address)
           )
         )

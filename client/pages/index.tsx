@@ -102,10 +102,10 @@ const Home: NextPage = ({
       setLoading(false);
     };
 
-    if (networkInfo.correct && contracts.Governance) {
+    if (contracts.Governance) {
       load();
     }
-  }, [proposals, setProposalData, contracts.Governance, networkInfo.correct]);
+  }, [proposals, setProposalData, contracts.Governance]);
 
   useEffect(() => {
     const loadTotalSupply = async () => {

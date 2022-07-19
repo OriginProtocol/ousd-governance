@@ -14,7 +14,6 @@ import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import { useStore } from "utils/store";
-import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 
@@ -45,7 +44,7 @@ const ProposalNew: NextPage = () => {
   // Load users vote power
   useEffect(() => {
     const loadVotePower = async () => {
-      const votePower = await contracts.VoteLockerCurve.balanceOf(address);
+      const votePower = await contracts.OgvStaking.balanceOf(address);
       setVotePower(votePower);
     };
     if (web3Provider && address && contracts.loaded) {
