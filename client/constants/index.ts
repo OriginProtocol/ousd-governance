@@ -18,18 +18,18 @@ export const CHAIN_CONTRACTS = {
 };
 
 export const navItems = [
-  /*{
+  {
     href: "/",
     label: "Overview",
   },
   {
-    href: "/proposal",
-    label: "Proposal",
-  },
-  {
     href: "/leaderboard",
     label: "Leaderboard",
-  },*/
+  },
+  {
+    href: "/proposal",
+    label: "Proposals",
+  },
   {
     href: "/claim",
     label: "Claim",
@@ -38,7 +38,7 @@ export const navItems = [
     href: "/stake",
     label: "Stake",
   },
-  {
+  /*{
     href: "https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet",
     label: "Buy OGV",
     external: true,
@@ -47,7 +47,7 @@ export const navItems = [
     href: "https://ousd.com/swap",
     label: "Get OUSD",
     external: true,
-  },
+  },*/
 ];
 
 // daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
