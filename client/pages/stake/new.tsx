@@ -6,6 +6,8 @@ import { PageTitle } from "components/PageTitle";
 import LockupForm from "components/vote-escrow/LockupForm";
 import Link from "components/Link";
 import Seo from "components/Seo";
+import CardGroup from "components/CardGroup";
+import AccountBalances from "components/vote-escrow/AccountBalances";
 
 const LockupNew: NextPage = () => {
   const { web3Provider } = useStore();
@@ -22,7 +24,10 @@ const LockupNew: NextPage = () => {
     <Wrapper narrow>
       <Seo title="New Stake" />
       <PageTitle>New Stake</PageTitle>
-      <LockupForm />
+      <CardGroup>
+        <AccountBalances />
+        <LockupForm />
+      </CardGroup>
       <div className="mt-6">
         <Link className="btn rounded-full" href={`/stake`}>
           &larr; Back to OGV Staking
