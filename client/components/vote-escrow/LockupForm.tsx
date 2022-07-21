@@ -434,14 +434,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         <div className="space-y-6 pt-2 sm:pt-3">
           <div className="flex flex-col sm:text-right sm:w-1/3 sm:ml-auto">
             <ApyToolTip />
-            <Card noPadding noShadow>
+            <Card noPadding noShadow red={!validLockup} dark={validLockup}>
               <div className="flex p-2 flex-col sm:items-end">
                 <div className="flex space-x-2 items-end">
                   <CardStat large>
                     {validLockup
                       ? ogvLockupRewardApy.toFixed(2)
                       : (0.0).toFixed(2)}
-                    %
                   </CardStat>
                   <CardDescription large>%</CardDescription>
                 </div>
