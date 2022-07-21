@@ -489,7 +489,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                   <div className="block text-xs italic ml-11 mt-1 text-gray-400">
                     Unlocks{" "}
                     {moment(
-                      now.getTime() + lockupDuration * SECONDS_IN_A_MONTH * 1000
+                      parseInt(blockTimestamp) * 1000 +
+                        lockupDuration * SECONDS_IN_A_MONTH * 1000
                     ).format("MMM D, YYYY")}
                   </div>
                 </div>
