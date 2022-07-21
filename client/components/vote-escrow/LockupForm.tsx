@@ -21,6 +21,8 @@ import { mdiArrowRight } from "@mdi/js";
 import Icon from "@mdi/react";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 import { getRewardsApy } from "utils/apy";
+import numeral from "numeraljs";
+import { decimal18Bn } from "utils";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -126,7 +128,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
   const { totalSupplyVeOgvAdjusted } = totalBalances;
 
-  const [lockupAmount, setLockupAmount] = useState("0");
+  const [lockupAmount, setLockupAmount] = useState(
+    existingLockup
+      ? Math.floor(
+          numeral(existingLockup?.amount.div(decimal18Bn).toString())
+        ).toString()
+      : "0"
+  );
   const [lockupDuration, setLockupDuration] = useState(
     !existingLockup
       ? "0"
