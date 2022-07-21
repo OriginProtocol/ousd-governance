@@ -14,6 +14,7 @@ import useLockups from "utils/useLockups";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import { SECONDS_IN_A_MONTH } from "../../constants/index";
+import Image from "next/image";
 
 interface YourLockupsProps {}
 
@@ -225,7 +226,43 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       </div>
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
-          <p className="text-2xl">You can buy OGV now on Huobi and Uniswap.</p>
+          <p className="text-lg text-center">
+            OGV is available on many top exchanges
+          </p>
+          <ul className="flex space-x-2 items-center justify-center">
+            <li className="flex-1">
+              <Link
+                href="https://www.huobi.com/en-us/exchange/ogv_usdt"
+                newWindow
+                className="hover:opacity-80"
+              >
+                <Image src="/huobi.png" alt="Huobi" width={300} height={105} />
+              </Link>
+            </li>
+            <li className="flex-1 px-4">
+              <Link
+                href="https://www.gate.io/trade/OGV_USDT"
+                newWindow
+                className="hover:opacity-80"
+              >
+                <Image src="/gateio.svg" alt="Gate" width={1800} height={638} />
+              </Link>
+            </li>
+            <li className="flex-1 px-4">
+              <Link
+                href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
+                newWindow
+                className="hover:opacity-80"
+              >
+                <Image
+                  src="/uniswap.png"
+                  alt="Uniswap"
+                  width={300}
+                  height={75}
+                />
+              </Link>
+            </li>
+          </ul>
           <Link
             href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
             newWindow
