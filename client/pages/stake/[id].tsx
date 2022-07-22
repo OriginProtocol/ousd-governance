@@ -7,6 +7,8 @@ import { PageTitle } from "components/PageTitle";
 import LockupForm from "components/vote-escrow/LockupForm";
 import { find } from "lodash";
 import Seo from "components/Seo";
+import CardGroup from "components/CardGroup";
+import AccountBalances from "components/vote-escrow/AccountBalances";
 
 export async function getServerSideProps({
   res,
@@ -45,13 +47,16 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
     <Wrapper narrow>
       <Seo title="Extend Stake" />
       <PageTitle>Extend Stake</PageTitle>
-      {!lockup && <p className="text-gray-300">No stake found.</p>}
-      {lockup && lockup?.user !== address && (
-        <p className="text-gray-300">This lockup isn&apos;t yours.</p>
-      )}
-      {lockup && lockup?.user === address && (
-        <LockupForm existingLockup={lockup} />
-      )}
+      <CardGroup>
+        <AccountBalances />
+        {!lockup && <p className="text-gray-300">No stake found.</p>}
+        {lockup && lockup?.user !== address && (
+          <p className="text-gray-300">This lockup isn&apos;t yours.</p>
+        )}
+        {lockup && lockup?.user === address && (
+          <LockupForm existingLockup={lockup} />
+        )}
+      </CardGroup>
       <div className="mt-6">
         <Link className="btn rounded-full" href={`/stake`}>
           &larr; Back to OGV Staking

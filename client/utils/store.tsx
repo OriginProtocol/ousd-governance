@@ -30,6 +30,7 @@ const defaultState: Web3DataType = {
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),
+    accruedRewards: ethers.BigNumber.from("0"),
   },
   existingLockup: {
     amount: ethers.BigNumber.from(0),
@@ -52,6 +53,7 @@ const defaultState: Web3DataType = {
     totalSupplyOfOgv: ethers.BigNumber.from("0"),
     totalLockedUpOgv: ethers.BigNumber.from("0"),
     totalPercentageOfLockedUpOgv: 0,
+    totalSupplyVeOgv: ethers.BigNumber.from("0"),
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),
