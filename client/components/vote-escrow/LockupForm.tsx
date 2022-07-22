@@ -11,6 +11,18 @@ import useLockups from "utils/useLockups";
 import useTotalBalances from "utils/useTotalBalances";
 import LockupTable from "components/vote-escrow/LockupTable";
 import { SECONDS_IN_A_MONTH } from "../../constants/index";
+import TokenIcon from "components/TokenIcon";
+import TokenAmount from "components/TokenAmount";
+import CardStat from "components/CardStat";
+import CardDescription from "components/CardDescription";
+import CardGroup from "components/CardGroup";
+import moment from "moment";
+import { mdiArrowRight } from "@mdi/js";
+import Icon from "@mdi/react";
+import ApyToolTip from "components/claim/claim/ApyTooltip";
+import { getRewardsApy } from "utils/apy";
+import numeral from "numeraljs";
+import { decimal18Bn } from "utils";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -110,15 +122,38 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     balances,
     allowances,
     blockTimestamp,
+    totalBalances,
   } = useStore();
   const router = useRouter();
 
-  const [lockupAmount, setLockupAmount] = useState("0");
+  const { totalSupplyVeOgvAdjusted } = totalBalances;
+
+  const [lockupAmount, setLockupAmount] = useState(
+    existingLockup
+      ? Math.floor(
+          numeral(existingLockup?.amount.div(decimal18Bn).toString())
+        ).toString()
+      : "0"
+  );
   const [lockupDuration, setLockupDuration] = useState(
     !existingLockup
       ? "0"
       : Math.floor((existingLockup.end - blockTimestamp) / SECONDS_IN_A_MONTH)
   ); // In months
+
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
+
+  const veOgvFromOgvLockup =
+    lockupAmount * votingDecayFactor ** (lockupDuration / 12);
+
+  const ogvLockupRewardApy = getRewardsApy(
+    veOgvFromOgvLockup,
+    lockupAmount,
+    totalSupplyVeOgvAdjusted
+  );
+
+  const validLockup = lockupAmount !== "0" && lockupDuration !== "0";
 
   const [approvalStatus, setApprovalStatus] = useState("ready");
   const [lockupStatus, setLockupStatus] = useState("ready");
@@ -361,6 +396,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     }
   };
 
+  const now = new Date();
+
   return (
     <Card>
       <div className="space-y-2">
@@ -393,15 +430,97 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           max={maxLockupDurationInMonths}
           value={lockupDuration}
           onChange={(e) => {
+            if (
+              existingLockup &&
+              e.target.value <=
+                Math.floor(
+                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
+                )
+            )
+              return;
             setLockupDuration(e.target.value);
           }}
           markers={lockupDurationInputMarkers}
           onMarkerClick={(markerValue) => {
+            if (
+              existingLockup &&
+              markerValue <=
+                Math.floor(
+                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
+                )
+            )
+              return;
             if (markerValue) {
               setLockupDuration(markerValue);
             }
           }}
         />
+        <div className="space-y-6 pt-2 sm:pt-3">
+          <div className="flex flex-col sm:text-right sm:w-1/3 sm:ml-auto">
+            <ApyToolTip />
+            <Card noPadding noShadow red={!validLockup} dark={validLockup}>
+              <div className="flex p-2 flex-col sm:items-end">
+                <div className="flex space-x-2 items-end">
+                  <CardStat large>
+                    {validLockup
+                      ? ogvLockupRewardApy.toFixed(2)
+                      : (0.0).toFixed(2)}
+                  </CardStat>
+                  <CardDescription large>%</CardDescription>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Your stake summary</h2>
+          <CardGroup horizontal twoCol>
+            <div className="space-y-2 flex flex-col">
+              <span className="text-sm">You are staking</span>
+              <Card tightPadding noShadow>
+                <div className="flex flex-col">
+                  <div className="flex space-x-[0.4rem] items-end">
+                    <TokenIcon large src="/ogv.svg" alt="OGV" />
+                    <CardStat large>
+                      <TokenAmount amount={lockupAmount} />
+                    </CardStat>
+                    <CardDescription large>OGV</CardDescription>
+                  </div>
+                  <div className="block text-xs italic ml-11 mt-1 text-gray-400">
+                    Unlocks{" "}
+                    {moment(
+                      parseInt(blockTimestamp) * 1000 +
+                        lockupDuration * SECONDS_IN_A_MONTH * 1000
+                    ).format("MMM D, YYYY")}
+                  </div>
+                </div>
+              </Card>
+            </div>
+            <div className="space-y-2 flex flex-col">
+              <span className="text-sm">Today you get</span>
+              <Card tightPadding noShadow>
+                <div className="flex">
+                  <div className="flex space-x-[0.4rem] items-end">
+                    <TokenIcon large src="/veogv.svg" alt="veOGV" />
+                    <CardStat large>
+                      <TokenAmount amount={veOgvFromOgvLockup} />
+                    </CardStat>
+                    <CardDescription large>veOGV</CardDescription>
+                  </div>
+                </div>
+              </Card>
+            </div>
+            <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
+            <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
+            <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[15px] sm:mt-[6px] -ml-[16px] sm:-ml-[8px]">
+              <Icon
+                path={mdiArrowRight}
+                size={0.66}
+                className="text-gray-400"
+              />
+            </div>
+          </CardGroup>
+        </div>
         {transactionError && (
           <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
             {transactionError}
