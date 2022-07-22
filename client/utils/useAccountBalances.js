@@ -19,6 +19,10 @@ const useAccountBalances = () => {
       return await contracts.OgvStaking.balanceOf(address);
     };
 
+    const loadAccruedRewards = async () => {
+      return await contracts.OgvStaking.previewRewards(address);
+    };
+
     if (
       claimIsOpen() &&
       web3Provider &&
@@ -29,14 +33,13 @@ const useAccountBalances = () => {
       Promise.all([
         loadOgvBalance(),
         loadVeOgvBalance(),
-        web3Provider.getBlock(),
-      ]).then(([ogv, veOgv, lastestBlock]) => {
-        const now = lastestBlock.timestamp;
-
+        loadAccruedRewards(),
+      ]).then(([ogv, veOgv, accruedRewards]) => {
         useStore.setState({
           balances: {
             ogv,
             veOgv,
+            accruedRewards,
           },
         });
       });
