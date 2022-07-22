@@ -142,8 +142,8 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       <div className="mb-20">
         <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
           <h2 className="text-2xl font-bold">
-            {totalPercentageOfLockedUpOgv}% of all OGV is currently staked. OGV
-            stakers earn {stakingApy.toFixed(2)}% variable APY.
+            {totalPercentageOfLockedUpOgv.toFixed(2)}% of all OGV is currently
+            staked. OGV stakers earn {stakingApy.toFixed(2)}% variable APY.
           </h2>
         </div>
       </div>
