@@ -3,16 +3,13 @@ import moment from "moment";
 import Card from "components/Card";
 import TokenAmount from "components/TokenAmount";
 import { Loading } from "components/Loading";
-import { useStore } from "utils/store";
-import { SECONDS_IN_A_MONTH } from "constants/index";
+import TimeToDate from "components/TimeToDate";
 
 interface LockupTableProps {
   lockup: Object;
 }
 
 const LockupTable: FunctionComponent<LockupTableProps> = ({ lockup }) => {
-  const { blockTimestamp } = useStore();
-
   if (!lockup) {
     return (
       <Card>
@@ -26,7 +23,7 @@ const LockupTable: FunctionComponent<LockupTableProps> = ({ lockup }) => {
       <thead>
         <tr>
           <th>OGV</th>
-          <th>Duration</th>
+          <th>Time remaining</th>
           <th>Lockup ends</th>
           <th>veOGV</th>
         </tr>
@@ -37,8 +34,7 @@ const LockupTable: FunctionComponent<LockupTableProps> = ({ lockup }) => {
             <TokenAmount amount={lockup.amount} />
           </td>
           <td>
-            {Math.floor((lockup.end - blockTimestamp) / SECONDS_IN_A_MONTH)}{" "}
-            months
+            <TimeToDate epoch={lockup.end} />
           </td>
           <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
           <td>
