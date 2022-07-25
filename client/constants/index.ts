@@ -5,6 +5,11 @@ import MainnetGovernanceContracts from "../networks/governance.mainnet.json";
 export const mainnetNetworkUrl = process.env.WEB3_PROVIDER;
 export const rinkebyNetworkUrl = process.env.WEB3_PROVIDER;
 
+export const websocketProvider = process.env.WEB3_PROVIDER?.replace(
+  "http",
+  "ws"
+);
+
 export const RPC_URLS = {
   1: mainnetNetworkUrl,
   4: rinkebyNetworkUrl,

@@ -1,11 +1,16 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import { MewConnectConnector } from "@myetherwallet/mewconnect-connector";
 import { providers, utils } from "ethers";
 import { useCallback, useEffect, FunctionComponent } from "react";
 import WalletLink from "walletlink";
 import Web3Modal from "web3modal";
 import { truncateEthAddress, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
-import { RPC_URLS, mainnetNetworkUrl } from "constants/index";
+import {
+  RPC_URLS,
+  mainnetNetworkUrl,
+  websocketProvider,
+} from "constants/index";
 import { toast } from "react-toastify";
 import classNames from "classnames";
 
@@ -38,6 +43,26 @@ const providerOptions = {
       return provider;
     },
   },
+  "custom-mew": {
+    display: {
+      logo: "/myetherwallet-icon.svg",
+      name: "MyEtherWallet",
+      description: "Connect to your MyEtherWallet",
+    },
+    package: MewConnectConnector,
+    options: {
+      appName: "MyEtherWallet", // Your app name
+      networkUrl: mainnetNetworkUrl,
+      chainId: 1,
+    },
+    connector: async () => {
+      const provider = new MewConnectConnector({
+        url: websocketProvider,
+      });
+      await provider.activate();
+      return provider;
+    },
+  },
 };
 
 const networkNameMap = {
@@ -67,51 +92,54 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
 
   const networkInfo = useNetworkInfo();
 
-  const connect = useCallback(async function () {
-    let provider;
-    try {
-      provider = await web3Modal.connect();
-    } catch (e) {
-      console.warn("Connection error:", e);
-      return;
-    }
-
-    provider.on("chainChanged", (chainId) => {
-      useStore.setState({ chainId: Number(chainId) });
-    });
-
-    const web3Provider = new providers.Web3Provider(provider, "any");
-    const signer = web3Provider.getSigner();
-    const address = await signer.getAddress();
-    const network = await web3Provider.getNetwork();
-
-    provider.on("accountsChanged", async (accounts) => {
-      const newAccount: string =
-        accounts.length === 0 ? undefined : accounts[0];
-      let storeUpdate = {
-        address: utils.getAddress(newAccount), // ensure checksum address to prevent excess state updates
-      };
-      resetWeb3State();
-
-      if (newAccount !== undefined) {
-        storeUpdate = {
-          ...storeUpdate,
-          provider,
-          web3Provider,
-          chainId: network.chainId,
-        };
+  const connect = useCallback(
+    async function () {
+      let provider;
+      try {
+        provider = await web3Modal.connect();
+      } catch (e) {
+        console.warn("Connection error:", e);
+        return;
       }
-      useStore.setState(storeUpdate);
-    });
 
-    // Add contracts
-    useStore.setState({
-      provider,
-      web3Provider,
-      address,
-      chainId: network.chainId,
-    });
-  }, []);
+      provider.on("chainChanged", (chainId) => {
+        useStore.setState({ chainId: Number(chainId) });
+      });
+
+      const web3Provider = new providers.Web3Provider(provider, "any");
+      const signer = web3Provider.getSigner();
+      const address = await signer.getAddress();
+      const network = await web3Provider.getNetwork();
+
+      provider.on("accountsChanged", async (accounts) => {
+        const newAccount: string =
+          accounts.length === 0 ? undefined : accounts[0];
+        let storeUpdate = {
+          address: utils.getAddress(newAccount), // ensure checksum address to prevent excess state updates
+        };
+        resetWeb3State();
+
+        if (newAccount !== undefined) {
+          storeUpdate = {
+            ...storeUpdate,
+            provider,
+            web3Provider,
+            chainId: network.chainId,
+          };
+        }
+        useStore.setState(storeUpdate);
+      });
+
+      // Add contracts
+      useStore.setState({
+        provider,
+        web3Provider,
+        address,
+        chainId: network.chainId,
+      });
+    },
+    [resetWeb3State]
+  );
 
   const disconnect = useCallback(
     async function () {
