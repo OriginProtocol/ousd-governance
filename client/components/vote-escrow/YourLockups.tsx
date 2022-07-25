@@ -13,8 +13,8 @@ import useTotalBalances from "utils/useTotalBalances";
 import useLockups from "utils/useLockups";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
-import { SECONDS_IN_A_MONTH } from "../../constants/index";
 import Image from "next/image";
+import TimeToDate from "components/TimeToDate";
 
 interface YourLockupsProps {}
 
@@ -153,7 +153,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           <thead>
             <tr>
               <th>OGV</th>
-              <th>Duration remaining</th>
+              <th>Time remaining</th>
               <th>Stake ends</th>
               <th>veOGV</th>
               <th>&nbsp;</th>
@@ -167,10 +167,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                   <TokenAmount amount={lockup.amount} />
                 </td>
                 <td>
-                  {Math.floor(
-                    (lockup.end - blockTimestamp) / SECONDS_IN_A_MONTH
-                  )}{" "}
-                  months
+                  <TimeToDate epoch={lockup.end} />
                 </td>
                 <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
                 <td>
