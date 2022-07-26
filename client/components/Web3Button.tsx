@@ -197,7 +197,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
           className="flex items-center space-x-2 p-2 md:px-4 border border-[#bbc9da] text-white rounded-full text-sm leading-none capitalize cursor-pointer"
         >
           <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
-          <div className="md:flex" style={{display: "none"}}>
+          <div className="md:flex" style={{ display: "none" }}>
             {truncateEthAddress(address)}
             {web3Provider.network.name === "unknown" && " / Localhost"}
             {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
