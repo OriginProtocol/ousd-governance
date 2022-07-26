@@ -17,7 +17,7 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import CardGroup from "components/CardGroup";
 import moment from "moment";
-import { mdiArrowRight } from "@mdi/js";
+import { mdiArrowRight, mdiAlertCircle } from "@mdi/js";
 import Icon from "@mdi/react";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 import { getRewardsApy } from "utils/apy";
@@ -526,7 +526,30 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             {transactionError}
           </div>
         )}
-        <div className="flex pt-6">
+        {balances?.accruedRewards.gt(0) && (
+          <div className="pt-2">
+            <div className="flex space-x-4 bg-gray-100 p-4 pb-5 border-t-4 border-gray-300">
+              <Icon
+                path={mdiAlertCircle}
+                size={1}
+                className="text-accent flex-shrink-0"
+              />
+              <div>
+                <span className="block text-md font-bold text-gray-900">
+                  OGV rewards will be collected
+                </span>
+                <span className="block text-sm text-gray-700">
+                  You have accrued{" "}
+                  {<TokenAmount amount={balances?.accruedRewards} />} OGV in
+                  staking rewards. This OGV will be transferred to your wallet
+                  immediately when you {existingLockup ? "extend" : "create"}{" "}
+                  your stake.
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="flex pt-2">
           <button
             className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
             disabled={
