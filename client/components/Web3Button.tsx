@@ -56,10 +56,12 @@ const providerOptions = {
       chainId: 1,
     },
     connector: async () => {
-      const provider = new MewConnectConnector({
+      const connector = new MewConnectConnector({
         url: websocketProvider,
       });
-      await provider.activate();
+      await connector.activate();
+      const provider = await connector.getProvider();
+      provider.enable();
       return provider;
     },
   },
@@ -94,6 +96,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
 
   const connect = useCallback(
     async function () {
+      await web3Modal.clearCachedProvider();
       let provider;
       try {
         provider = await web3Modal.connect();
@@ -194,7 +197,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
           className="flex items-center space-x-2 p-2 md:px-4 border border-[#bbc9da] text-white rounded-full text-sm leading-none capitalize cursor-pointer"
         >
           <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
-          <div className="hidden md:flex">
+          <div className="md:flex" style={{display: "none"}}>
             {truncateEthAddress(address)}
             {web3Provider.network.name === "unknown" && " / Localhost"}
             {web3Provider.network.name === "rinkeby" && " / Rinkeby"}
