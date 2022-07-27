@@ -522,8 +522,10 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           </CardGroup>
         </div>
         {transactionError && (
-          <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
-            {transactionError}
+          <div className="pt-4">
+            <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-2xl text-center font-bold text-[#dd0a0a]">
+              {transactionError}
+            </div>
           </div>
         )}
         <div className="flex pt-6">
