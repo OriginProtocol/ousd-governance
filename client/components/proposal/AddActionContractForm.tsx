@@ -122,7 +122,10 @@ export const AddActionContractForm = ({
                 {Object.entries(contracts)
                   .filter(([name, contract]) => typeof contract === "object")
                   .map(([name, contract]) => (
-                    <option key={contract.address} value={contract.address}>
+                    <option
+                      key={`${name}-${contract.address}`}
+                      value={contract.address}
+                    >
                       {name} {truncateEthAddress(contract.address)}
                     </option>
                   ))}
