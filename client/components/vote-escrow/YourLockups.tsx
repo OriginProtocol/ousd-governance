@@ -15,6 +15,7 @@ import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
 import TimeToDate from "components/TimeToDate";
+import DisabledButtonToolTip from "./DisabledButtonTooltip";
 
 interface YourLockupsProps {}
 
@@ -208,21 +209,33 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
         </table>
       )}
       <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
-        {ogv.gt(0) && (
+        <DisabledButtonToolTip
+          show={ogv.eq(0)}
+          text="You have no OGV to stake yet"
+        >
           <div>
             <Link
-              className="w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
+              className={
+                ogv.eq(0)
+                  ? "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-disabled"
+                  : "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
+              }
               href="/stake/new"
             >
               {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
             </Link>
           </div>
-        )}
-        {accruedRewards.gt(0) && (
+        </DisabledButtonToolTip>
+        <DisabledButtonToolTip
+          show={accruedRewards.eq(0)}
+          text="You have no rewards to collect yet"
+        >
           <div>
             <Button
               onClick={handleCollectRewards}
-              disabled={collectRewardsStatus !== "ready"}
+              disabled={
+                collectRewardsStatus !== "ready" || accruedRewards.eq(0)
+              }
               large
               alt
               fullWidth
@@ -230,7 +243,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               {collectRewardsButtonText}
             </Button>
           </div>
-        )}
+        </DisabledButtonToolTip>
       </div>
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
