@@ -56,7 +56,10 @@ const useContracts = () => {
             mainnetProvider
           );
           return {
-            [name]: contract,
+            [name]: {
+              ...contract,
+              abi: definition.abi,
+            },
           };
         }
       );
@@ -67,6 +70,7 @@ const useContracts = () => {
 
       contracts.loaded = true;
       contracts.rpcProvider = networkProvider;
+
       useStore.setState({
         contracts,
       });
