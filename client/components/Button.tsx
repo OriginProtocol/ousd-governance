@@ -31,7 +31,8 @@ const Button: FunctionComponent<ButtonProps> = ({
     "btn-sm": small,
     "w-full": fullWidth,
     "btn-primary": !alt,
-    "btn-primary btn-outline": alt,
+    "btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300":
+      alt,
     "bg-white hover:bg-gray-100 active:bg-gray-100 focus:bg-gray-100 text-accent":
       white,
     "bg-black text-white border-black hover:bg-gray-900 hover:border-gray-900":

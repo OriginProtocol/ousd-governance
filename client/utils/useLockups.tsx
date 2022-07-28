@@ -3,6 +3,7 @@ import { useStore } from "utils/store";
 import { useNetworkInfo, claimIsOpen } from "utils/index";
 import { fetcher } from "utils/index";
 import useSWR, { mutate } from "swr";
+import { sortBy } from "lodash";
 
 const useLockups = () => {
   const [reloadLockups, setReloadLockups] = useState(0);
@@ -34,8 +35,10 @@ const useLockups = () => {
           });
         })
       ).then((enrichedLockups) => {
+        const sortedLockups = sortBy(enrichedLockups, (lockup) => lockup.end);
+
         useStore.setState({
-          lockups: enrichedLockups,
+          lockups: sortedLockups,
         });
       });
     };
