@@ -44,6 +44,8 @@ model Lockup {
   end       DateTime
   points    Decimal @db.Decimal(78, 0)
   createdAt DateTime @default(now()) @map("created_at")
+  txHashes  String[]
+  active    Boolean
 
   @@unique([lockupId, user])
   @@index([user], type: BTree)
