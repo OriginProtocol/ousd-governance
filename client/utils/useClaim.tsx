@@ -17,7 +17,7 @@ const useClaim = () => {
   const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
   const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
     useState(null);
-  const { address, contracts, web3Provider } = useStore();
+  const { address, contracts, web3Provider, rpcProvider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
   /*
    * ready -> ready to start claiming
@@ -159,7 +159,7 @@ const useClaim = () => {
               setOptionalClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await contracts.rpcProvider.waitForTransaction(
+                receipt = await rpcProvider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable
@@ -218,7 +218,7 @@ const useClaim = () => {
               setMandatoryClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await contracts.rpcProvider.waitForTransaction(
+                receipt = await rpcProvider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable

@@ -138,13 +138,15 @@ export const AddActionFunctionForm = ({
             <option value="" disabled={true}>
               Select contract
             </option>
-            {Object.entries(contracts).map(([name, contract]) => {
-              return (
-                <option key={contract.address} value={contract.address}>
-                  {name} {truncateEthAddress(contract.address)}
-                </option>
-              );
-            })}
+            {Object.entries(contracts)
+              .filter(([name, contract]) => typeof contract === "object")
+              .map(([name, contract]) => {
+                return (
+                  <option key={contract.address} value={contract.address}>
+                    {name} {truncateEthAddress(contract.address)}
+                  </option>
+                );
+              })}
           </select>
           {touched.address && errors.address && touched.signature && (
             <p className="mt-2 text-sm text-error-content">

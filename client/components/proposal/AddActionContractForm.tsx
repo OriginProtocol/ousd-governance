@@ -54,7 +54,7 @@ export const AddActionContractForm = ({
         changeHandler({
           target: {
             name: "abi",
-            value: contract.abi,
+            value: contract.interface.fragments,
           },
         });
         onChange(contract);
