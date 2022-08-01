@@ -18,7 +18,7 @@ export const CHAIN_CONTRACTS = {
 };
 
 export const navItems = [
-  {
+  /*{
     href: "/",
     label: "Overview",
   },
@@ -29,7 +29,7 @@ export const navItems = [
   {
     href: "/leaderboard",
     label: "Leaderboard",
-  },
+  },*/
   {
     href: "/claim",
     label: "Claim",
