@@ -208,43 +208,47 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </tbody>
         </table>
       )}
-      <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
-        <DisabledButtonToolTip
-          show={ogv.eq(0)}
-          text="You have no OGV to stake yet"
-        >
-          <div>
-            <Link
-              className={
-                ogv.eq(0)
-                  ? "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-disabled"
-                  : "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
-              }
-              href="/stake/new"
-            >
-              {lockups.length > 0 ? "Create a new stake" : "Stake your OGV now"}
-            </Link>
-          </div>
-        </DisabledButtonToolTip>
-        <DisabledButtonToolTip
-          show={accruedRewards.eq(0)}
-          text="You have no rewards to collect yet"
-        >
-          <div>
-            <Button
-              onClick={handleCollectRewards}
-              disabled={
-                collectRewardsStatus !== "ready" || accruedRewards.eq(0)
-              }
-              large
-              alt
-              fullWidth
-            >
-              {collectRewardsButtonText}
-            </Button>
-          </div>
-        </DisabledButtonToolTip>
-      </div>
+      {!(ogv.eq(0) && lockups.length === 0) && (
+        <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
+          <DisabledButtonToolTip
+            show={ogv.eq(0)}
+            text="You have no OGV to stake yet"
+          >
+            <div>
+              <Link
+                className={
+                  ogv.eq(0)
+                    ? "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-disabled"
+                    : "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
+                }
+                href="/stake/new"
+              >
+                {lockups.length > 0
+                  ? "Create a new stake"
+                  : "Stake your OGV now"}
+              </Link>
+            </div>
+          </DisabledButtonToolTip>
+          <DisabledButtonToolTip
+            show={accruedRewards.eq(0)}
+            text="You have no rewards to collect yet"
+          >
+            <div>
+              <Button
+                onClick={handleCollectRewards}
+                disabled={
+                  collectRewardsStatus !== "ready" || accruedRewards.eq(0)
+                }
+                large
+                alt
+                fullWidth
+              >
+                {collectRewardsButtonText}
+              </Button>
+            </div>
+          </DisabledButtonToolTip>
+        </div>
+      )}
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
           <p className="text-lg text-center">
