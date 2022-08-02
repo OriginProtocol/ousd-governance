@@ -155,7 +155,6 @@ contract OgvStaking is ERC20Votes {
             })
         );
         _mint(to, points);
-        _afterTokenTransfer(address(0), to, points);
         ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
@@ -172,7 +171,6 @@ contract OgvStaking is ERC20Votes {
         _collectRewards(msg.sender);
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
-        _afterTokenTransfer(msg.sender, address(0), points);
         ogv.transfer(msg.sender, amount);
         emit Unstake(msg.sender, lockupId, amount, end, points);
     }
@@ -205,9 +203,7 @@ contract OgvStaking is ERC20Votes {
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
-        uint256 pointsDiff = newPoints - oldPoints;
-        _mint(msg.sender, pointsDiff);
-        _afterTokenTransfer(address(0), msg.sender, pointsDiff);
+        _mint(msg.sender, newPoints - oldPoints);
         emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
         emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
     }
