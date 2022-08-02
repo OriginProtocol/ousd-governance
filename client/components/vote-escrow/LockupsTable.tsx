@@ -15,7 +15,7 @@ import Modal from "components/Modal";
 import { truncateEthAddress } from "utils";
 
 const LockupsTable: FunctionComponent = () => {
-  const { lockups, pendingTransactions, contracts, blockTimestamp } =
+  const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =
     useStore();
 
   const { reloadTotalBalances } = useTotalBalances();
@@ -119,14 +119,33 @@ const LockupsTable: FunctionComponent = () => {
         </tbody>
       </table>
       <Modal show={showTxModal} handleClose={() => setShowTxModal(false)}>
-        <h3 className="mb-4 text-lg">Transactions</h3>
+        <h3 className="mb-4 text-lg">Transaction history</h3>
         <table className="table table-compact w-full">
+          <thead>
+            <th>Transaction time</th>
+            <th>Event</th>
+            <th>Transaction hash</th>
+          </thead>
           <tbody>
-            {modalLockup.txHashes.map((txHash) => {
+            {modalLockup.transactions.map((transaction) => {
               return (
-                <tr key={txHash}>
+                <tr key={transaction.hash}>
                   <td>
-                    <span>{truncateEthAddress(txHash)}</span>
+                    {moment(transaction.createdAt).format(
+                      "MMM D, YYYY, HH:mm:ss"
+                    )}
+                  </td>
+                  <td>{transaction.event}</td>
+                  <td>
+                    <Link
+                      href={
+                        chainId === 4
+                          ? `https://rinkeby.etherscan.io/tx/${transaction.hash}`
+                          : `https://etherscan.io/tx/${transaction.hash}`
+                      }
+                    >
+                      {truncateEthAddress(transaction.hash)}
+                    </Link>
                   </td>
                 </tr>
               );

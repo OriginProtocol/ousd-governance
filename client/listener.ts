@@ -86,6 +86,9 @@ const handleStake = async (event) => {
           lockupId: parseInt(event.values.lockupId),
         }
       },
+      include: {
+        transactions: true,
+      },
     });
   } catch(e) {
     logger.info(e);
@@ -104,7 +107,12 @@ const handleStake = async (event) => {
         data: {
           end: new Date(event.values.end * 1000),
           points: event.values.points,
-          txHashes: [...existingLockup.txHashes, event.transactionHash],
+          transactions: {
+            create: [{
+              hash: event.transactionHash,
+              event: "Extend",
+            }],
+          },
           active: true,
         },
       });
@@ -122,7 +130,12 @@ const handleStake = async (event) => {
           amount: event.values.amount,
           end: new Date(event.values.end * 1000),
           points: event.values.points,
-          txHashes: [event.transactionHash],
+          transactions: {
+            create: [{
+              hash: event.transactionHash,
+              event: event.name,
+            }],
+          },
           active: true,
         },
       });

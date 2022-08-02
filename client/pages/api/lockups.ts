@@ -13,6 +13,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
       user: {
         equals: account,
       },
+      active: {
+        equals: true,
+      },
+    },
+    include: {
+      transactions: true,
     },
   });
 
