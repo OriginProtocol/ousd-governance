@@ -22,6 +22,7 @@ type StoreType = Web3DataType & {
 const defaultState: Web3DataType = {
   provider: null,
   web3Provider: null,
+  rpcProvider: null,
   address: undefined,
   chainId: null,
   contracts: {
