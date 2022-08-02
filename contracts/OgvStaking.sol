@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
-import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import {ERC20Votes} from "./ERC20Votes.sol";
 import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
@@ -119,12 +119,6 @@ contract OgvStaking is ERC20Votes {
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
     function stake(uint256 amount, uint256 duration) external {
-        // as in spec in order for voting power and checkpoints to function
-        // one needs to perform delegation themself 
-        // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol#L21-L23
-        if (delegates(msg.sender) == address(0)) {
-            delegate(msg.sender);
-        }
         _stake(amount, duration, msg.sender);
     }
 
@@ -140,6 +134,15 @@ contract OgvStaking is ERC20Votes {
         require(to != address(0), "Staking: To the zero address");
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
+
+        // as in spec in order for voting power and checkpoints to function
+        // one needs to perform delegation on their own address. Only perform delegation if
+        // one is not already present.
+        // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol#L21-L23
+        if (delegates(to) == address(0)) {
+            delegate(to);
+        }
+
         // duration checked inside previewPoints
         (uint256 points, uint256 end) = previewPoints(amount, duration);
         require(
