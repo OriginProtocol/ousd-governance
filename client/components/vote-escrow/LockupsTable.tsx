@@ -13,6 +13,8 @@ import useLockups from "utils/useLockups";
 import { toast } from "react-toastify";
 import Modal from "components/Modal";
 import { truncateEthAddress } from "utils";
+import EtherscanIcon from "components/EtherscanIcon";
+import ExternalLinkIcon from "../ExternalLinkIcon";
 
 const LockupsTable: FunctionComponent = () => {
   const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =
@@ -104,12 +106,13 @@ const LockupsTable: FunctionComponent = () => {
                     </td>
                     <td>
                       <button
+                        className="flex-shrink-0 flex items-center justify-center w-4 p-0"
                         onClick={() => {
                           setModalLockup(lockup);
                           setShowTxModal(true);
                         }}
                       >
-                        txs
+                        <EtherscanIcon />
                       </button>
                     </td>
                   </tr>
@@ -144,7 +147,10 @@ const LockupsTable: FunctionComponent = () => {
                           : `https://etherscan.io/tx/${transaction.hash}`
                       }
                     >
-                      {truncateEthAddress(transaction.hash)}
+                      <span className="mr-2">
+                        {truncateEthAddress(transaction.hash)}
+                      </span>
+                      <ExternalLinkIcon isGreen />
                     </Link>
                   </td>
                 </tr>
