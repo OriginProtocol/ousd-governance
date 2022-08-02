@@ -103,6 +103,9 @@ contract RewardsSource is Governable {
                 break; // No future slope could match
             }
         }
+        // when previewing or sending rewards, check it's own OGV balance,
+        // and if present, send that along as part of the rewards
+        total += address(this).balance;
         return (total, nextSlopeIndex);
     }
 
