@@ -119,6 +119,12 @@ contract OgvStaking is ERC20Votes {
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
     function stake(uint256 amount, uint256 duration) external {
+        // as in spec in order for voting power and checkpoints to function
+        // one needs to perform delegation themself 
+        // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol#L21-L23
+        if (delegates(msg.sender) == address(0)) {
+            delegate(msg.sender);
+        }
         _stake(amount, duration, msg.sender);
     }
 
@@ -149,6 +155,7 @@ contract OgvStaking is ERC20Votes {
             })
         );
         _mint(to, points);
+        _afterTokenTransfer(address(0), to, points);
         ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
         emit Stake(to, lockups[to].length - 1, amount, end, points);
     }
@@ -165,6 +172,7 @@ contract OgvStaking is ERC20Votes {
         _collectRewards(msg.sender);
         delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
         _burn(msg.sender, points);
+        _afterTokenTransfer(msg.sender, address(0), points);
         ogv.transfer(msg.sender, amount);
         emit Unstake(msg.sender, lockupId, amount, end, points);
     }
@@ -197,7 +205,9 @@ contract OgvStaking is ERC20Votes {
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
-        _mint(msg.sender, newPoints - oldPoints);
+        uint256 pointsDiff = newPoints - oldPoints;
+        _mint(msg.sender, pointsDiff);
+        _afterTokenTransfer(address(0), msg.sender, pointsDiff);
         emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
         emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
     }
