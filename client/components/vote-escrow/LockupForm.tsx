@@ -118,6 +118,7 @@ const maxLockupDurationInMonths = 12 * 4;
 const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const {
     contracts,
+    rpcProvider,
     pendingTransactions,
     balances,
     allowances,
@@ -240,9 +241,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     let receipt;
     try {
-      receipt = await contracts.rpcProvider.waitForTransaction(
-        transaction.hash
-      );
+      receipt = await rpcProvider.waitForTransaction(transaction.hash);
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -302,9 +301,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await contracts.rpcProvider.waitForTransaction(
-          transaction.hash
-        );
+        receipt = await rpcProvider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -362,9 +359,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await contracts.rpcProvider.waitForTransaction(
-          transaction.hash
-        );
+        receipt = await rpcProvider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
