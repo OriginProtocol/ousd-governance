@@ -152,6 +152,7 @@ const LockupsTable: FunctionComponent = () => {
                           ? `https://rinkeby.etherscan.io/tx/${transaction.hash}`
                           : `https://etherscan.io/tx/${transaction.hash}`
                       }
+                      newWindow
                     >
                       <span className="mr-2">
                         {truncateEthAddress(transaction.hash)}
