@@ -75,25 +75,83 @@ const handleProposalCreated = async (event) => {
 };
 
 const handleStake = async (event) => {
+  // Check if lockup exists
+  let existingLockup;
+
   try {
-    await prisma.lockup.create({
-      data: {
-        user: event.values.user,
-        lockupId: parseInt(event.values.lockupId),
-        amount: event.values.amount,
-        end: new Date(event.values.end * 1000),
-        points: event.values.points,
+    existingLockup = await prisma.lockup.findUnique({
+      where: {
+        lockupId_user: {
+          user: event.values.user,
+          lockupId: parseInt(event.values.lockupId),
+        }
+      },
+      include: {
+        transactions: true,
       },
     });
-    logger.info("Inserted lockup");
-  } catch (e) {
+  } catch(e) {
     logger.info(e);
+  }
+
+  // If it does (extend action), update it (new end, new points and additional tx hash)
+  if(existingLockup) {
+    try {
+      await prisma.lockup.update({
+        where: {
+          lockupId_user: {
+            user: event.values.user,
+            lockupId: parseInt(event.values.lockupId),
+          }
+        },
+        data: {
+          end: new Date(event.values.end * 1000),
+          points: event.values.points,
+          transactions: {
+            create: [{
+              hash: event.transactionHash,
+              event: "Extend",
+            }],
+          },
+          active: true,
+        },
+      });
+      logger.info(`Updated lockup ${parseInt(event.values.lockupId)} for ${event.values.user}`);
+    } catch (e) {
+      logger.info(e);
+    }
+  } else {
+    // If it doesn't, create it (stake action)
+    try {
+      await prisma.lockup.create({
+        data: {
+          user: event.values.user,
+          lockupId: parseInt(event.values.lockupId),
+          amount: event.values.amount,
+          end: new Date(event.values.end * 1000),
+          points: event.values.points,
+          transactions: {
+            create: [{
+              hash: event.transactionHash,
+              event: event.name,
+            }],
+          },
+          active: true,
+        },
+      });
+      logger.info(`Inserted lockup ${parseInt(event.values.lockupId)} for ${event.values.user}`);
+    } catch (e) {
+      logger.info(e);
+    }
   }
 }
 
 const handleUnstake = async (event) => {
+  // Check if lockup exists
+  let existingLockup;
+
   try {
-    await prisma.lockup.delete({
+    existingLockup = await prisma.lockup.findUnique({
       where: {
         lockupId_user: {
           user: event.values.user,
@@ -101,9 +159,28 @@ const handleUnstake = async (event) => {
         }
       },
     });
-    logger.info("Removed lockup");
-  } catch (e) {
+  } catch(e) {
     logger.info(e);
+  }
+
+  if(existingLockup) {
+  // Flag lockup as inactive
+    try {
+      await prisma.lockup.update({
+        where: {
+          lockupId_user: {
+            user: event.values.user,
+            lockupId: parseInt(event.values.lockupId),
+          }
+        },
+        data: {
+          active: false,
+        }
+      });
+      logger.info(`Lockup ${parseInt(event.values.lockupId)} for ${event.values.user} deactivated`);
+    } catch (e) {
+      logger.info(e);
+    }
   }
 }
 
