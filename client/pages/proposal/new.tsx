@@ -102,7 +102,7 @@ const ProposalNew: NextPage = () => {
         snapshotHash
       );
     } catch (error) {
-      console.log("ERROR", error);
+      console.error(error);
       setSubmitDisabled(false);
       return;
     }
