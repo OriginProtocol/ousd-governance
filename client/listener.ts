@@ -111,6 +111,7 @@ const handleStake = async (event) => {
             create: [{
               hash: event.transactionHash,
               event: "Extend",
+              createdAt: new Date(event.timestamp * 1000),
             }],
           },
           active: true,
@@ -134,6 +135,7 @@ const handleStake = async (event) => {
             create: [{
               hash: event.transactionHash,
               event: event.name,
+              createdAt: new Date(event.timestamp * 1000),
             }],
           },
           active: true,
