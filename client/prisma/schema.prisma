@@ -45,7 +45,7 @@ model Lockup {
   points       Decimal       @db.Decimal(78, 0)
   createdAt    DateTime      @default(now()) @map("created_at")
   transactions Transaction[]
-  active       Boolean
+  active       Boolean       @default(true)
 
   @@unique([lockupId, user])
   @@index([user], type: BTree)
