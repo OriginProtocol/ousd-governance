@@ -95,8 +95,10 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
   const networkInfo = useNetworkInfo();
 
   const connect = useCallback(
-    async function () {
-      await web3Modal.clearCachedProvider();
+    async function (isAutoconnect = false) {
+      if (!isAutoconnect) {
+        await web3Modal.clearCachedProvider();
+      }
       let provider;
       try {
         provider = await web3Modal.connect();
@@ -158,7 +160,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
   // Auto connect to the cached provider
   useEffect(() => {
     if (web3Modal.cachedProvider) {
-      connect();
+      connect(true);
     }
   }, [connect]);
 
