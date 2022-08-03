@@ -65,7 +65,7 @@ contract OgvStaking is ERC20Votes {
     }
 
     function name() public pure override returns (string memory) {
-        return "veOGV";
+        return "Vote Escrowed Origin Dollar Governance";
     }
 
     function symbol() public pure override returns (string memory) {
