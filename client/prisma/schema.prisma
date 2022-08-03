@@ -38,7 +38,7 @@ model Listener {
 
 model Lockup {
   id           Int           @id @default(autoincrement())
-  lockupId     Int
+  lockupId     Int           @default(0) @map("lockup_id")
   user         String
   amount       Decimal       @db.Decimal(78, 0)
   end          DateTime
@@ -53,11 +53,14 @@ model Lockup {
 }
 
 model Transaction {
-  hash      String   @unique
+  id        Int      @id @default(autoincrement())
+  hash      String
   event     String
-  createdAt DateTime @default(now())
-  Lockup    Lockup?  @relation(fields: [lockupId], references: [id])
-  lockupId  Int
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("transaction")
+  Lockup   Lockup? @relation(fields: [lockupId], references: [id])
+  lockupId Int
+
+  @@unique([hash, lockupId])
+  @@map("transactions")
 }
