@@ -121,13 +121,19 @@ const LockupsTable: FunctionComponent = () => {
             })}
         </tbody>
       </table>
-      <Modal show={showTxModal} handleClose={() => setShowTxModal(false)}>
+      <Modal
+        show={showTxModal}
+        handleClose={() => setShowTxModal(false)}
+        showCloseIcon
+      >
         <h3 className="mb-4 text-lg">Transaction history</h3>
         <table className="table table-compact w-full">
           <thead>
-            <th>Transaction time</th>
-            <th>Event</th>
-            <th>Transaction hash</th>
+            <tr>
+              <th>Transaction time</th>
+              <th>Event</th>
+              <th>Transaction hash</th>
+            </tr>
           </thead>
           <tbody>
             {modalLockup.transactions.map((transaction) => {
