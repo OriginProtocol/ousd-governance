@@ -20,7 +20,7 @@ contract Governance is
         GovernorSettings(
             1, /* 1 block */
             32727, /* 5 days */
-            5000000 * 1e18
+            5000000 * 1e18 /* 5 mio veOgv */
         )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(4) // Default quorum denominator is 100, so 4/100 or 4%
