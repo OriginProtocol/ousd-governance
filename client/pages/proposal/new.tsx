@@ -13,6 +13,7 @@ import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
+import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
@@ -20,6 +21,7 @@ import Seo from "components/Seo";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
+  const selfDelegationCheck = useEnsureSelfDelegation();
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState(
@@ -89,6 +91,7 @@ const ProposalNew: NextPage = () => {
     let transaction;
 
     try {
+      await selfDelegationCheck();
       transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
@@ -99,6 +102,7 @@ const ProposalNew: NextPage = () => {
         snapshotHash
       );
     } catch (error) {
+      console.log("ERROR", error);
       setSubmitDisabled(false);
       return;
     }

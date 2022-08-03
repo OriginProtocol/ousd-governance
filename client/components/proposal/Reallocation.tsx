@@ -3,9 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
+import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
 
 export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
+  const selfDelegationCheck = useEnsureSelfDelegation();
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
   const [daiAmount, setDaiAmount] = useState(BigNumber.from(0));
@@ -48,17 +50,17 @@ export const Reallocation = ({ snapshotHash }) => {
 
     const ProxiedAaveStrategy = new ethers.Contract(
       contracts.AaveStrategyProxy.address,
-      contracts.AaveStrategy.abi,
+      contracts.AaveStrategy.interface.fragments,
       contracts.AaveStrategy.provider
     );
     const ProxiedCompoundStrategy = new ethers.Contract(
       contracts.CompoundStrategyProxy.address,
-      contracts.CompoundStrategy.abi,
+      contracts.CompoundStrategy.interface.fragments,
       contracts.CompoundStrategy.provider
     );
     const ProxiedConvexStrategy = new ethers.Contract(
       contracts.ConvexStrategyProxy.address,
-      contracts.ConvexStrategy.abi,
+      contracts.ConvexStrategy.interface.fragments,
       contracts.ConvexStrategy.provider
     );
 
@@ -145,6 +147,7 @@ export const Reallocation = ({ snapshotHash }) => {
     };
 
     const handleSubmit = async () => {
+      await selfDelegationCheck();
       const transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](

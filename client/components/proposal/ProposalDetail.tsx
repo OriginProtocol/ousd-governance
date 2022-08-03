@@ -10,6 +10,7 @@ import CardGroup from "components/CardGroup";
 import Card from "components/Card";
 import { useStore } from "utils/store";
 import { toast } from "react-toastify";
+import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
 
 export const ProposalDetail = ({
   proposalId,
@@ -20,6 +21,7 @@ export const ProposalDetail = ({
 }) => {
   const { address, contracts, pendingTransactions } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
+  const selfDelegationCheck = useEnsureSelfDelegation();
   const [proposal, setProposal] = useState(null);
   const [proposalState, setProposalState] = useState(null);
   const [quorum, setQuorum] = useState(0);
@@ -69,6 +71,7 @@ export const ProposalDetail = ({
   if (proposal === null || proposalActions === null) return <Loading />;
 
   const handleVote = async (support: Number) => {
+    await selfDelegationCheck();
     const transaction = await Governance.castVote(proposalId, support);
 
     useStore.setState({
