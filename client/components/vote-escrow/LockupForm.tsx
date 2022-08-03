@@ -425,26 +425,10 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           max={maxLockupDurationInMonths}
           value={lockupDuration}
           onChange={(e) => {
-            if (
-              existingLockup &&
-              e.target.value <=
-                Math.floor(
-                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
-                )
-            )
-              return;
             setLockupDuration(e.target.value);
           }}
           markers={lockupDurationInputMarkers}
           onMarkerClick={(markerValue) => {
-            if (
-              existingLockup &&
-              markerValue <=
-                Math.floor(
-                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
-                )
-            )
-              return;
             if (markerValue) {
               setLockupDuration(markerValue);
             }
