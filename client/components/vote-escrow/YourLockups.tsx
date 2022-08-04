@@ -12,12 +12,19 @@ import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
 import DisabledButtonToolTip from "./DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
+import { Web3Button } from "components/Web3Button";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const { lockups, pendingTransactions, contracts, balances, totalBalances } =
-    useStore();
+  const {
+    lockups,
+    pendingTransactions,
+    contracts,
+    balances,
+    totalBalances,
+    web3Provider,
+  } = useStore();
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
   const { reloadAccountBalances } = useAccountBalances();
@@ -205,13 +212,17 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               </Link>
             </li>
           </ul>
-          <Link
-            href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
-            newWindow
-            className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
-          >
-            Buy OGV
-          </Link>
+          {web3Provider ? (
+            <Link
+              href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
+              newWindow
+              className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+            >
+              Buy OGV
+            </Link>
+          ) : (
+            <Web3Button inPage />
+          )}
         </div>
       )}
     </Card>
