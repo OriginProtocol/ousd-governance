@@ -29,6 +29,7 @@ const defaultState: Web3DataType = {
   contracts: {
     loaded: false,
   },
+  ensureDelegationModalOpened: false,
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),

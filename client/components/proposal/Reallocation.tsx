@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
-import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
+import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
+import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 
 export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
-  const selfDelegationCheck = useEnsureSelfDelegation();
+  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
   const [daiAmount, setDaiAmount] = useState(BigNumber.from(0));
@@ -147,7 +148,11 @@ export const Reallocation = ({ snapshotHash }) => {
     };
 
     const handleSubmit = async () => {
-      await selfDelegationCheck();
+      // showing delegation modal quit flow
+      if (await checkIfDelegationModalNeedsShowing()) {
+        return;
+      }
+
       const transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
@@ -302,6 +307,7 @@ export const Reallocation = ({ snapshotHash }) => {
           Submit Proposal
         </button>
       </div>
+      <EnsureDelegationModal />
     </>
   );
 };

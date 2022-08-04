@@ -8,26 +8,12 @@ DAY = 86400
 WEEK = 7 * DAY
 
 
-def test_delegation(governance, staking, token, web3):
-    alice = accounts[0]
-    bob = accounts[1]
-
-    token.approve(staking.address, 3000e18, {"from": alice})
-    staking.stake(1000e18, WEEK * 52 * 4, {"from": alice})
-    chain.mine()
-    votes = governance.getVotes(alice, web3.eth.block_number - 1)
-    staking.delegate(bob, {"from": alice})
-    # votes show the correct value after delegation when another stake event event happens. 
-    # (or token transfer event, but we don't support those)
-    assert approx(governance.getVotes(bob, web3.eth.block_number - 1), 0)
-    staking.stake(1000e18, WEEK * 52 * 4, {"from": alice})
-    chain.mine()
-    assert approx(governance.getVotes(bob, web3.eth.block_number - 1), votes * 2, 1e-6)
-
 def test_create_proposal(governance, staking, token):
     # Proposal threshold is 2500 veOGV
     token.approve(staking.address, 3000e18)
     staking.stake(3000e18, WEEK * 52 * 4, accounts.default)
+    # Self delegate
+    staking.delegate(accounts.default)
     tx = governance.propose(
         ["0xEA2Ef2e2E5A749D4A66b41Db9aD85a38Aa264cb3"],
         [0],
@@ -58,6 +44,8 @@ def test_can_cancel_proposal(governance, staking, token):
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    # Self delegate
+    staking.delegate(alice, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -76,6 +64,7 @@ def test_proposal_can_pass_vote(governance, staking, token, timelock_controller,
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice)
     tx = governance.propose(
         [governance.address],
         [0],
@@ -111,6 +100,8 @@ def test_proposal_can_fail_vote(
     rewards.setRewardsTarget(staking.address, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
     staking.stake(amount * 2, WEEK, bob, {"from": bob})
+    staking.delegate(alice, {"from": alice})
+    staking.delegate(bob, {"from": bob})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -141,6 +132,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -168,6 +160,7 @@ def test_late_vote_extends_quorum(
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -190,6 +183,7 @@ def test_timelock_proposal_can_be_cancelled(
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice, {"from": alice})
     tx = governance.propose(
         [governance.address],
         [0],
@@ -220,6 +214,7 @@ def test_timelock_proposal_can_be_cancelled_after_time_passes(
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice)
     tx = governance.propose(
         [governance.address],
         [0],
@@ -248,6 +243,7 @@ def test_timelock_proposal_can_not_be_cancelled_after_is_executed(
     amount = 1000 * 10**18
     token.approve(staking.address, amount * 10, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
+    staking.delegate(alice)
     tx = governance.propose(
         [governance.address],
         [0],

@@ -135,14 +135,6 @@ contract OgvStaking is ERC20Votes {
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
 
-        // as in spec in order for voting power and checkpoints to function
-        // one needs to perform delegation on their own address. Only perform delegation if
-        // one is not already present.
-        // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Votes.sol#L21-L23
-        if (delegates(to) == address(0)) {
-            delegate(to);
-        }
-
         // duration checked inside previewPoints
         (uint256 points, uint256 end) = previewPoints(amount, duration);
         require(

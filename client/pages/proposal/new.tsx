@@ -13,15 +13,16 @@ import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
-import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
+import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
+import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
-  const selfDelegationCheck = useEnsureSelfDelegation();
+  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState(
@@ -86,12 +87,14 @@ const ProposalNew: NextPage = () => {
 
   // Handle submit of the proposal (i.e. transaction)
   const handleSubmit = async () => {
-    setSubmitDisabled(true);
-
     let transaction;
 
     try {
-      await selfDelegationCheck();
+      // showing delegation modal quit flow
+      if (await checkIfDelegationModalNeedsShowing()) {
+        return;
+      }
+      setSubmitDisabled(true);
       transaction = await contracts.Governance[
         "propose(address[],uint256[],string[],bytes[],string)"
       ](
@@ -242,6 +245,7 @@ const ProposalNew: NextPage = () => {
           />
         </Card>
       </CardGroup>
+      <EnsureDelegationModal />
     </Wrapper>
   );
 };

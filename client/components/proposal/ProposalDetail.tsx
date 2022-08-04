@@ -10,7 +10,8 @@ import CardGroup from "components/CardGroup";
 import Card from "components/Card";
 import { useStore } from "utils/store";
 import { toast } from "react-toastify";
-import useEnsureSelfDelegation from "utils/useEnsureSelfDelegation";
+import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
+import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 
 export const ProposalDetail = ({
   proposalId,
@@ -21,7 +22,7 @@ export const ProposalDetail = ({
 }) => {
   const { address, contracts, pendingTransactions } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
-  const selfDelegationCheck = useEnsureSelfDelegation();
+  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
   const [proposalState, setProposalState] = useState(null);
   const [quorum, setQuorum] = useState(0);
@@ -71,7 +72,10 @@ export const ProposalDetail = ({
   if (proposal === null || proposalActions === null) return <Loading />;
 
   const handleVote = async (support: Number) => {
-    await selfDelegationCheck();
+    if (await checkIfDelegationModalNeedsShowing()) {
+      return;
+    }
+
     const transaction = await Governance.castVote(proposalId, support);
 
     useStore.setState({
@@ -91,40 +95,43 @@ export const ProposalDetail = ({
   };
 
   return (
-    <CardGroup>
-      <ProposalVoteStats
-        proposal={proposal}
-        votePower={votePower}
-        onVote={handleVote}
-        hasVoted={hasVoted}
-      />
-      <Card>
-        <div className="space-y-8">
-          <div>
-            <SectionTitle>Proposal Parameters</SectionTitle>
-            <ProposalParameters
-              proposal={proposal}
-              state={proposalState}
-              quorum={quorum}
-            />
+    <>
+      <CardGroup>
+        <ProposalVoteStats
+          proposal={proposal}
+          votePower={votePower}
+          onVote={handleVote}
+          hasVoted={hasVoted}
+        />
+        <Card>
+          <div className="space-y-8">
+            <div>
+              <SectionTitle>Proposal Parameters</SectionTitle>
+              <ProposalParameters
+                proposal={proposal}
+                state={proposalState}
+                quorum={quorum}
+              />
+            </div>
+            <div>
+              <SectionTitle>Governance Actions</SectionTitle>
+              <ProposalActionsTable proposalActions={proposalActions} />
+              {description && (
+                <>
+                  <SectionTitle>Signalling Proposal</SectionTitle>
+                  <Link
+                    href={`https://vote.originprotocol.com/#/proposal/${description}`}
+                    passHref
+                  >
+                    <a target="_blank">{description}</a>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
-          <div>
-            <SectionTitle>Governance Actions</SectionTitle>
-            <ProposalActionsTable proposalActions={proposalActions} />
-            {description && (
-              <>
-                <SectionTitle>Signalling Proposal</SectionTitle>
-                <Link
-                  href={`https://vote.originprotocol.com/#/proposal/${description}`}
-                  passHref
-                >
-                  <a target="_blank">{description}</a>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </Card>
-    </CardGroup>
+        </Card>
+      </CardGroup>
+      <EnsureDelegationModal />
+    </>
   );
 };
