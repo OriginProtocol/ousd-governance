@@ -28,12 +28,12 @@ export const navItems = [
   /*{
     href: "/",
     label: "Overview",
-  },*/
+  },
   {
     href: "/proposal",
     label: "Proposal",
   },
-  /*{
+  {
     href: "/leaderboard",
     label: "Leaderboard",
   },*/

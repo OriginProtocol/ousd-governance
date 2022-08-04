@@ -44,10 +44,6 @@ export const ProposalDetail = ({
 
   useEffect(() => {
     const loadVotePower = async () => {
-      console.log(
-        "COTE POWER",
-        await Governance.getVotes(address, proposal.startBlock)
-      );
       setVotePower(await Governance.getVotes(address, proposal.startBlock));
     };
     if (address && proposal && Governance) {
