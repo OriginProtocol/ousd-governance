@@ -11,8 +11,7 @@ const useShowDelegationModalOption = () => {
   // returns bool -> true if delegation modal needs to be shown
   return async () => {
     // account already has delegation set
-    //const needToShowDelegation = ogvDelegateeAddress === ZERO_ADDRESS;
-    const needToShowDelegation = true;
+    const needToShowDelegation = ogvDelegateeAddress === ZERO_ADDRESS;
     if (needToShowDelegation) {
       useStore.setState({ ensureDelegationModalOpened: true });
     }
