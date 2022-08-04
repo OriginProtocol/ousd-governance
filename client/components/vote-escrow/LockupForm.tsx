@@ -433,6 +433,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               setLockupDuration(markerValue);
             }
           }}
+          hideLabelFormatting
         />
         <div className="space-y-6 pt-2 sm:pt-3">
           <div className="flex flex-col sm:text-right sm:w-1/3 sm:ml-auto">

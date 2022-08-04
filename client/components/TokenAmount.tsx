@@ -31,7 +31,7 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
       return (
         <span className="uppercase">
           {numeral(+amount)
-            .format("0 a")
+            .format("0.00 a")
             .trim()}
         </span>
       );
