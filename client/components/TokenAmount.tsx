@@ -1,13 +1,20 @@
 import { FunctionComponent, ReactNode } from "react";
 import { BigNumber } from "ethers";
 import numeral from "numeraljs";
+import { useStore } from "utils/store";
 
 interface TokenAmount {
   amount: BigNumber | string | number;
   format?: string;
 }
 
-const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
+const TokenAmount: FunctionComponent<TokenAmount> = ({
+  amount,
+  format,
+  disconnected,
+}) => {
+  const { web3Provider } = useStore();
+
   const formatMap = {
     abbreviatedCurrency: "0.00 a",
     currency: "0,0.00",
@@ -16,6 +23,10 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
   };
 
   const usedFormat = formatMap[format] || formatMap["default"];
+
+  if (!web3Provider) {
+    return <span className="uppercase">--.--</span>;
+  }
 
   if (typeof amount == "string" || typeof amount == "number") {
     if (typeof amount == "number" && Number.isInteger(amount))
