@@ -1,10 +1,8 @@
 import { FunctionComponent, useState } from "react";
-
 import Card from "components/Card";
 import Button from "components/Button";
 import Link from "components/Link";
 import { SectionTitle } from "components/SectionTitle";
-
 import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
 import { toast } from "react-toastify";
@@ -12,7 +10,6 @@ import useAccountBalances from "utils/useAccountBalances";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
-
 import DisabledButtonToolTip from "./DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
 
