@@ -8,11 +8,7 @@ interface TokenAmount {
   format?: string;
 }
 
-const TokenAmount: FunctionComponent<TokenAmount> = ({
-  amount,
-  format,
-  disconnected,
-}) => {
+const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
   const { web3Provider } = useStore();
 
   const formatMap = {
