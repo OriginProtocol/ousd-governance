@@ -6,7 +6,7 @@ import { decimal18Bn } from "utils";
 
 const useTotalBalances = () => {
   const networkInfo = useNetworkInfo();
-  const { web3Provider, contracts } = useStore();
+  const { contracts } = useStore();
 
   const [reloadTotalBalances, setReloadTotalBalances] = useState(0);
 
@@ -22,12 +22,7 @@ const useTotalBalances = () => {
     const loadTotalSupplyVeOgv = async () =>
       await contracts.OgvStaking.totalSupply();
 
-    if (
-      claimIsOpen() &&
-      web3Provider &&
-      networkInfo.correct &&
-      contracts.loaded
-    ) {
+    if (claimIsOpen() && contracts.loaded) {
       Promise.all([
         loadTotalSupplyOfOgv(),
         loadTotalLockedUpOgv(),
@@ -54,7 +49,7 @@ const useTotalBalances = () => {
         });
       });
     }
-  }, [web3Provider, networkInfo.correct, contracts, reloadTotalBalances]);
+  }, [networkInfo.correct, contracts, reloadTotalBalances]);
 
   return {
     reloadTotalBalances: () => {
