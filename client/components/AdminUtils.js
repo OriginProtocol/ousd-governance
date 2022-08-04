@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import { useStore } from "utils/store";
+import { ZERO_ADDRESS } from "constants/index";
 
 const AdminUtils = () => {
+  const { contracts } = useStore();
+
   const show = useMemo(() => {
     if (process.browser) {
       if (localStorage.getItem("admin") === "true") {
@@ -27,6 +30,10 @@ const AdminUtils = () => {
         currentStep: 2,
       },
     });
+  };
+
+  const resetDelegation = async () => {
+    await contracts.OgvStaking.delegate(ZERO_ADDRESS);
   };
 
   const buttonClass = "px-2 py-1 my-1 border border-black rounded-md";
@@ -59,6 +66,9 @@ const AdminUtils = () => {
         </button>
         <button className={buttonClass} onClick={skipEducation}>
           Skip Education
+        </button>
+        <button className={buttonClass} onClick={resetDelegation}>
+          Reset OGV staking delegation
         </button>
       </div>
     )

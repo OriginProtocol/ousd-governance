@@ -61,6 +61,10 @@ const defaultState: Web3DataType = {
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),
+  // Is increased by 1 when relevant information is getting refreshed
+  refreshStatus: {
+    ogvStakingDelegation: 0,
+  },
 };
 
 export const useStore = create<StoreType>((set) => ({

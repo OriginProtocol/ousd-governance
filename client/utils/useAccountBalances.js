@@ -8,7 +8,7 @@ const useAccountBalances = () => {
   const [reloadStakingDelegation, setReloadStakingDelegation] = useState(0);
 
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts } = useStore();
+  const { web3Provider, address, contracts, refreshStatus } = useStore();
 
   useEffect(() => {
     const fetchOgvStakingDelegateeAddress = async () => {
@@ -105,6 +105,12 @@ const useAccountBalances = () => {
     },
     reloadOgvDelegation: () => {
       setReloadStakingDelegation(reloadStakingDelegation + 1);
+      useStore.setState({
+        refreshStatus: {
+          ...refreshStatus,
+          ogvStakingDelegation: reloadStakingDelegation + 1,
+        },
+      });
     },
     reloadAll: () => {
       setReloadAccountAllowances(reloadAccountAllowances + 1);

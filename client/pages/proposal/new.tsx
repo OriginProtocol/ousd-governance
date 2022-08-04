@@ -22,7 +22,7 @@ import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal
 
 const ProposalNew: NextPage = () => {
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
-  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
+  const { showModalIfApplicable } = useShowDelegationModalOption();
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState(
@@ -90,8 +90,8 @@ const ProposalNew: NextPage = () => {
     let transaction;
 
     try {
-      // showing delegation modal quit flow
-      if (await checkIfDelegationModalNeedsShowing()) {
+      // showing delegation modal quits flow
+      if (showModalIfApplicable()) {
         return;
       }
       setSubmitDisabled(true);

@@ -22,7 +22,7 @@ export const ProposalDetail = ({
 }) => {
   const { address, contracts, pendingTransactions } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
-  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
+  const { showModalIfApplicable } = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
   const [proposalState, setProposalState] = useState(null);
   const [quorum, setQuorum] = useState(0);
@@ -44,6 +44,10 @@ export const ProposalDetail = ({
 
   useEffect(() => {
     const loadVotePower = async () => {
+      console.log(
+        "COTE POWER",
+        await Governance.getVotes(address, proposal.startBlock)
+      );
       setVotePower(await Governance.getVotes(address, proposal.startBlock));
     };
     if (address && proposal && Governance) {
@@ -72,7 +76,8 @@ export const ProposalDetail = ({
   if (proposal === null || proposalActions === null) return <Loading />;
 
   const handleVote = async (support: Number) => {
-    if (await checkIfDelegationModalNeedsShowing()) {
+    // showing delegation modal quits flow
+    if (showModalIfApplicable()) {
       return;
     }
 

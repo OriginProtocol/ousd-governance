@@ -8,7 +8,7 @@ import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal
 
 export const Reallocation = ({ snapshotHash }) => {
   const { contracts, pendingTransactions } = useStore();
-  const checkIfDelegationModalNeedsShowing = useShowDelegationModalOption();
+  const { showModalIfApplicable } = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
   const [daiAmount, setDaiAmount] = useState(BigNumber.from(0));
@@ -148,8 +148,8 @@ export const Reallocation = ({ snapshotHash }) => {
     };
 
     const handleSubmit = async () => {
-      // showing delegation modal quit flow
-      if (await checkIfDelegationModalNeedsShowing()) {
+      // showing delegation modal quits flow
+      if (showModalIfApplicable()) {
         return;
       }
 
