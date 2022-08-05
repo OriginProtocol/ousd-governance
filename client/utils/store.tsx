@@ -1,6 +1,5 @@
 import create from "zustand";
 import { ethers } from "ethers";
-import { ZERO_ADDRESS } from "constants/index";
 
 type Web3DataType = {
   provider?: any;
@@ -35,7 +34,7 @@ const defaultState: Web3DataType = {
     veOgv: ethers.BigNumber.from("0"),
     accruedRewards: ethers.BigNumber.from("0"),
   },
-  ogvDelegateeAddress: ZERO_ADDRESS,
+  ogvDelegateeAddress: "0x0000000000000000000000000000000000000000",
   existingLockup: {
     amount: ethers.BigNumber.from(0),
     end: ethers.BigNumber.from(0),
