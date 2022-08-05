@@ -120,6 +120,7 @@ export function inputToBigNumber(
   );
 }
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export { fetcher };
 
 export function claimOpensTimestamp() {
@@ -131,6 +132,10 @@ export function claimClosesTimestamp() {
 }
 
 const now = () => Math.floor(new Date().getTime() / 1000);
+
+export function governanceEnabled() {
+  return process.env.ENABLE_GOVERNANCE === "true";
+}
 
 export function claimOpenTimestampPassed() {
   if (!claimOpensTimestamp()) return true;

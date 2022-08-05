@@ -13,7 +13,7 @@ import CardGroup from "components/CardGroup";
 import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
-import { Seo } from "components/Seo";
+import Seo from "components/Seo";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
