@@ -5,9 +5,22 @@ import { useNetworkInfo, claimIsOpen } from "utils/index";
 const useAccountBalances = () => {
   const [reloadAccountAllowances, setReloadAccountAllowances] = useState(0);
   const [reloadAccountBalances, setReloadAccountBalances] = useState(0);
+  const [reloadStakingDelegation, setReloadStakingDelegation] = useState(0);
 
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts } = useStore();
+  const { web3Provider, address, contracts, refreshStatus } = useStore();
+
+  useEffect(() => {
+    const fetchOgvStakingDelegateeAddress = async () => {
+      return await contracts.OgvStaking.delegates(address);
+    };
+
+    if (address && networkInfo.correct && contracts.loaded) {
+      fetchOgvStakingDelegateeAddress().then((ogvDelegateeAddress) => {
+        useStore.setState({ ogvDelegateeAddress });
+      });
+    }
+  }, [address, contracts, reloadStakingDelegation, networkInfo.correct]);
 
   // Load users governance token balance and vote power
   useEffect(() => {
@@ -90,9 +103,19 @@ const useAccountBalances = () => {
     reloadAccountBalances: () => {
       setReloadAccountBalances(reloadAccountBalances + 1);
     },
+    reloadOgvDelegation: () => {
+      setReloadStakingDelegation(reloadStakingDelegation + 1);
+      useStore.setState({
+        refreshStatus: {
+          ...refreshStatus,
+          ogvStakingDelegation: reloadStakingDelegation + 1,
+        },
+      });
+    },
     reloadAll: () => {
       setReloadAccountAllowances(reloadAccountAllowances + 1);
       setReloadAccountBalances(reloadAccountBalances + 1);
+      setReloadStakingDelegation(reloadStakingDelegation + 1);
     },
   };
 };

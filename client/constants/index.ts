@@ -10,6 +10,8 @@ export const websocketProvider = process.env.WEB3_PROVIDER?.replace(
   "ws"
 );
 
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 export const RPC_URLS = {
   1: mainnetNetworkUrl,
   4: rinkebyNetworkUrl,

@@ -1,5 +1,6 @@
 import create from "zustand";
 import { ethers } from "ethers";
+import { ZERO_ADDRESS } from "constants/index";
 
 type Web3DataType = {
   provider?: any;
@@ -28,11 +29,13 @@ const defaultState: Web3DataType = {
   contracts: {
     loaded: false,
   },
+  ensureDelegationModalOpened: false,
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),
     accruedRewards: ethers.BigNumber.from("0"),
   },
+  ogvDelegateeAddress: ZERO_ADDRESS,
   existingLockup: {
     amount: ethers.BigNumber.from(0),
     end: ethers.BigNumber.from(0),
@@ -58,6 +61,10 @@ const defaultState: Web3DataType = {
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),
+  // Is increased by 1 when relevant information is getting refreshed
+  refreshStatus: {
+    ogvStakingDelegation: 0,
+  },
 };
 
 export const useStore = create<StoreType>((set) => ({
