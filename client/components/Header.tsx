@@ -47,7 +47,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
         <Wrapper>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex-none -mb-3 mr-16">
+              <div className="flex-none -mb-3 mr-7">
                 <Link href="/">
                   <Image
                     width="204"
