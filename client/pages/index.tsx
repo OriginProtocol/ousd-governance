@@ -14,6 +14,7 @@ import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 import { Seo } from "components/Seo";
+import { NextSeo } from "next-seo";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -120,7 +121,8 @@ const Home: NextPage = ({
 
   return (
     <Wrapper narrow>
-      <Seo />
+      <NextSeo title="OUSD Governance" />
+      {/*<Seo />*/}
       <PageTitle>Overview</PageTitle>
       <CardGroup>
         <VoteStats
