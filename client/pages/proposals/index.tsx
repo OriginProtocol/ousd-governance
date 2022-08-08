@@ -82,7 +82,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
         {proposals.length > 0 && (
           <button
             className="btn btn-primary btn-circle mb-5 text-secondary"
-            onClick={() => router.push("/proposal/new")}
+            onClick={() => router.push("/proposals/new")}
           >
             <span className="text-2xl block">+</span>
           </button>
