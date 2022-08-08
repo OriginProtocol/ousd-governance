@@ -38,7 +38,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
           No proposals have been created
         </h3>
         <div className="mt-6">
-          <Link href="/proposal/new" passHref>
+          <Link href="/proposals/new" passHref>
             <a className="btn btn-primary btn-sm">
               <svg
                 className="-ml-1 mr-2 h-5 w-5"
@@ -76,7 +76,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
             <tr
               key={index}
               className="hover cursor-pointer"
-              onClick={() => router.push(`/proposal/${proposal[0]}`)}
+              onClick={() => router.push(`/proposals/${proposal[0]}`)}
             >
               <td>{proposal.displayId}</td>
               <td>
