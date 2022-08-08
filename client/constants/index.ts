@@ -26,11 +26,6 @@ export const CHAIN_CONTRACTS = {
 };
 
 let navItems = [
-  /*
-  {
-    href: "/leaderboard",
-    label: "Leaderboard",
-  },*/
   {
     href: "/claim",
     label: "Claim",
@@ -54,12 +49,8 @@ let navItems = [
 if (governanceEnabled()) {
   navItems = [
     {
-      href: "/",
-      label: "Overview",
-    },
-    {
-      href: "/proposal",
-      label: "Proposal",
+      href: "/proposals",
+      label: "Proposals",
     },
     ...navItems,
   ];
