@@ -1,10 +1,17 @@
 import { useRouter } from "next/router";
+import { FunctionComponent } from "react";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
 import Link from "next/link";
 
-export const ProposalTable = ({ proposalData }) => {
+interface ProposalTableProps {
+  proposalData: Array<object>;
+}
+
+const ProposalTable: FunctionComponent<ProposalTableProps> = ({
+  proposalData,
+}) => {
   const router = useRouter();
 
   if (!proposalData || proposalData?.loading) return <Loading />;
@@ -85,3 +92,5 @@ export const ProposalTable = ({ proposalData }) => {
     </div>
   );
 };
+
+export { ProposalTable };
