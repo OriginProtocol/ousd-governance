@@ -14,6 +14,8 @@ import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 import Seo from "components/Seo";
+import Button from "components/Button";
+import Link from "components/Link";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -121,16 +123,32 @@ const Home: NextPage<HomeProps> = ({
           totalSupply={totalSupplyVeOgv}
         />
         <Card>
-          <SectionTitle>Last 5 Proposals</SectionTitle>
+          <SectionTitle>Recent Proposals</SectionTitle>
           {loading ? (
             <Loading />
           ) : (
-            <ProposalTable proposalData={proposalData} />
+            <div className="space-y-4">
+              <ProposalTable proposalData={proposalData} />
+              <Link
+                href="/proposals"
+                className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+              >
+                View All Proposals
+              </Link>
+            </div>
           )}
         </Card>
         <Card>
-          <SectionTitle>Top 5 Voters</SectionTitle>
-          <LeaderboardTable voters={voters} />
+          <SectionTitle>Top Voting Addresses</SectionTitle>
+          <div className="space-y-4">
+            <LeaderboardTable voters={voters} />
+            <Link
+              href="/leaderboard"
+              className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+            >
+              View Leaderboard
+            </Link>
+          </div>
         </Card>
       </CardGroup>
     </Wrapper>
