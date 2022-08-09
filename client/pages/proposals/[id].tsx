@@ -4,6 +4,7 @@ import { PageTitle } from "components/PageTitle";
 import prisma from "lib/prisma";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
+import { getProposalContent } from "utils";
 
 export async function getServerSideProps({
   res,
@@ -26,10 +27,12 @@ export async function getServerSideProps({
 }
 
 const ProposalPage: NextPage = ({ proposalId, description }) => {
+  const { title } = getProposalContent(description);
+
   return (
     <Wrapper>
-      <Seo title="Proposal" />
-      <PageTitle>Proposal</PageTitle>
+      <Seo title={title} />
+      <PageTitle>{title}</PageTitle>
       <ProposalDetail proposalId={proposalId} description={description} />
     </Wrapper>
   );
