@@ -4,6 +4,7 @@ import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
 import Link from "next/link";
+import { getProposalContent } from "utils/index";
 
 interface ProposalTableProps {
   proposalData: Array<object>;
@@ -64,29 +65,28 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
   return (
     <div className="overflow-x-auto">
       <table className="table w-full">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Proposer</th>
-            <th>State</th>
-          </tr>
-        </thead>
         <tbody>
-          {proposalData?.proposals.map((proposal, index) => (
-            <tr
-              key={index}
-              className="hover cursor-pointer"
-              onClick={() => router.push(`/proposals/${proposal[0]}`)}
-            >
-              <td>{proposal.displayId}</td>
-              <td>
-                <Address address={proposal[1]} />
-              </td>
-              <td>
-                <StateTag state={proposalData.states[index]} />
-              </td>
-            </tr>
-          ))}
+          {proposalData?.proposals.map((proposal, index) => {
+            const { title } = getProposalContent(proposal.description);
+
+            return (
+              <tr
+                key={index}
+                className="hover cursor-pointer"
+                onClick={() => router.push(`/proposals/${proposal[0]}`)}
+              >
+                <td>
+                  <div className="">
+                    <h3 className="text-lg truncate">{title}</h3>
+                    <div>{proposal.displayId}</div>
+                  </div>
+                </td>
+                <td>
+                  <StateTag state={proposalData.states[index]} />
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

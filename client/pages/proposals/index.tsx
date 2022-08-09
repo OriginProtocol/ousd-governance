@@ -25,6 +25,7 @@ export async function getServerSideProps({ res }: { res: any }) {
     id: p.id,
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
+    description: p.description,
   }));
 
   return {
@@ -58,6 +59,9 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
           displayId: proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
           )?.id,
+          description: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.description,
         })),
       };
       setProposalData(dataWithDisplayId);

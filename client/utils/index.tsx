@@ -150,3 +150,14 @@ export function claimIsOpen() {
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// Break up/truncate proposal content for display
+const getProposalContent = (proposalDescription: string) => {
+  const split = proposalDescription.split("<br>");
+  const title = split[0];
+  const description = split.slice(1).join("<br>").trim();
+
+  return { title, description };
+};
+
+export { getProposalContent };

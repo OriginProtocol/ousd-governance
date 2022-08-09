@@ -1,12 +1,18 @@
 import { ethers, BigNumber } from "ethers";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, FunctionComponent } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 
-export const Reallocation = ({ snapshotHash }) => {
+interface ReallocationProps {
+  proposalDetails: string;
+}
+
+const Reallocation: FunctionComponent<ReallocationProps> = ({
+  proposalDetails,
+}) => {
   const { contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
@@ -160,7 +166,7 @@ export const Reallocation = ({ snapshotHash }) => {
         proposal.values,
         proposal.signatures,
         proposal.calldatas,
-        snapshotHash
+        proposalDetails.replace(/\n/g, "<br>\n")
       );
 
       useStore.setState({
@@ -347,3 +353,5 @@ const StrategyBalanceRow = ({
     </tr>
   );
 };
+
+export { Reallocation };
