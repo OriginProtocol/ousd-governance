@@ -74,7 +74,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
             return (
               <tr
                 key={index}
-                className="hover cursor-pointer"
+                className="cursor-pointer hover:bg-gray-100"
                 onClick={() => router.push(`/proposals/${proposal[0]}`)}
               >
                 <td>
