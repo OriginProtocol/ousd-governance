@@ -5,6 +5,7 @@ import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
 import Link from "next/link";
 import { getProposalContent } from "utils/index";
+import moment from "moment";
 
 interface ProposalTableProps {
   proposalData: Array<object>;
@@ -68,6 +69,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
         <tbody>
           {proposalData?.proposals.map((proposal, index) => {
             const { title } = getProposalContent(proposal.description);
+            const id = proposal?.displayId.toString().padStart(3, "0");
 
             return (
               <tr
@@ -76,9 +78,12 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                 onClick={() => router.push(`/proposals/${proposal[0]}`)}
               >
                 <td>
-                  <div className="">
-                    <h3 className="text-lg truncate">{title}</h3>
-                    <div>{proposal.displayId}</div>
+                  <div className="space-y-1">
+                    <h3 className="text-xl truncate">{title}</h3>
+                    <div className="text-gray-400 text-xmd">
+                      {id} • Created{" "}
+                      {moment(proposal.createdAt).format("MMM D, YYYY")}
+                    </div>
                   </div>
                 </td>
                 <td>
