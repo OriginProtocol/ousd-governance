@@ -1,6 +1,5 @@
 import type { NextPage } from "next";
 import { ProposalDetail } from "components/proposal/ProposalDetail";
-import { PageTitle } from "components/PageTitle";
 import prisma from "lib/prisma";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
@@ -32,7 +31,6 @@ const ProposalPage: NextPage = ({ proposalId, description }) => {
   return (
     <Wrapper narrow>
       <Seo title={title} />
-      <PageTitle>{title}</PageTitle>
       <ProposalDetail proposalId={proposalId} description={description} />
     </Wrapper>
   );

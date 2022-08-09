@@ -12,6 +12,8 @@ import { useStore } from "utils/store";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { PageTitle } from "components/PageTitle";
+import { getProposalContent, truncateEthAddress } from "utils/index";
 
 export const ProposalDetail = ({
   proposalId,
@@ -30,6 +32,8 @@ export const ProposalDetail = ({
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [hasVoted, setHasVoted] = useState(false);
   const { Governance } = contracts;
+  const { title: proposalTitle, description: proposalDescription } =
+    getProposalContent(description);
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -97,6 +101,16 @@ export const ProposalDetail = ({
 
   return (
     <>
+      <div className="flex justify-between mb-4">
+        <PageTitle>{proposalTitle}</PageTitle>
+        <div className="flex-shrink-0 space-y-1">
+          <div className="bg-secondary-focus text-white p-2 rounded">
+            <span className="opacity-90">
+              {truncateEthAddress(proposal?.proposer)}
+            </span>
+          </div>
+        </div>
+      </div>
       <CardGroup>
         <ProposalVoteStats
           proposal={proposal}
