@@ -132,12 +132,14 @@ const Home: NextPage<HomeProps> = ({
           ) : (
             <div className="space-y-4">
               <ProposalTable proposalData={proposalData} />
-              <Link
-                href="/proposals"
-                className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
-              >
-                View All Proposals
-              </Link>
+              {proposalCount > 0 && (
+                <Link
+                  href="/proposals"
+                  className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+                >
+                  View All Proposals
+                </Link>
+              )}
             </div>
           )}
         </Card>
@@ -145,12 +147,14 @@ const Home: NextPage<HomeProps> = ({
           <SectionTitle>Top Voting Addresses</SectionTitle>
           <div className="space-y-4">
             <LeaderboardTable voters={voters} />
-            <Link
-              href="/leaderboard"
-              className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
-            >
-              View Leaderboard
-            </Link>
+            {voters && voters.length > 0 && (
+              <Link
+                href="/leaderboard"
+                className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+              >
+                View Leaderboard
+              </Link>
+            )}
           </div>
         </Card>
       </CardGroup>
