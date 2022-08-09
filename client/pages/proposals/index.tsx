@@ -11,6 +11,7 @@ import Card from "components/Card";
 import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import Seo from "components/Seo";
+import Button from "components/Button";
 
 export async function getServerSideProps({ res }: { res: any }) {
   res.setHeader(
@@ -81,15 +82,12 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
   return (
     <Wrapper narrow>
       <Seo title="Proposals" />
-      <div className="flex items-end justify-between">
+      <div className="flex items-center justify-between mb-4">
         <PageTitle>Proposals</PageTitle>
         {proposals.length > 0 && (
-          <button
-            className="btn btn-primary btn-circle mb-5 text-secondary"
-            onClick={() => router.push("/proposals/new")}
-          >
-            <span className="text-2xl block">+</span>
-          </button>
+          <Button onClick={() => router.push("/proposals/new")} large>
+            Create a new proposal
+          </Button>
         )}
       </div>
       {loading ? (

@@ -1,4 +1,4 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { toast } from "react-toastify";
@@ -15,7 +15,6 @@ import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { useStore } from "utils/store";
-import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
