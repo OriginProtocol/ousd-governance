@@ -18,8 +18,10 @@ import { useStore } from "utils/store";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { useRouter } from "next/router";
 
 const ProposalNew: NextPage = () => {
+  const router = useRouter();
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
@@ -122,6 +124,7 @@ const ProposalNew: NextPage = () => {
             toast.success("Proposal has been submitted", {
               hideProgressBar: true,
             });
+            router.push(`/proposals`);
             reset();
           },
         },

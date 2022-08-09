@@ -5,6 +5,7 @@ import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { useRouter } from "next/router";
 
 interface ReallocationProps {
   proposalDetails: string;
@@ -13,6 +14,7 @@ interface ReallocationProps {
 const Reallocation: FunctionComponent<ReallocationProps> = ({
   proposalDetails,
 }) => {
+  const router = useRouter();
   const { contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
@@ -178,6 +180,7 @@ const Reallocation: FunctionComponent<ReallocationProps> = ({
               toast.success("Proposal has been submitted", {
                 hideProgressBar: true,
               });
+              router.push(`/proposals`);
               reset();
             },
           },
