@@ -30,7 +30,7 @@ const ProposalPage: NextPage = ({ proposalId, description }) => {
   const { title } = getProposalContent(description);
 
   return (
-    <Wrapper>
+    <Wrapper narrow>
       <Seo title={title} />
       <PageTitle>{title}</PageTitle>
       <ProposalDetail proposalId={proposalId} description={description} />
