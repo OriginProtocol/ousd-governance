@@ -65,7 +65,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
 
   return (
     <div className="overflow-x-auto">
-      <table className="table w-full">
+      <table className="table table-fixed w-full">
         <tbody>
           {proposalData?.proposals.map((proposal, index) => {
             const { title } = getProposalContent(proposal.description);
@@ -86,7 +86,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                     </div>
                   </div>
                 </td>
-                <td>
+                <td className="w-1/4 text-right">
                   <StateTag state={proposalData.states[index]} />
                 </td>
               </tr>
