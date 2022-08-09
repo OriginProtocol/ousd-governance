@@ -14,7 +14,6 @@ import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 import Seo from "components/Seo";
-import Button from "components/Button";
 import Link from "components/Link";
 
 export type ProposalDataType = {
@@ -47,6 +46,7 @@ export async function getServerSideProps({ res }: { res: any }) {
     id: p.id,
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
+    description: p.description,
   }));
 
   return {
@@ -101,6 +101,9 @@ const Home: NextPage<HomeProps> = ({
           displayId: proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
           )?.id,
+          description: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.description,
         })),
       };
       setProposalData(dataWithDisplayId);
