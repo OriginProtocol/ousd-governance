@@ -68,7 +68,8 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
-    if (networkInfo.correct && contracts.loaded) {
+
+    if (contracts.loaded) {
       load();
     }
   }, [
