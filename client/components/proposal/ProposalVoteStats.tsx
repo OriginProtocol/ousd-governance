@@ -4,6 +4,7 @@ import CardLabel from "components/CardLabel";
 import CardStat from "components/CardStat";
 import TokenAmount from "components/TokenAmount";
 import TokenIcon from "components/TokenIcon";
+import CardDescription from "../CardDescription";
 
 export const ProposalVoteStats = ({
   proposal,
@@ -22,6 +23,7 @@ export const ProposalVoteStats = ({
               <TokenAmount amount={votePower} />
             </CardStat>
           </div>
+          <CardDescription>At start block</CardDescription>
         </div>
       </Card>
       <Card dark tightPadding>
