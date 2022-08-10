@@ -51,7 +51,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
         </Card>
         <Card dark tightPadding>
           <div className="space-y-1">
-            <CardLabel>Vote balance</CardLabel>
+            <CardLabel>Vote Balance</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/veogv.svg" alt="veOGV" small />
               <CardStat small>
