@@ -104,10 +104,8 @@ export const ProposalDetail = ({
       <div className="flex justify-between mb-4">
         <PageTitle>{proposalTitle}</PageTitle>
         <div className="flex-shrink-0 space-y-1">
-          <div className="bg-secondary-focus text-white p-2 rounded">
-            <span className="opacity-90">
-              {truncateEthAddress(proposal?.proposer)}
-            </span>
+          <div className="ml-4 bg-white bg-opacity-10 text-white px-2 py-1 rounded-sm">
+            <span>{truncateEthAddress(proposal?.proposer)}</span>
           </div>
         </div>
       </div>
