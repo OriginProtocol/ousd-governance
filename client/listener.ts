@@ -36,7 +36,7 @@ const contracts = [
     name: "Governance",
     address: GovernanceContracts.Governance.address,
     abi: GovernanceContracts.Governance.abi,
-    events: ["ProposalCreated"],
+    events: ["ProposalCreated", "VoteCast"],
   },
   {
     name: "OgvStaking",
@@ -190,9 +190,9 @@ const handleNewVoter = async (event) => {
   try {
     await prisma.voter.create({
       data: {
-        address: event.values.provider,
+        address: event.values.voter,
         votes: (
-          await governanceTokenContract.balanceOf(event.values.provider)
+          await governanceTokenContract.balanceOf(event.values.voter)
         ).toString(),
         firstSeenBlock: event.blockNumber,
       },
@@ -215,8 +215,11 @@ const handleEvents = async (blockNumber, events, done) => {
       case 'Unstake':
         await handleUnstake(event);
         break;
-      default:
+      case 'VoteCast':
         await handleNewVoter(event);
+        break;
+      default:
+        break;
     }
   }
 };
