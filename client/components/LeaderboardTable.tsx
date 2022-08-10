@@ -34,7 +34,7 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
                 )}
               />
             </td>
-            <td>{(voter.votes / totalSupplyVeOgv) * 100}%</td>
+            <td>{((voter.votes / totalSupplyVeOgv) * 100).toFixed(2)}%</td>
             <td></td>
           </tr>
         ))}
