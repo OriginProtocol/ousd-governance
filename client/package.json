@@ -38,7 +38,7 @@
     "dotenv": "^16.0.0",
     "eslint": "8.9.0",
     "eslint-config-next": "12.1.0",
-    "ethereum-events": "^0.1.3",
+    "ethereum-events": "https://github.com/AleG94/ethereum-events#develop",
     "ethers": "^5.5.4",
     "keccak256": "^1.0.6",
     "lodash": "^4.17.21",
