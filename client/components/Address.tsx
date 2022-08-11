@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
+import { truncateEthAddress } from "utils";
 
 export const Address = ({ address }: { address: string }) => {
   const { web3Provider } = useStore();
-  const [addressDisplay, setAddressDisplay] = useState(address);
+  const [addressDisplay, setAddressDisplay] = useState(
+    truncateEthAddress(address)
+  );
 
   useEffect(() => {
     const loadEns = async () => {

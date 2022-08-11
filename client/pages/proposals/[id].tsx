@@ -16,16 +16,21 @@ export async function getServerSideProps({
 
   const proposal = await prisma.proposal.findUnique({
     where: { proposalId: query.id },
+    include: { voters: true },
   });
 
-  const { proposalId, description } = proposal;
+  const { proposalId, description, voters } = proposal;
 
   return {
-    props: { proposalId, description },
+    props: {
+      proposalId,
+      description,
+      voters: JSON.parse(JSON.stringify(voters)),
+    },
   };
 }
 
-const ProposalPage: NextPage = ({ proposalId, description }) => {
+const ProposalPage: NextPage = ({ proposalId, description, voters }) => {
   const { title } = getProposalContent(description);
 
   return (

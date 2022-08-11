@@ -186,20 +186,63 @@ const handleUnstake = async (event) => {
   }
 }
 
-const handleNewVoter = async (event) => {
+const handleVoteCast = async (event) => {
+  // Check if voter exists
+  let existingVoter;
+
   try {
-    await prisma.voter.create({
-      data: {
+    existingVoter = await prisma.voter.findUnique({
+      where: {
         address: event.values.voter,
-        votes: (
-          await governanceTokenContract.balanceOf(event.values.voter)
-        ).toString(),
-        firstSeenBlock: event.blockNumber,
       },
     });
-    logger.info("Inserted new voter");
-  } catch (e) {
+  } catch(e) {
     logger.info(e);
+  }
+
+  if(existingVoter) {
+    // Update record
+    try {
+      await prisma.voter.update({
+        where: {
+          address: event.values.voter,
+        },
+        data: {
+          votes: (
+            await governanceTokenContract.balanceOf(event.values.voter)
+          ).toString(),
+          proposalsVoted: {
+            connect: {
+              proposalId: event.values.proposalId,
+            },
+          },
+        }
+      });
+      logger.info(`Voter ${event.values.voter} updated`);
+    } catch (e) {
+      logger.info(e);
+    }
+  } else {
+    // Add new voter
+    try {
+      await prisma.voter.create({
+        data: {
+          address: event.values.voter,
+          votes: (
+            await governanceTokenContract.balanceOf(event.values.voter)
+          ).toString(),
+          firstSeenBlock: event.blockNumber,
+          proposalsVoted: {
+            connect: {
+              proposalId: event.values.proposalId,
+            },
+          },
+        },
+      });
+      logger.info(`Inserted new voter: ${event.values.voter}`);
+    } catch (e) {
+      logger.info(e);
+    }
   }
 }
 
@@ -216,7 +259,7 @@ const handleEvents = async (blockNumber, events, done) => {
         await handleUnstake(event);
         break;
       case 'VoteCast':
-        await handleNewVoter(event);
+        await handleVoteCast(event);
         break;
       default:
         break;

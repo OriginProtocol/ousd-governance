@@ -28,12 +28,18 @@ export async function getServerSideProps({ res }: { res: any }) {
   );
 
   const holderCount = await prisma.voter.count();
+
   // Limit 5
   const voters = (
-    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }], take: 5 })
+    await prisma.voter.findMany({
+      include: { proposalsVoted: true },
+      orderBy: [{ votes: "desc" }],
+      take: 5,
+    })
   ).map((v) => ({
     address: v.address,
     votes: v.votes.toHexadecimal(),
+    proposalsVoted: v?.proposalsVoted?.length,
   }));
 
   const proposalCount = await prisma.proposal.count();

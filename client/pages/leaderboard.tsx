@@ -8,10 +8,14 @@ import Seo from "components/Seo";
 
 export async function getServerSideProps({ res }: { res: any }) {
   const voters = (
-    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }] })
+    await prisma.voter.findMany({
+      include: { proposalsVoted: true },
+      orderBy: [{ votes: "desc" }],
+    })
   ).map((v) => ({
     address: v.address,
     votes: v.votes.toHexadecimal(),
+    proposalsVoted: v?.proposalsVoted?.length,
   }));
 
   return {

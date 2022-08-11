@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import TokenAmount from "components/TokenAmount";
-import { truncateEthAddress } from "utils";
 import { useStore } from "utils/store";
+import { Address } from "components/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   const { totalBalances } = useStore();
@@ -26,7 +26,9 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
         {voters.map((voter, index) => (
           <tr key={index}>
             <td>{index + 1}</td>
-            <td>{truncateEthAddress(voter.address)}</td>
+            <td>
+              <Address address={voter.address} />
+            </td>
             <td>
               <TokenAmount
                 amount={ethers.utils.formatUnits(
@@ -35,7 +37,7 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
               />
             </td>
             <td>{((voter.votes / totalSupplyVeOgv) * 100).toFixed(2)}%</td>
-            <td></td>
+            <td>{voter.proposalsVoted}</td>
           </tr>
         ))}
       </tbody>
