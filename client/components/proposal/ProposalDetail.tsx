@@ -13,7 +13,8 @@ import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { PageTitle } from "components/PageTitle";
-import { getProposalContent, truncateEthAddress } from "utils/index";
+import { getProposalContent } from "utils/index";
+import { Address } from "components/Address";
 
 export const ProposalDetail = ({
   proposalId,
@@ -105,7 +106,7 @@ export const ProposalDetail = ({
         <PageTitle>{proposalTitle}</PageTitle>
         <div className="flex-shrink-0 space-y-1">
           <div className="ml-4 bg-white bg-opacity-10 text-white px-2 py-1 rounded-sm">
-            <span>{truncateEthAddress(proposal?.proposer)}</span>
+            <Address address={proposal?.proposer} />
           </div>
         </div>
       </div>
