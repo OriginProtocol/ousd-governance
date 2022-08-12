@@ -4,6 +4,7 @@ import prisma from "lib/prisma";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { getProposalContent } from "utils";
+import moment from "moment";
 
 export async function getServerSideProps({
   res,
@@ -19,25 +20,35 @@ export async function getServerSideProps({
     include: { voters: true },
   });
 
-  const { proposalId, description, voters } = proposal;
+  const { id, proposalId, createdAt, description, voters } = proposal;
 
   return {
     props: {
+      id,
       proposalId,
+      createdAt: moment(createdAt).format("MMM D, YYYY"),
       description,
       voters: JSON.parse(JSON.stringify(voters)),
     },
   };
 }
 
-const ProposalPage: NextPage = ({ proposalId, description, voters }) => {
+const ProposalPage: NextPage = ({
+  id,
+  proposalId,
+  createdAt,
+  description,
+  voters,
+}) => {
   const { title } = getProposalContent(description);
 
   return (
     <Wrapper narrow>
       <Seo title={title} />
       <ProposalDetail
+        id={id}
         proposalId={proposalId}
+        createdAt={createdAt}
         description={description}
         voters={voters}
       />

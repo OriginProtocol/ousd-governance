@@ -86,7 +86,8 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                     <h3 className="text-lg truncate">{title}</h3>
                     <div className="text-gray-400 text-xmd">
                       {id} • Created{" "}
-                      {moment(proposal.createdAt).format("MMM D, YYYY")}
+                      {moment(proposal.createdAt).format("MMM D, YYYY")} • By{" "}
+                      <Address address={proposal.proposer} />
                     </div>
                   </div>
                 </td>

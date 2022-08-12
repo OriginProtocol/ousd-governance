@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Loading } from "components/Loading";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { ProposalVoteStats } from "components/proposal/ProposalVoteStats";
@@ -16,13 +15,18 @@ import { PageTitle } from "components/PageTitle";
 import { getProposalContent } from "utils/index";
 import { Address } from "components/Address";
 import { SupportTable } from "./SupportTable";
+import { StateTag } from "./StateTag";
 
 export const ProposalDetail = ({
+  id,
   proposalId,
+  createdAt,
   description,
   voters,
 }: {
+  id: string;
   proposalId: string;
+  createdAt: string;
   description: string;
   voters: Array<object>;
 }) => {
@@ -130,13 +134,15 @@ export const ProposalDetail = ({
 
   return (
     <>
-      <div className="flex justify-between mb-4">
-        <PageTitle>{proposalTitle}</PageTitle>
-        <div className="flex-shrink-0 space-y-1">
-          <div className="ml-4 bg-white bg-opacity-10 text-white px-2 py-1 rounded-sm">
-            <Address address={proposal?.proposer} />
+      <div className="flex justify-between items-center mb-6">
+        <div className="mr-4">
+          <PageTitle noBottomMargin>{proposalTitle}</PageTitle>
+          <div className="text-white opacity-70 text-md">
+            {id.toString().padStart(3, "0")} • Created {createdAt} • By{" "}
+            <Address address={proposal.proposer} />
           </div>
         </div>
+        <StateTag state={proposalState} />
       </div>
       <CardGroup>
         <ProposalVoteStats
