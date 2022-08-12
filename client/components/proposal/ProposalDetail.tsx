@@ -15,13 +15,17 @@ import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal
 import { PageTitle } from "components/PageTitle";
 import { getProposalContent } from "utils/index";
 import { Address } from "components/Address";
+import TokenAmount from "components/TokenAmount";
+import { SupportTable } from "./SupportTable";
 
 export const ProposalDetail = ({
   proposalId,
   description,
+  voters,
 }: {
   proposalId: string;
   description: string;
+  voters: Array<object>;
 }) => {
   const { address, contracts, pendingTransactions } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
@@ -32,9 +36,34 @@ export const ProposalDetail = ({
   const [reloadProposal, setReloadProposal] = useState(false);
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [hasVoted, setHasVoted] = useState(false);
+  const [forVoters, setForVoters] = useState([]);
+  const [againstVoters, setAgainstVoters] = useState([]);
   const { Governance } = contracts;
   const { title: proposalTitle, description: proposalDescription } =
     getProposalContent(description);
+
+  useEffect(() => {
+    const loadVoters = async () => {
+      const receipts = await Promise.all(
+        voters.map((voter) => Governance.getReceipt(proposalId, voter.address))
+      );
+
+      const enrichedVoters = voters.map((voter, index) => {
+        return {
+          ...voter,
+          votes: receipts[index].votes,
+          support: receipts[index].support,
+        };
+      });
+
+      setForVoters(enrichedVoters.filter((voter) => voter.support === 1));
+      setAgainstVoters(enrichedVoters.filter((voter) => voter.support === 0));
+    };
+
+    if (voters && Governance) {
+      loadVoters();
+    }
+  }, [proposalId, Governance, voters]);
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -117,6 +146,16 @@ export const ProposalDetail = ({
           onVote={handleVote}
           hasVoted={hasVoted}
         />
+        <CardGroup twoCol horizontal>
+          <Card tightPadding>
+            <SectionTitle>For Voters</SectionTitle>
+            <SupportTable voters={forVoters} />
+          </Card>
+          <Card tightPadding>
+            <SectionTitle>Against Voters</SectionTitle>
+            <SupportTable voters={againstVoters} />
+          </Card>
+        </CardGroup>
         <Card>
           <div className="space-y-8">
             <div>

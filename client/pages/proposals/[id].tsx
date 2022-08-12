@@ -36,7 +36,11 @@ const ProposalPage: NextPage = ({ proposalId, description, voters }) => {
   return (
     <Wrapper narrow>
       <Seo title={title} />
-      <ProposalDetail proposalId={proposalId} description={description} />
+      <ProposalDetail
+        proposalId={proposalId}
+        description={description}
+        voters={voters}
+      />
     </Wrapper>
   );
 };
