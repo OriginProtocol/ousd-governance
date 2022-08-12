@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useStore } from "utils/store";
+import sanitizeHtml from "sanitize-html";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -157,7 +158,12 @@ const getProposalContent = (proposalDescription: string) => {
   const title = split && split[0];
   const description = split && split.slice(1).join("<br>").trim();
 
-  return { title, description };
+  const cleanTitle = sanitizeHtml(title);
+  const cleanDescription = sanitizeHtml(description, {
+    allowedTags: ["br"],
+  });
+
+  return { title: cleanTitle, description: cleanDescription };
 };
 
 export { getProposalContent };

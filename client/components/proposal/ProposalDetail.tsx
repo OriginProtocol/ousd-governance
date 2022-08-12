@@ -15,7 +15,6 @@ import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal
 import { PageTitle } from "components/PageTitle";
 import { getProposalContent } from "utils/index";
 import { Address } from "components/Address";
-import TokenAmount from "components/TokenAmount";
 import { SupportTable } from "./SupportTable";
 
 export const ProposalDetail = ({
@@ -146,40 +145,57 @@ export const ProposalDetail = ({
           onVote={handleVote}
           hasVoted={hasVoted}
         />
-        <CardGroup twoCol horizontal>
-          <Card tightPadding>
-            <SectionTitle>For Voters</SectionTitle>
-            <SupportTable voters={forVoters} />
-          </Card>
-          <Card tightPadding>
-            <SectionTitle>Against Voters</SectionTitle>
-            <SupportTable voters={againstVoters} />
+        {(forVoters.length > 0 || againstVoters.length > 0) && (
+          <CardGroup
+            twoCol={forVoters.length > 0 && againstVoters.length > 0}
+            horizontal={forVoters.length > 0 && againstVoters.length > 0}
+          >
+            {forVoters.length > 0 && (
+              <Card
+                tightPadding={forVoters.length > 0 && againstVoters.length > 0}
+              >
+                <SectionTitle>For Voters</SectionTitle>
+                <SupportTable voters={forVoters} />
+              </Card>
+            )}
+            {againstVoters.length > 0 && (
+              <Card
+                tightPadding={forVoters.length > 0 && againstVoters.length > 0}
+              >
+                <SectionTitle>Against Voters</SectionTitle>
+                <SupportTable voters={againstVoters} />
+              </Card>
+            )}
+          </CardGroup>
+        )}
+        <CardGroup>
+          <Card>
+            <div className="space-y-8">
+              {description && (
+                <div>
+                  <SectionTitle>Description</SectionTitle>
+                  <div
+                    className="text-sm"
+                    dangerouslySetInnerHTML={{ __html: proposalDescription }}
+                  />
+                </div>
+              )}
+              <div>
+                <SectionTitle>Actions</SectionTitle>
+                <ProposalActionsTable proposalActions={proposalActions} />
+              </div>
+            </div>
           </Card>
         </CardGroup>
         <Card>
           <div className="space-y-8">
             <div>
-              <SectionTitle>Proposal Parameters</SectionTitle>
+              <SectionTitle>Details</SectionTitle>
               <ProposalParameters
                 proposal={proposal}
                 state={proposalState}
                 quorum={quorum}
               />
-            </div>
-            <div>
-              <SectionTitle>Governance Actions</SectionTitle>
-              <ProposalActionsTable proposalActions={proposalActions} />
-              {description && (
-                <>
-                  <SectionTitle>Signalling Proposal</SectionTitle>
-                  <Link
-                    href={`https://vote.originprotocol.com/#/proposal/${description}`}
-                    passHref
-                  >
-                    <a target="_blank">{description}</a>
-                  </Link>
-                </>
-              )}
             </div>
           </div>
         </Card>
