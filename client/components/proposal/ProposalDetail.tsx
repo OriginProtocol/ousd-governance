@@ -30,7 +30,7 @@ export const ProposalDetail = ({
   description: string;
   voters: Array<object>;
 }) => {
-  const { address, contracts, pendingTransactions } = useStore();
+  const { address, contracts, pendingTransactions, rpcProvider } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
@@ -41,9 +41,20 @@ export const ProposalDetail = ({
   const [hasVoted, setHasVoted] = useState(false);
   const [forVoters, setForVoters] = useState([]);
   const [againstVoters, setAgainstVoters] = useState([]);
+  const [blockNumber, setBlockNumber] = useState(0);
   const { Governance } = contracts;
   const { title: proposalTitle, description: proposalDescription } =
     getProposalContent(description);
+
+  useEffect(() => {
+    const getBlockNumber = async () => {
+      const blockNumber = await rpcProvider.getBlockNumber();
+      setBlockNumber(parseInt(blockNumber));
+    };
+    if (rpcProvider) {
+      getBlockNumber();
+    }
+  }, [rpcProvider]);
 
   useEffect(() => {
     const loadVoters = async () => {
@@ -101,10 +112,10 @@ export const ProposalDetail = ({
     const loadQuorum = async () => {
       setQuorum(await Governance.quorum(proposal.startBlock));
     };
-    if (proposal && Governance) {
+    if (proposal && Governance && blockNumber > parseInt(proposal.startBlock)) {
       loadQuorum();
     }
-  }, [proposal, Governance, proposalId, reloadProposal]);
+  }, [proposal, Governance, proposalId, reloadProposal, blockNumber]);
 
   if (proposal === null || proposalActions === null) return <Loading />;
 

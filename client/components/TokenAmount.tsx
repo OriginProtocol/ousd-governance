@@ -6,9 +6,14 @@ import { useStore } from "utils/store";
 interface TokenAmount {
   amount: BigNumber | string | number;
   format?: string;
+  isWalletBalance?: Boolean;
 }
 
-const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
+const TokenAmount: FunctionComponent<TokenAmount> = ({
+  amount,
+  format,
+  isWalletBalance,
+}) => {
   const { web3Provider } = useStore();
 
   const formatMap = {
@@ -20,7 +25,7 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({ amount, format }) => {
 
   const usedFormat = formatMap[format] || formatMap["default"];
 
-  if (!web3Provider) {
+  if (isWalletBalance && !web3Provider) {
     return <span className="uppercase">--.--</span>;
   }
 

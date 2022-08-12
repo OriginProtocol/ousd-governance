@@ -1,23 +1,21 @@
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Address } from "components/Address";
-import { StateTag } from "components/proposal/StateTag";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
 
 export const ProposalParameters = ({ proposal, state, quorum }) => {
-  const { web3Provider } = useStore();
+  const { rpcProvider } = useStore();
   const [blockNumber, setBlockNumber] = useState(0);
 
   useEffect(() => {
     const getBlockNumber = async () => {
-      const blockNumber = await web3Provider.getBlockNumber();
+      const blockNumber = await rpcProvider.getBlockNumber();
       setBlockNumber(parseInt(blockNumber));
     };
-    if (web3Provider) {
+    if (rpcProvider) {
       getBlockNumber();
     }
-  }, [web3Provider]);
+  }, [rpcProvider]);
 
   const blockDifference = proposal.endBlock - proposal.startBlock;
   const blocksSinceStart = blockNumber - proposal.startBlock;
