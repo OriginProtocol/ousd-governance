@@ -147,7 +147,9 @@ export const ProposalDetail = ({
     <>
       <div className="flex justify-between items-center mb-6">
         <div className="mr-4">
-          <PageTitle noBottomMargin>{proposalTitle}</PageTitle>
+          <PageTitle noBottomMargin>
+            <div dangerouslySetInnerHTML={{ __html: proposalTitle }} />
+          </PageTitle>
           <div className="text-white opacity-70 text-md">
             {id.toString().padStart(3, "0")} • Created {createdAt} • By{" "}
             <Address address={proposal.proposer} />

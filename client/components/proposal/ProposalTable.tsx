@@ -83,7 +83,9 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
               >
                 <td>
                   <div className="space-y-1">
-                    <h3 className="text-lg truncate">{title}</h3>
+                    <h3 className="text-lg truncate">
+                      <div dangerouslySetInnerHTML={{ __html: title }} />
+                    </h3>
                     <div className="text-gray-400 text-xmd">
                       {id} • Created{" "}
                       {moment(proposal.createdAt).format("MMM D, YYYY")} • By{" "}
