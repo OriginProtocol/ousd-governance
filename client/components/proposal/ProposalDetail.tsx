@@ -145,7 +145,7 @@ export const ProposalDetail = ({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
+      <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
         <div className="mr-4 relative max-w-lg">
           <PageTitle noBottomMargin>
             <div
