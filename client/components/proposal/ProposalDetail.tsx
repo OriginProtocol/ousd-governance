@@ -146,9 +146,12 @@ export const ProposalDetail = ({
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <div className="mr-4">
+        <div className="mr-4 relative max-w-lg">
           <PageTitle noBottomMargin>
-            <div dangerouslySetInnerHTML={{ __html: proposalTitle }} />
+            <div
+              className="break-words"
+              dangerouslySetInnerHTML={{ __html: proposalTitle }}
+            />
           </PageTitle>
           <div className="text-white opacity-70 text-md">
             {id.toString().padStart(3, "0")} • Created {createdAt} • By{" "}
