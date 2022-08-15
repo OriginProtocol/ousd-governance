@@ -152,8 +152,15 @@ export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Break up/truncate proposal content for display
-const getProposalContent = (proposalDescription: string) => {
+/**
+ * Break up proposal content for display
+ *
+ * Important: The output of the function must be
+ * properly escaped and safe to use as raw HTML
+ * that is rendered by UI components. Never return
+ * unsanitized HTML here.
+ */
+const getCleanProposalContent = (proposalDescription: string) => {
   const split = proposalDescription?.split("<br>");
   const title = split && split[0];
   const description = split && split.slice(1).join("<br>").trim();
@@ -163,7 +170,7 @@ const getProposalContent = (proposalDescription: string) => {
     allowedTags: ["br"],
   });
 
-  return { title: cleanTitle, description: cleanDescription };
+  return { cleanTitle, cleanDescription };
 };
 
-export { getProposalContent };
+export { getCleanProposalContent };

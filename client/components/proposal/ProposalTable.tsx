@@ -4,7 +4,7 @@ import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
 import Link from "next/link";
-import { getProposalContent } from "utils/index";
+import { getCleanProposalContent } from "utils/index";
 import moment from "moment";
 import { useStore } from "utils/store";
 
@@ -72,7 +72,9 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
       <table className="table table-fixed w-full">
         <tbody>
           {proposalData?.proposals.map((proposal, index) => {
-            const { title } = getProposalContent(proposal.description);
+            const { cleanTitle } = getCleanProposalContent(
+              proposal.description
+            );
             const id = proposal?.displayId.toString().padStart(3, "0");
 
             return (
@@ -84,7 +86,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                 <td>
                   <div className="space-y-1">
                     <h3 className="text-lg truncate">
-                      <div dangerouslySetInnerHTML={{ __html: title }} />
+                      <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
                     </h3>
                     <div className="text-gray-400 text-xmd">
                       {id} • Created{" "}

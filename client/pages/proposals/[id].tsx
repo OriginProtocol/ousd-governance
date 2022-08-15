@@ -3,7 +3,7 @@ import { ProposalDetail } from "components/proposal/ProposalDetail";
 import prisma from "lib/prisma";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
-import { getProposalContent } from "utils";
+import { getCleanProposalContent } from "utils";
 import moment from "moment";
 
 export async function getServerSideProps({
@@ -40,11 +40,11 @@ const ProposalPage: NextPage = ({
   description,
   voters,
 }) => {
-  const { title } = getProposalContent(description);
+  const { cleanTitle } = getCleanProposalContent(description);
 
   return (
     <Wrapper narrow>
-      <Seo title={title} />
+      <Seo title={cleanTitle} />
       <ProposalDetail
         id={id}
         proposalId={proposalId}

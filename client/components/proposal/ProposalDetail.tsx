@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { PageTitle } from "components/PageTitle";
-import { getProposalContent } from "utils/index";
+import { getCleanProposalContent } from "utils/index";
 import { Address } from "components/Address";
 import { SupportTable } from "./SupportTable";
 import { StateTag } from "./StateTag";
@@ -43,8 +43,7 @@ export const ProposalDetail = ({
   const [againstVoters, setAgainstVoters] = useState([]);
   const [blockNumber, setBlockNumber] = useState(0);
   const { Governance } = contracts;
-  const { title: proposalTitle, description: proposalDescription } =
-    getProposalContent(description);
+  const { cleanTitle, cleanDescription } = getCleanProposalContent(description);
 
   useEffect(() => {
     const getBlockNumber = async () => {
@@ -150,7 +149,7 @@ export const ProposalDetail = ({
           <PageTitle noBottomMargin>
             <div
               className="break-words"
-              dangerouslySetInnerHTML={{ __html: proposalTitle }}
+              dangerouslySetInnerHTML={{ __html: cleanTitle }}
             />
           </PageTitle>
           <div className="text-white opacity-70 text-md">
@@ -198,7 +197,7 @@ export const ProposalDetail = ({
                   <SectionTitle>Description</SectionTitle>
                   <div
                     className="text-sm"
-                    dangerouslySetInnerHTML={{ __html: proposalDescription }}
+                    dangerouslySetInnerHTML={{ __html: cleanDescription }}
                   />
                 </div>
               )}
