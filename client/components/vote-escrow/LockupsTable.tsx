@@ -136,33 +136,35 @@ const LockupsTable: FunctionComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {modalLockup.transactions.map((transaction) => {
-              return (
-                <tr key={transaction.hash}>
-                  <td>
-                    {moment(transaction.createdAt).format(
-                      "MMM D, YYYY, HH:mm:ss"
-                    )}
-                  </td>
-                  <td>{transaction.event}</td>
-                  <td>
-                    <Link
-                      href={
-                        chainId === 4
-                          ? `https://rinkeby.etherscan.io/tx/${transaction.hash}`
-                          : `https://etherscan.io/tx/${transaction.hash}`
-                      }
-                      newWindow
-                    >
-                      <span className="mr-2">
-                        {truncateEthAddress(transaction.hash)}
-                      </span>
-                      <ExternalLinkIcon isGreen />
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
+            {modalLockup.transactions &&
+              modalLockup.transactions.length > 0 &&
+              modalLockup.transactions.map((transaction) => {
+                return (
+                  <tr key={transaction.hash}>
+                    <td>
+                      {moment(transaction.createdAt).format(
+                        "MMM D, YYYY, HH:mm:ss"
+                      )}
+                    </td>
+                    <td>{transaction.event}</td>
+                    <td>
+                      <Link
+                        href={
+                          chainId === 4
+                            ? `https://rinkeby.etherscan.io/tx/${transaction.hash}`
+                            : `https://etherscan.io/tx/${transaction.hash}`
+                        }
+                        newWindow
+                      >
+                        <span className="mr-2">
+                          {truncateEthAddress(transaction.hash)}
+                        </span>
+                        <ExternalLinkIcon isGreen />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </Modal>
