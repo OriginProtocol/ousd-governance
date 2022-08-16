@@ -154,23 +154,27 @@ The script listens from the latest mainnet block by default, however, when we ne
 
 If required, follow this process post deployment:
 
-1. Update the `last_seen_block` entry in the `listener` table of the databse to the block number the `OGVStaking.sol` contract was deployed at, `15089597`
-- Connect to the database via Heroku CLI: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
-- Update the block number: `INSERT INTO listener (last_seen_block) VALUES ('15089597');`
+1. Update the `last_seen_block` entry in the `listener` table of the databse to the block number the `OGVStaking.sol` contract was deployed at, `15089597` (Note: The more blocks that are mined over time, the longer this process will take):
+    1. Connect to the database via Heroku CLI: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
+    1. Update the block number: `INSERT INTO listener (last_seen_block) VALUES ('15089597');`
+
 
 1. Restart all dynos in the production environment's [Heroku dashboard](https://dashboard.heroku.com/apps/ousd-governance-production):
-- Click "More"
-- Click "Restart all dynos" to restart `listener.ts`
+    1. Click "More"
+    1. Click "Restart all dynos" to restart `listener.ts`
+
 
 1. Monitor the app logs from the [Heroku dashboard](https://dashboard.heroku.com/apps/ousd-governance-production) to ensure the listener has been properly reset:
-- Click "More"
-- Click "View logs"
-- Look for continued output from the worker showing `Got confirmed block 15089597` and onwards.
+    1. Click "More"
+    1. Click "View logs"
+    1. Look for continued output from the worker showing `Got confirmed block 15089597` and onwards.
+
 
 1. Check that the database is being backfilled with blockchain data:
-- Connect to the database: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
-- Bring up a table relevant to your new feature: `TABLE lockups;`
-- Ensure historic data is being added to the database by `listener.ts`. If yes, you're good!
+    1. Connect to the database: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
+    1. Bring up a table relevant to your new feature: `TABLE lockups;`
+    1. Ensure historic data is being added to the database by `listener.ts`. If yes, you're good!
+
 
 # Local Gotchas
 
