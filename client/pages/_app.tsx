@@ -3,7 +3,7 @@ import useTotalBalances from "utils/useTotalBalances";
 import useContracts from "utils/useContracts";
 import useLockups from "utils/useLockups";
 import useBlock from "utils/useBlock";
-import { TransactionListener } from "components/TransactionListener";
+import { TransactionListener } from "components/utils/TransactionListener";
 import "../styles/globals.css";
 import Layout from "../components/layout";
 import { claimOpenTimestampPassed } from "utils";

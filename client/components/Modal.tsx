@@ -1,6 +1,6 @@
 import { FunctionComponent, ReactNode, Dispatch, SetStateAction } from "react";
 import classNames from "classnames";
-import CrossIcon from "components/CrossIcon";
+import CrossIcon from "components/icons/CrossIcon";
 
 interface ModalProps {
   show: Boolean;

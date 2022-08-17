@@ -3,7 +3,7 @@ import moment from "moment";
 import Card from "components/Card";
 import TokenAmount from "components/TokenAmount";
 import { Loading } from "components/Loading";
-import TimeToDate from "components/TimeToDate";
+import TimeToDate from "components/utils/TimeToDate";
 import Link from "components/Link";
 import Button from "components/Button";
 import { useStore } from "utils/store";
@@ -13,8 +13,8 @@ import useLockups from "utils/useLockups";
 import { toast } from "react-toastify";
 import Modal from "components/Modal";
 import { truncateEthAddress } from "utils";
-import EtherscanIcon from "components/EtherscanIcon";
-import ExternalLinkIcon from "../ExternalLinkIcon";
+import EtherscanIcon from "components/icons/EtherscanIcon";
+import ExternalLinkIcon from "../icons/ExternalLinkIcon";
 
 const LockupsTable: FunctionComponent = () => {
   const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =

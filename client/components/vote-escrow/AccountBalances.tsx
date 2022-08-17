@@ -21,6 +21,29 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
     lockups.reduce((total: ethers.BigNumber, lockup) => {
       return total.add(lockup.amount);
     }, ethers.BigNumber.from("0"));
+  
+  const cardContentData = [
+  {
+    
+  }
+  ]
+
+  // const cardContent = () => {
+  //   return (
+  //     <Card dark tightPadding>
+  //       <div className="space-y-1">
+  //         <CardLabel>TITLE</CardLabel>
+  //         <div className="flex space-x-1 items-center">
+  //           <TokenIcon src="/ogv.svg" alt="OGV" small />
+  //           <CardStat small>
+  //             <TokenAmount amount={accruedRewards} />
+  //           </CardStat>
+  //         </div>
+  //         <CardDescription>DESCRIPTION</CardDescription>
+  //       </div>
+  //     </Card>
+  //   );
+  // }
 
   return (
     <>

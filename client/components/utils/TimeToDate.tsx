@@ -2,7 +2,7 @@ import { FunctionComponent, ReactNode } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useStore } from "utils/store";
-import { SECONDS_IN_A_MONTH } from "../constants/index";
+import { SECONDS_IN_A_MONTH } from "../../constants/index";
 
 dayjs.extend(relativeTime);
 

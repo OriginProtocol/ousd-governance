@@ -1,8 +1,8 @@
 import { FunctionComponent, useState, Dispatch, SetStateAction } from "react";
 import classNames from "classnames";
 import Button from "components/Button";
-import CheckIconWhite from "components/CheckIconWhite";
-import CrossIconWhite from "components/CrossIconWhite";
+import CheckIconWhite from "components/icons/CheckIconWhite";
+import CrossIconWhite from "components/icons/CrossIconWhite";
 import { shuffle } from "lodash";
 
 interface QuizQuestion {

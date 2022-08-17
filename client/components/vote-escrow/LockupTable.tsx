@@ -3,7 +3,7 @@ import moment from "moment";
 import Card from "components/Card";
 import TokenAmount from "components/TokenAmount";
 import { Loading } from "components/Loading";
-import TimeToDate from "components/TimeToDate";
+import TimeToDate from "components/utils/TimeToDate";
 
 interface LockupTableProps {
   lockup: Object;
