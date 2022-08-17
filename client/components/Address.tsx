@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils";
-import ExternalLinkIcon from "components/ExternalLinkIcon";
 import EtherscanIcon from "components/EtherscanIcon";
 
 export const Address = ({ address }: { address: string }) => {
