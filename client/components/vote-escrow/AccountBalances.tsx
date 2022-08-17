@@ -27,21 +27,25 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
       label: "Balance",
       amount: ogv,
       description: "OGV",
+      icon: "/ogv.svg",
     },
     {
       label: "Staked",
       amount: totalOgvLockedUp,
       description: "OGV",
+      icon: "/ogv.svg",
     },
     {
       label: "Vote balance",
       amount: veOgv,
       description: "veOGV",
+      icon: "/veogv.svg",
     },
     {
       label: "Accrued Rewards",
       amount: accruedRewards,
       description: "OGV",
+      icon: "/ogv.svg",
     },
   ];
 
@@ -54,7 +58,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
               <div className="space-y-1">
                 <CardLabel>{data.label}</CardLabel>
                 <div className="flex space-x-1 items-center">
-                  <TokenIcon src="/ogv.svg" alt="OGV" small />
+                  <TokenIcon src={data.icon} alt={data.description} small />
                   <CardStat small>
                     <TokenAmount amount={data.amount} />
                   </CardStat>
