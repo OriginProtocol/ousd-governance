@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Address } from "components/Address";
+import { Address } from "@/components/utils/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   if (voters.length < 1) {

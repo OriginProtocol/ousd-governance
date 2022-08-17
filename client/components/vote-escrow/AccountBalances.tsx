@@ -22,57 +22,52 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
       return total.add(lockup.amount);
     }, ethers.BigNumber.from("0"));
 
+  const cardContentData = [
+    {
+      label: "Balance",
+      amount: ogv,
+      description: "OGV",
+      icon: "/ogv.svg",
+    },
+    {
+      label: "Staked",
+      amount: totalOgvLockedUp,
+      description: "OGV",
+      icon: "/ogv.svg",
+    },
+    {
+      label: "Vote balance",
+      amount: veOgv,
+      description: "veOGV",
+      icon: "/veogv.svg",
+    },
+    {
+      label: "Accrued Rewards",
+      amount: accruedRewards,
+      description: "OGV",
+      icon: "/ogv.svg",
+    },
+  ];
+
   return (
     <>
       <CardGroup horizontal fourCol>
-        <Card dark tightPadding>
-          <div className="space-y-1">
-            <CardLabel>Balance</CardLabel>
-            <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" small />
-              <CardStat small>
-                <TokenAmount amount={ogv} />
-              </CardStat>
-            </div>
-            <CardDescription>OGV</CardDescription>
-          </div>
-        </Card>
-        <Card dark tightPadding>
-          <div className="space-y-1">
-            <CardLabel>Staked</CardLabel>
-            <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" small />
-              <CardStat small>
-                <TokenAmount amount={totalOgvLockedUp} />
-              </CardStat>
-            </div>
-            <CardDescription>OGV</CardDescription>
-          </div>
-        </Card>
-        <Card dark tightPadding>
-          <div className="space-y-1">
-            <CardLabel>Vote balance</CardLabel>
-            <div className="flex space-x-1 items-center">
-              <TokenIcon src="/veogv.svg" alt="veOGV" small />
-              <CardStat small>
-                <TokenAmount amount={veOgv} />
-              </CardStat>
-            </div>
-            <CardDescription>veOGV</CardDescription>
-          </div>
-        </Card>
-        <Card dark tightPadding>
-          <div className="space-y-1">
-            <CardLabel>Accrued Rewards</CardLabel>
-            <div className="flex space-x-1 items-center">
-              <TokenIcon src="/ogv.svg" alt="OGV" small />
-              <CardStat small>
-                <TokenAmount amount={accruedRewards} />
-              </CardStat>
-            </div>
-            <CardDescription>OGV</CardDescription>
-          </div>
-        </Card>
+        {cardContentData.map((data) => {
+          return (
+            <Card dark tightPadding key={data.label}>
+              <div className="space-y-1">
+                <CardLabel>{data.label}</CardLabel>
+                <div className="flex space-x-1 items-center">
+                  <TokenIcon src={data.icon} alt={data.description} small />
+                  <CardStat small>
+                    <TokenAmount amount={data.amount} />
+                  </CardStat>
+                </div>
+                <CardDescription>{data.description}</CardDescription>
+              </div>
+            </Card>
+          );
+        })}
       </CardGroup>
     </>
   );

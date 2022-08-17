@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import { utils, BigNumber } from "ethers";
 import TokenIcon from "components/TokenIcon";
-import CheckIcon from "components/CheckIcon";
+import CheckIcon from "components/icons/CheckIcon";
 import ReactTooltip from "react-tooltip";
 import { formatCurrency } from "utils/math";
 

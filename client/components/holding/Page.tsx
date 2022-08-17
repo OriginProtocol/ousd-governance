@@ -6,7 +6,7 @@ import CardGroup from "../CardGroup";
 import Card from "../Card";
 import CardDescription from "../CardDescription";
 import CardStat from "../CardStat";
-import ExternalLinkIcon from "../ExternalLinkIcon";
+import ExternalLinkIcon from "../icons/ExternalLinkIcon";
 import { useStore } from "utils/store";
 
 const renderer: CountdownRendererFn = ({ days, hours, minutes, seconds }) => (

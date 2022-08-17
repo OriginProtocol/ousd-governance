@@ -92,7 +92,7 @@ yarn install
 
 Copy `client/sample.env` to `client/.env`.
 
-Setup postgresql locally and create a database and update the `DATABASE_URL` in your `client/.env`
+Setup [postgresql locally](https://www.prisma.io/dataguide/postgresql/setting-up-a-local-postgresql-database) and create a database and update the `DATABASE_URL` in your `client/.env`
 
 _A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`._
 
