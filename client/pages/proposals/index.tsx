@@ -83,14 +83,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
   return (
     <Wrapper narrow>
       <Seo title="Proposals" />
-      <div className="flex items-center justify-between mb-4">
-        <PageTitle>Proposals</PageTitle>
-        {proposals.length > 0 && (
-          <Button onClick={() => router.push("/proposals/new")} large>
-            Create a new proposal
-          </Button>
-        )}
-      </div>
+      <PageTitle>Proposals</PageTitle>
       {loading ? (
         <Loading />
       ) : (
