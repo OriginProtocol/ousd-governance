@@ -3,10 +3,9 @@ import { FunctionComponent } from "react";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { Address } from "components/Address";
-import Link from "next/link";
 import { getCleanProposalContent } from "utils/index";
 import moment from "moment";
-import { useStore } from "utils/store";
+import Link from "components/Link";
 
 interface ProposalTableProps {
   proposalData: Array<object>;
@@ -16,7 +15,6 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
   proposalData,
 }) => {
   const router = useRouter();
-  const { web3Provider } = useStore();
 
   if (!proposalData || proposalData?.loading) return <Loading />;
 
@@ -56,15 +54,16 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
             const id = proposal?.displayId.toString().padStart(3, "0");
 
             return (
-              <tr
-                key={index}
-                className="cursor-pointer hover:bg-gray-100"
-                onClick={() => router.push(`/proposals/${proposal[0]}`)}
-              >
+              <tr key={index}>
                 <td>
                   <div className="space-y-1">
                     <h3 className="text-lg truncate">
-                      <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
+                      <Link
+                        className="text-gray-900 hover:underline"
+                        href={`/proposals/${proposal[0]}`}
+                      >
+                        <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
+                      </Link>
                     </h3>
                     <div className="text-gray-400 text-xmd">
                       {id} • Created{" "}

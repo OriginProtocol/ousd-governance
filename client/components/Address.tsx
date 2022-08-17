@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils";
+import ExternalLinkIcon from "components/ExternalLinkIcon";
+import EtherscanIcon from "components/EtherscanIcon";
 
 export const Address = ({ address }: { address: string }) => {
-  const { web3Provider } = useStore();
+  const { rpcProvider } = useStore();
   const [addressDisplay, setAddressDisplay] = useState(
     truncateEthAddress(address)
   );
@@ -11,21 +13,21 @@ export const Address = ({ address }: { address: string }) => {
   useEffect(() => {
     const loadEns = async () => {
       try {
-        const ens = await web3Provider.lookupAddress(address);
+        const ens = await rpcProvider.lookupAddress(address);
         if (ens) {
           setAddressDisplay(ens);
         }
       } catch (error) {}
     };
-    if (web3Provider) {
+    if (rpcProvider) {
       loadEns();
     }
-  }, [web3Provider, address]);
+  }, [rpcProvider, address]);
 
   let explorerPrefix;
-  if (web3Provider?.chainId === 1) {
+  if (rpcProvider?._network?.chainId === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (web3Provider?.chainId === 4) {
+  } else if (rpcProvider?._network?.chainId === 4) {
     explorerPrefix = "https://rinkeby.etherscan.io/";
   }
 
@@ -35,8 +37,12 @@ export const Address = ({ address }: { address: string }) => {
         href={`${explorerPrefix}address/${address}`}
         target="_blank"
         rel="noreferrer"
+        className="text-inherit hover:underline"
       >
-        {addressDisplay}
+        <span className="mr-1">{addressDisplay}</span>
+        <span className="w-3 inline-block">
+          <EtherscanIcon />
+        </span>
       </a>
     );
   } else {
