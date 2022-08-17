@@ -4,6 +4,7 @@ import {Governable} from "./Governable.sol";
 
 interface Mintable {
     function mint(address to, uint256 amount) external;
+    function balanceOf(address owner) view returns (uint256);
 }
 
 /// @title OGV Inflation and Rewards
@@ -103,9 +104,11 @@ contract RewardsSource is Governable {
                 break; // No future slope could match
             }
         }
-        // when previewing or sending rewards, check it's own OGV balance,
+
+        // When previewing or sending rewards, check it's own OGV balance,
         // and if present, send that along as part of the rewards
-        total += address(this).balance;
+        total += Mintable(ogv).balanceOf(address(this));
+
         return (total, nextSlopeIndex);
     }
 
