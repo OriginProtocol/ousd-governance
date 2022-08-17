@@ -22,16 +22,19 @@ type StoreType = Web3DataType & {
 const defaultState: Web3DataType = {
   provider: null,
   web3Provider: null,
+  rpcProvider: null,
   address: undefined,
   chainId: null,
   contracts: {
     loaded: false,
   },
+  ensureDelegationModalOpened: false,
   balances: {
     ogv: ethers.BigNumber.from("0"),
     veOgv: ethers.BigNumber.from("0"),
     accruedRewards: ethers.BigNumber.from("0"),
   },
+  ogvDelegateeAddress: "0x0000000000000000000000000000000000000000",
   existingLockup: {
     amount: ethers.BigNumber.from(0),
     end: ethers.BigNumber.from(0),
@@ -57,6 +60,10 @@ const defaultState: Web3DataType = {
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),
+  // Is increased by 1 when relevant information is getting refreshed
+  refreshStatus: {
+    ogvStakingDelegation: 0,
+  },
 };
 
 export const useStore = create<StoreType>((set) => ({

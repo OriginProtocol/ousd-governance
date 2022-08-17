@@ -1,21 +1,18 @@
 import { FunctionComponent, useState } from "react";
-import moment from "moment";
 import Card from "components/Card";
 import Button from "components/Button";
 import Link from "components/Link";
 import { SectionTitle } from "components/SectionTitle";
-import TokenAmount from "components/TokenAmount";
 import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
-import useTotalBalances from "utils/useTotalBalances";
-import useLockups from "utils/useLockups";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
-import TimeToDate from "components/TimeToDate";
 import DisabledButtonToolTip from "./DisabledButtonTooltip";
+import LockupsTable from "./LockupsTable";
+import { Web3Button } from "components/Web3Button";
 
 interface YourLockupsProps {}
 
@@ -25,14 +22,12 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     pendingTransactions,
     contracts,
     balances,
-    blockTimestamp,
     totalBalances,
+    web3Provider,
   } = useStore();
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
-  const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
-  const { reloadLockups } = useLockups();
   const claim = useClaim();
   const [collectRewardsStatus, setCollectRewardsStatus] = useState("ready");
 
@@ -61,30 +56,6 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
       </Card>
     );
   }
-
-  const handleUnlock = async (lockupId) => {
-    const transaction = await contracts.OgvStaking["unstake(uint256)"](
-      lockupId,
-      { gasLimit: 1000000 }
-    ); // @TODO maybe set this to lower
-
-    useStore.setState({
-      pendingTransactions: [
-        ...pendingTransactions,
-        {
-          ...transaction,
-          onComplete: () => {
-            toast.success("Lockup unstaked", {
-              hideProgressBar: true,
-            });
-            reloadTotalBalances();
-            reloadAccountBalances();
-            reloadLockups();
-          },
-        },
-      ],
-    });
-  };
 
   const handleCollectRewards = async () => {
     setCollectRewardsStatus("waiting-for-user");
@@ -160,54 +131,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
         </div>
       </div>
       {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}
-      {lockups.length > 0 && (
-        <table className="table table-compact w-full mb-4">
-          <thead>
-            <tr>
-              <th>OGV</th>
-              <th>Time remaining</th>
-              <th>Stake ends</th>
-              <th>veOGV</th>
-              <th>&nbsp;</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            {lockups.map((lockup: Object) => (
-              <tr key={`${lockup.lockupId}`}>
-                <td>
-                  <TokenAmount amount={lockup.amount} />
-                </td>
-                <td>
-                  <TimeToDate epoch={lockup.end} />
-                </td>
-                <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
-                <td>
-                  <TokenAmount amount={lockup.points} />
-                </td>
-                <td>
-                  <Link
-                    className="btn rounded-full btn-sm btn-primary"
-                    href={`/stake/${lockup.lockupId}`}
-                  >
-                    Extend
-                  </Link>
-                </td>
-                <td>
-                  <Button
-                    white
-                    small
-                    disabled={blockTimestamp < lockup.end}
-                    onClick={() => handleUnlock(lockup.lockupId)}
-                  >
-                    Unstake
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {lockups.length > 0 && <LockupsTable lockups={lockups} />}
       {!(ogv.eq(0) && lockups.length === 0) && (
         <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
           <DisabledButtonToolTip
@@ -288,13 +212,17 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               </Link>
             </li>
           </ul>
-          <Link
-            href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
-            newWindow
-            className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
-          >
-            Buy OGV
-          </Link>
+          {web3Provider ? (
+            <Link
+              href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
+              newWindow
+              className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+            >
+              Buy OGV
+            </Link>
+          ) : (
+            <Web3Button inPage />
+          )}
         </div>
       )}
     </Card>

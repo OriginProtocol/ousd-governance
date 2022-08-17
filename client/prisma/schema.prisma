@@ -4,48 +4,63 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["extendedIndexes"]
 }
 
 model Voter {
-    id                Int @default(autoincrement()) @id
-    address           String @unique
-    // This is storing a uint256
-    votes             Decimal @db.Decimal(78, 0)
-    firstSeenBlock    Int @map("first_seen_block")
-    updatedAt         DateTime @default(now()) @map("updated_at")
-    createdAt         DateTime @default(now()) @map("created_at")
+  id             Int      @id @default(autoincrement())
+  address        String   @unique
+  // This is storing a uint256
+  votes          Decimal  @db.Decimal(78, 0)
+  firstSeenBlock Int      @map("first_seen_block")
+  updatedAt      DateTime @default(now()) @map("updated_at")
+  createdAt      DateTime @default(now()) @map("created_at")
 
-    @@map("voters")
+  @@map("voters")
 }
 
 model Proposal {
-    id          Int @default(autoincrement()) @id
-    // This is storing a uint256
-    proposalId  String @unique @map("proposal_id")
-    description String @default("")
-    createdAt   DateTime @default(now()) @map("created_at")
+  id          Int      @id @default(autoincrement())
+  // This is storing a uint256
+  proposalId  String   @unique @map("proposal_id")
+  description String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-    @@map("proposals")
+  @@map("proposals")
 }
 
 model Listener {
-    lastSeenBlock Int @map("last_seen_block") @unique
+  lastSeenBlock Int @unique @map("last_seen_block")
 
-    @@map("listener")
+  @@map("listener")
 }
 
 model Lockup {
-  id        Int @default(autoincrement()) @id
-  lockupId  Int
-  user      String
-  amount    Decimal @db.Decimal(78, 0)
-  end       DateTime
-  points    Decimal @db.Decimal(78, 0)
-  createdAt DateTime @default(now()) @map("created_at")
+  id           Int           @id @default(autoincrement())
+  lockupId     Int           @default(0) @map("lockup_id")
+  user         String
+  amount       Decimal       @db.Decimal(78, 0)
+  end          DateTime
+  points       Decimal       @db.Decimal(78, 0)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  transactions Transaction[]
+  active       Boolean       @default(true)
 
   @@unique([lockupId, user])
   @@index([user], type: BTree)
   @@map("lockups")
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  hash      String
+  event     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  Lockup   Lockup? @relation(fields: [lockupId], references: [id])
+  lockupId Int
+
+  @@unique([hash, lockupId])
+  @@map("transactions")
 }

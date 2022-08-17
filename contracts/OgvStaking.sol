@@ -65,7 +65,7 @@ contract OgvStaking is ERC20Votes {
     }
 
     function name() public pure override returns (string memory) {
-        return "veOGV";
+        return "Vote Escrowed Origin Dollar Governance";
     }
 
     function symbol() public pure override returns (string memory) {
@@ -134,6 +134,7 @@ contract OgvStaking is ERC20Votes {
         require(to != address(0), "Staking: To the zero address");
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
+
         // duration checked inside previewPoints
         (uint256 points, uint256 end) = previewPoints(amount, duration);
         require(

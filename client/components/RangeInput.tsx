@@ -11,6 +11,7 @@ interface RangeInputProps {
   onChange: ChangeEventHandler<HTMLInputElement>;
   onMarkerClick?: (marker: string) => void;
   hideLabel?: Boolean;
+  hideLabelFormatting?: Boolean;
 }
 
 const RangeInput: FunctionComponent<RangeInputProps> = ({
@@ -23,6 +24,7 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
   onChange,
   onMarkerClick,
   hideLabel,
+  hideLabelFormatting,
 }) => (
   <>
     {!hideLabel && (
@@ -30,7 +32,7 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
         <span className="label-text text-lg flex justify-between items-center w-full">
           <span>
             {label}&nbsp;
-            <TokenAmount amount={value} />
+            {hideLabelFormatting ? value : <TokenAmount amount={value} />}
             &nbsp;{counterUnit}
           </span>
         </span>

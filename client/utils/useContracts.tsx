@@ -66,8 +66,8 @@ const useContracts = () => {
       );
 
       contracts.loaded = true;
-      contracts.rpcProvider = networkProvider;
       useStore.setState({
+        rpcProvider: networkProvider,
         contracts,
       });
     };

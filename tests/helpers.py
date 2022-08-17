@@ -10,6 +10,9 @@ TOL = 120 / WEEK
 def approx(expected, actual, precision=1e-10):
     if expected == actual == 0:
         return True
+    # one is 0 and the other isn't
+    if (expected == 0 or actual == 0) and (expected != 0 or actual != 0):
+        return False
     if (expected < 0 and actual > 0) or (actual < 0 and expected > 0):
         return False
     return abs(expected - actual) / abs(expected) <= precision

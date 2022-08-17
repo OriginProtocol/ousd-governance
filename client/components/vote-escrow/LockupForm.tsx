@@ -118,6 +118,7 @@ const maxLockupDurationInMonths = 12 * 4;
 const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const {
     contracts,
+    rpcProvider,
     pendingTransactions,
     balances,
     allowances,
@@ -240,9 +241,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     let receipt;
     try {
-      receipt = await contracts.rpcProvider.waitForTransaction(
-        transaction.hash
-      );
+      receipt = await rpcProvider.waitForTransaction(transaction.hash);
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -302,9 +301,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await contracts.rpcProvider.waitForTransaction(
-          transaction.hash
-        );
+        receipt = await rpcProvider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -362,9 +359,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await contracts.rpcProvider.waitForTransaction(
-          transaction.hash
-        );
+        receipt = await rpcProvider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
@@ -430,30 +425,15 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           max={maxLockupDurationInMonths}
           value={lockupDuration}
           onChange={(e) => {
-            if (
-              existingLockup &&
-              e.target.value <=
-                Math.floor(
-                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
-                )
-            )
-              return;
             setLockupDuration(e.target.value);
           }}
           markers={lockupDurationInputMarkers}
           onMarkerClick={(markerValue) => {
-            if (
-              existingLockup &&
-              markerValue <=
-                Math.floor(
-                  (existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH
-                )
-            )
-              return;
             if (markerValue) {
               setLockupDuration(markerValue);
             }
           }}
+          hideLabelFormatting
         />
         <div className="space-y-6 pt-2 sm:pt-3">
           <div className="flex flex-col sm:text-right sm:w-1/3 sm:ml-auto">

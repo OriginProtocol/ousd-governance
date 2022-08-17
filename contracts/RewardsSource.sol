@@ -40,7 +40,7 @@ contract RewardsSource is Governable {
     /// @return rewards OGV collected
     function collectRewards() external returns (uint256) {
         require(msg.sender == rewardsTarget, "Rewards: Not rewardsTarget");
-        require(lastRewardTime > 0, "Rewards: lastRewardTime is zero"); // Ensures initialziation
+        require(lastRewardTime > 0, "Rewards: lastRewardTime is zero"); // Ensures initialization
         if (block.timestamp <= lastRewardTime) {
             return 0;
         }
@@ -87,7 +87,7 @@ contract RewardsSource is Governable {
             uint256 rangeStart = last;
             uint256 rangeEnd = block.timestamp;
             if (rangeEnd < slopeStart) {
-                break; // No future slope could match
+                break; // No current or future slope could match
             }
             if (rangeStart < slopeStart) {
                 rangeStart = slopeStart; // trim to slope edge
@@ -100,7 +100,7 @@ contract RewardsSource is Governable {
             if (i > _currentSlopeIndex && duration > 0) {
                 nextSlopeIndex = i; // We have moved into a new slope
             }
-            if (slopeEnd < rangeEnd) {
+            if (rangeEnd < slopeEnd) {
                 break; // No future slope could match
             }
         }

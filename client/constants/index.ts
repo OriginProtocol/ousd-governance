@@ -1,6 +1,7 @@
 import LocalGovernanceContracts from "../networks/governance.localhost.json";
 import RinkebyGovernanceContracts from "../networks/governance.rinkeby.json";
 import MainnetGovernanceContracts from "../networks/governance.mainnet.json";
+import { governanceEnabled } from "utils";
 
 export const mainnetNetworkUrl = process.env.WEB3_PROVIDER;
 export const rinkebyNetworkUrl = process.env.WEB3_PROVIDER;
@@ -9,6 +10,8 @@ export const websocketProvider = process.env.WEB3_PROVIDER?.replace(
   "http",
   "ws"
 );
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const RPC_URLS = {
   1: mainnetNetworkUrl,
@@ -22,15 +25,8 @@ export const CHAIN_CONTRACTS = {
   31337: LocalGovernanceContracts,
 };
 
-export const navItems = [
-  /*{
-    href: "/",
-    label: "Overview",
-  },
-  {
-    href: "/proposal",
-    label: "Proposal",
-  },
+let navItems = [
+  /*
   {
     href: "/leaderboard",
     label: "Leaderboard",
@@ -54,6 +50,22 @@ export const navItems = [
     external: true,
   },
 ];
+
+if (governanceEnabled()) {
+  navItems = [
+    {
+      href: "/",
+      label: "Overview",
+    },
+    {
+      href: "/proposal",
+      label: "Proposal",
+    },
+    ...navItems,
+  ];
+}
+
+export { navItems };
 
 // daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
 export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12

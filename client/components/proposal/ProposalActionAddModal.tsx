@@ -51,13 +51,13 @@ export const ProposalActionAddModal = ({
         {step === 0 && (
           <AddActionContractForm
             onChange={async (contract: any) => {
-              const { abi, address } = contract;
+              const { interface, address } = contract;
+              const abi = interface.fragments;
               // Check contract selected abi for implementation method
-              const implementationFunction = abi.find(
+              const implementationFunction = interface.fragments.find(
                 ({ type, name }: { type: string; name: string }) =>
                   type === "function" && name === "implementation"
               );
-
               // If present, call it and get the implementation address
               if (implementationFunction) {
                 setFetchingProxy(true);
@@ -77,7 +77,7 @@ export const ProposalActionAddModal = ({
                   if (implementationContract) {
                     setHasImplementationAbi(true);
                     setAddress(implementationContract.address);
-                    setAbi(implementationContract.abi);
+                    setAbi(implementationContract.interface.fragments);
                   } else {
                     setHasImplementationAbi(false);
                     setAddress(address);
@@ -109,9 +109,9 @@ export const ProposalActionAddModal = ({
             abi={abi}
             address={address}
             hasImplementationAbi={hasImplementationAbi}
-            onContractChange={(data) => {
-              setAddress(data.address);
-              setAbi(data.abi);
+            onContractChange={(contract) => {
+              setAddress(contract.address);
+              setAbi(contract.interface.fragments);
             }}
             onSubmit={(data) => {
               // TODO check ordering
