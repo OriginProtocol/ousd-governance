@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
-import { Address } from "@/components/utils/Address";
+import { Address } from "components/utils/Address";
 import Link from "next/link";
 
 export const ProposalTable = ({ proposalData }) => {

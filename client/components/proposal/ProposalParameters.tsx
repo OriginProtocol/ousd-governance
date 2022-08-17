@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { Address } from "@/components/utils/Address";
+import { Address } from "components/utils/Address";
 import { StateTag } from "components/proposal/StateTag";
 import { useStore } from "utils/store";
 import { truncateBalance } from "utils/index";
