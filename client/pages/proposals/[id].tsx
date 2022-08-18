@@ -5,6 +5,9 @@ import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { getCleanProposalContent } from "utils";
 import moment from "moment";
+import Link from "components/Link";
+import Icon from "@mdi/react";
+import { mdiArrowLeft } from "@mdi/js";
 
 export async function getServerSideProps({
   res,
@@ -45,6 +48,13 @@ const ProposalPage: NextPage = ({
   return (
     <Wrapper narrow>
       <Seo title={cleanTitle} />
+      <Link
+        className="mb-5 flex items-center uppercase text-xs font-bold text-gray-300 hover:text-white"
+        href="/proposals"
+      >
+        <Icon className="mr-1" path={mdiArrowLeft} size={0.75} />
+        Proposals
+      </Link>
       <ProposalDetail
         id={id}
         proposalId={proposalId}
