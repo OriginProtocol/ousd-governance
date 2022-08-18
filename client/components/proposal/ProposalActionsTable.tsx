@@ -21,14 +21,14 @@ export const ProposalActionsTable = ({
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-  const { web3Provider, contracts } = useStore();
+  const { rpcProvider, contracts } = useStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
   let explorerPrefix: string | undefined;
-  if (web3Provider?.chainId === 1) {
+  if (rpcProvider?._network?.chainId === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (web3Provider?.chainId === 4) {
+  } else if (rpcProvider?._network?.chainId === 4) {
     explorerPrefix = "https://rinkeby.etherscan.io/";
   }
 
