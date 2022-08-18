@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useState, useEffect } from "react";
 import { Loading } from "components/Loading";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
@@ -77,6 +77,16 @@ export const ProposalDetail = ({
       loadVoters();
     }
   }, [proposalId, Governance, voters]);
+
+  const totalForVotes = forVoters.reduce(
+    (total: BigNumber, voter) => total.add(voter.votes),
+    BigNumber.from(0)
+  );
+  const totalAgainstVotes = againstVoters.reduce(
+    (total: BigNumber, voter) => total.add(voter.votes),
+    BigNumber.from(0)
+  );
+  const totalVotes = totalForVotes.add(totalAgainstVotes);
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -175,7 +185,12 @@ export const ProposalDetail = ({
               <Card
                 tightPadding={forVoters.length > 0 && againstVoters.length > 0}
               >
-                <SectionTitle>For Voters</SectionTitle>
+                <SectionTitle noMarginBottom>For</SectionTitle>
+                <progress
+                  className="mt-4 progress progress-success w-full"
+                  value={totalForVotes.toString()}
+                  max={totalVotes.toString()}
+                />
                 <SupportTable voters={forVoters} />
               </Card>
             )}
@@ -183,7 +198,12 @@ export const ProposalDetail = ({
               <Card
                 tightPadding={forVoters.length > 0 && againstVoters.length > 0}
               >
-                <SectionTitle>Against Voters</SectionTitle>
+                <SectionTitle noMarginBottom>Against</SectionTitle>
+                <progress
+                  className="mt-4 progress progress-error w-full"
+                  value={totalAgainstVotes.toString()}
+                  max={totalVotes.toString()}
+                />
                 <SupportTable voters={againstVoters} />
               </Card>
             )}
