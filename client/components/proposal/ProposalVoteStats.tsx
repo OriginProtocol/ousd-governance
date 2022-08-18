@@ -38,7 +38,7 @@ export const ProposalVoteStats = ({
         </div>
         {!hasVoted && (
           <button
-            className="btn btn-sm btn-success w-full mt-4"
+            className="btn btn-sm btn-success w-full mt-4 disabled:text-gray-200 disabled:text-opacity-30"
             disabled={!votePower.gt(0)}
             onClick={() => onVote(1)}
           >
@@ -58,7 +58,7 @@ export const ProposalVoteStats = ({
         </div>
         {!hasVoted && (
           <button
-            className="btn btn-sm btn-error w-full mt-4"
+            className="btn btn-sm btn-error w-full mt-4 disabled:text-gray-200 disabled:text-opacity-30"
             disabled={!votePower.gt(0)}
             onClick={() => onVote(0)}
           >
@@ -78,7 +78,7 @@ export const ProposalVoteStats = ({
         </div>
         {!hasVoted && (
           <button
-            className="btn btn-sm w-full mt-4"
+            className="btn btn-sm w-full mt-4 disabled:text-gray-200 disabled:text-opacity-30"
             disabled={!votePower.gt(0)}
             onClick={() => onVote(2)}
           >
