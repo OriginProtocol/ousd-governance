@@ -228,10 +228,14 @@ contract RewardsSourceTest is Test {
 
         vm.startPrank(staking);
         vm.warp(EPOCH - 1000);
+        // 0 + 13 ==
         assertEq(rewards.previewRewards(), 13 ether, "a");
 
-        // 2x4 + 5x2 + 8x1 + 13 ==
+        // Simulate OGV from Buyback contract
+        ogv.mint(address(rewards), 11 ether);
+
+        // 2x4 + 5x2 + 8x1 + 13 + 11 ==
         vm.warp(EPOCH + 15 days);
-        assertEq(rewards.previewRewards(), (39 ether), "m");
+        assertEq(rewards.previewRewards(), (50 ether), "m");
     }
 }
