@@ -211,4 +211,27 @@ contract RewardsSourceTest is Test {
         rewards.setRewardsTarget(address(0));
         assertEq(rewards.rewardsTarget(), address(0));
     }
+
+    function testPreviewRewards() public {
+        vm.prank(team);
+        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](3);
+        slopes[0].start = uint64(EPOCH);
+        slopes[0].ratePerDay = 4 ether;
+        slopes[1].start = uint64(EPOCH + 2 days);
+        slopes[1].ratePerDay = 2 ether;
+        slopes[2].start = uint64(EPOCH + 7 days);
+        slopes[2].ratePerDay = 1 ether;
+        rewards.setInflation(slopes);
+
+        // Simulate OGV from Buyback contract
+        ogv.mint(address(rewards), 13 ether);
+
+        vm.startPrank(staking);
+        vm.warp(EPOCH - 1000);
+        assertEq(rewards.previewRewards(), 13 ether, "a");
+
+        // 2x4 + 5x2 + 8x1 + 13 ==
+        vm.warp(EPOCH + 15 days);
+        assertEq(rewards.previewRewards(), (39 ether), "m");
+    }
 }

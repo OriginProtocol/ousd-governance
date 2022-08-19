@@ -4,7 +4,7 @@ import {Governable} from "./Governable.sol";
 
 interface Mintable {
     function mint(address to, uint256 amount) external;
-    function balanceOf(address owner) view returns (uint256);
+    function balanceOf(address owner) external view returns (uint256);
 }
 
 /// @title OGV Inflation and Rewards
