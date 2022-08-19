@@ -1,0 +1,79 @@
+import { FunctionComponent } from "react";
+import Card from "components/Card";
+import { SectionTitle } from "components/SectionTitle";
+import Icon from "@mdi/react";
+import { mdiCheck } from "@mdi/js";
+import moment from "moment";
+import classNames from "classnames";
+import { useStore } from "utils/store";
+import Link from "components/Link";
+import ExternalLinkIcon from "components/ExternalLinkIcon";
+
+interface ProposalHistoryProps {
+  transactions: Array<object>;
+}
+
+const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
+  transactions,
+}) => {
+  const { rpcProvider } = useStore();
+
+  let explorerPrefix;
+  if (rpcProvider?._network?.chainId === 1) {
+    explorerPrefix = "https://etherscan.io/";
+  } else if (rpcProvider?._network?.chainId === 4) {
+    explorerPrefix = "https://rinkeby.etherscan.io/";
+  }
+
+  return (
+    <Card>
+      <SectionTitle>Proposal History</SectionTitle>
+      <ul className="space-y-5">
+        {transactions.map((transaction) => {
+          const isGrey =
+            transaction.event !== "Succeeded" &&
+            transaction.event !== "Queued" &&
+            transaction.event !== "Executed";
+          const iconClasses = classNames(
+            "h-7 w-7 rounded-full text-white flex items-center justify-center",
+            {
+              "bg-gray-500": isGrey,
+              "bg-accent": !isGrey,
+            }
+          );
+
+          return (
+            <li
+              key={`${transaction.naeventme}-${transaction.createdAt}`}
+              className="flex space-x-4 items-center"
+            >
+              <span className={iconClasses}>
+                <Icon path={mdiCheck} size={0.66} />
+              </span>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3>{transaction.event}</h3>
+                  {explorerPrefix && transaction.hash && (
+                    <Link
+                      href={`${explorerPrefix}tx/${transaction.hash}`}
+                      newWindow
+                    >
+                      <ExternalLinkIcon isGreen />
+                    </Link>
+                  )}
+                </div>
+                <p className="text-gray-500 text-sm">
+                  {moment(transaction.createdAt).format(
+                    "MMM D, YYYY, HH:mm:ss"
+                  )}
+                </p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+};
+
+export { ProposalHistory };

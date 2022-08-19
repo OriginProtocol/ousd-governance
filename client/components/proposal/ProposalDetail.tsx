@@ -16,6 +16,7 @@ import { getCleanProposalContent } from "utils/index";
 import { Address } from "components/Address";
 import { SupportTable } from "./SupportTable";
 import { StateTag } from "./StateTag";
+import { ProposalHistory } from "./ProposalHistory";
 
 export const ProposalDetail = ({
   id,
@@ -23,12 +24,14 @@ export const ProposalDetail = ({
   createdAt,
   description,
   voters,
+  transactions,
 }: {
   id: string;
   proposalId: string;
   createdAt: string;
   description: string;
   voters: Array<object>;
+  transactions: Array<object>;
 }) => {
   const { address, contracts, pendingTransactions, rpcProvider } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
@@ -44,7 +47,7 @@ export const ProposalDetail = ({
   const [blockNumber, setBlockNumber] = useState(0);
   const { Governance } = contracts;
   const { cleanTitle, cleanDescription } = getCleanProposalContent(description);
-
+  console.log(Governance, proposalState);
   useEffect(() => {
     const getBlockNumber = async () => {
       const blockNumber = await rpcProvider.getBlockNumber();
@@ -240,6 +243,7 @@ export const ProposalDetail = ({
             </div>
           </div>
         </Card>
+        <ProposalHistory proposalId={proposalId} transactions={transactions} />
       </CardGroup>
       <EnsureDelegationModal />
     </>

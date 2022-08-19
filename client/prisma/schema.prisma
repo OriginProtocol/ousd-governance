@@ -22,12 +22,14 @@ model Voter {
 }
 
 model Proposal {
-  id          Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   // This is storing a uint256
-  proposalId  String   @unique @map("proposal_id")
-  description String   @default("")
-  createdAt   DateTime @default(now()) @map("created_at")
-  voters      Voter[]  @relation("proposal_to_voter")
+  proposalId   String        @unique @map("proposal_id")
+  description  String        @default("")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  voters       Voter[]       @relation("proposal_to_voter")
+  transactions Transaction[]
+  status       Int           @default(0)
 
   @@map("proposals")
 }
@@ -56,13 +58,14 @@ model Lockup {
 
 model Transaction {
   id        Int      @id @default(autoincrement())
-  hash      String
+  hash      String?
   event     String
   createdAt DateTime @default(now()) @map("created_at")
+  
+  Proposal   Proposal? @relation(fields: [proposalId], references: [id])
+  proposalId Int?
+  Lockup     Lockup?   @relation(fields: [lockupId], references: [id])
+  lockupId   Int?
 
-  Lockup   Lockup? @relation(fields: [lockupId], references: [id])
-  lockupId Int
-
-  @@unique([hash, lockupId])
   @@map("transactions")
 }

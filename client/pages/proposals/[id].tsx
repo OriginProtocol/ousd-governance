@@ -20,10 +20,11 @@ export async function getServerSideProps({
 
   const proposal = await prisma.proposal.findUnique({
     where: { proposalId: query.id },
-    include: { voters: true },
+    include: { voters: true, transactions: true },
   });
 
-  const { id, proposalId, createdAt, description, voters } = proposal;
+  const { id, proposalId, createdAt, description, voters, transactions } =
+    proposal;
 
   return {
     props: {
@@ -32,6 +33,7 @@ export async function getServerSideProps({
       createdAt: moment(createdAt).format("MMM D, YYYY"),
       description,
       voters: JSON.parse(JSON.stringify(voters)),
+      transactions: JSON.parse(JSON.stringify(transactions)),
     },
   };
 }
@@ -42,6 +44,7 @@ const ProposalPage: NextPage = ({
   createdAt,
   description,
   voters,
+  transactions,
 }) => {
   const { cleanTitle } = getCleanProposalContent(description);
 
@@ -61,6 +64,7 @@ const ProposalPage: NextPage = ({
         createdAt={createdAt}
         description={description}
         voters={voters}
+        transactions={transactions}
       />
     </Wrapper>
   );

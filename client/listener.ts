@@ -31,12 +31,18 @@ export const governanceTokenContract = new ethers.Contract(
   rpc_provider
 );
 
+export const governanceContract = new ethers.Contract(
+  GovernanceContracts.Governance.address,
+  GovernanceContracts.Governance.abi,
+  rpc_provider
+);
+
 const contracts = [
   {
     name: "Governance",
     address: GovernanceContracts.Governance.address,
     abi: GovernanceContracts.Governance.abi,
-    events: ["ProposalCreated", "VoteCast"],
+    events: ["ProposalCreated", "ProposalCancelled", "ProposalQueued", "ProposalExecuted", "VoteCast"],
   },
   {
     name: "OgvStaking",
@@ -66,12 +72,47 @@ const handleProposalCreated = async (event) => {
       data: {
         proposalId: event.values.proposalId,
         description: event.values.description,
+        transactions: {
+          create: [{
+            hash: event.transactionHash,
+            event: "Created",
+            createdAt: new Date(event.timestamp * 1000),
+          }],
+        },
       },
     });
     logger.info("Inserted new proposal");
   } catch (e) {
     logger.info(e);
   }
+};
+
+const proposalEventLabels = {
+  'ProposalCancelled': "Cancelled",
+  'ProposalQueued': "Queued",
+  'ProposalExecuted': "Executed",
+};
+
+const handleGenericProposalEvent = async (event) => {
+  try {
+    await prisma.proposal.update({
+      where: {
+        proposalId: event.values.proposalId,
+      },
+      data: {
+        transactions: {
+          create: [{
+            hash: event.transactionHash,
+            event: proposalEventLabels[event.name],
+            createdAt: new Date(event.timestamp * 1000),
+          }],
+        },
+      },
+    });
+    logger.info(`Added ${event.name} transaction to proposal ${event.values.proposalId}`);
+  } catch(e) {
+    logger.info(e);
+  };
 };
 
 const handleStake = async (event) => {
@@ -252,6 +293,11 @@ const handleEvents = async (blockNumber, events, done) => {
       case 'ProposalCreated':
         await handleProposalCreated(event);
         break;
+      case 'ProposalCancelled':
+      case 'ProposalQueued':
+      case 'ProposalExecuted':
+        await handleGenericProposalEvent(event);
+        break;
       case 'Stake':
         await handleStake(event);
         break;
@@ -267,9 +313,63 @@ const handleEvents = async (blockNumber, events, done) => {
   }
 };
 
+const statusLabels = {
+  1: "Active",
+  3: "Defeated",
+  4: "Succeeded",
+};
+
+const handleProposalStatusUpdates = async (blockNumber) => {
+  const block = await rpc_provider.getBlock(blockNumber);
+
+  let proposals;
+  try {
+    proposals = await prisma.proposal.findMany();
+
+    if(proposals && proposals.length > 0) {
+      proposals.forEach(async (proposal) => {
+        const proposalStatus = await governanceContract.state(proposal.proposalId);
+        
+        const proposalInDatabase = await prisma.proposal.findUnique({
+          where: {
+            proposalId: proposal.proposalId,
+          },
+        });
+
+        if((proposalInDatabase?.status !== proposalStatus) && [1,3,4].includes(proposalStatus)) {
+          try {
+            await prisma.proposal.update({
+              where: {
+                proposalId: proposal.proposalId,
+              },
+              data: {
+                status: proposalStatus,
+                transactions: {
+                  create: [{
+                    event: statusLabels[proposalStatus],
+                    createdAt: new Date(block.timestamp * 1000),
+                  }],
+                },
+              },
+            });
+            logger.info(`Added ${statusLabels[proposalStatus]} timestamp to proposal ${proposal.proposalId}`);
+          } catch(e) {
+            logger.info(e);
+          };
+        }
+      });
+    } else {
+      logger.info('No proposals to update.');
+    }
+  } catch(e) {
+    logger.info(e);
+  }
+};
+
 ethereumEvents.on("block.confirmed", async (blockNumber, events, done) => {
   logger.info(`Got confirmed block ${blockNumber}`);
   await handleEvents(blockNumber, events, done);
+  await handleProposalStatusUpdates(blockNumber);
   const existingLastBlock = await prisma.listener.findFirst();
   if (existingLastBlock) {
     await prisma.listener.update({
