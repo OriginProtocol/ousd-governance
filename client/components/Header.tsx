@@ -47,8 +47,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
         <Wrapper>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex-none -mb-3 mr-7 xl:mr-10">
-                <Link href="/">
+              <div className="flex -mb-3 mr-4 md:mr-7 xl:mr-10">
+                <Link href="/" className="block">
                   <Image
                     width="204"
                     height="29"
@@ -58,7 +58,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 </Link>
               </div>
               {!hideNav && (
-                <ul className="space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto lg:visible lg:flex">
+                <ul className="w-0 space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto lg:visible lg:flex lg:w-auto">
                   {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
