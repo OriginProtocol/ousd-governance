@@ -155,8 +155,6 @@ export const ProposalDetail = ({
     });
   };
 
-  console.log(cleanTitle, cleanDescription);
-
   return (
     <>
       <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
