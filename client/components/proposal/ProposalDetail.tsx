@@ -47,7 +47,7 @@ export const ProposalDetail = ({
   const [blockNumber, setBlockNumber] = useState(0);
   const { Governance } = contracts;
   const { cleanTitle, cleanDescription } = getCleanProposalContent(description);
-  console.log(Governance, proposalState);
+
   useEffect(() => {
     const getBlockNumber = async () => {
       const blockNumber = await rpcProvider.getBlockNumber();
@@ -155,6 +155,8 @@ export const ProposalDetail = ({
     });
   };
 
+  console.log(cleanTitle, cleanDescription);
+
   return (
     <>
       <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
@@ -215,7 +217,7 @@ export const ProposalDetail = ({
         <CardGroup>
           <Card>
             <div className="space-y-8">
-              {description && (
+              {cleanDescription && (
                 <div>
                   <SectionTitle>Description</SectionTitle>
                   <div
