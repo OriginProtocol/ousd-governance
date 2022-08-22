@@ -65,8 +65,14 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                         <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
                       </Link>
                     </h3>
-                    <div className="text-gray-400 text-xmd">
-                      {id} • Created{" "}
+                    <div className="text-gray-400 text-md">
+                      <Link
+                        className="text-gray-400 hover:underline"
+                        href={`/proposals/${proposal[0]}`}
+                      >
+                        {id}
+                      </Link>{" "}
+                      • Created{" "}
                       {moment(proposal.createdAt).format("MMM D, YYYY")} • By{" "}
                       <Address address={proposal.proposer} />
                     </div>
