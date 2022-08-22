@@ -1,7 +1,6 @@
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { truncateBalance } from "utils/index";
+import TokenAmount from "components/TokenAmount";
 
 export const ProposalParameters = ({ proposal, state, quorum }) => {
   const { rpcProvider } = useStore();
@@ -55,7 +54,7 @@ export const ProposalParameters = ({ proposal, state, quorum }) => {
           <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt className="text-sm font-medium text-gray-400">Quorum</dt>
             <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {truncateBalance(ethers.utils.formatUnits(quorum))}
+              <TokenAmount amount={quorum} />
             </dd>
           </div>
         </dl>
