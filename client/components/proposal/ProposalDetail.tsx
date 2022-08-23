@@ -178,6 +178,7 @@ export const ProposalDetail = ({
           votePower={votePower}
           onVote={handleVote}
           hasVoted={hasVoted}
+          votingActive={proposalState === 1}
         />
         <CardGroup twoCol horizontal>
           <Card tightPadding>
@@ -189,7 +190,6 @@ export const ProposalDetail = ({
             />
             <SupportTable voters={forVoters} />
           </Card>
-
           <Card tightPadding>
             <SectionTitle noMarginBottom>Against</SectionTitle>
             <progress
