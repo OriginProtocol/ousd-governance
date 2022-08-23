@@ -60,3 +60,5 @@ export { navItems };
 
 // daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
 export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12
+
+export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";

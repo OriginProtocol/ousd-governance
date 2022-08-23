@@ -216,21 +216,17 @@ export const ProposalDetail = ({
                 <SectionTitle>Actions</SectionTitle>
                 <ProposalActionsTable proposalActions={proposalActions} />
               </div>
+              <div>
+                <SectionTitle>Details</SectionTitle>
+                <ProposalParameters
+                  proposal={proposal}
+                  state={proposalState}
+                  quorum={quorum}
+                />
+              </div>
             </div>
           </Card>
         </CardGroup>
-        <Card>
-          <div className="space-y-8">
-            <div>
-              <SectionTitle>Details</SectionTitle>
-              <ProposalParameters
-                proposal={proposal}
-                state={proposalState}
-                quorum={quorum}
-              />
-            </div>
-          </div>
-        </Card>
         <ProposalHistory proposalId={proposalId} transactions={transactions} />
       </CardGroup>
       <EnsureDelegationModal />

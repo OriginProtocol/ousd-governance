@@ -44,7 +44,7 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
 
           return (
             <li
-              key={`${transaction.naeventme}-${transaction.createdAt}`}
+              key={`${transaction.event}-${transaction.createdAt}`}
               className="flex space-x-4 items-center"
             >
               <span className={iconClasses}>
