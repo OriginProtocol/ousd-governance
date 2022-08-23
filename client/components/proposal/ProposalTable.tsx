@@ -54,27 +54,19 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
             const id = proposal?.displayId.toString().padStart(3, "0");
 
             return (
-              <tr key={index}>
+              <tr
+                key={index}
+                className="cursor-pointer hover:bg-gray-100"
+                onClick={() => router.push(`/proposals/${proposal[0]}`)}
+              >
                 <td>
                   <div className="space-y-1">
                     <h3 className="text-lg truncate">
-                      <Link
-                        className="text-gray-900 hover:underline"
-                        href={`/proposals/${proposal[0]}`}
-                      >
-                        <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
-                      </Link>
+                      <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
                     </h3>
                     <div className="text-gray-400 text-md">
-                      <Link
-                        className="text-gray-400 hover:underline"
-                        href={`/proposals/${proposal[0]}`}
-                      >
-                        {id}
-                      </Link>{" "}
-                      • Created{" "}
-                      {moment(proposal.createdAt).format("MMM D, YYYY")} • By{" "}
-                      <Address address={proposal.proposer} />
+                      {id} • Created{" "}
+                      {moment(proposal.createdAt).format("MMM D, YYYY")}
                     </div>
                   </div>
                 </td>
