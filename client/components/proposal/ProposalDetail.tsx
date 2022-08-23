@@ -179,39 +179,28 @@ export const ProposalDetail = ({
           onVote={handleVote}
           hasVoted={hasVoted}
         />
-        {(forVoters.length > 0 || againstVoters.length > 0) && (
-          <CardGroup
-            twoCol={forVoters.length > 0 && againstVoters.length > 0}
-            horizontal={forVoters.length > 0 && againstVoters.length > 0}
-          >
-            {forVoters.length > 0 && (
-              <Card
-                tightPadding={forVoters.length > 0 && againstVoters.length > 0}
-              >
-                <SectionTitle noMarginBottom>For</SectionTitle>
-                <progress
-                  className="mt-4 progress progress-success w-full"
-                  value={totalForVotes.toString()}
-                  max={totalVotes.toString()}
-                />
-                <SupportTable voters={forVoters} />
-              </Card>
-            )}
-            {againstVoters.length > 0 && (
-              <Card
-                tightPadding={forVoters.length > 0 && againstVoters.length > 0}
-              >
-                <SectionTitle noMarginBottom>Against</SectionTitle>
-                <progress
-                  className="mt-4 progress progress-error w-full"
-                  value={totalAgainstVotes.toString()}
-                  max={totalVotes.toString()}
-                />
-                <SupportTable voters={againstVoters} />
-              </Card>
-            )}
-          </CardGroup>
-        )}
+
+        <CardGroup twoCol horizontal>
+          <Card tightPadding>
+            <SectionTitle noMarginBottom>For</SectionTitle>
+            <progress
+              className="mt-4 progress progress-success w-full"
+              value={totalForVotes.toString()}
+              max={totalVotes.toString()}
+            />
+            <SupportTable voters={forVoters} />
+          </Card>
+
+          <Card tightPadding>
+            <SectionTitle noMarginBottom>Against</SectionTitle>
+            <progress
+              className="mt-4 progress progress-error w-full"
+              value={totalAgainstVotes.toString()}
+              max={totalVotes.toString()}
+            />
+            <SupportTable voters={againstVoters} />
+          </Card>
+        </CardGroup>
         <CardGroup>
           <Card>
             <div className="space-y-8">

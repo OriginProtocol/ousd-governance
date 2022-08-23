@@ -31,6 +31,12 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
             </td>
           </tr>
         ))}
+        {voters.length < 1 && (
+          <tr>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );
