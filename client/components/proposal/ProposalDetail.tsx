@@ -179,7 +179,6 @@ export const ProposalDetail = ({
           onVote={handleVote}
           hasVoted={hasVoted}
         />
-
         <CardGroup twoCol horizontal>
           <Card tightPadding>
             <SectionTitle noMarginBottom>For</SectionTitle>
