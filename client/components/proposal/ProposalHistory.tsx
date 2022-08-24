@@ -1,13 +1,12 @@
 import { FunctionComponent } from "react";
 import Card from "components/Card";
 import { SectionTitle } from "components/SectionTitle";
-import Icon from "@mdi/react";
-import { mdiCheck } from "@mdi/js";
+import { mdiCheck, mdiOpenInNew } from "@mdi/js";
 import moment from "moment";
 import classNames from "classnames";
 import { useStore } from "utils/store";
 import Link from "components/Link";
-import ExternalLinkIcon from "components/ExternalLinkIcon";
+import Icon from "@mdi/react";
 
 interface ProposalHistoryProps {
   transactions: Array<object>;
@@ -51,14 +50,14 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
                 <Icon path={mdiCheck} size={0.66} />
               </span>
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
                   <h3>{transaction.event}</h3>
                   {explorerPrefix && transaction.hash && (
                     <Link
                       href={`${explorerPrefix}tx/${transaction.hash}`}
                       newWindow
                     >
-                      <ExternalLinkIcon isGreen />
+                      <Icon path={mdiOpenInNew} size={0.6} />
                     </Link>
                   )}
                 </div>

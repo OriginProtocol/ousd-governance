@@ -173,7 +173,7 @@ export const ProposalDetail = ({
             {`${lastTx?.event} ${moment(lastTx?.createdAt).format(
               "MMM D, YYYY"
             )}`}{" "}
-            • Proposed by <Address address={proposal.proposer} />
+            • Proposed by <Address noTruncate address={proposal.proposer} />
           </div>
         </div>
         <StateTag state={proposalState} />

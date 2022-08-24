@@ -46,6 +46,7 @@ export async function getServerSideProps({ res }: { res: any }) {
   const proposals = (
     await prisma.proposal.findMany({
       orderBy: [{ id: "desc" }],
+      include: { transactions: true },
       take: 5,
     })
   ).map((p) => ({
@@ -53,6 +54,7 @@ export async function getServerSideProps({ res }: { res: any }) {
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
     description: p.description,
+    transactions: JSON.parse(JSON.stringify(p.transactions)),
   }));
 
   return {
@@ -110,6 +112,9 @@ const Home: NextPage<HomeProps> = ({
           description: proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
           )?.description,
+          transactions: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.transactions,
         })),
       };
       setProposalData(dataWithDisplayId);

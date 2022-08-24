@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { truncateEthAddress } from "utils";
-import EtherscanIcon from "components/EtherscanIcon";
+import Icon from "@mdi/react";
+import { mdiOpenInNew } from "@mdi/js";
 
-export const Address = ({ address }: { address: string }) => {
+export const Address = ({
+  address,
+  noTruncate = false,
+}: {
+  address: string;
+  noTruncate: Boolean;
+}) => {
   const { rpcProvider } = useStore();
   const [addressDisplay, setAddressDisplay] = useState(
-    truncateEthAddress(address)
+    noTruncate ? address : truncateEthAddress(address)
   );
 
   useEffect(() => {
@@ -36,11 +43,11 @@ export const Address = ({ address }: { address: string }) => {
         href={`${explorerPrefix}address/${address}`}
         target="_blank"
         rel="noreferrer"
-        className="text-inherit hover:underline"
+        className="text-inherit inline-flex items-center"
       >
         <span className="mr-1">{addressDisplay}</span>
-        <span className="w-3 inline-block">
-          <EtherscanIcon />
+        <span className="inline-block">
+          <Icon path={mdiOpenInNew} size={0.6} />
         </span>
       </a>
     );
