@@ -17,6 +17,7 @@ import { Address } from "components/Address";
 import { SupportTable } from "./SupportTable";
 import { StateTag } from "./StateTag";
 import { ProposalHistory } from "./ProposalHistory";
+import moment from "moment";
 
 export const ProposalDetail = ({
   id,
@@ -155,6 +156,8 @@ export const ProposalDetail = ({
     });
   };
 
+  const lastTx = transactions[transactions.length - 1];
+
   return (
     <>
       <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
@@ -166,8 +169,11 @@ export const ProposalDetail = ({
             />
           </PageTitle>
           <div className="text-white opacity-70 text-md">
-            {id.toString().padStart(3, "0")} • Created {createdAt} • By{" "}
-            <Address address={proposal.proposer} />
+            {id.toString().padStart(3, "0")} •{" "}
+            {`${lastTx?.event} ${moment(lastTx?.createdAt).format(
+              "MMM D, YYYY"
+            )}`}{" "}
+            • Proposed by <Address address={proposal.proposer} />
           </div>
         </div>
         <StateTag state={proposalState} />
