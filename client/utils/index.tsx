@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useStore } from "utils/store";
 import sanitizeHtml from "sanitize-html";

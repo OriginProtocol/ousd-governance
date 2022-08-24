@@ -2,10 +2,8 @@ import { useRouter } from "next/router";
 import { FunctionComponent } from "react";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
-import { Address } from "components/Address";
 import { getCleanProposalContent } from "utils/index";
 import moment from "moment";
-import Link from "components/Link";
 
 interface ProposalTableProps {
   proposalData: Array<object>;
@@ -52,6 +50,8 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
               proposal.description
             );
             const id = proposal?.displayId.toString().padStart(3, "0");
+            const lastTx =
+              proposal?.transactions[proposal?.transactions.length - 1];
 
             return (
               <tr
@@ -65,8 +65,10 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                       <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
                     </h3>
                     <div className="text-gray-400 text-md">
-                      {id} • Created{" "}
-                      {moment(proposal.createdAt).format("MMM D, YYYY")}
+                      {id} •{" "}
+                      {`${lastTx?.event} ${moment(lastTx?.createdAt).format(
+                        "MMM D, YYYY"
+                      )}`}
                     </div>
                   </div>
                 </td>
