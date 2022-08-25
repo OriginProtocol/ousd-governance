@@ -48,7 +48,7 @@ export const ProposalActionsTable = ({
         <table className="table w-full">
           <thead>
             <tr>
-              <td>Contract</td>
+              <td className="pl-0">Contract</td>
               <td>Function</td>
               <td>Argument Types</td>
               <td>Arguments</td>
@@ -58,7 +58,7 @@ export const ProposalActionsTable = ({
           <tbody>
             {proposalActions.targets.map((target, index) => (
               <tr key={index}>
-                <td>
+                <td className="pl-0">
                   {explorerPrefix ? (
                     <a
                       className="link link-primary"

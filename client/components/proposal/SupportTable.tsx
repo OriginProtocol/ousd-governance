@@ -12,14 +12,14 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
     <table className="table table-compact w-full">
       <thead>
         <tr>
-          <th>Address</th>
+          <th className="pl-0">Address</th>
           <th>Votes</th>
         </tr>
       </thead>
       <tbody>
         {voters.map((voter) => (
           <tr key={voter.address}>
-            <td>
+            <td className="pl-0">
               <Address address={voter.address} />
             </td>
             <td>
@@ -33,7 +33,7 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
         ))}
         {voters.length < 1 && (
           <tr>
-            <td>-</td>
+            <td className="pl-0">-</td>
             <td>-</td>
           </tr>
         )}
