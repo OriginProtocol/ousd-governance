@@ -45,7 +45,7 @@ def main():
             print(e)
 
         try:
-            contract_6 = OriginDollarGovernance.at(contracts["ERC1967Proxy"][0])
+            contract_6 = OriginDollarGovernance.at(contracts["OriginDollarGovernance"][0])
             OriginDollarGovernance.publish_source(contract_6)
         except Exception as e:
             print(e)
