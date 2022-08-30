@@ -27,7 +27,7 @@ export async function getServerSideProps({ res }: { res: any }) {
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
     description: p.description,
-    transactions: JSON.parse(JSON.stringify(p.transactions)),
+    transactions: JSON.parse(JSON.stringify(p.transactions)), // transactions.createdAt [object Date] cannot be serialized as JSON without JSON.parse/stringify
   }));
 
   return {
