@@ -52,12 +52,12 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
             const id = proposal?.displayId.toString().padStart(3, "0");
             const lastTx =
               proposal?.transactions[proposal?.transactions.length - 1];
-
+              
             return (
               <tr
                 key={index}
                 className="cursor-pointer hover:bg-gray-100"
-                onClick={() => router.push(`/proposals/${proposal[0]}`)}
+                onClick={() => router.push(`/proposals/${proposal['0']}`)}
               >
                 <td>
                   <div className="space-y-1">
