@@ -83,7 +83,7 @@ const handleProposalCreated = async (event) => {
     });
     logger.info("Inserted new proposal");
   } catch (e) {
-    logger.info(e);
+    logger.error(e);
   }
 };
 
@@ -111,7 +111,7 @@ const handleGenericProposalEvent = async (event) => {
     });
     logger.info(`Added ${event.name} transaction to proposal ${event.values.proposalId}`);
   } catch(e) {
-    logger.info(e);
+    logger.error(e);
   };
 };
 
@@ -132,7 +132,7 @@ const handleStake = async (event) => {
       },
     });
   } catch(e) {
-    logger.info(e);
+    logger.error(e);
   }
 
   // If it does (extend action), update it (new end, new points and additional tx hash)
@@ -160,7 +160,7 @@ const handleStake = async (event) => {
       });
       logger.info(`Updated lockup ${parseInt(event.values.lockupId)} for ${event.values.user}`);
     } catch (e) {
-      logger.info(e);
+      logger.error(e);
     }
   } else {
     // If it doesn't, create it (stake action)
@@ -184,7 +184,7 @@ const handleStake = async (event) => {
       });
       logger.info(`Inserted lockup ${parseInt(event.values.lockupId)} for ${event.values.user}`);
     } catch (e) {
-      logger.info(e);
+      logger.error(e);
     }
   }
 }
@@ -203,7 +203,7 @@ const handleUnstake = async (event) => {
       },
     });
   } catch(e) {
-    logger.info(e);
+    logger.error(e);
   }
 
   if(existingLockup) {
@@ -222,7 +222,7 @@ const handleUnstake = async (event) => {
       });
       logger.info(`Lockup ${parseInt(event.values.lockupId)} for ${event.values.user} deactivated`);
     } catch (e) {
-      logger.info(e);
+      logger.error(e);
     }
   }
 }
@@ -238,7 +238,7 @@ const handleVoteCast = async (event) => {
       },
     });
   } catch(e) {
-    logger.info(e);
+    logger.error(e);
   }
 
   if(existingVoter) {
@@ -261,7 +261,7 @@ const handleVoteCast = async (event) => {
       });
       logger.info(`Voter ${event.values.voter} updated`);
     } catch (e) {
-      logger.info(e);
+      logger.error(e);
     }
   } else {
     // Add new voter
@@ -282,7 +282,7 @@ const handleVoteCast = async (event) => {
       });
       logger.info(`Inserted new voter: ${event.values.voter}`);
     } catch (e) {
-      logger.info(e);
+      logger.error(e);
     }
   }
 }
@@ -354,7 +354,7 @@ const handleProposalStatusUpdates = async (blockNumber) => {
             });
             logger.info(`Added ${statusLabels[proposalStatus]} timestamp to proposal ${proposal.proposalId}`);
           } catch(e) {
-            logger.info(e);
+            logger.error(e);
           };
         }
       });
@@ -362,7 +362,7 @@ const handleProposalStatusUpdates = async (blockNumber) => {
       logger.info('No proposals to update.');
     }
   } catch(e) {
-    logger.info(e);
+    logger.error(e);
   }
 };
 
