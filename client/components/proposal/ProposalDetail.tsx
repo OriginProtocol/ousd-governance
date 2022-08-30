@@ -169,10 +169,11 @@ export const ProposalDetail = ({
             />
           </PageTitle>
           <div className="text-white opacity-70 text-md">
-            {id.toString().padStart(3, "0")} •{" "}
-            {`${lastTx?.event} ${moment(lastTx?.createdAt).format(
-              "MMM D, YYYY"
-            )}`}{" "}
+            {id.toString().padStart(3, "0")}
+            {lastTx &&
+              ` • ${lastTx?.event} ${moment(lastTx?.createdAt).format(
+                "MMM D, YYYY"
+              )}`}{" "}
             • Proposed by <Address noTruncate address={proposal.proposer} />
           </div>
         </div>
