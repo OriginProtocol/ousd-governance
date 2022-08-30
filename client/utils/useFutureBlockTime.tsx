@@ -12,10 +12,14 @@ const useFutureBlockTime = (blockNumber: Number) => {
       if (4 === envNetwork) {
         api = `https://api-rinkeby.etherscan.io/api?module=block&action=getblockcountdown&blockno=${blockNumber}&apikey=${ETHERSCAN_API_KEY}`;
       }
-      const res = await fetch(api);
-      const futureBlock = await res.json();
-      if (futureBlock?.status !== "0") {
-        setFutureBlockTime(futureBlock?.result?.EstimateTimeInSec);
+      try {
+        const res = await fetch(api);
+        const futureBlock = await res.json();
+        if (futureBlock?.status !== "0") {
+          setFutureBlockTime(futureBlock?.result?.EstimateTimeInSec);
+        }
+      } catch (e) {
+        console.log(e);
       }
     };
 
