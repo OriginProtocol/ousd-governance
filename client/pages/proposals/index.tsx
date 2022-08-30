@@ -65,7 +65,7 @@ const Proposal: NextPage = ({ proposals }) => {
             ...d,
             displayId: proposalById?.id,
             description: proposalById?.description,
-            transacitons: proposalById?.transactions,
+            transactions: proposalById?.transactions,
           };
         }),
       };
