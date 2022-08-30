@@ -56,18 +56,18 @@ const Proposal: NextPage = ({ proposals }) => {
       // Augment with human readable ID from the database
       const dataWithDisplayId = {
         ...data,
-        proposals: data.proposals.map((d) => ({
-          ...d,
-          displayId: proposals.find(
+        proposals: data.proposals.map((d) => {
+          const proposalById = proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
-          )?.id,
-          description: proposals.find(
-            (p) => p.proposalId.toString() === d.id.toString()
-          )?.description,
-          transactions: proposals.find(
-            (p) => p.proposalId.toString() === d.id.toString()
-          )?.transactions,
-        })),
+          );
+
+          return {
+            ...d,
+            displayId: proposalById?.id,
+            description: proposalById?.description,
+            transacitons: proposalById?.transactions,
+          };
+        }),
       };
 
       setProposalData(dataWithDisplayId);
