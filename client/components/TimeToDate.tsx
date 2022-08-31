@@ -28,7 +28,7 @@ const TimeToDate: FunctionComponent<TimeToDateProps> = ({ epoch }) => {
           ) : (
             <>
               {epoch < blockTimestamp
-                ? `None`
+                ? `-`
                 : dayjs.unix(epoch).fromNow(true)}
             </>
           )}
