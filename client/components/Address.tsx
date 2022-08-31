@@ -9,7 +9,7 @@ export const Address = ({
   noTruncate = false,
 }: {
   address: string;
-  noTruncate: Boolean;
+  noTruncate?: Boolean;
 }) => {
   const { rpcProvider } = useStore();
   const [addressDisplay, setAddressDisplay] = useState(
