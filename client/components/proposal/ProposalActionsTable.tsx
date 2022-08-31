@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useStore } from "utils/store";
+import { useNetworkInfo } from "utils/index";
 import {
   decodeCalldata,
   functionNameFromSignature,
@@ -21,14 +22,15 @@ export const ProposalActionsTable = ({
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-  const { rpcProvider, contracts } = useStore();
+  const { contracts } = useStore();
+  const { envNetwork } = useNetworkInfo();
   const [modalOpen, setModalOpen] = useState(false);
   const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
   let explorerPrefix: string | undefined;
-  if (rpcProvider?._network?.chainId === 1) {
+  if (envNetwork === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (rpcProvider?._network?.chainId === 4) {
+  } else if (envNetwork === 4) {
     explorerPrefix = "https://rinkeby.etherscan.io/";
   }
 
