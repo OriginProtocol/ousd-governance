@@ -5,7 +5,7 @@ import CardStat from "components/CardStat";
 import TokenAmount from "components/TokenAmount";
 import TokenIcon from "components/TokenIcon";
 import DisabledButtonTooltip from "components/DisabledButtonTooltip";
-
+import { BigNumber } from "ethers";
 export const ProposalVoteStats = ({
   proposal,
   votePower,
@@ -14,7 +14,7 @@ export const ProposalVoteStats = ({
   votingActive,
 }) => {
   let tooltipText = "";
-  if (!votePower.gt(0)) {
+  if (BigNumber.isBigNumber(votePower) && !votePower.gt(0)) {
     tooltipText = "You don't have enough votes";
   } else if (hasVoted) {
     tooltipText = "You've already voted";
