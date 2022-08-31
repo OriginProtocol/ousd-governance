@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import { Address } from "components/Address";
 import TokenAmount from "components/TokenAmount";
-import { ethers } from "ethers";
+import { ethers, BigNumberish, BigNumber } from "ethers";
 
 interface SupportTableProps {
   voters: Array<object>;
@@ -17,20 +17,34 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
         </tr>
       </thead>
       <tbody>
-        {voters.map((voter) => (
-          <tr key={voter.address}>
-            <td className="pl-0">
-              <Address address={voter.address} />
-            </td>
-            <td>
-              <TokenAmount
-                amount={ethers.utils.formatUnits(
-                  ethers.BigNumber.from(voter.votes)
-                )}
-              />
-            </td>
-          </tr>
-        ))}
+        {voters.map((voter) => {
+          let votesBn;
+
+          try {
+            votesBn = BigNumber.from(voter.votes);
+          } catch (e) {
+            return (
+              <tr key={voter.address}>
+                <td className="pl-0">
+                  <Address address={voter.address} />
+                </td>
+                <td>-</td>
+              </tr>
+            );
+          }
+
+          return (
+            <tr key={voter.address}>
+              <td className="pl-0">
+                <Address address={voter.address} />
+              </td>
+              <td>
+                <TokenAmount amount={ethers.utils.formatUnits(votesBn)} />
+              </td>
+            </tr>
+          );
+        })}
+
         {voters.length < 1 && (
           <tr>
             <td className="pl-0">-</td>
