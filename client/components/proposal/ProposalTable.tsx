@@ -66,7 +66,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                     </h3>
                     <div className="text-gray-400 text-md">
                       {id} •{" "}
-                      {`${lastTx?.event} ${moment(lastTx?.createdAt).format(
+                      {lastTx && `${lastTx?.event} ${moment(lastTx?.createdAt).format(
                         "MMM D, YYYY"
                       )}`}
                     </div>
