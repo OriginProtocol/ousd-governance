@@ -27,9 +27,7 @@ const TimeToDate: FunctionComponent<TimeToDateProps> = ({ epoch }) => {
             <>{monthsRemaining} month</>
           ) : (
             <>
-              {epoch < blockTimestamp
-                ? `-`
-                : dayjs.unix(epoch).fromNow(true)}
+              {epoch < blockTimestamp ? `-` : dayjs.unix(epoch).fromNow(true)}
             </>
           )}
         </>
