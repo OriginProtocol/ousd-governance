@@ -66,7 +66,7 @@ const LockupsTable: FunctionComponent = () => {
           <tr>
             <th>OGV</th>
             <th>Time remaining</th>
-            <th>Lockup ends</th>
+            <th>End of lock-up</th>
             <th>veOGV</th>
           </tr>
         </thead>
