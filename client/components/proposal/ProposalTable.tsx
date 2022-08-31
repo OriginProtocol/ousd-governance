@@ -45,13 +45,13 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
     <div className="overflow-x-auto">
       <table className="table table-fixed w-full">
         <tbody>
-          {proposalData?.proposals.map((proposal, index) => {
+          {proposalData.proposals.map((proposal, index) => {
             const { cleanTitle } = getCleanProposalContent(
               proposal.description
             );
-            const id = proposal?.displayId.toString().padStart(3, "0");
+            const id = proposal.displayId?.toString().padStart(3, "0");
             const lastTx =
-              proposal?.transactions[proposal?.transactions.length - 1];
+              proposal.transactions?.[proposal.transactions?.length - 1];
 
             return (
               <tr
