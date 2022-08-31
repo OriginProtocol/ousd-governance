@@ -45,7 +45,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
     <div className="overflow-x-auto">
       <table className="table table-fixed w-full">
         <tbody>
-          {proposalData.proposals.map((proposal, index) => {
+          {proposalData.proposals?.map((proposal, index) => {
             const { cleanTitle } = getCleanProposalContent(
               proposal.description
             );
