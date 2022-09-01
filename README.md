@@ -136,7 +136,7 @@ Note: You shouldn't commit to `stable` directly. Only merge from `master` (where
 
 ## Production Deployment Process
 
-1. Take a database backup before you start: `heroku pg:backups:capture --app=ousd-governance-production`. Note: You must be authorised with Heroku to run this command. Contact [Franck](mailto:franck@originprotocol.com) to be added if you're not already.
+1. Take a database backup before you start: `heroku pg:backups:capture --app=ousd-governance-production`. Note: You must be authorised with Heroku to run this command. Contact Franck to be added if you're not already.
 
 1. Take a note of the last commit hash that's confirmed as working in production. You can find this in the `stable` branch's [commit history](https://github.com/OriginProtocol/ousd-governance/commits/stable).
 
@@ -145,6 +145,30 @@ Note: You shouldn't commit to `stable` directly. Only merge from `master` (where
 1. Once deployed, check the [production environment](https://governance.ousd.com/) in your browser to make sure that things are working as expected. If yes, you're done!
 
 1. If the release causes issues in production, don't be afraid to roll back while you diagnose the issue. Especially if users are impacted. You can do this by reverting your commit: `git revert [commit hash]` and pushing the resulting revert commit to `stable`. Or, if you want to keep a cleaner commit history, reset the `stable` branch to the last commit hash of the previous release: `git reset [commit hash] --hard` and push this to `stable` using `git push stable --force`. Note: You should only force push if you're 100% certain of the change.
+
+## Git Commands For Merging Branches
+
+### Staging (Rinkeby)
+
+```
+git checkout master
+git pull
+git checkout staging
+git merge --no-ff origin/master
+git log --abbrev-commit --pretty=oneline | more
+git push origin staging --no-verify
+```
+
+### Production (Mainnet)
+
+```
+git checkout master
+git pull
+git checkout stable
+git merge --no-ff origin/staging
+git log --abbrev-commit --pretty=oneline | more
+git push origin stable --no-verify
+```
 
 ## Backfilling Database Data
 
