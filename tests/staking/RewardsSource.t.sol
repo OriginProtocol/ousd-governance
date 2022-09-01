@@ -212,30 +212,53 @@ contract RewardsSourceTest is Test {
         assertEq(rewards.rewardsTarget(), address(0));
     }
 
-    function testPreviewRewards() public {
+    function testBuybackRewards() public {
         vm.prank(team);
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](3);
+        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
         slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 4 ether;
-        slopes[1].start = uint64(EPOCH + 2 days);
-        slopes[1].ratePerDay = 2 ether;
-        slopes[2].start = uint64(EPOCH + 7 days);
-        slopes[2].ratePerDay = 1 ether;
+        slopes[0].ratePerDay = 1 ether;
         rewards.setInflation(slopes);
 
-        // Simulate OGV from Buyback contract
-        ogv.mint(address(rewards), 13 ether);
-
         vm.startPrank(staking);
-        vm.warp(EPOCH - 1000);
-        // 0 + 13 ==
-        assertEq(rewards.previewRewards(), 13 ether, "a");
 
         // Simulate OGV from Buyback contract
-        ogv.mint(address(rewards), 11 ether);
+        // Send 13 OGV
+        ogv.mint(address(rewards), 13 ether);
+        vm.warp(EPOCH - 1000);
+        assertEq(ogv.balanceOf(address(rewards)), 13 ether, "BB: Rewards should only hold current buyback funds");
+        
+        // Verify preview
+        assertEq(rewards.previewRewards(), 13 ether, "BB:  Preview wrong");
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), 13 ether, "BB: Staking balance wrong");
 
-        // 2x4 + 5x2 + 8x1 + 13 + 11 ==
+        // Simulate OGV from Buyback contract + inflation
+        // Send 11 OGV
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards should start zero after collect");
+        ogv.mint(address(rewards), 11 ether);
         vm.warp(EPOCH + 15 days);
-        assertEq(rewards.previewRewards(), (50 ether), "m");
+        assertEq(ogv.balanceOf(address(rewards)), 11 ether, "BB+Inf: Rewards should only hold current buyback funds");
+
+        // Verify preview
+        assertEq(rewards.previewRewards(), 11 ether + 15 ether, "BB+Inf: Preview wrong");
+
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether), "BB+Inf: Staking balance wrong");
+
+        // Simulate OGV from inflation
+        vm.warp(EPOCH + 31 days);
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards should only hold current buyback funds");
+
+        // Verify preview
+        assertEq(rewards.previewRewards(), 16 ether, "Inf: Preview wrong");
+
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether + 16 ether), "Staking balance wrong");
     }
 }
