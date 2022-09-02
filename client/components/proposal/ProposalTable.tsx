@@ -20,8 +20,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
   title,
 }) => {
   const router = useRouter();
-  const { contracts, address, rpcProvider, balances, pendingTransactions } =
-    useStore();
+  const { contracts, address, balances, pendingTransactions } = useStore();
   const { veOgv } = balances;
   const [registerStatus, setRegisterStatus] = useState("ready");
   const { needToShowDelegation } = useShowDelegationModalOption();
@@ -33,8 +32,8 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
       <div className="bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
         <h2 className="text-lg font-bold mb-2">Governance Information</h2>
         <p className="mb-4">
-          Please register to participate in governance. You won&apos;t be able
-          to vote on a proposal with your veOGV until you do.
+          Please register to participate in governance for future proposals. You
+          won&apos;t be able to vote on a proposal with your veOGV until you do.
         </p>
         <Button
           white
