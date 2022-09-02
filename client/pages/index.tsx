@@ -137,12 +137,14 @@ const Home: NextPage<HomeProps> = ({
           totalSupply={totalSupplyVeOgv}
         />
         <Card>
-          <SectionTitle>Recent Proposals</SectionTitle>
           {loading ? (
             <Loading />
           ) : (
             <div className="space-y-4">
-              <ProposalTable proposalData={proposalData} />
+              <ProposalTable
+                title="Recent Proposals"
+                proposalData={proposalData}
+              />
               {proposalCount > 0 && (
                 <Link
                   href="/proposals"
