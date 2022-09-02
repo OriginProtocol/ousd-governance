@@ -5,6 +5,7 @@ import {Governable} from "./Governable.sol";
 interface Mintable {
     function mint(address to, uint256 amount) external;
     function balanceOf(address owner) external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
 }
 
 /// @title OGV Inflation and Rewards
@@ -49,7 +50,29 @@ contract RewardsSource is Governable {
             currentSlopeIndex = _nextSlopeIndex;
         }
         lastRewardTime = block.timestamp;
-        Mintable(ogv).mint(rewardsTarget, rewards);
+
+        // OGV Balance of this contract
+        uint256 balance = Mintable(ogv).balanceOf(address(this));
+
+        if (rewards <= balance) {
+            // No need to mint any new OGV.
+            // Just transfer it from the contract's balance.
+            Mintable(ogv).transfer(rewardsTarget, rewards);
+        } else if (balance == 0) {
+            // Zero balance: Have to mint everything
+            Mintable(ogv).mint(rewardsTarget, rewards);
+        } else {
+            // Has some OGV balance but it's lesser what
+            // we need. So, transfer what's left and 
+            // mint the difference
+
+            // Transfer the balance
+            Mintable(ogv).transfer(rewardsTarget, balance);
+
+            // Mint the rest
+            uint256 ogvToMint = rewards - balance;
+            Mintable(ogv).mint(rewardsTarget, ogvToMint);
+        }
         return rewards;
     }
 
