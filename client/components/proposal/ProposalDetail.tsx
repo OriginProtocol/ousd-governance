@@ -181,11 +181,7 @@ export const ProposalDetail = ({
         <StateTag state={proposalState} />
       </div>
       <CardGroup>
-        <Card>
-          <div className="-mb-4">
-            <RegisterToVote withCard />
-          </div>
-        </Card>
+        <RegisterToVote withCard />
         <ProposalVoteStats
           proposal={proposal}
           votePower={votePower}

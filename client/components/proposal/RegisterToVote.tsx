@@ -77,9 +77,11 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   if (!hasTokensButUnregistered) return null;
 
   if (withCard) {
-    <Card>
-      <RegisterCta />
-    </Card>;
+    return (
+      <Card>
+        <RegisterCta />
+      </Card>
+    );
   }
 
   return <RegisterCta />;
