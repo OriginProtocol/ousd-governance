@@ -1,14 +1,11 @@
 import { useRouter } from "next/router";
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent } from "react";
 import { Loading } from "components/Loading";
 import { StateTag } from "components/proposal/StateTag";
 import { getCleanProposalContent } from "utils/index";
 import moment from "moment";
-import Button from "components/Button";
 import { SectionTitle } from "components/SectionTitle";
-import { useStore } from "utils/store";
-import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
-import { toast } from "react-toastify";
+import RegisterToVote from "components/proposal/RegisterToVote";
 
 interface ProposalTableProps {
   proposalData: Array<object>;
@@ -20,75 +17,13 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
   title,
 }) => {
   const router = useRouter();
-  const { contracts, address, balances, pendingTransactions } = useStore();
-  const { veOgv } = balances;
-  const [registerStatus, setRegisterStatus] = useState("ready");
-  const { needToShowDelegation } = useShowDelegationModalOption();
 
   if (!proposalData || proposalData?.loading) return <Loading />;
-
-  const RegisterToVote = () => (
-    <div className="mb-20">
-      <div className="bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
-        <h2 className="text-lg font-bold mb-2">Governance Information</h2>
-        <p className="mb-4">
-          Please register to participate in governance for future proposals. You
-          won&apos;t be able to vote on a proposal with your veOGV until you do.
-        </p>
-        <Button
-          white
-          large
-          onClick={handleRegistration}
-          disabled={registerStatus !== "ready"}
-        >
-          {registerButtonText}
-        </Button>
-      </div>
-    </div>
-  );
-
-  let registerButtonText = "";
-  if (registerStatus === "ready") {
-    registerButtonText = "Register to Vote";
-  } else if (registerStatus === "waiting-for-user") {
-    registerButtonText = "Confirm transaction";
-  } else if (registerStatus === "waiting-for-network") {
-    registerButtonText = "Waiting to be mined";
-  }
-
-  const handleRegistration = async () => {
-    setRegisterStatus("waiting-for-user");
-    try {
-      const transaction = await contracts.OgvStaking.delegate(address);
-      setRegisterStatus("waiting-for-network");
-      //await rpcProvider.waitForTransaction(transaction.hash);
-
-      useStore.setState({
-        pendingTransactions: [
-          ...pendingTransactions,
-          {
-            ...transaction,
-            onComplete: () => {
-              toast.success("You've registered to vote", {
-                hideProgressBar: true,
-              }),
-                setRegisterStatus("ready");
-              useStore.setState({ ogvDelegateeAddress: address });
-            },
-          },
-        ],
-      });
-    } catch (e) {
-      setRegisterStatus("ready");
-    }
-  };
-
-  const hasTokensButUnregistered = veOgv.gt(0) && needToShowDelegation;
 
   if (proposalData.proposals.length === 0) {
     return (
       <>
-        {hasTokensButUnregistered && <RegisterToVote />}
+        <RegisterToVote />
         {title && <SectionTitle>{title}</SectionTitle>}
         <div className="text-center pt-5">
           <svg
@@ -116,7 +51,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
 
   return (
     <>
-      {hasTokensButUnregistered && <RegisterToVote />}
+      <RegisterToVote />
       {title && <SectionTitle>{title}</SectionTitle>}
       <div className="overflow-x-auto">
         <table className="table table-fixed w-full">

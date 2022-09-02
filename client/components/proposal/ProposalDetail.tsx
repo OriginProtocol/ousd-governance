@@ -18,6 +18,7 @@ import { SupportTable } from "./SupportTable";
 import { StateTag } from "./StateTag";
 import { ProposalHistory } from "./ProposalHistory";
 import moment from "moment";
+import RegisterToVote from "components/proposal/RegisterToVote";
 
 export const ProposalDetail = ({
   id,
@@ -180,6 +181,11 @@ export const ProposalDetail = ({
         <StateTag state={proposalState} />
       </div>
       <CardGroup>
+        <Card>
+          <div className="-mb-4">
+            <RegisterToVote withCard />
+          </div>
+        </Card>
         <ProposalVoteStats
           proposal={proposal}
           votePower={votePower}
