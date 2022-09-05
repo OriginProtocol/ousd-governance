@@ -235,7 +235,7 @@ contract RewardsSourceTest is Test {
         assertEq(ogv.balanceOf(staking), 13 ether, "BB: Staking balance wrong");
 
         // Simulate OGV from Buyback contract + inflation
-        // Send 11 OGV
+        // Send 15 OGV
         assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards should start zero after collect");
         ogv.mint(address(rewards), 15 ether);
         vm.warp(EPOCH + 11 days);
@@ -253,12 +253,42 @@ contract RewardsSourceTest is Test {
         vm.warp(EPOCH + 31 days);
         assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards should only hold current buyback funds");
 
-        // Verify preview
-        assertEq(rewards.previewRewards(), 16 ether, "Inf: Preview wrong");
+        // Verify preview after 20 days
+        assertEq(rewards.previewRewards(), 20 ether, "Inf: Preview wrong");
 
         // Verify collect
         rewards.collectRewards();
         assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards balance wrong");
-        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether + 16 ether), "Staking balance wrong");
+        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether + 20 ether), "Inf: Staking balance wrong");
+    }
+
+
+    function testFuzzExtraRewards(uint16 duration, uint64 extraRewards) external {
+        vm.prank(team);
+        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
+        slopes[0].start = uint64(EPOCH);
+        slopes[0].ratePerDay = 1 ether;
+        rewards.setInflation(slopes);
+
+        vm.startPrank(staking);
+
+        uint256 startSnapshot = vm.snapshot();
+        // First, run without extra rewards, and record ending balance
+        vm.warp(EPOCH+duration);
+        rewards.collectRewards();
+        uint256 inflationOnly = ogv.balanceOf(address(staking));
+        // Then, run the same period with rewards, and check math
+        vm.revertTo(startSnapshot);
+        vm.warp(EPOCH+duration);
+        
+        // Preview math
+        assertEq(rewards.previewRewards(), inflationOnly);
+        ogv.mint(address(rewards), extraRewards);
+        assertEq(rewards.previewRewards(), inflationOnly + extraRewards, "Preview rewards");
+
+        rewards.collectRewards();
+        uint256 totalRewards = ogv.balanceOf(address(staking));
+        assertEq(totalRewards, inflationOnly + extraRewards, "Rewards were not added to inflation");
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Funds were left in rewards after collect");
     }
 }
