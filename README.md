@@ -1,5 +1,7 @@
 This is the [OUSD](https://ousd.com) decentralized governance stack.
 
+# Getting Started
+
 ## Install brownie via pipx  
 
 [The recommended way to install Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html) is via [pipx](https://github.com/pipxproject/pipx):
@@ -117,11 +119,92 @@ yarn dev
 
 This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
 
-## Gotchas
+# Deploying the dApp
+
+This section details the playbook for deploying the dApp.
+
+## Environments
+
+Commits to the following branches will automatically deploying to the associated Heroku environments:
+
+1. `stable` -> [Production](https://governance.ousd.com/claim)
+2. `staging` -> [Staging](https://ousd-governance-rinkeby.herokuapp.com/)
+
+The production environment references the mainnet contracts in this repo. The staging environment references contracts deployed to Rinkeby.
+
+Note: You shouldn't commit to `stable` directly. Only merge from `master` (where new features are merged via approved pull request).
+
+## Production Deployment Process
+
+1. Take a database backup before you start: `heroku pg:backups:capture --app=ousd-governance-production`. Note: You must be authorised with Heroku to run this command. Contact Franck to be added if you're not already.
+
+1. Take a note of the last commit hash that's confirmed as working in production. You can find this in the `stable` branch's [commit history](https://github.com/OriginProtocol/ousd-governance/commits/stable).
+
+1. Merge from `master` to `stable` to initiate a deployment. You can check progress in the [Heroku Dashboard](https://dashboard.heroku.com/apps/ousd-governance-production) where you'll find error logs should your deployment fail.
+
+1. Once deployed, check the [production environment](https://governance.ousd.com/) in your browser to make sure that things are working as expected. If yes, you're done!
+
+1. If the release causes issues in production, don't be afraid to roll back while you diagnose the issue. Especially if users are impacted. You can do this by reverting your commit: `git revert [commit hash]` and pushing the resulting revert commit to `stable`. Or, if you want to keep a cleaner commit history, reset the `stable` branch to the last commit hash of the previous release: `git reset [commit hash] --hard` and push this to `stable` using `git push stable --force`. Note: You should only force push if you're 100% certain of the change.
+
+## Git Commands For Merging Branches
+
+### Staging (Rinkeby)
+
+```
+git checkout master
+git pull
+git checkout staging
+git merge --no-ff origin/master
+git log --abbrev-commit --pretty=oneline | more
+git push origin staging --no-verify
+```
+
+### Production (Mainnet)
+
+```
+git checkout master
+git pull
+git checkout stable
+git merge --no-ff origin/staging
+git log --abbrev-commit --pretty=oneline | more
+git push origin stable --no-verify
+```
+
+## Backfilling Database Data
+
+Because we rely on data from blockchain events that occur over time, some features require changes to `listener.ts`. 
+
+The script listens from the latest mainnet block by default, however, when we need data from events in the past we need to reset the listener to an earlier block number.
+
+If required, follow this process post deployment:
+
+1. Update the `last_seen_block` entry in the `listener` table of the databse to the block number the `OGVStaking.sol` contract was deployed at, `15089597` (Note: The more blocks that are mined over time, the longer this process will take):
+    1. Connect to the database via Heroku CLI: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
+    1. Update the block number: `INSERT INTO listener (last_seen_block) VALUES ('15089597');`
+
+
+1. Restart all dynos in the production environment's [Heroku dashboard](https://dashboard.heroku.com/apps/ousd-governance-production):
+    1. Click "More"
+    1. Click "Restart all dynos" to restart `listener.ts`
+
+
+1. Monitor the app logs from the [Heroku dashboard](https://dashboard.heroku.com/apps/ousd-governance-production) to ensure the listener has been properly reset:
+    1. Click "More"
+    1. Click "View logs"
+    1. Look for continued output from the worker showing `Got confirmed block 15089597` and onwards.
+
+
+1. Check that the database is being backfilled with blockchain data:
+    1. Connect to the database: `heroku pg:psql postgresql-transparent-92815 --app ousd-governance-production`
+    1. Bring up a table relevant to your new feature: `TABLE lockups;`
+    1. Ensure historic data is being added to the database by `listener.ts`. If yes, you're good!
+
+
+# Local Gotchas
 
 Here are some places you may come unstuck when setting up locally. If you find any yourself, please document them here to help your fellow engineers:
 
-### 1. How do we populate the database with proposal data post- transaction submission?
+## 1. How do we populate the database with proposal data post-transaction submission?
 
 **Problem:**
 
@@ -142,4 +225,3 @@ Because we [start from the last seen block saved in the database](/client/listen
 5. Run `yarn run dev` again
 
 You should now see proposals added to the database when you submit transactions.
-
