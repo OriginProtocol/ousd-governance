@@ -45,35 +45,25 @@ contract RewardsSource is Governable {
         if (block.timestamp <= lastRewardTime) {
             return 0;
         }
-        (uint256 rewards, uint256 _nextSlopeIndex) = _calcRewards();
+        (uint256 inflation, uint256 _nextSlopeIndex) = _calculateInflation();
         if (_nextSlopeIndex != 0) {
             currentSlopeIndex = _nextSlopeIndex;
         }
         lastRewardTime = block.timestamp;
 
+        if (inflation > 0) {
+            // Mint the inflation
+            Mintable(ogv).mint(rewardsTarget, inflation);
+        }
+
         // OGV Balance of this contract
         uint256 balance = Mintable(ogv).balanceOf(address(this));
-
-        if (rewards <= balance) {
-            // No need to mint any new OGV.
-            // Just transfer it from the contract's balance.
-            Mintable(ogv).transfer(rewardsTarget, rewards);
-        } else if (balance == 0) {
-            // Zero balance: Have to mint everything
-            Mintable(ogv).mint(rewardsTarget, rewards);
-        } else {
-            // Has some OGV balance but it's lesser what
-            // we need. So, transfer what's left and 
-            // mint the difference
-
+        if (balance > 0) {
             // Transfer the balance
             Mintable(ogv).transfer(rewardsTarget, balance);
-
-            // Mint the rest
-            uint256 ogvToMint = rewards - balance;
-            Mintable(ogv).mint(rewardsTarget, ogvToMint);
         }
-        return rewards;
+
+        return inflation + balance;
     }
 
     /// @notice Preview the amount of rewards that would be returned if rewards
@@ -81,7 +71,12 @@ contract RewardsSource is Governable {
     ///
     /// @return rewards OGV that would be collected
     function previewRewards() external view returns (uint256) {
-        (uint256 rewards, ) = _calcRewards();
+        (uint256 rewards, ) = _calculateInflation();
+
+        // When previewing rewards, check contract's own OGV balance,
+        // and if present, send that along as part of the rewards
+        rewards += Mintable(ogv).balanceOf(address(this));
+
         return rewards;
     }
 
@@ -91,7 +86,7 @@ contract RewardsSource is Governable {
     /// @return total OGV rewards accrued in the time period
     /// @return slopeIndex a value to be cached, if non-zero, to speed up
     ///   computing rewards in the future.
-    function _calcRewards() internal view returns (uint256, uint256) {
+    function _calculateInflation() internal view returns (uint256, uint256) {
         uint256 last = lastRewardTime;
         if (last >= block.timestamp) {
             return (0, 0); // A zero slopeIndex here results in no change to stored state
@@ -127,10 +122,6 @@ contract RewardsSource is Governable {
                 break; // No future slope could match
             }
         }
-
-        // When previewing or sending rewards, check it's own OGV balance,
-        // and if present, send that along as part of the rewards
-        total += Mintable(ogv).balanceOf(address(this));
 
         return (total, nextSlopeIndex);
     }
