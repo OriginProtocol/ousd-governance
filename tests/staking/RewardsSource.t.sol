@@ -237,9 +237,9 @@ contract RewardsSourceTest is Test {
         // Simulate OGV from Buyback contract + inflation
         // Send 11 OGV
         assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards should start zero after collect");
-        ogv.mint(address(rewards), 11 ether);
-        vm.warp(EPOCH + 15 days);
-        assertEq(ogv.balanceOf(address(rewards)), 11 ether, "BB+Inf: Rewards should only hold current buyback funds");
+        ogv.mint(address(rewards), 15 ether);
+        vm.warp(EPOCH + 11 days);
+        assertEq(ogv.balanceOf(address(rewards)), 15 ether, "BB+Inf: Rewards should only hold current buyback funds");
 
         // Verify preview
         assertEq(rewards.previewRewards(), 11 ether + 15 ether, "BB+Inf: Preview wrong");
