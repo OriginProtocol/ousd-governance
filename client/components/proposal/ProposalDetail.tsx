@@ -181,7 +181,7 @@ export const ProposalDetail = ({
         <StateTag state={proposalState} />
       </div>
       <CardGroup>
-        <RegisterToVote withCard />
+        <RegisterToVote withCard singleView />
         <ProposalVoteStats
           proposal={proposal}
           votePower={votePower}

@@ -7,10 +7,12 @@ import Card from "components/Card";
 
 interface RegisterToVoteProps {
   withCard?: Boolean;
+  singleView?: Boolean;
 }
 
 const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   withCard,
+  singleView,
 }) => {
   const { contracts, address, balances, pendingTransactions } = useStore();
   const { veOgv } = balances;
@@ -59,6 +61,12 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
       <div className="bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
         <h2 className="text-lg font-bold mb-2">Governance Information</h2>
         <p className="mb-4">
+          {singleView && (
+            <>
+              Sorry, you weren&apos;t registered in time to vote on this
+              proposal.
+            </>
+          )}{" "}
           Please register to participate in governance for future proposals. You
           won&apos;t be able to vote on a proposal with your veOGV until you do.
         </p>
