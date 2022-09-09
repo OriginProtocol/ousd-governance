@@ -24,7 +24,7 @@ def test_create_proposal(governance, staking, token):
     )
     chain.mine()
     proposal_quorum = governance.quorum(tx.block_number)
-    assert approx(proposal_quorum, staking.getPastTotalSupply(tx.block_number) * 0.04)
+    assert approx(proposal_quorum, staking.getPastTotalSupply(tx.block_number) * 0.2)
 
 
 def test_cant_create_proposal_if_below_threshold(governance):
@@ -75,7 +75,7 @@ def test_proposal_can_pass_vote(governance, staking, token, timelock_controller,
     )
     chain.mine()
     proposal_quorum = governance.quorum(tx.block_number)
-    expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.04
+    expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.2
     assert approx(proposal_quorum, expected_quorum)
     chain.mine()
     governance.castVote(tx.return_value, 1, {"from": alice})
@@ -112,7 +112,7 @@ def test_proposal_can_fail_vote(
     )
     chain.mine()
     proposal_quorum = governance.quorum(tx.block_number)
-    expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.04
+    expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.2
     assert approx(proposal_quorum, expected_quorum)
     chain.mine()
     governance.castVote(tx.return_value, 1, {"from": alice})
@@ -169,11 +169,11 @@ def test_late_vote_extends_quorum(
         "Set voting delay",
         {"from": accounts[0]},
     )
-    mine_blocks(web3, "0x7fa5")  # 50 less than is required for vote end
+    mine_blocks(web3, "0x434E")  # 50 less (17230) than is required for vote end (17280)
     governance.castVote(tx.return_value, 1, {"from": alice})
     proposal = governance.proposals(tx.return_value)
-    # Extends for a day beyond the current block
-    assert proposal[4] == (86400 / 15) + web3.eth.block_number
+    # Extends for 2 days beyond the current block
+    assert proposal[4] == (86400 / 15) * 2 + web3.eth.block_number
 
 
 def test_timelock_proposal_can_be_cancelled(

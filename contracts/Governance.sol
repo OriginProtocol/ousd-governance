@@ -19,13 +19,13 @@ contract Governance is
         Governor("OUSD Governance")
         GovernorSettings(
             1, /* 1 block */
-            32727, /* 5 days */
-            5000000 * 1e18 /* 5 mio veOgv */
+            17280, /* ~3 days (86400 / 15) * 3 */
+            10000000 * 1e18 /* 10 mio veOgv */
         )
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4) // Default quorum denominator is 100, so 4/100 or 4%
+        GovernorVotesQuorumFraction(20) // Default quorum denominator is 100, so 20/100 or 20%
         GovernorTimelockControl(_timelock)
-        GovernorPreventLateQuorum(86400 / 15) // ~1 day
+        GovernorPreventLateQuorum(11520) // ~2 days (86400 / 15) * 2
     {}
 
     // The following functions are overrides required by Solidity.
