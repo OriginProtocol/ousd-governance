@@ -57,6 +57,8 @@ const defaultState: Web3DataType = {
     totalLockedUpOgv: ethers.BigNumber.from("0"),
     totalPercentageOfLockedUpOgv: 0,
     totalSupplyVeOgv: ethers.BigNumber.from("0"),
+    optionalDistributorOgv: ethers.BigNumber.from("0"),
+    mandatoryDistributorOgv: ethers.BigNumber.from("0"),
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),

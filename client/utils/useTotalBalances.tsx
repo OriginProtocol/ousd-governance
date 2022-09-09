@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo, claimIsOpen } from "utils/index";
+import { claimIsOpen } from "utils/index";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
 
 const useTotalBalances = () => {
-  const networkInfo = useNetworkInfo();
   const { contracts } = useStore();
 
   const [reloadTotalBalances, setReloadTotalBalances] = useState(0);
@@ -22,34 +21,56 @@ const useTotalBalances = () => {
     const loadTotalSupplyVeOgv = async () =>
       await contracts.OgvStaking.totalSupply();
 
+    const loadOptionalDistributorOgvBalance = async () =>
+      await contracts.OriginDollarGovernance.balanceOf(
+        contracts.OptionalDistributor.address
+      );
+
+    const loadMandatoryDistributorOgvBalance = async () =>
+      await contracts.OriginDollarGovernance.balanceOf(
+        contracts.MandatoryDistributor.address
+      );
+
     if (claimIsOpen() && contracts.loaded) {
       Promise.all([
         loadTotalSupplyOfOgv(),
         loadTotalLockedUpOgv(),
         loadTotalSupplyVeOgv(),
-      ]).then(([totalSupplyOfOgv, totalLockedUpOgv, totalSupplyVeOgv]) => {
-        const totalPercentageOfLockedUpOgv =
-          totalLockedUpOgv.gt(0) && totalSupplyOfOgv.gt(0)
-            ? (totalLockedUpOgv / totalSupplyOfOgv) * 100
-            : 0;
+        loadOptionalDistributorOgvBalance(),
+        loadMandatoryDistributorOgvBalance(),
+      ]).then(
+        ([
+          totalSupplyOfOgv,
+          totalLockedUpOgv,
+          totalSupplyVeOgv,
+          optionalDistributorOgv,
+          mandatoryDistributorOgv,
+        ]) => {
+          const totalPercentageOfLockedUpOgv =
+            totalLockedUpOgv.gt(0) && totalSupplyOfOgv.gt(0)
+              ? (totalLockedUpOgv / totalSupplyOfOgv) * 100
+              : 0;
 
-        const minTotalSupply = numeral(100000000);
-        const totalSupply = numeral(
-          totalSupplyVeOgv.div(decimal18Bn).toString()
-        );
+          const minTotalSupply = numeral(100000000);
+          const totalSupply = numeral(
+            totalSupplyVeOgv.div(decimal18Bn).toString()
+          );
 
-        useStore.setState({
-          totalBalances: {
-            totalSupplyOfOgv,
-            totalLockedUpOgv,
-            totalPercentageOfLockedUpOgv,
-            totalSupplyVeOgv,
-            totalSupplyVeOgvAdjusted: Math.max(totalSupply, minTotalSupply),
-          },
-        });
-      });
+          useStore.setState({
+            totalBalances: {
+              totalSupplyOfOgv,
+              totalLockedUpOgv,
+              totalPercentageOfLockedUpOgv,
+              totalSupplyVeOgv,
+              totalSupplyVeOgvAdjusted: Math.max(totalSupply, minTotalSupply),
+              optionalDistributorOgv,
+              mandatoryDistributorOgv,
+            },
+          });
+        }
+      );
     }
-  }, [networkInfo.correct, contracts, reloadTotalBalances]);
+  }, [contracts, reloadTotalBalances]);
 
   return {
     reloadTotalBalances: () => {

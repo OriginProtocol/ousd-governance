@@ -74,7 +74,7 @@ const useContracts = () => {
     if (claimIsOpen()) {
       loadContracts();
     }
-  }, [web3Provider, chainId]);
+  }, [web3Provider, chainId, networkInfo.envNetwork]);
 };
 
 export default useContracts;
