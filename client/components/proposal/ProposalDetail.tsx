@@ -1,6 +1,5 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Loading } from "components/Loading";
 import { ProposalActionsTable } from "components/proposal/ProposalActionsTable";
 import { ProposalVoteStats } from "components/proposal/ProposalVoteStats";
@@ -12,15 +11,31 @@ import { useStore } from "utils/store";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { PageTitle } from "components/PageTitle";
+import { getCleanProposalContent } from "utils/index";
+import { Address } from "components/Address";
+import { SupportTable } from "./SupportTable";
+import { StateTag } from "./StateTag";
+import { ProposalHistory } from "./ProposalHistory";
+import moment from "moment";
+import RegisterToVote from "components/proposal/RegisterToVote";
 
 export const ProposalDetail = ({
+  id,
   proposalId,
+  createdAt,
   description,
+  voters,
+  transactions,
 }: {
+  id: string;
   proposalId: string;
+  createdAt: string;
   description: string;
+  voters: Array<object>;
+  transactions: Array<object>;
 }) => {
-  const { address, contracts, pendingTransactions } = useStore();
+  const { address, contracts, pendingTransactions, rpcProvider } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
@@ -29,7 +44,54 @@ export const ProposalDetail = ({
   const [reloadProposal, setReloadProposal] = useState(false);
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
   const [hasVoted, setHasVoted] = useState(false);
+  const [forVoters, setForVoters] = useState([]);
+  const [againstVoters, setAgainstVoters] = useState([]);
+  const [blockNumber, setBlockNumber] = useState(0);
   const { Governance } = contracts;
+  const { cleanTitle, cleanDescription } = getCleanProposalContent(description);
+
+  useEffect(() => {
+    const getBlockNumber = async () => {
+      const blockNumber = await rpcProvider.getBlockNumber();
+      setBlockNumber(parseInt(blockNumber));
+    };
+    if (rpcProvider) {
+      getBlockNumber();
+    }
+  }, [rpcProvider]);
+
+  useEffect(() => {
+    const loadVoters = async () => {
+      const receipts = await Promise.all(
+        voters.map((voter) => Governance.getReceipt(proposalId, voter.address))
+      );
+
+      const enrichedVoters = voters.map((voter, index) => {
+        return {
+          ...voter,
+          votes: receipts[index].votes,
+          support: receipts[index].support,
+        };
+      });
+
+      setForVoters(enrichedVoters.filter((voter) => voter.support === 1));
+      setAgainstVoters(enrichedVoters.filter((voter) => voter.support === 0));
+    };
+
+    if (voters && Governance) {
+      loadVoters();
+    }
+  }, [proposalId, Governance, voters]);
+
+  const totalForVotes = forVoters.reduce(
+    (total: BigNumber, voter) => total.add(voter.votes),
+    BigNumber.from(0)
+  );
+  const totalAgainstVotes = againstVoters.reduce(
+    (total: BigNumber, voter) => total.add(voter.votes),
+    BigNumber.from(0)
+  );
+  const totalVotes = totalForVotes.add(totalAgainstVotes);
 
   useEffect(() => {
     const loadProposal = async () => {
@@ -64,10 +126,10 @@ export const ProposalDetail = ({
     const loadQuorum = async () => {
       setQuorum(await Governance.quorum(proposal.startBlock));
     };
-    if (proposal && Governance) {
+    if (proposal && Governance && blockNumber > parseInt(proposal.startBlock)) {
       loadQuorum();
     }
-  }, [proposal, Governance, proposalId, reloadProposal]);
+  }, [proposal, Governance, proposalId, reloadProposal, blockNumber]);
 
   if (proposal === null || proposalActions === null) return <Loading />;
 
@@ -95,42 +157,86 @@ export const ProposalDetail = ({
     });
   };
 
+  const lastTx = transactions[transactions.length - 1];
+
   return (
     <>
+      <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
+        <div className="mr-4 relative max-w-lg">
+          <PageTitle noBottomMargin>
+            <div
+              className="break-words"
+              dangerouslySetInnerHTML={{ __html: cleanTitle }}
+            />
+          </PageTitle>
+          <div className="text-white opacity-70 text-md">
+            {id.toString().padStart(3, "0")}
+            {lastTx &&
+              ` • ${lastTx?.event} ${moment(lastTx?.createdAt).format(
+                "MMM D, YYYY"
+              )}`}{" "}
+            • Proposed by <Address noTruncate address={proposal.proposer} />
+          </div>
+        </div>
+        <StateTag state={proposalState} />
+      </div>
       <CardGroup>
+        <RegisterToVote withCard singleView />
         <ProposalVoteStats
           proposal={proposal}
           votePower={votePower}
           onVote={handleVote}
           hasVoted={hasVoted}
+          votingActive={proposalState === 1}
         />
-        <Card>
-          <div className="space-y-8">
-            <div>
-              <SectionTitle>Proposal Parameters</SectionTitle>
-              <ProposalParameters
-                proposal={proposal}
-                state={proposalState}
-                quorum={quorum}
-              />
-            </div>
-            <div>
-              <SectionTitle>Governance Actions</SectionTitle>
-              <ProposalActionsTable proposalActions={proposalActions} />
-              {description && (
-                <>
-                  <SectionTitle>Signalling Proposal</SectionTitle>
-                  <Link
-                    href={`https://vote.originprotocol.com/#/proposal/${description}`}
-                    passHref
-                  >
-                    <a target="_blank">{description}</a>
-                  </Link>
-                </>
+        <CardGroup twoCol horizontal>
+          <Card tightPadding>
+            <SectionTitle noMarginBottom>For</SectionTitle>
+            <progress
+              className="mt-4 progress progress-success w-full"
+              value={totalForVotes.toString()}
+              max={totalVotes.toString()}
+            />
+            <SupportTable voters={forVoters} />
+          </Card>
+          <Card tightPadding>
+            <SectionTitle noMarginBottom>Against</SectionTitle>
+            <progress
+              className="mt-4 progress progress-error w-full"
+              value={totalAgainstVotes.toString()}
+              max={totalVotes.toString()}
+            />
+            <SupportTable voters={againstVoters} />
+          </Card>
+        </CardGroup>
+        <CardGroup>
+          <Card>
+            <div className="space-y-8">
+              {cleanDescription && (
+                <div>
+                  <SectionTitle>Description</SectionTitle>
+                  <div
+                    className="text-sm"
+                    dangerouslySetInnerHTML={{ __html: cleanDescription }}
+                  />
+                </div>
               )}
+              <div>
+                <SectionTitle>Actions</SectionTitle>
+                <ProposalActionsTable proposalActions={proposalActions} />
+              </div>
+              <div>
+                <SectionTitle>Details</SectionTitle>
+                <ProposalParameters
+                  proposal={proposal}
+                  state={proposalState}
+                  quorum={quorum}
+                />
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </CardGroup>
+        <ProposalHistory proposalId={proposalId} transactions={transactions} />
       </CardGroup>
       <EnsureDelegationModal />
     </>

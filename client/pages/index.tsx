@@ -14,6 +14,7 @@ import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import { useStore } from "utils/store";
 import Seo from "components/Seo";
+import Link from "components/Link";
 
 export type ProposalDataType = {
   proposals: Array<Array<[BigNumber, string, BigNumber, boolean]>>;
@@ -27,24 +28,33 @@ export async function getServerSideProps({ res }: { res: any }) {
   );
 
   const holderCount = await prisma.voter.count();
+
   // Limit 5
   const voters = (
-    await prisma.voter.findMany({ orderBy: [{ votes: "desc" }], take: 5 })
+    await prisma.voter.findMany({
+      include: { proposalsVoted: true },
+      orderBy: [{ votes: "desc" }],
+      take: 5,
+    })
   ).map((v) => ({
     address: v.address,
     votes: v.votes.toHexadecimal(),
+    proposalsVoted: v?.proposalsVoted?.length,
   }));
 
   const proposalCount = await prisma.proposal.count();
   const proposals = (
     await prisma.proposal.findMany({
       orderBy: [{ id: "desc" }],
+      include: { transactions: true },
       take: 5,
     })
   ).map((p) => ({
     id: p.id,
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
+    description: p.description,
+    transactions: JSON.parse(JSON.stringify(p.transactions)),
   }));
 
   return {
@@ -57,12 +67,7 @@ export async function getServerSideProps({ res }: { res: any }) {
   };
 }
 
-const Home: NextPage = ({
-  voters,
-  proposals,
-  proposalCount,
-  holderCount,
-}: {
+interface HomeProps {
   voters: Array<{ address: string; votes: string }>;
   proposals: Array<{
     id: number;
@@ -72,14 +77,22 @@ const Home: NextPage = ({
   }>;
   proposalCount: number;
   holderCount: number;
+}
+
+const Home: NextPage<HomeProps> = ({
+  voters,
+  proposals,
+  proposalCount,
+  holderCount,
 }) => {
-  const { contracts } = useStore();
+  const { contracts, totalBalances } = useStore();
+  const { totalSupplyVeOgv } = totalBalances;
+
   const networkInfo = useNetworkInfo();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
     states: [],
   });
-  const [totalSupply, setTotalSupply] = useState<BigNumber>(BigNumber.from(0));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,49 +109,66 @@ const Home: NextPage = ({
           displayId: proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
           )?.id,
+          description: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.description,
+          transactions: proposals.find(
+            (p) => p.proposalId.toString() === d.id.toString()
+          )?.transactions,
         })),
       };
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
 
-    if (networkInfo.correct && contracts.Governance) {
+    if (contracts.Governance) {
       load();
     }
   }, [proposals, setProposalData, contracts.Governance, networkInfo.correct]);
 
-  useEffect(() => {
-    const loadTotalSupply = async () => {
-      const totalSupply = await contracts.VoteLockerCurve.totalSupply();
-      setTotalSupply(totalSupply);
-    };
-
-    if (networkInfo.correct && contracts.VoteLockerCurve) {
-      loadTotalSupply();
-    }
-  }, [contracts, networkInfo.correct]);
-
   return (
     <Wrapper narrow>
       <Seo />
-      <PageTitle>Overview</PageTitle>
+      <PageTitle>Governance Overview</PageTitle>
       <CardGroup>
         <VoteStats
           proposalCount={proposalCount}
           holderCount={holderCount}
-          totalSupply={totalSupply}
+          totalSupply={totalSupplyVeOgv}
         />
         <Card>
-          <SectionTitle>Last 5 Proposals</SectionTitle>
           {loading ? (
             <Loading />
           ) : (
-            <ProposalTable proposalData={proposalData} />
+            <div className="space-y-4">
+              <ProposalTable
+                title="Recent Proposals"
+                proposalData={proposalData}
+              />
+              {proposalCount > 0 && (
+                <Link
+                  href="/proposals"
+                  className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+                >
+                  View All Proposals
+                </Link>
+              )}
+            </div>
           )}
         </Card>
         <Card>
-          <SectionTitle>Top 5 Voters</SectionTitle>
-          <LeaderboardTable voters={voters} />
+          <SectionTitle>Top Voting Addresses</SectionTitle>
+          <div className="space-y-4">
+            <LeaderboardTable voters={voters} />
+            {voters && voters.length > 0 && (
+              <Link
+                href="/leaderboard"
+                className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
+              >
+                View Leaderboard
+              </Link>
+            )}
+          </div>
         </Card>
       </CardGroup>
     </Wrapper>

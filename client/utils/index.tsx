@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useStore } from "utils/store";
+import sanitizeHtml from "sanitize-html";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -150,3 +151,44 @@ export function claimIsOpen() {
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Break up proposal content for display
+ *
+ * Important: The output of the function must be
+ * properly escaped and safe to use as raw HTML
+ * that is rendered by UI components. Never return
+ * unsanitized HTML here.
+ */
+const getCleanProposalContent = (proposalDescription: string) => {
+  const split = proposalDescription?.split("<br>");
+  const title = split && split[0];
+  const description = split && split.slice(1).join("<br>").trim();
+
+  const cleanTitle = sanitizeHtml(title);
+  const cleanDescription = sanitizeHtml(description, {
+    allowedTags: ["br"],
+  });
+
+  return { cleanTitle, cleanDescription };
+};
+
+export { getCleanProposalContent };
+
+const makeHumanReadable = (num: Number, singular: string) => {
+  return num > 0
+    ? num + (num === 1 ? ` ${singular}, ` : ` ${singular}s, `)
+    : "";
+};
+
+export const toDaysMinutesSeconds = (totalSeconds: Number) => {
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+  const days = Math.floor(totalSeconds / (3600 * 24));
+
+  const minutesStr = makeHumanReadable(minutes, "min");
+  const hoursStr = makeHumanReadable(hours, "hr");
+  const daysStr = makeHumanReadable(days, "day");
+
+  return `${daysStr}${hoursStr}${minutesStr}`.replace(/,\s*$/, "");
+};

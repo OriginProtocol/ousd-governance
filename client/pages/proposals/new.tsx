@@ -1,4 +1,4 @@
-import { ethers, BigNumber } from "ethers";
+import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
 import { toast } from "react-toastify";
@@ -15,12 +15,13 @@ import { Reallocation } from "components/proposal/Reallocation";
 import { useStickyState } from "utils/useStickyState";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { useStore } from "utils/store";
-import { truncateBalance } from "utils/index";
 import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { useRouter } from "next/router";
 
 const ProposalNew: NextPage = () => {
+  const router = useRouter();
   const { address, web3Provider, contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
@@ -29,7 +30,11 @@ const ProposalNew: NextPage = () => {
     [],
     "proposalActions"
   );
-  const [snapshotHash, setSnapshotHash] = useStickyState("", "snapshotHash");
+  const [proposalDetails, setProposalDetails] = useStickyState(
+    "",
+    "proposalDetails"
+  );
+
   const [isReallocation, setIsReallocation] = useStickyState(
     false,
     "isReallocation"
@@ -73,7 +78,7 @@ const ProposalNew: NextPage = () => {
   // Reset the state of the form
   const reset = () => {
     setNewProposalActions([]);
-    setSnapshotHash("");
+    setProposalDetails("");
     setIsReallocation(false);
     setSubmitDisabled(false);
   };
@@ -102,7 +107,7 @@ const ProposalNew: NextPage = () => {
         proposalActions.values,
         proposalActions.signatures,
         proposalActions.calldatas,
-        snapshotHash
+        proposalDetails.replace(/\n/g, "<br>\n")
       );
     } catch (error) {
       console.error(error);
@@ -119,6 +124,7 @@ const ProposalNew: NextPage = () => {
             toast.success("Proposal has been submitted", {
               hideProgressBar: true,
             });
+            router.push(`/proposals`);
             reset();
           },
         },
@@ -161,24 +167,20 @@ const ProposalNew: NextPage = () => {
       <PageTitle>New Proposal</PageTitle>
       <CardGroup>
         <Card>
-          <SectionTitle>Snapshot Proposal</SectionTitle>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Hash</span>
-            </label>
-            <input
-              type="text"
-              placeholder="0x0"
-              className="input input-bordered text-black"
-              onChange={(e) => setSnapshotHash(e.target.value)}
-            />
-          </div>
+          <SectionTitle>Proposal Details</SectionTitle>
+          <label className="label">
+            <span className="label-text">Title and description</span>
+          </label>
+          <textarea
+            className="textarea textarea-bordered text-black w-full"
+            rows={4}
+            onChange={(e) => setProposalDetails(e.target.value)}
+            value={proposalDetails}
+          />
           <label className="label">
             <span className="label-text-alt opacity-80">
-              For proposals that aren&apos;t simple reallocations, a Snapshot
-              proposal should be used to signal intent before on chain happens.
-              The Snapshot proposal should clearly detail the justification for
-              the change.
+              Add the proposal title on the first line and the proposal
+              description underneath.
             </span>
           </label>
         </Card>
@@ -203,7 +205,7 @@ const ProposalNew: NextPage = () => {
             </a>
           </div>{" "}
           {isReallocation ? (
-            <Reallocation snapshotHash={snapshotHash} />
+            <Reallocation proposalDetails={proposalDetails} />
           ) : (
             <>
               {newProposalActions.length === 0 ? (

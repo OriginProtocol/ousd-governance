@@ -1,7 +1,12 @@
 import { ethers } from "ethers";
+import TokenAmount from "components/TokenAmount";
+import { useStore } from "utils/store";
 import { Address } from "components/Address";
 
 export const LeaderboardTable = ({ voters }: { voters: Array }) => {
+  const { totalBalances } = useStore();
+  const { totalSupplyVeOgv } = totalBalances;
+
   if (voters.length < 1) {
     return <p className="text-gray-500 text-sm">No voters yet.</p>;
   }
@@ -10,9 +15,11 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
     <table className="table w-full">
       <thead>
         <tr>
-          <th>#</th>
+          <th>Rank</th>
           <th>Address</th>
           <th>Votes</th>
+          <th>Vote Weight</th>
+          <th>Proposals Voted</th>
         </tr>
       </thead>
       <tbody>
@@ -23,8 +30,14 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
               <Address address={voter.address} />
             </td>
             <td>
-              {ethers.utils.formatUnits(ethers.BigNumber.from(voter.votes))}
+              <TokenAmount
+                amount={ethers.utils.formatUnits(
+                  ethers.BigNumber.from(voter.votes)
+                )}
+              />
             </td>
+            <td>{((voter.votes / totalSupplyVeOgv) * 100).toFixed(2)}%</td>
+            <td>{voter.proposalsVoted}</td>
           </tr>
         ))}
       </tbody>

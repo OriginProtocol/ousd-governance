@@ -9,23 +9,27 @@ generator client {
 }
 
 model Voter {
-  id             Int      @id @default(autoincrement())
-  address        String   @unique
+  id             Int        @id @default(autoincrement())
+  address        String     @unique
   // This is storing a uint256
-  votes          Decimal  @db.Decimal(78, 0)
-  firstSeenBlock Int      @map("first_seen_block")
-  updatedAt      DateTime @default(now()) @map("updated_at")
-  createdAt      DateTime @default(now()) @map("created_at")
+  votes          Decimal    @db.Decimal(78, 0)
+  firstSeenBlock Int        @map("first_seen_block")
+  updatedAt      DateTime   @default(now()) @map("updated_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  proposalsVoted Proposal[] @relation("proposal_to_voter")
 
   @@map("voters")
 }
 
 model Proposal {
-  id          Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   // This is storing a uint256
-  proposalId  String   @unique @map("proposal_id")
-  description String   @default("")
-  createdAt   DateTime @default(now()) @map("created_at")
+  proposalId   String        @unique @map("proposal_id")
+  description  String        @default("")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  voters       Voter[]       @relation("proposal_to_voter")
+  transactions Transaction[]
+  status       Int           @default(0)
 
   @@map("proposals")
 }
@@ -54,13 +58,14 @@ model Lockup {
 
 model Transaction {
   id        Int      @id @default(autoincrement())
-  hash      String
+  hash      String?
   event     String
   createdAt DateTime @default(now()) @map("created_at")
+  
+  Proposal   Proposal? @relation(fields: [proposalId], references: [id])
+  proposalId Int?
+  Lockup     Lockup?   @relation(fields: [lockupId], references: [id])
+  lockupId   Int?
 
-  Lockup   Lockup? @relation(fields: [lockupId], references: [id])
-  lockupId Int
-
-  @@unique([hash, lockupId])
   @@map("transactions")
 }
