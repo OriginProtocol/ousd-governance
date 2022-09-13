@@ -150,8 +150,8 @@ const LockupsTable: FunctionComponent = () => {
                     <td>
                       <Link
                         href={
-                          chainId === 4
-                            ? `https://rinkeby.etherscan.io/tx/${transaction.hash}`
+                          chainId === 5
+                            ? `https://goerli.etherscan.io/tx/${transaction.hash}`
                             : `https://etherscan.io/tx/${transaction.hash}`
                         }
                         newWindow

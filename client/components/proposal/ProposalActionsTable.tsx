@@ -30,8 +30,8 @@ export const ProposalActionsTable = ({
   let explorerPrefix: string | undefined;
   if (envNetwork === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (envNetwork === 4) {
-    explorerPrefix = "https://rinkeby.etherscan.io/";
+  } else if (envNetwork === 5) {
+    explorerPrefix = "https://goerli.etherscan.io/";
   }
 
   return (

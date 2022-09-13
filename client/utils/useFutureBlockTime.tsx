@@ -9,8 +9,8 @@ const useFutureBlockTime = (blockNumber: Number) => {
   useEffect(() => {
     const fetchFutureBlock = async () => {
       let api = `https://api.etherscan.io/api?module=block&action=getblockcountdown&blockno=${blockNumber}&apikey=${ETHERSCAN_API_KEY}`;
-      if (4 === envNetwork) {
-        api = `https://api-rinkeby.etherscan.io/api?module=block&action=getblockcountdown&blockno=${blockNumber}&apikey=${ETHERSCAN_API_KEY}`;
+      if (5 === envNetwork) {
+        api = `https://api-goerli.etherscan.io/api?module=block&action=getblockcountdown&blockno=${blockNumber}&apikey=${ETHERSCAN_API_KEY}`;
       }
       try {
         const res = await fetch(api);

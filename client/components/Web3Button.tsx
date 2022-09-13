@@ -69,7 +69,7 @@ const providerOptions = {
 
 const networkNameMap = {
   1: "Mainnet",
-  4: "Rinkeby",
+  5: "Goerli",
   31337: "localhost",
 };
 
@@ -202,7 +202,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
           <div className="invisible md:visible md:flex">
             {truncateEthAddress(address)}
             {web3Provider.network.name === "unknown" && " / Lh"}
-            {web3Provider.network.name === "rinkeby" && " / Rink"}
+            {web3Provider.network.name === "goerli" && " / Goer"}
           </div>
         </label>
       )}
