@@ -10,7 +10,7 @@ import useAccountBalances from "utils/useAccountBalances";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
-import DisabledButtonToolTip from "./DisabledButtonTooltip";
+import DisabledButtonToolTip from "../DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
 import { Web3Button } from "components/Web3Button";
 

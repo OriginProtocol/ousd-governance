@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useStore } from "utils/store";
+import { useNetworkInfo } from "utils/index";
 import {
   decodeCalldata,
   functionNameFromSignature,
@@ -21,14 +22,15 @@ export const ProposalActionsTable = ({
   const MAX_UINT256 =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-  const { web3Provider, contracts } = useStore();
+  const { contracts } = useStore();
+  const { envNetwork } = useNetworkInfo();
   const [modalOpen, setModalOpen] = useState(false);
   const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
   let explorerPrefix: string | undefined;
-  if (web3Provider?.chainId === 1) {
+  if (envNetwork === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (web3Provider?.chainId === 4) {
+  } else if (envNetwork === 4) {
     explorerPrefix = "https://rinkeby.etherscan.io/";
   }
 
@@ -48,7 +50,7 @@ export const ProposalActionsTable = ({
         <table className="table w-full">
           <thead>
             <tr>
-              <td>Contract</td>
+              <td className="pl-0">Contract</td>
               <td>Function</td>
               <td>Argument Types</td>
               <td>Arguments</td>
@@ -58,7 +60,7 @@ export const ProposalActionsTable = ({
           <tbody>
             {proposalActions.targets.map((target, index) => (
               <tr key={index}>
-                <td>
+                <td className="pl-0">
                   {explorerPrefix ? (
                     <a
                       className="link link-primary"

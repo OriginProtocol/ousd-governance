@@ -26,11 +26,6 @@ export const CHAIN_CONTRACTS = {
 };
 
 let navItems = [
-  /*
-  {
-    href: "/leaderboard",
-    label: "Leaderboard",
-  },*/
   {
     href: "/claim",
     label: "Claim",
@@ -54,12 +49,8 @@ let navItems = [
 if (governanceEnabled()) {
   navItems = [
     {
-      href: "/",
-      label: "Overview",
-    },
-    {
-      href: "/proposal",
-      label: "Proposal",
+      href: "/proposals",
+      label: "Proposals",
     },
     ...navItems,
   ];
@@ -69,3 +60,5 @@ export { navItems };
 
 // daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
 export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12
+
+export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";

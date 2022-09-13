@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { loadProposals, useNetworkInfo } from "utils/index";
 import { useStore } from "utils/store";
 import type { ProposalDataType } from "pages/index";
@@ -18,13 +17,17 @@ export async function getServerSideProps({ res }: { res: any }) {
     "public, s-maxage=60, stale-while-revalidate=59"
   );
 
-  const proposalCount = await prisma.proposal.count();
   const proposals = (
-    await prisma.proposal.findMany({ orderBy: { id: "desc" } })
+    await prisma.proposal.findMany({
+      orderBy: { id: "desc" },
+      include: { transactions: true },
+    })
   ).map((p) => ({
     id: p.id,
     proposalId: p.proposalId,
     createdAt: p.createdAt.toString(),
+    description: p.description,
+    transactions: JSON.parse(JSON.stringify(p.transactions)), // transactions.createdAt [object Date] cannot be serialized as JSON without JSON.parse/stringify
   }));
 
   return {
@@ -34,9 +37,8 @@ export async function getServerSideProps({ res }: { res: any }) {
   };
 }
 
-const Proposal: NextPage = ({ proposalCount, proposals }) => {
+const Proposal: NextPage = ({ proposals }) => {
   const { contracts } = useStore();
-  const router = useRouter();
   const networkInfo = useNetworkInfo();
   const [proposalData, setProposalData] = useState<ProposalDataType>({
     proposals: [],
@@ -50,20 +52,29 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
         contracts.Governance,
         proposals.map((p) => p.proposalId)
       );
+
       // Augment with human readable ID from the database
       const dataWithDisplayId = {
         ...data,
-        proposals: data.proposals.map((d) => ({
-          ...d,
-          displayId: proposals.find(
+        proposals: data.proposals.map((d) => {
+          const proposalById = proposals.find(
             (p) => p.proposalId.toString() === d.id.toString()
-          )?.id,
-        })),
+          );
+
+          return {
+            ...d,
+            displayId: proposalById?.id,
+            description: proposalById?.description,
+            transactions: proposalById?.transactions,
+          };
+        }),
       };
+
       setProposalData(dataWithDisplayId);
       setLoading(false);
     };
-    if (networkInfo.correct && contracts.loaded) {
+
+    if (contracts.loaded) {
       load();
     }
   }, [
@@ -77,17 +88,7 @@ const Proposal: NextPage = ({ proposalCount, proposals }) => {
   return (
     <Wrapper narrow>
       <Seo title="Proposals" />
-      <div className="flex items-end justify-between">
-        <PageTitle>Proposals</PageTitle>
-        {proposals.length > 0 && (
-          <button
-            className="btn btn-primary btn-circle mb-5 text-secondary"
-            onClick={() => router.push("/proposal/new")}
-          >
-            <span className="text-2xl block">+</span>
-          </button>
-        )}
-      </div>
+      <PageTitle>Proposals</PageTitle>
       {loading ? (
         <Loading />
       ) : (
