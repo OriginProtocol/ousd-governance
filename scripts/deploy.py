@@ -24,8 +24,8 @@ def main(
 
     if web3.chain_id == 1:
         accounts.default = accounts.load("deployer")
-    elif web3.chain_id == 4:
-        accounts.default = accounts.load("rinkeby_deployer")
+    elif web3.chain_id == 5:
+        accounts.default = accounts.load("goerli_deployer")
     else:
         accounts.default = accounts[0]
 
