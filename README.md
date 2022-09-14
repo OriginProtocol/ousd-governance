@@ -128,9 +128,9 @@ This section details the playbook for deploying the dApp.
 Commits to the following branches will automatically deploying to the associated Heroku environments:
 
 1. `stable` -> [Production](https://governance.ousd.com/claim)
-2. `staging` -> [Staging](https://ousd-governance-rinkeby.herokuapp.com/)
+2. `staging` -> [Staging](https://ousd-governance-goerli.herokuapp.com/)
 
-The production environment references the mainnet contracts in this repo. The staging environment references contracts deployed to Rinkeby.
+The production environment references the mainnet contracts in this repo. The staging environment references contracts deployed to Goerli.
 
 Note: You shouldn't commit to `stable` directly. Only merge from `master` (where new features are merged via approved pull request).
 
@@ -148,7 +148,7 @@ Note: You shouldn't commit to `stable` directly. Only merge from `master` (where
 
 ## Git Commands For Merging Branches
 
-### Staging (Rinkeby)
+### Staging (Goerli)
 
 ```
 git checkout master

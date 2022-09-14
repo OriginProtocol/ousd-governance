@@ -9,8 +9,8 @@ def main():
     if map:
         if web3.chain_id == 1:
             contracts = map["1"]
-        elif web3.chain_id == 4:
-            contracts = map["4"]
+        elif web3.chain_id == 5:
+            contracts = map["5"]
         else:
             sys.exit("You do not have to verify using a local node.")
 

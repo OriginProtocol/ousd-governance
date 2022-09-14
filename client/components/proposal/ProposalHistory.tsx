@@ -20,8 +20,8 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
   let explorerPrefix;
   if (rpcProvider?._network?.chainId === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (rpcProvider?._network?.chainId === 4) {
-    explorerPrefix = "https://rinkeby.etherscan.io/";
+  } else if (rpcProvider?._network?.chainId === 5) {
+    explorerPrefix = "https://goerli.etherscan.io/";
   }
 
   return (
