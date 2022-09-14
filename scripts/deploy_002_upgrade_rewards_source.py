@@ -1,5 +1,6 @@
-from brownie import *
 import os
+
+from brownie import *
 from brownie.network import priority_fee
 
 def main():
@@ -43,3 +44,5 @@ def main():
 	if is_mainnet:
 		# Verify on mainnet
 		RewardsSource.publish_source(rewards_impl)
+
+	return Contract.from_abi("RewardsSource", rewards_proxy.address, rewards_impl.abi)
