@@ -5,6 +5,7 @@
       "0x9c354503C38481a7A7a51629142963F98eCC12D0"
     ],
     "Governance": [
+      "0x3cdD07c16614059e66344a7b579DAB4f9516C0b6",
       "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA"
     ],
     "MandatoryLockupDistributor": [
@@ -18,6 +19,7 @@
       "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
     ],
     "Timelock": [
+      "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F",
       "0xac126C98cFc7c55a9F944770cb17d7065688C577"
     ]
   },
