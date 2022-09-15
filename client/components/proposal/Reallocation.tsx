@@ -1,12 +1,20 @@
 import { ethers, BigNumber } from "ethers";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, FunctionComponent } from "react";
 import { useStore } from "utils/store";
 import { truncateBalance, inputToBigNumber } from "utils/index";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
+import { useRouter } from "next/router";
 
-export const Reallocation = ({ snapshotHash }) => {
+interface ReallocationProps {
+  proposalDetails: string;
+}
+
+const Reallocation: FunctionComponent<ReallocationProps> = ({
+  proposalDetails,
+}) => {
+  const router = useRouter();
   const { contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
@@ -160,7 +168,7 @@ export const Reallocation = ({ snapshotHash }) => {
         proposal.values,
         proposal.signatures,
         proposal.calldatas,
-        snapshotHash
+        proposalDetails.replace(/\n/g, "<br>\n")
       );
 
       useStore.setState({
@@ -172,6 +180,7 @@ export const Reallocation = ({ snapshotHash }) => {
               toast.success("Proposal has been submitted", {
                 hideProgressBar: true,
               });
+              router.push(`/proposals`);
               reset();
             },
           },
@@ -347,3 +356,5 @@ const StrategyBalanceRow = ({
     </tr>
   );
 };
+
+export { Reallocation };

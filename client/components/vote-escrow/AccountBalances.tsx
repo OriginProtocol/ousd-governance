@@ -31,7 +31,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />
               <CardStat small>
-                <TokenAmount amount={ogv} />
+                <TokenAmount amount={ogv} isWalletBalance />
               </CardStat>
             </div>
             <CardDescription>OGV</CardDescription>
@@ -43,7 +43,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />
               <CardStat small>
-                <TokenAmount amount={totalOgvLockedUp} />
+                <TokenAmount amount={totalOgvLockedUp} isWalletBalance />
               </CardStat>
             </div>
             <CardDescription>OGV</CardDescription>
@@ -51,11 +51,11 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
         </Card>
         <Card dark tightPadding>
           <div className="space-y-1">
-            <CardLabel>Vote balance</CardLabel>
+            <CardLabel>Vote Balance</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/veogv.svg" alt="veOGV" small />
               <CardStat small>
-                <TokenAmount amount={veOgv} />
+                <TokenAmount amount={veOgv} isWalletBalance />
               </CardStat>
             </div>
             <CardDescription>veOGV</CardDescription>
@@ -67,7 +67,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />
               <CardStat small>
-                <TokenAmount amount={accruedRewards} />
+                <TokenAmount amount={accruedRewards} isWalletBalance />
               </CardStat>
             </div>
             <CardDescription>OGV</CardDescription>

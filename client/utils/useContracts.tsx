@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-// Note we don't have a Rinkeby deploy of OUSD contracts, so always use mainnet
+// Note we don't have a Goerli deploy of OUSD contracts, so always use mainnet
 import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
@@ -74,7 +74,7 @@ const useContracts = () => {
     if (claimIsOpen()) {
       loadContracts();
     }
-  }, [web3Provider, chainId]);
+  }, [web3Provider, chainId, networkInfo.envNetwork]);
 };
 
 export default useContracts;

@@ -1,10 +1,10 @@
 import LocalGovernanceContracts from "../networks/governance.localhost.json";
-import RinkebyGovernanceContracts from "../networks/governance.rinkeby.json";
+import GoerliGovernanceContracts from "../networks/governance.goerli.json";
 import MainnetGovernanceContracts from "../networks/governance.mainnet.json";
 import { governanceEnabled } from "utils";
 
 export const mainnetNetworkUrl = process.env.WEB3_PROVIDER;
-export const rinkebyNetworkUrl = process.env.WEB3_PROVIDER;
+export const goerliNetworkUrl = process.env.WEB3_PROVIDER;
 
 export const websocketProvider = process.env.WEB3_PROVIDER?.replace(
   "http",
@@ -15,22 +15,17 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const RPC_URLS = {
   1: mainnetNetworkUrl,
-  4: rinkebyNetworkUrl,
+  5: goerliNetworkUrl,
   31337: "http://localhost:8545",
 };
 
 export const CHAIN_CONTRACTS = {
   1: MainnetGovernanceContracts,
-  4: RinkebyGovernanceContracts,
+  5: GoerliGovernanceContracts,
   31337: LocalGovernanceContracts,
 };
 
 let navItems = [
-  /*
-  {
-    href: "/leaderboard",
-    label: "Leaderboard",
-  },*/
   {
     href: "/claim",
     label: "Claim",
@@ -54,12 +49,8 @@ let navItems = [
 if (governanceEnabled()) {
   navItems = [
     {
-      href: "/",
-      label: "Overview",
-    },
-    {
-      href: "/proposal",
-      label: "Proposal",
+      href: "/proposals",
+      label: "Proposals",
     },
     ...navItems,
   ];
@@ -69,3 +60,5 @@ export { navItems };
 
 // daysPerAverageYear * hoursPerDay * minutesPerHour * secondsPerMinute / monthsPerYear = secondsPerMonth
 export const SECONDS_IN_A_MONTH = 2629800; // 365.25 * (24 * 60 * 60) / 12
+
+export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
