@@ -1,3 +1,5 @@
+If you made a contract change, make sure to complete the checklist below before merging it in master.
+
 Contract change checklist:
   - [ ] Code reviewed by 2 reviewers. 
   - [ ] If solidity changes copy&paste code review [security checklist](https://github.com/OriginProtocol/security/blob/master/templates/Contract-Code-Review-Example.md) below this checklist.
