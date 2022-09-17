@@ -15,7 +15,7 @@ const nextConfig = {
     /* Add any environmental variables here and they will be available in the JS code under
      * `process.env.[variable]`. 
      *
-     * Note: these get "baked in" to the code at build time when building for Rinkeby / Mainnet
+     * Note: these get "baked in" to the code at build time when building for Goerli / Mainnet
      */
     const envVars = {
       'production': {
@@ -27,7 +27,7 @@ const nextConfig = {
         CLAIM_CLOSES: 1665356400,
       },
       'staging': {
-        NETWORK_ID: 4
+        NETWORK_ID: 5
       },
     }
 

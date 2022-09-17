@@ -5,6 +5,7 @@
       "0x9c354503C38481a7A7a51629142963F98eCC12D0"
     ],
     "Governance": [
+      "0x3cdD07c16614059e66344a7b579DAB4f9516C0b6",
       "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA"
     ],
     "MandatoryLockupDistributor": [
@@ -18,6 +19,7 @@
       "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
     ],
     "Timelock": [
+      "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F",
       "0xac126C98cFc7c55a9F944770cb17d7065688C577"
     ]
   },
@@ -69,6 +71,32 @@
       "0xbb3b88210Cc56B85ec53af5f5cb3cF00E5e1b1A8",
       "0x563045e7981bE87A5C5C598440f3ae9F79e55D0B",
       "0x041d962Bf5B27ec1b5a43936EC3D088C39D9c588"
+    ]
+  },
+  "5": {
+    "ERC1967Proxy": [
+      "0xd4CFEf425B36deaCf70eDB60E7B75cC43fc347e0"
+    ],
+    "Governance": [
+      "0x2Ac47Fc760bDC4816605D39692A532328435e8d6"
+    ],
+    "MandatoryLockupDistributor": [
+      "0xb745c207a2518743023045EA6Bec311E0D94D6a0"
+    ],
+    "OgvStaking": [
+      "0x37EED9c648f7cc0DD6FD68d2e140c3340718728D"
+    ],
+    "OptionalLockupDistributor": [
+      "0x40F729253Bc6418e2648dA6636Ef0cFE0C527d6b"
+    ],
+    "OriginDollarGovernance": [
+      "0xD1650886D68d6393409a97fe6e10a9689A75Fa30"
+    ],
+    "RewardsSource": [
+      "0x0B0c5DA6Eed3E00B07c937d236c3a9343504F0Ed"
+    ],
+    "Timelock": [
+      "0xCCC8c403CEf745D20e09fBeb91c8FE79A237a0c7"
     ]
   }
 }
