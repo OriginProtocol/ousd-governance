@@ -75,30 +75,22 @@ const Burn: NextPage = () => {
     totalAirdropped
   );
 
-  const mandatoryDistributorInitialOgv =
-    BigNumber.from(398752449).mul(decimal18Bn);
-  const optionalDistributorInitialOgv =
-    BigNumber.from(747905084).mul(decimal18Bn);
-  const totalInitialOgv = mandatoryDistributorInitialOgv.add(
-    optionalDistributorInitialOgv
-  );
-
-  const totalClaimedOusd = mandatoryDistributorInitialOgv.sub(
+  const totalClaimedOusd = totalAirdroppedOusd.sub(
     mandatoryDistributorOgv
   );
-  const totalClaimedOgn = optionalDistributorInitialOgv.sub(
+  const totalClaimedOgn = totalAirdroppedOgn.sub(
     optionalDistributorOgv
   );
   const totalClaimed = totalClaimedOusd.add(totalClaimedOgn);
   const percentageClaimedOusd = getPercentage(
     totalClaimedOusd,
-    mandatoryDistributorInitialOgv
+    totalAirdroppedOusd
   );
   const percentageClaimedOgn = getPercentage(
     totalClaimedOgn,
-    optionalDistributorInitialOgv
+    totalAirdroppedOgn
   );
-  const percentageClaimed = getPercentage(totalClaimed, totalInitialOgv);
+  const percentageClaimed = getPercentage(totalClaimed, totalAirdropped);
 
   return (
     <Wrapper narrow>
