@@ -225,3 +225,47 @@ Because we [start from the last seen block saved in the database](/client/listen
 5. Run `yarn run dev` again
 
 You should now see proposals added to the database when you submit transactions.
+
+## 2. M1 macs (ARM architecture)
+
+**Problem:**
+
+My ether wallet as a `wrtc` dependency that doesn't compile on the ARM macs. There is an alternative build of `wrtc available that circumvents the issue, but MEW hasn't incorporated that into their codebase yet. See [issue](https://github.com/MyEtherWallet/MEWconnect-web-client/issues/75)
+
+**Solution:**
+
+Switch architecture from arm to x64 and install node using x64. It is recommended to use nvm and have that "special" x64 node install aliased, so it is easy to switch anytime from native arm built node to x64 built node. 
+
+Switch architecture from arm to x64
+```
+arch -x86_64 zsh
+
+```
+
+Confirm the "current" architure you're on by running
+```
+arch
+
+```
+This should return x64/i3/i9..
+
+
+Install nodejs using nvm. We'll install nodev16 (not 18). This is because of incompatibility with the latest node with m1.
+
+```
+// install node
+nvm install v16.16.0
+
+// create nvm alias (just to remember which node has x86 build)
+nvm alias x86_node_build v16.16.0
+
+// confirm node has been built in x64
+node -p process.arch
+// should return x64
+
+// wrtc error should no longer be a problem
+yarn install
+```
+
+
+
