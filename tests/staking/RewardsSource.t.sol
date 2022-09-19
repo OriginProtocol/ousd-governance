@@ -211,4 +211,84 @@ contract RewardsSourceTest is Test {
         rewards.setRewardsTarget(address(0));
         assertEq(rewards.rewardsTarget(), address(0));
     }
+
+    function testBuybackRewards() public {
+        vm.prank(team);
+        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
+        slopes[0].start = uint64(EPOCH);
+        slopes[0].ratePerDay = 1 ether;
+        rewards.setInflation(slopes);
+
+        vm.startPrank(staking);
+
+        // Simulate OGV from Buyback contract
+        // Send 13 OGV
+        ogv.mint(address(rewards), 13 ether);
+        vm.warp(EPOCH - 1000);
+        assertEq(ogv.balanceOf(address(rewards)), 13 ether, "BB: Rewards should only hold current buyback funds");
+        
+        // Verify preview
+        assertEq(rewards.previewRewards(), 13 ether, "BB:  Preview wrong");
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), 13 ether, "BB: Staking balance wrong");
+
+        // Simulate OGV from Buyback contract + inflation
+        // Send 15 OGV
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards should start zero after collect");
+        ogv.mint(address(rewards), 15 ether);
+        vm.warp(EPOCH + 11 days);
+        assertEq(ogv.balanceOf(address(rewards)), 15 ether, "BB+Inf: Rewards should only hold current buyback funds");
+
+        // Verify preview
+        assertEq(rewards.previewRewards(), 11 ether + 15 ether, "BB+Inf: Preview wrong");
+
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "BB+Inf: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether), "BB+Inf: Staking balance wrong");
+
+        // Simulate OGV from inflation
+        vm.warp(EPOCH + 31 days);
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards should only hold current buyback funds");
+
+        // Verify preview after 20 days
+        assertEq(rewards.previewRewards(), 20 ether, "Inf: Preview wrong");
+
+        // Verify collect
+        rewards.collectRewards();
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Inf: Rewards balance wrong");
+        assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether + 20 ether), "Inf: Staking balance wrong");
+    }
+
+
+    function testFuzzExtraRewards(uint16 duration, uint64 extraRewards) external {
+        vm.prank(team);
+        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
+        slopes[0].start = uint64(EPOCH);
+        slopes[0].ratePerDay = 1 ether;
+        rewards.setInflation(slopes);
+
+        vm.startPrank(staking);
+
+        uint256 startSnapshot = vm.snapshot();
+        // First, run without extra rewards, and record ending balance
+        vm.warp(EPOCH+duration);
+        rewards.collectRewards();
+        uint256 inflationOnly = ogv.balanceOf(address(staking));
+        // Then, run the same period with rewards, and check math
+        vm.revertTo(startSnapshot);
+        vm.warp(EPOCH+duration);
+        
+        // Preview math
+        assertEq(rewards.previewRewards(), inflationOnly);
+        ogv.mint(address(rewards), extraRewards);
+        assertEq(rewards.previewRewards(), inflationOnly + extraRewards, "Preview rewards");
+
+        rewards.collectRewards();
+        uint256 totalRewards = ogv.balanceOf(address(staking));
+        assertEq(totalRewards, inflationOnly + extraRewards, "Rewards were not added to inflation");
+        assertEq(ogv.balanceOf(address(rewards)), 0, "Funds were left in rewards after collect");
+    }
 }
