@@ -18,6 +18,12 @@
       "0xEd6E3808FCe0C4A52DEa8636933f666c6dea4d1d",
       "0x6cE89Ff1E8a910007BAc236C27B88f8a95B0bFaD"
     ],
+    "RewardsSource": [
+      "0xE82191eF8996852a802aaE509993770480F9CA2C"
+    ],
+    "RewardsSourceProxy": [
+      "0x7d82E86CF1496f9485a8ea04012afeb3C7489397"
+    ],
     "Timelock": [
       "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F",
       "0xac126C98cFc7c55a9F944770cb17d7065688C577"
