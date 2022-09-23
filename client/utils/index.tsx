@@ -41,7 +41,12 @@ export const loadProposals = async (governanceContract, ids: Array<String>) => {
 
 export const decodeCalldata = (signature: string, calldata: string) => {
   const types = typesFromSignature(signature);
-  return ethers.utils.defaultAbiCoder.decode(types, calldata);
+
+  try {
+    return ethers.utils.defaultAbiCoder.decode(types, calldata);
+  } catch (e) {
+    return [];
+  }
 };
 
 export const encodeCalldata = (
