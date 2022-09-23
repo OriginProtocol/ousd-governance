@@ -45,7 +45,7 @@ export const decodeCalldata = (signature: string, calldata: string) => {
   try {
     return ethers.utils.defaultAbiCoder.decode(types, calldata);
   } catch (e) {
-    return [];
+    return ["Bad data", calldata];
   }
 };
 

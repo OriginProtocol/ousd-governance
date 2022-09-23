@@ -95,6 +95,12 @@ export const ProposalActionsTable = ({
 
                     const data = decodedData.toString();
 
+                    if (data === "Bad data") {
+                      return (
+                        <div className="font-bold text-red-700">{data}</div>
+                      );
+                    }
+
                     if (type === "address") {
                       return (
                         <div key={i}>{etherscanLink(contracts, data)}</div>
