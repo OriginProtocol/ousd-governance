@@ -107,7 +107,7 @@ const ProposalNew: NextPage = () => {
         proposalActions.values,
         proposalActions.signatures,
         proposalActions.calldatas,
-        proposalDetails.replace(/\n/g, "<br>\n")
+        proposalDetails
       );
     } catch (error) {
       console.error(error);
