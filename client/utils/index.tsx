@@ -166,9 +166,14 @@ export function sleep(ms) {
  * unsanitized HTML here.
  */
 const getCleanProposalContent = (proposalDescription: string) => {
-  const split = proposalDescription?.split("<br>");
+  const split = proposalDescription?.split(/\n/g);
   const title = split && split[0];
-  const description = split && split.slice(1).join("<br>").trim();
+  const description =
+    split &&
+    split
+      .slice(1)
+      .filter((d) => d)
+      .join("<br><br>");
 
   const cleanTitle = sanitizeHtml(title);
   const cleanDescription = sanitizeHtml(description, {
