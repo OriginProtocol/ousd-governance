@@ -33,7 +33,9 @@ export async function getServerSideProps({
       createdAt: moment(createdAt).format("MMM D, YYYY"),
       description,
       voters: JSON.parse(JSON.stringify(voters)),
-      transactions: JSON.parse(JSON.stringify(transactions)),
+      transactions: JSON.parse(JSON.stringify(transactions)).sort((a, b) =>
+        a?.createdAt < b?.createdAt ? -1 : 1
+      ),
     },
   };
 }
