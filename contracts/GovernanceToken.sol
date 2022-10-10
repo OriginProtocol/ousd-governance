@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/OwnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/access/AccessControlUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/utils/Initializable.sol";
@@ -10,7 +10,7 @@ import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/proxy/ut
 /// @custom:security-contact security@originprotocol.com
 contract OriginDollarGovernance is
     Initializable,
-    ERC20BurnableUpgradeable,
+    ERC20Upgradeable,
     OwnableUpgradeable,
     UUPSUpgradeable,
     AccessControlUpgradeable
@@ -30,6 +30,15 @@ contract OriginDollarGovernance is
 
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
+    }
+
+    function burn(uint256 amount) public virtual {
+        _burn(_msgSender(), amount);
+    }
+
+    function burnFrom(address account, uint256 amount) public virtual {
+        _spendAllowance(account, _msgSender(), amount);
+        _burn(account, amount);
     }
 
     function grantMinterRole(address _account) public onlyOwner {

@@ -30,7 +30,7 @@ def test_transfer_ownership(token):
 
 def test_non_owner_cant_mint(token):
     with brownie.reverts(
-        "AccessControl: account 0x4370823e0453bae9f6b6b790daa7d02fd158719f is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
+        "AccessControl: account "+accounts[1].address.lower()+" is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
     ):
         token.mint(accounts[1], 100, {"from": accounts[1]})
 
@@ -59,3 +59,26 @@ def test_non_owner_cant_upgrade(token):
     upgrade_to = TestToken.deploy({"from": accounts[0]})
     with brownie.reverts("Ownable: caller is not the owner"):
         token.upgradeTo(upgrade_to.address, {"from": accounts[1]})
+
+def test_self_burn(token):
+    assert token.balanceOf(accounts[0]) > 0
+    token.burn(token.balanceOf(accounts[0]), {'from': accounts[0]})
+    assert token.balanceOf(accounts[0]) == 0
+
+def test_burn_from(token):
+    alice = accounts[0]
+    bob = accounts[1]
+
+    before_balance = token.balanceOf(alice);
+    token.approve(bob, 100, {'from': alice})
+    token.burnFrom(alice, 100, {'from': bob})
+    assert before_balance - 100 == token.balanceOf(alice)
+
+def test_burn_from_fail_not_approved(token):
+    alice = accounts[0]
+    bob = accounts[1]
+
+    before_balance = token.balanceOf(alice);
+    token.approve(bob, 90, {'from': alice})
+    with brownie.reverts("ERC20: insufficient allowance"):
+        token.burnFrom(alice, 100, {'from': bob})
