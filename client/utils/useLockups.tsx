@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo, claimIsOpen } from "utils/index";
+import { useNetworkInfo } from "utils/index";
 import { fetcher } from "utils/index";
 import useSWR, { mutate } from "swr";
 import { sortBy } from "lodash";
@@ -44,7 +44,6 @@ const useLockups = () => {
     };
 
     if (
-      claimIsOpen() &&
       web3Provider &&
       networkInfo.correct &&
       address &&

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { claimIsOpen } from "utils/index";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
 
@@ -31,7 +30,7 @@ const useTotalBalances = () => {
         contracts.MandatoryDistributor.address
       );
 
-    if (claimIsOpen() && contracts.loaded) {
+    if (contracts.loaded) {
       Promise.all([
         loadTotalSupplyOfOgv(),
         loadTotalLockedUpOgv(),

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo, claimIsOpen } from "utils/index";
+import { useNetworkInfo } from "utils/index";
 
 const useAccountBalances = () => {
   const [reloadAccountAllowances, setReloadAccountAllowances] = useState(0);
@@ -37,7 +37,6 @@ const useAccountBalances = () => {
     };
 
     if (
-      claimIsOpen() &&
       web3Provider &&
       address &&
       networkInfo.correct &&
@@ -74,7 +73,6 @@ const useAccountBalances = () => {
     };
 
     if (
-      claimIsOpen() &&
       web3Provider &&
       address &&
       networkInfo.correct &&

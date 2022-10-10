@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
-import { claimIsOpen, useNetworkInfo } from "utils/index";
+import { useNetworkInfo } from "utils/index";
 
 const useContracts = () => {
   const { web3Provider, chainId } = useStore();
@@ -71,9 +71,7 @@ const useContracts = () => {
         contracts,
       });
     };
-    if (claimIsOpen()) {
-      loadContracts();
-    }
+    loadContracts();
   }, [web3Provider, chainId, networkInfo.envNetwork]);
 };
 
