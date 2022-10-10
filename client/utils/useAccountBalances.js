@@ -36,12 +36,7 @@ const useAccountBalances = () => {
       return await contracts.OgvStaking.previewRewards(address);
     };
 
-    if (
-      web3Provider &&
-      address &&
-      networkInfo.correct &&
-      contracts.loaded
-    ) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
         loadOgvBalance(),
         loadVeOgvBalance(),
@@ -72,12 +67,7 @@ const useAccountBalances = () => {
       );
     };
 
-    if (
-      web3Provider &&
-      address &&
-      networkInfo.correct &&
-      contracts.loaded
-    ) {
+    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
       Promise.all([loadAllowance()]).then(([ogv_approval]) => {
         useStore.setState({
           allowances: {
