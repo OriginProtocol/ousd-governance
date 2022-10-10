@@ -30,7 +30,7 @@ def test_transfer_ownership(token):
 
 def test_non_owner_cant_mint(token):
     with brownie.reverts(
-        "AccessControl: account 0x4370823e0453bae9f6b6b790daa7d02fd158719f is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
+        "AccessControl: account "+accounts[1].address.lower()+" is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
     ):
         token.mint(accounts[1], 100, {"from": accounts[1]})
 

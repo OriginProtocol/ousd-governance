@@ -1,6 +1,6 @@
 import pytest
 from brownie import *
-from .helpers import DAY
+from .helpers import DAY, WEEK
 
 test_merkle_data = {
     "merkle_root": "0x362525d914142d116c518263e481c6cbe968a44638f9faeffb01c11a84008b96",
@@ -137,6 +137,15 @@ def rewards(token):
 def staking(token, rewards):
     return run("deploy_staking", "main", (token.address, DAY, rewards.address))
 
+@pytest.fixture
+def whale_voter(token, staking):
+    """Creates a user who is staked and ready to vote with more than quorum power."""
+    voter = accounts[3]
+    amount = int(1e9) * int(1e18)
+    token.approve(staking.address, amount) # Uses coins from default address
+    staking.stake(amount, WEEK * 52 * 4, voter)
+    staking.delegate(voter, {'from': voter})
+    return voter
 
 @pytest.fixture
 def timelock_controller():

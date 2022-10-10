@@ -23,8 +23,8 @@ def floor_week(timestamp):
 
 
 # Mine `amount` blocks using hardhat_mine, defaults to the length of the governance
-# voting period (32727 blocks ~5 days )
-def mine_blocks(web3, amount="0x7fd7", interval="0x1"):
+# voting period (17280 blocks +1 or ~3 days )
+def mine_blocks(web3, amount="0x4381", interval="0x1"):
     web3.provider.make_request("hardhat_mine", [amount, interval])
     # Using hardhat_mine seems to break the 0 base fee
     web3.provider.make_request("hardhat_setNextBlockBaseFeePerGas", ["0x0"])
