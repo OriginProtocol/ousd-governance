@@ -59,3 +59,26 @@ def test_non_owner_cant_upgrade(token):
     upgrade_to = TestToken.deploy({"from": accounts[0]})
     with brownie.reverts("Ownable: caller is not the owner"):
         token.upgradeTo(upgrade_to.address, {"from": accounts[1]})
+
+def test_self_burn(token):
+    assert token.balanceOf(accounts[0]) > 0
+    token.burn(token.balanceOf(accounts[0]), {'from': accounts[0]})
+    assert token.balanceOf(accounts[0]) == 0
+
+def test_burn_from(token):
+    alice = accounts[0]
+    bob = accounts[1]
+
+    before_balance = token.balanceOf(alice);
+    token.approve(bob, 100, {'from': alice})
+    token.burnFrom(alice, 100, {'from': bob})
+    assert before_balance - 100 == token.balanceOf(alice)
+
+def test_burn_from_fail_not_approved(token):
+    alice = accounts[0]
+    bob = accounts[1]
+
+    before_balance = token.balanceOf(alice);
+    token.approve(bob, 90, {'from': alice})
+    with brownie.reverts("ERC20: insufficient allowance"):
+        token.burnFrom(alice, 100, {'from': bob})
