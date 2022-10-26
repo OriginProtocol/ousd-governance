@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract AbstractLockupDistributor {
     //@notice This event is triggered whenever a call to #claim succeeds.
