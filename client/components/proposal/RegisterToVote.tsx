@@ -8,11 +8,14 @@ import Card from "components/Card";
 interface RegisterToVoteProps {
   withCard?: Boolean;
   singleView?: Boolean;
+  // show error message when user has no veOgv yet and hasn't delegated
+  noVeOgvMessage?: Boolean;
 }
 
 const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   withCard,
   singleView,
+  noVeOgvMessage,
 }) => {
   const { contracts, address, balances, pendingTransactions } = useStore();
   const { veOgv } = balances;
@@ -55,6 +58,7 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   };
 
   const hasTokensButUnregistered = veOgv.gt(0) && needToShowDelegation;
+  const hasNoTokensAndUnregistered = veOgv.eq(0) && needToShowDelegation;
 
   const RegisterCta = () => (
     <div className={!withCard ? "mb-20" : ""}>
@@ -82,7 +86,28 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
     </div>
   );
 
-  if (!hasTokensButUnregistered) return null;
+  const VeOgvMessage = () => (
+    <div className={!withCard ? "mb-20" : ""}>
+      <div className="bg-warning -my-10 -mx-6 p-10 md:-mx-10">
+        <h2 className="text-lg font-bold mb-2">Stake OGV</h2>
+        <p className="mb-4">
+          First stake some OGV and gain veOGV to be eligible for voting
+        </p>
+      </div>
+    </div>
+  );
+
+  if (noVeOgvMessage && hasNoTokensAndUnregistered) {
+    return (
+      <Card>
+        <VeOgvMessage />
+      </Card>
+    );
+  }
+
+  if (!hasTokensButUnregistered) {
+    return null;
+  }
 
   if (withCard) {
     return (
