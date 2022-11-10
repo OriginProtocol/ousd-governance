@@ -222,10 +222,10 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
         </button>
         {needToShowDelegation && (
           <Link
-            className="btn btn-sm rounded-btn w-full mt-2"
+            className="btn btn-sm rounded-btn w-full mt-2 whitespace-nowrap"
             href="/register-vote"
           >
-            Register to vote
+            Vote register
           </Link>
         )}
       </div>
