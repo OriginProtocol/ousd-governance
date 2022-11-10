@@ -11,7 +11,7 @@ export default function VoteEscrow() {
     <Wrapper narrow>
       <Seo title="Register Vote" />
       <PageTitle>Register Vote</PageTitle>
-      <RegisterToVote noVeOgvMessage withCard />
+      <RegisterToVote whiteRegisterCta showNoVeOgvMessage withCard />
     </Wrapper>
   );
 }

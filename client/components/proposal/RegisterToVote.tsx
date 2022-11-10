@@ -4,18 +4,22 @@ import { useStore } from "utils/store";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { toast } from "react-toastify";
 import Card from "components/Card";
+import Link from "components/Link";
+import classNames from "classnames";
 
 interface RegisterToVoteProps {
   withCard?: Boolean;
   singleView?: Boolean;
+  whiteRegisterCta?: Boolean;
   // show error message when user has no veOgv yet and hasn't delegated
-  noVeOgvMessage?: Boolean;
+  showNoVeOgvMessage?: Boolean;
 }
 
 const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   withCard,
   singleView,
-  noVeOgvMessage,
+  showNoVeOgvMessage,
+  whiteRegisterCta,
 }) => {
   const { contracts, address, balances, pendingTransactions } = useStore();
   const { veOgv } = balances;
@@ -59,10 +63,18 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
 
   const hasTokensButUnregistered = veOgv.gt(0) && needToShowDelegation;
   const hasNoTokensAndUnregistered = veOgv.eq(0) && needToShowDelegation;
+  console.log("whiteRegisterCta", whiteRegisterCta, !whiteRegisterCta);
+  const classes = classNames(
+    "bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10",
+    {
+      "bg-accent text-white": !whiteRegisterCta,
+      "bg-white text-black": whiteRegisterCta,
+    }
+  );
 
   const RegisterCta = () => (
     <div className={!withCard ? "mb-20" : ""}>
-      <div className="bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
+      <div className={classes}>
         <h2 className="text-lg font-bold mb-2">Governance Information</h2>
         <p className="mb-4">
           {singleView && (
@@ -88,16 +100,22 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
 
   const VeOgvMessage = () => (
     <div className={!withCard ? "mb-20" : ""}>
-      <div className="bg-warning -my-10 -mx-6 p-10 md:-mx-10">
+      <div className="bg-white -my-10 -mx-6 p-10 md:-mx-10">
         <h2 className="text-lg font-bold mb-2">Stake OGV</h2>
-        <p className="mb-4">
+        <p className="mb-8">
           First stake some OGV and gain veOGV to be eligible for voting
         </p>
+        <Link
+          className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] min-w-[10.25rem] btn-primary"
+          href="/stake"
+        >
+          Stake
+        </Link>
       </div>
     </div>
   );
 
-  if (noVeOgvMessage && hasNoTokensAndUnregistered) {
+  if (showNoVeOgvMessage && hasNoTokensAndUnregistered) {
     return (
       <Card>
         <VeOgvMessage />
