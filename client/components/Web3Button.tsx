@@ -13,6 +13,8 @@ import {
 } from "constants/index";
 import { toast } from "react-toastify";
 import classNames from "classnames";
+import Link from "components/Link";
+import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 
 const providerOptions = {
   walletconnect: {
@@ -93,6 +95,8 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
   const resetWeb3State = useStore((state) => state.reset);
 
   const networkInfo = useNetworkInfo();
+
+  const { needToShowDelegation } = useShowDelegationModalOption();
 
   const connect = useCallback(
     async function (isAutoconnect = false) {
@@ -216,6 +220,14 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
         >
           Disconnect
         </button>
+        {needToShowDelegation && (
+          <Link
+            className="btn btn-sm rounded-btn w-full mt-2"
+            href="/register-vote"
+          >
+            Register to vote
+          </Link>
+        )}
       </div>
     </div>
   ) : (

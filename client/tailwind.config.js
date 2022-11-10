@@ -8,6 +8,8 @@ const originTheme = {
   "secondary-focus": "#0d3020",
   accent: "#4bbc8a",
   "accent-content": "#ffffff",
+  warning: "#f1c40f",
+  "warning-content": "#ffffff",
   neutral: "#d8d8d8",
   "neutral-content": "#333333",
   "neutral-focus": "#c2c2c2",
