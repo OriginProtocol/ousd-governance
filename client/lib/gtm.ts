@@ -7,7 +7,7 @@ type WindowWithDataLayer = Window & {
 declare const window: WindowWithDataLayer;
 
 export const pageview = () => {
-  window.dataLayer.push({
+  window?.dataLayer?.push({
     event: 'pageview',
     pageUrl: window.location.href,
     pageTitle: document.title,
