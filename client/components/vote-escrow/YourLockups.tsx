@@ -63,7 +63,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     let transaction;
     try {
       transaction = await contracts.OgvStaking["collectRewards()"]({
-        gasLimit: 1400000,
+        gasLimit: 140000,
       });
     } catch (e) {
       setCollectRewardsStatus("ready");
