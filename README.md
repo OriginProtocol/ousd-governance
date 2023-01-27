@@ -17,32 +17,17 @@ _You may need to restart your terminal after installing `pipx`._
 pipx install eth-brownie
 ```
 
-## Install brownie dependencies
-
-We require OpenZeppelin contract code that is in master and will be released after 4.5.0. Since the release
-tag has not been created yet we need to import them by commit hash. Once newer version of 4.5.0 is released
-we can default to that.
-
-```bash
-
-brownie pm install OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0
-brownie pm install OpenZeppelin/openzeppelin-contracts@4.6.0
-```
-
-## Install hardhat
+## Install dependencies
 
 ```bash
 yarn install
 ```
 
-## Running contract tests (brownie)
+## Running contract tests (hardhat)
 
 ```bash
-cd contracts
-brownie test --network hardhat
+hardhat test
 ```
-
-_If this command reverts with an error it may be an incompatability with python 3.10. Try python 3.9 instead ([pyenv](https://github.com/pyenv/pyenv) is a good solution for managing multiple python versions)._
 
 ## Running contract tests (forge)
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
 
-import {Address} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Address.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {Governable} from "../Governable.sol";
 

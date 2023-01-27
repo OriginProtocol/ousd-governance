@@ -4,10 +4,10 @@
 
 pragma solidity ^0.8.0;
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Counters.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/math/SafeCast.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/extensions/IGovernorTimelock.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/Governor.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/governance/extensions/IGovernorTimelock.sol";
+import "@openzeppelin/contracts/governance/Governor.sol";
 import "./IGovernorCompatibilityBravo.sol";
 
 /**
