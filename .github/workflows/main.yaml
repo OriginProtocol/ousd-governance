@@ -1,6 +1,8 @@
-on: ["push", "pull_request"]
-
 name: OUSD Governance
+on: 
+  pull_request:
+    types: [opened, reopened]
+  push:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
