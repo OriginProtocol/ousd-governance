@@ -1,5 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
-import { GTM_ID } from '../lib/gtm';
+import { GTM_ID } from "../lib/gtm";
 
 class OUSDGovernanceDocument extends Document {
   render(): JSX.Element {
@@ -21,7 +21,7 @@ class OUSDGovernanceDocument extends Document {
               src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
               height="0"
               width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
+              style={{ display: "none", visibility: "hidden" }}
             />
           </noscript>
           <Main />
