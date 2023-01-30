@@ -4,14 +4,14 @@ pragma solidity 0.8.10;
 import "forge-std/Test.sol";
 import "contracts/OgvStaking.sol";
 import "contracts/RewardsSource.sol";
-import "contracts/tests/MockOgv.sol";
+import "contracts/tests/MockOGV.sol";
 
 //
 // Sanity test of OpenZeppelin's voting and deletegation.
 //
 
 contract DelegationTest is Test {
-    MockOgv ogv;
+    MockOGV ogv;
     OgvStaking staking;
     RewardsSource source;
 
@@ -26,7 +26,7 @@ contract DelegationTest is Test {
 
     function setUp() public {
         vm.startPrank(team);
-        ogv = new MockOgv();
+        ogv = new MockOGV();
         source = new RewardsSource(address(ogv));
         staking = new OgvStaking(address(ogv), EPOCH, 7 days, address(source));
         source.setRewardsTarget(address(staking));

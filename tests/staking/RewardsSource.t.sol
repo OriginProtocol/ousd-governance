@@ -1,10 +1,10 @@
 import "forge-std/Test.sol";
 import "contracts/upgrades/RewardsSourceProxy.sol";
 import "contracts/RewardsSource.sol";
-import "contracts/tests/MockOgv.sol";
+import "contracts/tests/MockOGV.sol";
 
 contract RewardsSourceTest is Test {
-    MockOgv ogv;
+    MockOGV ogv;
     RewardsSource rewards;
 
     address staking = address(0x42);
@@ -18,7 +18,7 @@ contract RewardsSourceTest is Test {
 
     function setUp() public {
         vm.startPrank(team);
-        ogv = new MockOgv();
+        ogv = new MockOGV();
         rewards = new RewardsSource(address(ogv));
 
         // Setup Rewards Proxy
