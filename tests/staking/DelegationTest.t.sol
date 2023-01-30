@@ -51,28 +51,19 @@ contract DelegationTest is Test {
         POINTS = staking.balanceOf(oak);
     }
 
-    function testSelfDelegate() external {
+    function testAutoDelegate() external {
         vm.roll(1);
-        assertEq(staking.getVotes(oak), 0, "zero until delegated");
-        assertEq(staking.getPastVotes(oak, block.number - 1), 0);
-        assertEq(staking.delegates(oak), address(0));
-
+        
+        // Can vote immediately after staking
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
+        
         vm.roll(2);
-        vm.prank(oak);
-        staking.delegate(oak);
 
-        assertEq(
-            staking.getVotes(oak),
-            1 * POINTS,
-            "can vote after delegation"
-        );
-        assertEq(staking.getPastVotes(oak, block.number - 1), 0);
-        assertEq(staking.delegates(oak), oak, "self is delegate");
-
-        vm.roll(3);
+        // Can opt out of voting after staking
         vm.prank(oak);
         staking.delegate(address(0));
-
         assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
         assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS);
         assertEq(staking.delegates(oak), address(0));
@@ -80,28 +71,38 @@ contract DelegationTest is Test {
 
     function testDelegate() external {
         vm.roll(1);
-        assertEq(staking.getVotes(oak), 0, "zero until delegated");
-        assertEq(staking.getPastVotes(oak, block.number - 1), 0);
-        assertEq(staking.delegates(oak), address(0));
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
 
         vm.roll(2);
         vm.prank(oak);
         staking.delegate(aspen);
-
+        assertEq(staking.delegates(aspen), aspen);
+        assertEq(staking.delegates(oak), aspen);
         assertEq(
             staking.getVotes(aspen),
-            1 * POINTS,
+            // Voting power of self + oak
+            3 * POINTS,
             "can vote after delegation"
         );
-        assertEq(staking.getPastVotes(aspen, block.number - 1), 0);
-        assertEq(staking.delegates(oak), aspen, "delegated");
+        assertEq(staking.getPastVotes(aspen, block.number - 1), 2 * POINTS, "can vote after staking");
+    }
 
-        vm.roll(3);
-        vm.prank(aspen);
-        staking.delegate(aspen); // Self delegate
+    function testRenounceVotingPower() external {
+        vm.roll(1);
 
-        assertEq(staking.getVotes(aspen), 3 * POINTS, "two users points");
-        assertEq(staking.getPastVotes(aspen, block.number - 1), 1 * POINTS);
-        assertEq(staking.delegates(aspen), aspen);
+        // Can vote immediately after staking
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
+        
+        // Can opt out of voting
+        vm.roll(2);
+        vm.prank(oak);
+        staking.delegate(address(0));
+        assertEq(staking.delegates(oak), address(0), "should renouce voting power");
+        assertEq(staking.getVotes(oak), 0, "should not have voting power after renouncing");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS, "can vote before renouncing");
     }
 }
