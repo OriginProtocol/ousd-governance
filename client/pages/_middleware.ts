@@ -14,13 +14,5 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(claimUrl);
   }
 
-  // Disable access to new proposal creation route (temporarily?)
-  if ("/proposals/new" === pathname) {
-    const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = "/proposals";
-
-    return NextResponse.redirect(redirectUrl);
-  }
-
   return NextResponse.next();
 }

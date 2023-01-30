@@ -4,23 +4,23 @@ import useTotalBalances from "utils/useTotalBalances";
 import useContracts from "utils/useContracts";
 import useLockups from "utils/useLockups";
 import useBlock from "utils/useBlock";
-import { useRouter } from "next/router"
+import { useRouter } from "next/router";
 import { TransactionListener } from "components/TransactionListener";
 import "../styles/globals.css";
 import Layout from "../components/layout";
 import { claimOpenTimestampPassed } from "utils";
-import Script from 'next/script';
-import { GTM_ID, pageview } from '../lib/gtm';
+import Script from "next/script";
+import { GTM_ID, pageview } from "../lib/gtm";
 
 export default function App({ Component, pageProps }) {
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    router.events.on('routeChangeComplete', pageview)
+    router.events.on("routeChangeComplete", pageview);
     return () => {
-      router.events.off('routeChangeComplete', pageview)
-    }
-  }, [router.events])
+      router.events.off("routeChangeComplete", pageview);
+    };
+  }, [router.events]);
 
   useContracts();
   useTotalBalances();
