@@ -9,7 +9,8 @@ env:
   NODE_OPTIONS: --max_old_space_size=4096
 
 jobs:
-  tests:
+  lint:
+    name: DApp Linter
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +36,14 @@ jobs:
         run: yarn && npm run prettier:check
         working-directory: client
 
+  brownie-tests:
+    name: Brownie tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       - name: Setup Python 3.8
         uses: actions/setup-python@v2
         with:
@@ -43,5 +52,19 @@ jobs:
       - name: Install Requirements
         run: pip install -r requirements.txt
 
-      - name: Run Tests
+      - name: Run tests
         run: brownie test --network hardhat
+
+  foundry-tests:
+    name: Foundry tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        run: forge test -vvv
