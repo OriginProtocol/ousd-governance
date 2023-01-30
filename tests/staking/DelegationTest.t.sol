@@ -18,6 +18,7 @@ contract DelegationTest is Test {
     address oak = address(0x42);
     address aspen = address(0x43);
     address taz = address(0x44);
+    address alice = address(0x45);
     address team = address(0x50);
 
     uint256 constant EPOCH = 1 days;
@@ -47,6 +48,8 @@ contract DelegationTest is Test {
         staking.stake(1 ether, 100 days);
         vm.prank(aspen);
         staking.stake(2 ether, 100 days);
+        vm.prank(taz);
+        staking.stake(1 ether, 100 days, alice); // Stake for alice
 
         POINTS = staking.balanceOf(oak);
     }
@@ -67,6 +70,27 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
         assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS);
         assertEq(staking.delegates(oak), address(0));
+    }
+
+    function testAutoDelegate2() external {
+        vm.roll(1);
+        
+        // Alice should have voting power after taz stakes for her
+        assertEq(staking.getVotes(alice), POINTS, "can vote after staking");
+        assertEq(staking.getVotes(taz), 0, "should not have voting power");
+        assertEq(staking.getPastVotes(alice, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.getPastVotes(taz, block.number - 1), 0, "should not have voting power");
+        assertEq(staking.delegates(alice), alice, "delegated to receiver after staking");
+        assertEq(staking.delegates(taz), address(0), "should not have a delegatee set");
+        
+        vm.roll(2);
+
+        // Alice can opt out of voting after staking
+        vm.prank(alice);
+        staking.delegate(address(0));
+        assertEq(staking.getVotes(alice), 0, "zero after delegation removed");
+        assertEq(staking.getPastVotes(alice, block.number - 1), 1 * POINTS);
+        assertEq(staking.delegates(alice), address(0));
     }
 
     function testDelegate() external {
