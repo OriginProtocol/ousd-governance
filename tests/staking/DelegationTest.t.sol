@@ -19,6 +19,7 @@ contract DelegationTest is Test {
     address aspen = address(0x43);
     address taz = address(0x44);
     address alice = address(0x45);
+    address bob = address(0x46);
     address team = address(0x50);
 
     uint256 constant EPOCH = 1 days;
@@ -72,7 +73,7 @@ contract DelegationTest is Test {
         assertEq(staking.delegates(oak), address(0));
     }
 
-    function testAutoDelegate2() external {
+    function testAutoDelegateOnStakeToOthers() external {
         vm.roll(1);
         
         // Alice should have voting power after taz stakes for her
@@ -128,5 +129,30 @@ contract DelegationTest is Test {
         assertEq(staking.delegates(oak), address(0), "should renouce voting power");
         assertEq(staking.getVotes(oak), 0, "should not have voting power after renouncing");
         assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS, "can vote before renouncing");
+    }
+
+    function testSkipAutoDelegateIfDelegated() external {
+        vm.roll(1);
+
+        // Can vote immediately after staking
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
+        
+        // Delegate to someone else
+        vm.roll(2);
+        vm.prank(oak);
+        staking.delegate(bob);
+        assertEq(staking.delegates(oak), bob, "should set a delegate");
+        assertEq(staking.getVotes(oak), 0, "should not have voting power");
+        assertEq(staking.getVotes(bob), 1 * POINTS, "should have voting power after delegation");
+
+        // Stake some more
+        vm.roll(3);
+        vm.prank(oak);
+        staking.stake(1 ether, 100 days);
+        assertEq(staking.getVotes(oak), 0, "cannot vote after delegation");
+        assertEq(staking.getVotes(bob), 2 * POINTS, "should have voting power after delegation");
+        assertEq(staking.delegates(oak), bob, "no change in delegation after staking");
     }
 }
