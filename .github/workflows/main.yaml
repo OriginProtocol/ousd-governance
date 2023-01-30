@@ -29,10 +29,10 @@ jobs:
           node-version: "14"
 
       - name: Install NPM dependencies
-        run: npm install
+        run: yarn
 
       - name: Client linting
-        run: npm install && npm run prettier:check
+        run: yarn && npm run prettier:check
         working-directory: client
 
       - name: Setup Python 3.8
