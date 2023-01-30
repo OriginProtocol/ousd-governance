@@ -1,7 +1,7 @@
 import "forge-std/Test.sol";
-import "../../contracts/upgrades/RewardsSourceProxy.sol";
-import "../../contracts/RewardsSource.sol";
-import "../../contracts/tests/MockOgv.sol";
+import "contracts/upgrades/RewardsSourceProxy.sol";
+import "contracts/RewardsSource.sol";
+import "contracts/tests/MockOgv.sol";
 
 contract RewardsSourceTest is Test {
     MockOgv ogv;

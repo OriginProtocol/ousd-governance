@@ -2,11 +2,11 @@
 pragma solidity 0.8.10;
 
 import "forge-std/Test.sol";
-import "../../contracts/upgrades/RewardsSourceProxy.sol";
-import "../../contracts/upgrades/OgvStakingProxy.sol";
-import "../../contracts/OgvStaking.sol";
-import "../../contracts/RewardsSource.sol";
-import "../../contracts/tests/MockOgv.sol";
+import "contracts/upgrades/RewardsSourceProxy.sol";
+import "contracts/upgrades/OgvStakingProxy.sol";
+import "contracts/OgvStaking.sol";
+import "contracts/RewardsSource.sol";
+import "contracts/tests/MockOgv.sol";
 
 contract OgvStakingTest is Test {
     MockOgv ogv;

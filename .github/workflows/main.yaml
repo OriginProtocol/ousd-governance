@@ -31,13 +31,15 @@ jobs:
         with:
           node-version: "14"
           cache: "yarn"
-          cache-dependency-path: contracts/yarn.lock
+          cache-dependency-path: |
+            client/yarn.lock
 
       - name: Install NPM dependencies
         run: yarn
+        working-directory: client
 
       - name: Client linting
-        run: yarn && npm run prettier:check
+        run: yarn run prettier:check
         working-directory: client
 
   brownie-tests:
@@ -61,7 +63,8 @@ jobs:
         with:
           node-version: "14"
           cache: "yarn"
-          cache-dependency-path: contracts/yarn.lock
+          cache-dependency-path: |
+            yarn.lock
 
       - name: Install NPM dependencies
         run: yarn
