@@ -152,6 +152,9 @@ contract OgvStaking is ERC20Votes {
         _mint(to, points);
         ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
         emit Stake(to, lockups[to].length - 1, amount, end, points);
+
+        // Delegate voting power to self
+        _delegate(to, to);
     }
 
     /// @notice Collect staked OGV for a lockup and any earned rewards.
