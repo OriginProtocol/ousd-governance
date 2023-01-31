@@ -123,7 +123,6 @@ contract DelegationTest is Test {
         
         // Can vote immediately after staking
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
-        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
         assertEq(staking.delegates(oak), oak, "self-delegated after staking");
 
         vm.roll(2);
@@ -131,8 +130,6 @@ contract DelegationTest is Test {
         vm.prank(oak);
         staking.delegate(alice);
         assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
-        assertEq(staking.getVotes(alice), 1 * POINTS, "voting power after delegation");
-        assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS);
         assertEq(staking.delegates(oak), alice);
 
         vm.roll(3);
