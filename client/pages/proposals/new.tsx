@@ -39,6 +39,7 @@ const ProposalNew: NextPage = () => {
     false,
     "isReallocation"
   );
+
   const [submitDisabled, setSubmitDisabled] = useState(false);
   const { proposalThreshold } = useGovernance();
 
@@ -146,7 +147,7 @@ const ProposalNew: NextPage = () => {
         </Card>
         <Card>
           <SectionTitle>Governance Actions</SectionTitle>
-          <div className="tabs mb-6">
+          {/*<div className="tabs mb-6">
             <a
               className={`tab tab-lg tab-lifted ${
                 !isReallocation && "tab-active"
@@ -163,7 +164,7 @@ const ProposalNew: NextPage = () => {
             >
               Reallocation
             </a>
-          </div>{" "}
+          </div>{" "}*/}
           {isReallocation ? (
             <Reallocation proposalDetails={proposalDetails} />
           ) : (
