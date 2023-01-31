@@ -12,7 +12,9 @@ import { SectionTitle } from "components/SectionTitle";
 import { PageTitle } from "components/PageTitle";
 import { Disconnected } from "components/Disconnected";
 import { Reallocation } from "components/proposal/Reallocation";
+import { SubmitProposalButton } from "components/proposal/SubmitProposalButton";
 import { useStickyState } from "utils/useStickyState";
+import useGovernance from "utils/useGovernance";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { useStore } from "utils/store";
 import Wrapper from "components/Wrapper";
@@ -22,10 +24,8 @@ import { useRouter } from "next/router";
 
 const ProposalNew: NextPage = () => {
   const router = useRouter();
-  const { address, web3Provider, contracts, pendingTransactions } = useStore();
+  const { web3Provider, contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
-  const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
-  const [proposalThreshold, setProposalThreshold] = useState<number>(0);
   const [newProposalActions, setNewProposalActions] = useStickyState(
     [],
     "proposalActions"
@@ -39,27 +39,9 @@ const ProposalNew: NextPage = () => {
     false,
     "isReallocation"
   );
+
   const [submitDisabled, setSubmitDisabled] = useState(false);
-
-  useEffect(() => {
-    const loadProposalThreshold = async () => {
-      setProposalThreshold(await contracts.Governance.proposalThreshold());
-    };
-    if (contracts.loaded) {
-      loadProposalThreshold();
-    }
-  }, [contracts]);
-
-  // Load users vote power
-  useEffect(() => {
-    const loadVotePower = async () => {
-      const votePower = await contracts.OgvStaking.balanceOf(address);
-      setVotePower(votePower);
-    };
-    if (web3Provider && address && contracts.loaded) {
-      loadVotePower();
-    }
-  }, [address, web3Provider, contracts]);
+  const { proposalThreshold } = useGovernance();
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -140,27 +122,6 @@ const ProposalNew: NextPage = () => {
     );
   }
 
-  /*if (votePower.lt(proposalThreshold)) {
-    return (
-      <Wrapper narrow>
-        <Card>
-          <div className="text-center">
-            <p className="mt-2 font-medium">
-              Minimum required vote power for a proposal is{" "}
-              {proposalThreshold.toString()} votes.
-              <br />
-              <br />
-              You have {truncateBalance(
-                ethers.utils.formatUnits(votePower)
-              )}{" "}
-              votes.
-            </p>
-          </div>
-        </Card>
-      </Wrapper>
-    );
-  }*/
-
   return (
     <Wrapper narrow>
       <Seo title="New Proposal" />
@@ -186,7 +147,7 @@ const ProposalNew: NextPage = () => {
         </Card>
         <Card>
           <SectionTitle>Governance Actions</SectionTitle>
-          <div className="tabs mb-6">
+          {/*<div className="tabs mb-6">
             <a
               className={`tab tab-lg tab-lifted ${
                 !isReallocation && "tab-active"
@@ -203,7 +164,7 @@ const ProposalNew: NextPage = () => {
             >
               Reallocation
             </a>
-          </div>{" "}
+          </div>{" "}*/}
           {isReallocation ? (
             <Reallocation proposalDetails={proposalDetails} />
           ) : (
@@ -226,15 +187,13 @@ const ProposalNew: NextPage = () => {
                     ephemeral={true}
                   />
                   <div className="flex">
-                    <button
-                      className="btn btn-primary mt-24"
+                    <SubmitProposalButton
+                      className="btn btn-primary"
                       disabled={
                         newProposalActions.length === 0 || submitDisabled
                       }
                       onClick={handleSubmit}
-                    >
-                      Submit Proposal
-                    </button>
+                    />
                   </div>
                 </>
               )}
