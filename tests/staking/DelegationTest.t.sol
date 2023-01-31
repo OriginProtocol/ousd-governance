@@ -55,7 +55,7 @@ contract DelegationTest is Test {
         POINTS = staking.balanceOf(oak);
     }
 
-    function testAutoDelegate() external {
+    function testAutoDelegateOnStake() external {
         vm.roll(1);
         
         // Can vote immediately after staking
@@ -92,6 +92,54 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(alice), 0, "zero after delegation removed");
         assertEq(staking.getPastVotes(alice, block.number - 1), 1 * POINTS);
         assertEq(staking.delegates(alice), address(0));
+    }
+
+    function testDelegateOnExtendAfterRenounce() external {
+        vm.roll(1);
+        
+        // Can vote immediately after staking
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
+
+        vm.roll(2);
+        // Can renounce voting powers
+        vm.prank(oak);
+        staking.delegate(address(0));
+        assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS);
+        assertEq(staking.delegates(oak), address(0));
+
+        vm.roll(3);
+        // Extend shouldn't change manual override
+        vm.prank(oak);
+        staking.extend(0, 200 days);
+        assertEq(staking.delegates(oak), address(0), "should not change delegation on extend");
+        assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
+    }
+
+    function testDelegateOnExtendAfterTransfer() external {
+        vm.roll(1);
+        
+        // Can vote immediately after staking
+        assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
+        assertEq(staking.delegates(oak), oak, "self-delegated after staking");
+
+        vm.roll(2);
+        // Can move voting power
+        vm.prank(oak);
+        staking.delegate(alice);
+        assertEq(staking.getVotes(oak), 0, "zero after delegation removed");
+        assertEq(staking.getVotes(alice), 1 * POINTS, "voting power after delegation");
+        assertEq(staking.getPastVotes(oak, block.number - 1), 1 * POINTS);
+        assertEq(staking.delegates(oak), alice);
+
+        vm.roll(3);
+        // Extend shouldn't change manual override
+        vm.prank(oak);
+        staking.extend(0, 200 days);
+        assertEq(staking.delegates(oak), alice, "should not change delegation on extend");
     }
 
     function testDelegate() external {
