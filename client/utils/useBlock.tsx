@@ -22,7 +22,6 @@ const useBlock = () => {
     if (web3Provider && networkInfo.correct) {
       intervalId = setInterval(() => {
         Promise.all([getBlockTimestamp()]).then(([blockTimestamp]) => {
-          console.log(blockTimestamp);
           useStore.setState({
             blockTimestamp,
           });

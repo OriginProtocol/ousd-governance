@@ -145,6 +145,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;
 
+  // block.timestamp of when OgvStaking.sol was launched
   const epoch = 1657584000;
   const duration = lockupDuration * SECONDS_IN_A_MONTH;
   // Since we'll be using blockTimestamp from CURRENT block, calculation will be
