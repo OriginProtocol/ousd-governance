@@ -1,6 +1,8 @@
-on: ["push", "pull_request"]
-
-name: main workflow
+name: OUSD Governance
+on: 
+  pull_request:
+    types: [opened, reopened]
+  push:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -9,11 +11,14 @@ env:
   NODE_OPTIONS: --max_old_space_size=4096
 
 jobs:
-  tests:
+  lint:
+    name: DApp Linter
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Cache Compiler Installations
         uses: actions/cache@v2
@@ -27,13 +32,44 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "14"
+          cache: "yarn"
+          cache-dependency-path: |
+            client/yarn.lock
 
       - name: Install NPM dependencies
-        run: npm install
+        run: yarn
+        working-directory: client
 
       - name: Client linting
-        run: npm install && npm run prettier:check
+        run: yarn run prettier:check
         working-directory: client
+
+  brownie-tests:
+    name: Brownie tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache Compiler Installations
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.solcx
+            ~/.vvm
+          key: compiler-cache
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: "yarn"
+          cache-dependency-path: |
+            yarn.lock
+
+      - name: Install NPM dependencies
+        run: yarn
 
       - name: Setup Python 3.8
         uses: actions/setup-python@v2
@@ -43,5 +79,19 @@ jobs:
       - name: Install Requirements
         run: pip install -r requirements.txt
 
-      - name: Run Tests
+      - name: Run tests
         run: brownie test --network hardhat
+
+  foundry-tests:
+    name: Foundry tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        run: forge test -vvv

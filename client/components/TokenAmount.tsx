@@ -33,26 +33,20 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({
     if (typeof amount == "number" && Number.isInteger(amount))
       return (
         <span className="uppercase">
-          {numeral(+amount)
-            .format("0 a")
-            .trim()}
+          {numeral(+amount).format("0 a").trim()}
         </span>
       );
 
     if (typeof amount == "string")
       return (
         <span className="uppercase">
-          {numeral(+amount)
-            .format("0.00 a")
-            .trim()}
+          {numeral(+amount).format("0.00 a").trim()}
         </span>
       );
 
     return (
       <span className="uppercase">
-        {numeral(+amount)
-          .format(usedFormat)
-          .trim()}
+        {numeral(+amount).format(usedFormat).trim()}
       </span>
     );
   }

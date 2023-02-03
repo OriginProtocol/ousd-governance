@@ -97,7 +97,12 @@ export const ProposalActionsTable = ({
 
                     if (data === "Bad data") {
                       return (
-                        <div className="font-bold text-red-700">{data}</div>
+                        <div
+                          key="bad-data-error"
+                          className="font-bold text-red-700"
+                        >
+                          {data}
+                        </div>
                       );
                     }
 
