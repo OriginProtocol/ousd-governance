@@ -33,6 +33,9 @@ contract OgvStaking is ERC20Votes {
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
+    // Used to track any manual `delegate()` method call. When this isn't
+    // set to true, voting powers are delegated to the receiver of the stake
+    // when `stake()` or `extend()` method are called.
     mapping(address => bool) public hasManualDelegation;
 
     // Events
