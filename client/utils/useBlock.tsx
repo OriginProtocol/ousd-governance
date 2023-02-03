@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
-import { Timer } from "";
 
 const useBlock = () => {
   const networkInfo = useNetworkInfo();
