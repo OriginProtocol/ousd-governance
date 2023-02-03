@@ -83,8 +83,6 @@ def test_proposal_can_fail_vote(
     rewards.setRewardsTarget(staking.address, {"from": alice})
     staking.stake(amount, WEEK, alice, {"from": alice})
     staking.stake(amount * 2, WEEK, bob, {"from": bob})
-    staking.delegate(alice, {"from": alice})
-    staking.delegate(bob, {"from": bob})
     tx = governance.propose(
         [governance.address],
         [0],
