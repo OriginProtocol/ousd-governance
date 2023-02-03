@@ -145,8 +145,16 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;
 
-  const veOgvFromOgvLockup =
-    lockupAmount * votingDecayFactor ** (lockupDuration / 12);
+  // block.timestamp of when OgvStaking.sol was launched
+  const epoch = 1657584000;
+  const duration = lockupDuration * SECONDS_IN_A_MONTH;
+  // Since we'll be using blockTimestamp from CURRENT block, calculation will be
+  // a hair outdated... but it's negligible
+  const start = blockTimestamp > epoch ? blockTimestamp : epoch; // In prod, should always be blockTimestamp
+  const end = start + duration;
+  const dist = end - epoch; // Distance between end of staking period and the very beginning when staking was launched
+  const multiplier = dist / 365 / 86400;
+  const veOgvFromOgvLockup = lockupAmount * votingDecayFactor ** multiplier;
 
   const ogvLockupRewardApy = getRewardsApy(
     veOgvFromOgvLockup,
@@ -347,7 +355,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
           existingLockup.lockupId,
           duration,
-          { gasLimit: 220000 }
+          { gasLimit: 240000 }
         );
       } catch (e) {
         setTransactionError("Error extending lockup!");

@@ -144,7 +144,6 @@ def whale_voter(token, staking):
     amount = int(1e9) * int(1e18)
     token.approve(staking.address, amount) # Uses coins from default address
     staking.stake(amount, WEEK * 52 * 4, voter)
-    staking.delegate(voter, {'from': voter})
     return voter
 
 @pytest.fixture

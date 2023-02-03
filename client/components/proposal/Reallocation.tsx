@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { useRouter } from "next/router";
+import { SubmitProposalButton } from "components/proposal/SubmitProposalButton";
 
 interface ReallocationProps {
   proposalDetails: string;
@@ -308,13 +309,11 @@ const Reallocation: FunctionComponent<ReallocationProps> = ({
         </div>
       </div>
       <div className="flex">
-        <button
-          className="btn btn-primary mt-24"
+        <SubmitProposalButton
+          className="btn btn-primary"
           onClick={handleSubmit}
           disabled={proposalActions.length === 0}
-        >
-          Submit Proposal
-        </button>
+        />
       </div>
       <EnsureDelegationModal />
     </>
