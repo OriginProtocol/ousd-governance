@@ -16,13 +16,19 @@ const useBlock = () => {
       return block?.timestamp;
     };
 
+    let intervalId: ReturnType<typeof setInterval>;
+
     if (web3Provider && networkInfo.correct) {
-      Promise.all([getBlockTimestamp()]).then(([blockTimestamp]) => {
-        useStore.setState({
-          blockTimestamp,
+      intervalId = setInterval(() => {
+        Promise.all([getBlockTimestamp()]).then(([blockTimestamp]) => {
+          useStore.setState({
+            blockTimestamp,
+          });
         });
-      });
+      }, 4000);
     }
+
+    return () => clearInterval(intervalId);
   }, [web3Provider, networkInfo.correct, refetchBlock]);
 
   return {

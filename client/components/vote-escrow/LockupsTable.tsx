@@ -38,8 +38,8 @@ const LockupsTable: FunctionComponent = () => {
   const handleUnlock = async (lockupId) => {
     const transaction = await contracts.OgvStaking["unstake(uint256)"](
       lockupId,
-      { gasLimit: 1000000 }
-    ); // @TODO maybe set this to lower
+      { gasLimit: 210000 }
+    );
 
     useStore.setState({
       pendingTransactions: [

@@ -1,4 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
+import { GTM_ID } from "../lib/gtm";
 
 class OUSDGovernanceDocument extends Document {
   render(): JSX.Element {
@@ -15,6 +16,14 @@ class OUSDGovernanceDocument extends Document {
           <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         </Head>
         <body className="bg-base-100">
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
           <Main />
           <NextScript />
         </body>
