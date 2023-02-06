@@ -9,6 +9,7 @@ interface CardProps {
   alt?: Boolean;
   noShadow?: Boolean;
   red?: Boolean;
+  margin?: Boolean;
 }
 
 const Card: FunctionComponent<CardProps> = ({
@@ -19,6 +20,7 @@ const Card: FunctionComponent<CardProps> = ({
   alt,
   noShadow,
   red,
+  margin,
 }) => {
   const classes = classNames(
     "overflow-x-auto w-full rounded-lg border h-full",
@@ -31,6 +33,7 @@ const Card: FunctionComponent<CardProps> = ({
       "shadow-lg": !noShadow,
       "px-4 py-5 md:px-5 md:py-6": tightPadding && !noPadding && noShadow,
       "bg-[#dd0a0a1a] border-[#dd0a0a] text-[#dd0a0a]": red,
+      "mt-6 h-full": margin,
     }
   );
 
