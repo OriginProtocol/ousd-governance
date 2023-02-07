@@ -200,4 +200,25 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(bob), 2 * POINTS, "should have voting power after delegation");
         assertEq(staking.delegates(oak), bob, "no change in delegation after staking");
     }
+
+    function testRenounceAttack() external {
+        // Alice can vote, because she is staked
+        assertEq(staking.getVotes(alice), 1 * POINTS, "can vote after staking");
+
+        // Alice renounces voting.
+        vm.prank(alice);
+        staking.delegate(address(0));
+
+        // Attacker attacks
+        vm.startPrank(attacker);
+        ogv.mint(attacker, 1 ether);
+        ogv.approve(address(staking), 1 ether);
+        staking.stake(1 ether, 100 days, alice);
+        vm.stopPrank();
+
+        vm.roll(2);
+
+        // Alice should still have renounced voting
+        assertEq(staking.getVotes(alice), 0, "can't vot after renouncing");
+    }
 }

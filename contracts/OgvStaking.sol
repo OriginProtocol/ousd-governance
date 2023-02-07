@@ -33,10 +33,10 @@ contract OgvStaking is ERC20Votes {
     mapping(address => uint256) public rewardDebtPerShare;
     uint256 public accRewardPerShare; // As of the start of the block
 
-    // Used to track any manual `delegate()` method call. When this isn't
+    // Used to track any calls to `delegate()` method. When this isn't
     // set to true, voting powers are delegated to the receiver of the stake
     // when `stake()` or `extend()` method are called.
-    mapping(address => bool) public hasManualDelegation;
+    mapping(address => bool) public hasDelegationSet;
 
     // Events
     event Stake(
@@ -157,7 +157,7 @@ contract OgvStaking is ERC20Votes {
         _mint(to, points);
         ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
 
-        if (!hasManualDelegation[msg.sender] && delegates(to) == address(0)) {
+        if (!hasDelegationSet[to] && delegates(to) == address(0)) {
             // Delegate voting power to the receiver, if unregistered
             _delegate(to, to);
         }
@@ -210,7 +210,7 @@ contract OgvStaking is ERC20Votes {
         lockup.points = newPoints;
         lockups[msg.sender][lockupId] = lockup;
         _mint(msg.sender, newPoints - oldPoints);
-        if (!hasManualDelegation[msg.sender] && delegates(msg.sender) == address(0)) {
+        if (!hasDelegationSet[msg.sender] && delegates(msg.sender) == address(0)) {
             // Delegate voting power to the receiver, if unregistered
             _delegate(msg.sender, msg.sender);
         }
@@ -302,7 +302,7 @@ contract OgvStaking is ERC20Votes {
      * Emits events {DelegateChanged} and {DelegateVotesChanged}.
      */
     function _delegate(address delegator, address delegatee) internal override {
-        hasManualDelegation[delegator] = true;
+        hasDelegationSet[delegator] = true;
         super._delegate(delegator, delegatee);
     }
 }
