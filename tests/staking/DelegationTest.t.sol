@@ -20,6 +20,7 @@ contract DelegationTest is Test {
     address taz = address(0x44);
     address alice = address(0x45);
     address bob = address(0x46);
+    address attacker = address(0x47);
     address team = address(0x50);
 
     uint256 constant EPOCH = 1 days;
