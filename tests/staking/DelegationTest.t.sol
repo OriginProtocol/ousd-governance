@@ -162,6 +162,7 @@ contract DelegationTest is Test {
         vm.prank(oak);
         staking.extend(0, 200 days);
         assertEq(staking.delegates(oak), oak, "should auto delegate on extend");
+        assertEq(staking.hasDelegationSet(oak), true, "should have hasDelegationSet");
         assertGt(staking.getVotes(oak), 1 * POINTS, "should have voting power after extend");
     }
 
