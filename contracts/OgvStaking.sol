@@ -35,8 +35,9 @@ contract OgvStaking is ERC20Votes {
 
     // Used to track any calls to `delegate()` method. When this isn't
     // set to true, voting powers are delegated to the receiver of the stake
-    // when `stake()` or `extend()` method are called. For existing stakers 
-    // with deletegation set, This will always remain `false` (due to upgrades)
+    // when `stake()` or `extend()` method are called. 
+    // For existing stakers with deletegation set, This will remain `false` 
+    // unless the user calls `delegate()` method.
     mapping(address => bool) public hasDelegationSet;
 
     // Events
