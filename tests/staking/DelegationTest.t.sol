@@ -11,6 +11,8 @@ import "contracts/tests/MockOGV.sol";
 //
 
 contract DelegationTest is Test {
+    using stdStorage for StdStorage;
+
     MockOGV ogv;
     OgvStaking staking;
     RewardsSource source;
