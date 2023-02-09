@@ -140,6 +140,29 @@ contract DelegationTest is Test {
         assertEq(staking.delegates(oak), alice, "should not change delegation on extend");
     }
 
+    function testDelegateOnExtendForOlderStakes() external {
+        // For test purposes, undo auto-staking on user
+        vm.prank(oak);
+        staking.delegate(address(0));
+        stdstore.target(address(staking))
+            .sig(staking.hasDelegationSet.selector)
+            .with_key(oak)
+            .checked_write(false);
+
+        vm.roll(1);
+        
+        // Cannot vote because test undid auto-staking
+        assertEq(staking.getVotes(oak), 0, "can not vote");
+        assertEq(staking.delegates(oak), address(0), "no delegation");
+        assertEq(staking.hasDelegationSet(oak), false, "no hasDelegationSet");
+
+        // Extend should auto-delegate
+        vm.prank(oak);
+        staking.extend(0, 200 days);
+        assertEq(staking.delegates(oak), oak, "should auto delegate on extend");
+        assertGt(staking.getVotes(oak), 1 * POINTS, "should have voting power after extend");
+    }
+
     function testDelegate() external {
         vm.roll(1);
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
@@ -222,4 +245,6 @@ contract DelegationTest is Test {
         // Alice should still have renounced voting
         assertEq(staking.getVotes(alice), 0, "can't vot after renouncing");
     }
+
+    
 }
