@@ -295,7 +295,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       try {
         // Note: ~300k gas is used only when auto-delegation happens.
         // When the user has delegation set already, it'll be ~200k.
-        const maxGasNeeded = 350000 * 1.5; // Adds a buffer
+        const maxGasNeeded = 350000 * 1.2; // Adds a buffer
 
         const gasEstimate = await contracts.OgvStaking.estimateGas[
           "stake(uint256,uint256)"
@@ -361,7 +361,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       try {
         // Note: ~300k gas is used only when auto-delegation happens.
         // When the user has delegation set already, it'll be ~200k.
-        const maxGasNeeded = 300000 * 1.5; // Adds a buffer
+        const maxGasNeeded = 300000 * 1.2; // Adds a buffer
 
         const gasEstimate = await contracts.OgvStaking.estimateGas[
           "extend(uint256,uint256)"
