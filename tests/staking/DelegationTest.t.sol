@@ -7,7 +7,7 @@ import "contracts/RewardsSource.sol";
 import "contracts/tests/MockOGV.sol";
 
 //
-// Sanity test of OpenZeppelin's voting and deletegation.
+// Sanity test of OpenZeppelin's voting and delegation.
 //
 
 contract DelegationTest is Test {
