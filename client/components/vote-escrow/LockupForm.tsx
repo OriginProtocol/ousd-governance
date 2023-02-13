@@ -293,11 +293,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       }
 
       try {
+        // Note: ~300k gas is used only when auto-delegation happens.
+        // When the user has delegation set already, it'll be ~200k.
+        const maxGasNeeded = 350000 * 1.2; // Adds a buffer
+
+        const gasEstimate = await contracts.OgvStaking.estimateGas[
+          "stake(uint256,uint256)"
+        ](amountToStake, duration);
+
         transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
           amountToStake,
           duration,
-          // 228123 * 1.5
-          { gasLimit: 342184 }
+          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
         );
       } catch (e) {
         setTransactionError("Error locking up!");
@@ -352,10 +359,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let transaction;
       try {
+        // Note: ~300k gas is used only when auto-delegation happens.
+        // When the user has delegation set already, it'll be ~200k.
+        const maxGasNeeded = 300000 * 1.2; // Adds a buffer
+
+        const gasEstimate = await contracts.OgvStaking.estimateGas[
+          "extend(uint256,uint256)"
+        ](existingLockup.lockupId, duration);
+
         transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
           existingLockup.lockupId,
           duration,
-          { gasLimit: 260000 }
+          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
         );
       } catch (e) {
         setTransactionError("Error extending lockup!");
