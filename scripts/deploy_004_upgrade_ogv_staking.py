@@ -25,9 +25,13 @@ def main():
 	# # Dynamicly price gas, avoids over paying or TX's getting stuck
 	# priority_fee("2 gwei")
 
-	# Note: These params don't matter since the storage slots
-	# of proxy contract will be used after upgrade
-	min_staking = 7 * 24 * 60 * 60
+	# these values are marked as immutable in the contract and for that reason
+	# the compiler does not reserve storage slots for them - rather they are
+	# copied to all the places in the code where they are used. It is important
+	# that we use the correct values in the constructor
+	#
+	# https://docs.soliditylang.org/en/v0.8.17/contracts.html#constant-and-immutable-state-variables
+	min_staking = 30 * 24 * 60 * 60 # 2592000 -> 30 days
 	epoch = 1657584000
 
 	# Deploy new implementation 
