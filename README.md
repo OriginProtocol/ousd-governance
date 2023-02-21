@@ -153,6 +153,10 @@ export WEB3_INFURA_PROJECT_ID=...
 export ETHERSCAN_TOKEN=...
 export DEPLOYER_KEY=...
 
+The deployment needs to be done in 2 steps. First one executes the code deployed / altered on 
+mainnet by the deployer account. The second step is able to build the transaction to make a proposal 
+on the governor only when in mainnet-fork mode, so needs to be ran separately. 
+
 ### Step 1
 Write a deployment file and then run `brownie run [DEPLOYMENT_FILE] --network mainnet`
 
@@ -160,6 +164,8 @@ Make sure that script outputs all of the addresses that need to be passed to pot
 proposal.
 
 ### Step 2
+Make sure you copy all the addresses to the governor proposal section of the deploy file.
+
 To build a transaction for Governor `MODE=build_ogv_gov_proposal brownie run [DEPLOYMENT_FILE] --network mainnet-fork`
 
 Copy the `To` and `Data` to transaction builder with an account that has enough veOGV to create

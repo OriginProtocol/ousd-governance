@@ -13,6 +13,10 @@ def main():
     # Current OGVStakingProxy
     staking_proxy = OgvStakingProxy.at(OGV_STAKING_PROXY)
 
+    # IMPORTANT
+    # because of technical limitations the below governance proposal actions can not have
+    # any addresses dynamically fetched. Rather they need to be copied from Step 1 that 
+    # executes the code below. 
     # just build the OGV governance proposal
     if (is_proposal_mode):
       return {
