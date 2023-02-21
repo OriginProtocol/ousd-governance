@@ -146,6 +146,37 @@ Note: You shouldn't commit to `stable` directly. Only merge from `master` (where
 
 1. If the release causes issues in production, don't be afraid to roll back while you diagnose the issue. Especially if users are impacted. You can do this by reverting your commit: `git revert [commit hash]` and pushing the resulting revert commit to `stable`. Or, if you want to keep a cleaner commit history, reset the `stable` branch to the last commit hash of the previous release: `git reset [commit hash] --hard` and push this to `stable` using `git push stable --force`. Note: You should only force push if you're 100% certain of the change.
 
+## Deploying contracts
+
+Setup environment variables:
+export WEB3_INFURA_PROJECT_ID=...
+export ETHERSCAN_TOKEN=...
+export DEPLOYER_KEY=...
+
+### Step 1
+Write a deployment file and then run `brownie run [DEPLOYMENT_FILE] --network mainnet`
+
+Make sure that script outputs all of the addresses that need to be passed to potential governance
+proposal.
+
+### Step 2
+To build a transaction for Governor `MODE=build_ogv_gov_proposal brownie run [DEPLOYMENT_FILE] --network mainnet-fork`
+
+Copy the `To` and `Data` to transaction builder with an account that has enough veOGV to create
+a governance proposal. 
+
+### Optional
+Set up virtual environment using python3. 
+
+#### Setup Python environment
+    # Let's create a new virtual environment
+    python3 -m venv brownie-deploy
+    source ./brownie-deploy/bin/activate
+    pip install -r requirements.txt
+#### To run
+    source ./brownie-deploy/bin/activate
+
+
 ## Git Commands For Merging Branches
 
 ### Staging (Goerli)
