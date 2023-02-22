@@ -5,11 +5,18 @@
       "0x9c354503C38481a7A7a51629142963F98eCC12D0"
     ],
     "Governance": [
-      "0x3cdD07c16614059e66344a7b579DAB4f9516C0b6",
-      "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA"
+      "0xC6a3525e2FD8F4844a6fdfE4552a583CE5aC7EfA",
+      "0x3cdD07c16614059e66344a7b579DAB4f9516C0b6"
     ],
     "MandatoryLockupDistributor": [
       "0xD667091c2d1DCc8620f4eaEA254CdFB0a176718D"
+    ],
+    "OgvStaking": [
+      "0xE61110663334794abA03c349c621A075DC590a42",
+      "0xe61110663334794aba03c349c621a075dc590a42"
+    ],
+    "OgvStakingProxy": [
+      "0x0C4576Ca1c365868E162554AF8e385dc3e7C66D9"
     ],
     "OptionalLockupDistributor": [
       "0x7aE2334f12a449895AD21d4c255D9DE194fe986f"
@@ -26,8 +33,8 @@
       "0x7d82E86CF1496f9485a8ea04012afeb3C7489397"
     ],
     "Timelock": [
-      "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F",
-      "0xac126C98cFc7c55a9F944770cb17d7065688C577"
+      "0xac126C98cFc7c55a9F944770cb17d7065688C577",
+      "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F"
     ]
   },
   "4": {
