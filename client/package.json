@@ -19,6 +19,11 @@
     "prettier:fix": "prettier --write '{components,constants,lib,pages,utils}/**/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
+    "@0x/subproviders": "^7.0.1",
+    "@fbtjs/default-collection-transform": "^1.0.0",
+    "@gnosis.pm/safe-apps-web3-react": "^1.5.3",
+    "@ledgerhq/hw-app-eth": "^6.32.0",
+    "@ledgerhq/hw-transport-webusb": "^6.27.12",
     "@mdi/js": "^6.9.96",
     "@mdi/react": "^1.6.0",
     "@myetherwallet/mewconnect-connector": "^0.1.8",
@@ -31,16 +36,28 @@
     "@types/react-sticky": "^6.0.4",
     "@types/react-sticky-el": "^1.0.3",
     "@walletconnect/web3-provider": "^1.7.1",
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
+    "@web3-react/ledger-connector": "^6.1.9",
+    "@web3-react/walletconnect-connector": "^6.2.13",
+    "@web3-react/walletlink-connector": "^6.2.14",
     "autoprefixer": "^10.4.2",
+    "babel-plugin-fbt": "^1.0.0",
+    "babel-plugin-fbt-runtime": "^1.0.0",
+    "bootstrap": "4.5.2",
     "chart.js": "^3.7.1",
     "classnames": "^2.3.1",
     "daisyui": "^2.0.9",
     "dayjs": "^1.11.4",
+    "deficonnect": "^1.6.14-dev.2",
     "dotenv": "^16.0.0",
     "eslint": "8.9.0",
     "eslint-config-next": "12.1.0",
     "ethereum-events": "https://github.com/AleG94/ethereum-events#develop",
     "ethers": "^5.5.4",
+    "fbjs": "^3.0.4",
+    "fbt": "^1.0.0",
+    "fbt-runtime": "^0.9.4",
     "keccak256": "^1.0.6",
     "lodash": "^4.17.21",
     "merkletreejs": "^0.2.31",
@@ -73,5 +90,14 @@
     "web3modal": "^1.9.5",
     "winston": "^3.6.0",
     "zustand": "^3.7.0"
+  },
+  "babel": {
+    "presets": [
+      "next/babel"
+    ],
+    "plugins": [
+      "babel-plugin-fbt",
+      "babel-plugin-fbt-runtime"
+    ]
   }
 }

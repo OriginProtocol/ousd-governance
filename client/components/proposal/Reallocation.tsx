@@ -7,6 +7,7 @@ import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { useRouter } from "next/router";
 import { SubmitProposalButton } from "components/proposal/SubmitProposalButton";
+import { useWeb3React } from "@web3-react/core";
 
 interface ReallocationProps {
   proposalDetails: string;
@@ -17,6 +18,7 @@ const Reallocation: FunctionComponent<ReallocationProps> = ({
 }) => {
   const router = useRouter();
   const { contracts, pendingTransactions } = useStore();
+  const { account, library } = useWeb3React();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [fromStrategy, setFromStrategy] = useState<string>("");
   const [toStrategy, setToStrategy] = useState<string>("");
@@ -162,9 +164,9 @@ const Reallocation: FunctionComponent<ReallocationProps> = ({
         return;
       }
 
-      const transaction = await contracts.Governance[
-        "propose(address[],uint256[],string[],bytes[],string)"
-      ](
+      const transaction = await contracts.Governance.connect(
+        library.getSigner(account)
+      )["propose(address[],uint256[],string[],bytes[],string)"](
         proposal.targets,
         proposal.values,
         proposal.signatures,

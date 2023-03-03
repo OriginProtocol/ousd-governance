@@ -1,6 +1,6 @@
 import { FunctionComponent } from "react";
 import { ethers } from "ethers";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { useStore } from "utils/store";
 import Card from "components/Card";
@@ -19,10 +19,11 @@ import CardGroup from "components/CardGroup";
 import moment from "moment";
 import { mdiArrowRight, mdiAlertCircle } from "@mdi/js";
 import Icon from "@mdi/react";
-import ApyToolTip from "components/claim/claim/ApyTooltip";
+import ApyToolTip from "@/components/ApyTooltip";
 import { getRewardsApy } from "utils/apy";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
+import { useWeb3React } from "@web3-react/core";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -118,13 +119,14 @@ const maxLockupDurationInMonths = 12 * 4;
 const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const {
     contracts,
-    rpcProvider,
+    web3Provider,
     pendingTransactions,
     balances,
     allowances,
     blockTimestamp,
     totalBalances,
   } = useStore();
+  const { library, account } = useWeb3React();
   const router = useRouter();
 
   const { totalSupplyVeOgvAdjusted } = totalBalances;
@@ -234,11 +236,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     let transaction;
     try {
-      transaction = await contracts.OriginDollarGovernance.approve(
-        contracts.OgvStaking.address,
-        ethers.constants.MaxUint256,
-        { gasLimit: 144300 }
-      );
+      transaction = await contracts.OriginDollarGovernance.connect(
+        library.getSigner(account)
+      ).approve(contracts.OgvStaking.address, ethers.constants.MaxUint256, {
+        gasLimit: 144300,
+      });
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -249,7 +251,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     let receipt;
     try {
-      receipt = await rpcProvider.waitForTransaction(transaction.hash);
+      receipt = await web3Provider.waitForTransaction(transaction.hash);
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -297,15 +299,15 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         // When the user has delegation set already, it'll be ~200k.
         const maxGasNeeded = 350000 * 1.2; // Adds a buffer
 
-        const gasEstimate = await contracts.OgvStaking.estimateGas[
-          "stake(uint256,uint256)"
-        ](amountToStake, duration);
+        const gasEstimate = await contracts.OgvStaking.connect(
+          library.getSigner(account)
+        ).estimateGas["stake(uint256,uint256)"](amountToStake, duration);
 
-        transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
-          amountToStake,
-          duration,
-          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
-        );
+        transaction = await contracts.OgvStaking.connect(
+          library.getSigner(account)
+        )["stake(uint256,uint256)"](amountToStake, duration, {
+          gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded),
+        });
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -316,7 +318,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await rpcProvider.waitForTransaction(transaction.hash);
+        receipt = await web3Provider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -363,15 +365,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         // When the user has delegation set already, it'll be ~200k.
         const maxGasNeeded = 300000 * 1.2; // Adds a buffer
 
-        const gasEstimate = await contracts.OgvStaking.estimateGas[
-          "extend(uint256,uint256)"
-        ](existingLockup.lockupId, duration);
-
-        transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
+        const gasEstimate = await contracts.OgvStaking.connect(
+          library.getSigner(account)
+        ).estimateGas["extend(uint256,uint256)"](
           existingLockup.lockupId,
-          duration,
-          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
+          duration
         );
+
+        transaction = await contracts.OgvStaking.connect(
+          library.getSigner(account)
+        )["extend(uint256,uint256)"](existingLockup.lockupId, duration, {
+          gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded),
+        });
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");
@@ -382,7 +387,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       let receipt;
       try {
-        receipt = await rpcProvider.waitForTransaction(transaction.hash);
+        receipt = await web3Provider.waitForTransaction(transaction.hash);
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");

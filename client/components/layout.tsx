@@ -2,6 +2,7 @@ import { FunctionComponent, ReactNode } from "react";
 import Header from "components/Header";
 import Footer from "components/Footer";
 import AdminUtils from "components/AdminUtils";
+import WalletSelectModal from "./WalletSelectModal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 
 const Layout: FunctionComponent<LayoutProps> = ({ children, hideNav }) => (
   <div className="min-h-screen">
+    <WalletSelectModal />
     <Header hideNav={hideNav} />
     <div className="relative">
       <div className="bg-white pt-4 pb-16 min-h-[15rem]">

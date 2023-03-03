@@ -14,6 +14,22 @@ class OUSDGovernanceDocument extends Document {
           />
           <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
           <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+          {/* jQuery is required for bootstrap javascript */}
+          <script
+            src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+            integrity="sha384-Qg00WFl9r0Xr6rUqNLv1ffTSSKEFFCDCKVyHZ+sVt8KuvG99nWw5RNvbhuKgif9z"
+            crossOrigin="anonymous"
+          />
+          <script
+            src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossOrigin="anonymous"
+          />
+          <script
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossOrigin="anonymous"
+          />
         </Head>
         <body className="bg-base-100">
           <noscript>

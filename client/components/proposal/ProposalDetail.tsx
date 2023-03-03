@@ -19,6 +19,7 @@ import { StateTag } from "./StateTag";
 import { ProposalHistory } from "./ProposalHistory";
 import moment from "moment";
 import RegisterToVote from "components/proposal/RegisterToVote";
+import { useWeb3React } from "@web3-react/core";
 
 export const ProposalDetail = ({
   id,
@@ -35,7 +36,8 @@ export const ProposalDetail = ({
   voters: Array<object>;
   transactions: Array<object>;
 }) => {
-  const { address, contracts, pendingTransactions, rpcProvider } = useStore();
+  const { contracts, pendingTransactions, web3Provider } = useStore();
+  const { account: address } = useWeb3React();
   const [proposalActions, setProposalActions] = useState(null);
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
@@ -52,13 +54,13 @@ export const ProposalDetail = ({
 
   useEffect(() => {
     const getBlockNumber = async () => {
-      const blockNumber = await rpcProvider.getBlockNumber();
+      const blockNumber = await web3Provider.getBlockNumber();
       setBlockNumber(parseInt(blockNumber));
     };
-    if (rpcProvider) {
+    if (web3Provider) {
       getBlockNumber();
     }
-  }, [rpcProvider]);
+  }, [web3Provider]);
 
   useEffect(() => {
     const loadVoters = async () => {

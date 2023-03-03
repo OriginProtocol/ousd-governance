@@ -11,7 +11,7 @@ export const Address = ({
   address: string;
   noTruncate?: Boolean;
 }) => {
-  const { rpcProvider } = useStore();
+  const { web3Provider } = useStore();
   const [addressDisplay, setAddressDisplay] = useState(
     noTruncate ? address : truncateEthAddress(address)
   );
@@ -19,21 +19,21 @@ export const Address = ({
   useEffect(() => {
     const loadEns = async () => {
       try {
-        const ens = await rpcProvider.lookupAddress(address);
+        const ens = await web3Provider.lookupAddress(address);
         if (ens) {
           setAddressDisplay(ens);
         }
       } catch (error) {}
     };
-    if (rpcProvider) {
+    if (web3Provider) {
       loadEns();
     }
-  }, [rpcProvider, address]);
+  }, [web3Provider, address]);
 
   let explorerPrefix;
-  if (rpcProvider?._network?.chainId === 1) {
+  if (web3Provider?._network?.chainId === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (rpcProvider?._network?.chainId === 5) {
+  } else if (web3Provider?._network?.chainId === 5) {
     explorerPrefix = "https://goerli.etherscan.io/";
   }
 

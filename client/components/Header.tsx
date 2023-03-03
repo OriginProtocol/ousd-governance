@@ -1,12 +1,12 @@
 import { FunctionComponent, useState } from "react";
 import classNames from "classnames";
-import { Web3Button } from "components/Web3Button";
 import Wrapper from "components/Wrapper";
 import Link from "components/Link";
 import Image from "next/image";
 import { navItems } from "../constants";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
+import AccountStatusDropdown from "./AccountStatusDropdown";
 
 interface HeaderProps {
   hideNav?: boolean;
@@ -103,7 +103,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                     alt="Open Menu"
                   />
                 </button>
-                <Web3Button />
+                <AccountStatusDropdown />
               </div>
             )}
           </div>

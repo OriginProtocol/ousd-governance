@@ -2,10 +2,12 @@ import { useStore } from "utils/store";
 import { useState } from "react";
 import useAccountBalances from "utils/useAccountBalances";
 import Modal from "components/Modal";
+import { useWeb3React } from "@web3-react/core";
 
 export const EnsureDelegationModal = () => {
-  const { contracts, ensureDelegationModalOpened, address, rpcProvider } =
+  const { contracts, ensureDelegationModalOpened, address, web3Provider } =
     useStore();
+  const { account, library } = useWeb3React();
   /*
    * 0 - initial prompt to initiate contract delegation call
    * 1 - confirmation stage
@@ -31,10 +33,12 @@ export const EnsureDelegationModal = () => {
   const handleRegistration = async () => {
     setRegisterStatus("waiting-for-user");
     // self delegate
-    const transaction = await contracts.OgvStaking.delegate(address);
+    const transaction = await contracts.OgvStaking.connect(
+      library.getSigner(account)
+    ).delegate(address);
     setRegisterStatus("waiting-for-network");
     // wait for self delegation to be mined before continuing
-    await rpcProvider.waitForTransaction(transaction.hash);
+    await web3Provider.waitForTransaction(transaction.hash);
     setStage(1);
     setRegisterStatus("ready");
     /*

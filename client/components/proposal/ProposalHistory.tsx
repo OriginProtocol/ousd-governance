@@ -15,12 +15,12 @@ interface ProposalHistoryProps {
 const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
   transactions,
 }) => {
-  const { rpcProvider } = useStore();
+  const { web3Provider } = useStore();
 
   let explorerPrefix;
-  if (rpcProvider?._network?.chainId === 1) {
+  if (web3Provider?._network?.chainId === 1) {
     explorerPrefix = "https://etherscan.io/";
-  } else if (rpcProvider?._network?.chainId === 5) {
+  } else if (web3Provider?._network?.chainId === 5) {
     explorerPrefix = "https://goerli.etherscan.io/";
   }
 

@@ -11,9 +11,14 @@ import Layout from "../components/layout";
 import { claimOpenTimestampPassed } from "utils";
 import Script from "next/script";
 import { GTM_ID, pageview } from "../lib/gtm";
+import { withWeb3Provider } from "hoc";
+import { useWeb3React } from "@web3-react/core";
+import { useStore } from "utils/store";
 
-export default function App({ Component, pageProps }) {
+export function App({ Component, pageProps }) {
   const router = useRouter();
+  const { account } = useWeb3React();
+  const resetWeb3State = useStore((state) => state.reset);
 
   useEffect(() => {
     router.events.on("routeChangeComplete", pageview);
@@ -21,6 +26,12 @@ export default function App({ Component, pageProps }) {
       router.events.off("routeChangeComplete", pageview);
     };
   }, [router.events]);
+
+  // If somebody locks their wallet, "account" from within the Web3React state
+  // will be undefined... we want to use that re-render to reset the web3 store.
+  useEffect(() => {
+    if (!account) resetWeb3State();
+  }, [account]);
 
   useContracts();
   useTotalBalances();
@@ -48,3 +59,5 @@ export default function App({ Component, pageProps }) {
     </Layout>
   );
 }
+
+export default withWeb3Provider(App);

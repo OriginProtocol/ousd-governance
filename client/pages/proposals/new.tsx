@@ -21,10 +21,13 @@ import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { useRouter } from "next/router";
+import { useWeb3React } from "@web3-react/core";
 
 const ProposalNew: NextPage = () => {
   const router = useRouter();
   const { web3Provider, contracts, pendingTransactions } = useStore();
+  const { library, account } = useWeb3React();
+
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [newProposalActions, setNewProposalActions] = useStickyState(
     [],
@@ -82,9 +85,9 @@ const ProposalNew: NextPage = () => {
         return;
       }
       setSubmitDisabled(true);
-      transaction = await contracts.Governance[
-        "propose(address[],uint256[],string[],bytes[],string)"
-      ](
+      transaction = await contracts.Governance.connect(
+        library.getSigner(account)
+      )["propose(address[],uint256[],string[],bytes[],string)"](
         proposalActions.targets,
         proposalActions.values,
         proposalActions.signatures,

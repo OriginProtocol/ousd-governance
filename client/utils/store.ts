@@ -1,16 +1,23 @@
 import create from "zustand";
-import { ethers } from "ethers";
+import { ethers, providers, BigNumber } from "ethers";
 
 type Web3DataType = {
-  provider?: any;
-  web3Provider?: any;
-  address?: string;
-  chainId?: number;
+  web3Provider?: providers.JsonRpcProvider | null;
+  ensureDelegationModalOpened: boolean;
+  connectorName: string | null;
+  walletSelectModalState: "Wallet" | "LedgerDerivation" | false;
   contracts: Object;
-  balances: Object;
+  ogvDelegateeAddress: string;
+  balances: {
+    ogv: BigNumber;
+    veOgv: BigNumber;
+    accruedRewards: BigNumber;
+  };
   existingLockup: Object;
   lockups: Array<Object>;
-  allowances: Object;
+  allowances: {
+    ogv: BigNumber;
+  };
   pendingTransactions: Array<any>;
   totalBalances: Object;
 };
@@ -20,24 +27,22 @@ type StoreType = Web3DataType & {
 };
 
 const defaultState: Web3DataType = {
-  provider: null,
   web3Provider: null,
-  rpcProvider: null,
-  address: undefined,
-  chainId: null,
   contracts: {
     loaded: false,
   },
   ensureDelegationModalOpened: false,
+  connectorName: null,
+  walletSelectModalState: false,
   balances: {
-    ogv: ethers.BigNumber.from("0"),
-    veOgv: ethers.BigNumber.from("0"),
-    accruedRewards: ethers.BigNumber.from("0"),
+    ogv: BigNumber.from("0"),
+    veOgv: BigNumber.from("0"),
+    accruedRewards: BigNumber.from("0"),
   },
   ogvDelegateeAddress: "0x0000000000000000000000000000000000000000",
   existingLockup: {
-    amount: ethers.BigNumber.from(0),
-    end: ethers.BigNumber.from(0),
+    amount: BigNumber.from(0),
+    end: BigNumber.from(0),
     existingEndWeeks: 0,
     existingEndDate: "",
   },
@@ -49,16 +54,16 @@ const defaultState: Web3DataType = {
   lockups: [],
   recentLockups: [],
   allowances: {
-    ogv: ethers.BigNumber.from("0"),
+    ogv: BigNumber.from("0"),
   },
   pendingTransactions: [],
   totalBalances: {
-    totalSupplyOfOgv: ethers.BigNumber.from("0"),
-    totalLockedUpOgv: ethers.BigNumber.from("0"),
+    totalSupplyOfOgv: BigNumber.from("0"),
+    totalLockedUpOgv: BigNumber.from("0"),
     totalPercentageOfLockedUpOgv: 0,
-    totalSupplyVeOgv: ethers.BigNumber.from("0"),
-    optionalDistributorOgv: ethers.BigNumber.from("0"),
-    mandatoryDistributorOgv: ethers.BigNumber.from("0"),
+    totalSupplyVeOgv: BigNumber.from("0"),
+    optionalDistributorOgv: BigNumber.from("0"),
+    mandatoryDistributorOgv: BigNumber.from("0"),
   },
   totalOgvLockedUp: ethers.BigNumber.from("0"),
   blockTimestamp: Math.ceil(Date.now() / 1000),

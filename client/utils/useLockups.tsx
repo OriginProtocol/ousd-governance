@@ -4,12 +4,14 @@ import { useNetworkInfo } from "utils/index";
 import { fetcher } from "utils/index";
 import useSWR, { mutate } from "swr";
 import { sortBy } from "lodash";
+import { useWeb3React } from "@web3-react/core";
 
 const useLockups = () => {
   const [reloadLockups, setReloadLockups] = useState(0);
 
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts } = useStore();
+  const { web3Provider, contracts } = useStore();
+  const { account: address } = useWeb3React();
 
   const { data } = useSWR(`/api/lockups?account=${address}`, fetcher);
   // @TODO: Might need to fetch data another way as it doesn't reload instantly using set reloadLockups

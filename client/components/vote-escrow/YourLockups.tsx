@@ -12,7 +12,8 @@ import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
 import DisabledButtonToolTip from "../DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
-import { Web3Button } from "components/Web3Button";
+import ConnectButton from "../ConnectButton";
+import { useWeb3React } from "@web3-react/core";
 
 interface YourLockupsProps {}
 
@@ -25,6 +26,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     totalBalances,
     web3Provider,
   } = useStore();
+  const { library, account } = useWeb3React();
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
   const { reloadAccountBalances } = useAccountBalances();
@@ -62,7 +64,9 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
     let transaction;
     try {
-      transaction = await contracts.OgvStaking["collectRewards()"]({
+      transaction = await contracts.OgvStaking.connect(
+        library.getSigner(account)
+      )["collectRewards()"]({
         gasLimit: 140000,
       });
     } catch (e) {
@@ -74,9 +78,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
     let receipt;
     try {
-      receipt = await contracts.rpcProvider.waitForTransaction(
-        transaction.hash
-      );
+      receipt = await web3Provider?.waitForTransaction(transaction.hash);
     } catch (e) {
       setCollectRewardsStatus("ready");
       throw e;
@@ -212,7 +214,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               </Link>
             </li>
           </ul>
-          {web3Provider ? (
+          {web3Provider && account ? (
             <Link
               href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
               newWindow
@@ -221,7 +223,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               Buy OGV
             </Link>
           ) : (
-            <Web3Button inPage />
+            <ConnectButton inPage />
           )}
         </div>
       )}

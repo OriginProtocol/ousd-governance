@@ -5,10 +5,11 @@ import useClaim from "../utils/useClaim";
 import { useStore } from "utils/store";
 import Wrapper from "components/Wrapper";
 import { utils } from "ethers";
+import { useWeb3React } from "@web3-react/core";
 
 const MerkleTest: NextPage = () => {
   const { optional } = useClaim();
-  const { address } = useStore();
+  const { account: address } = useWeb3React();
   if (!optional) {
     return <></>;
   }

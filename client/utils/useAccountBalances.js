@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import { useWeb3React } from "@web3-react/core";
 
 const useAccountBalances = () => {
   const [reloadAccountAllowances, setReloadAccountAllowances] = useState(0);
@@ -8,7 +9,8 @@ const useAccountBalances = () => {
   const [reloadStakingDelegation, setReloadStakingDelegation] = useState(0);
 
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts, refreshStatus } = useStore();
+  const { web3Provider, contracts, refreshStatus } = useStore();
+  const { account: address } = useWeb3React();
 
   useEffect(() => {
     const fetchOgvStakingDelegateeAddress = async () => {

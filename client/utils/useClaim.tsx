@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { useStore } from "utils/store";
-import useConnectSigner from "utils/useConnectSigner";
 import { decimal18Bn, sleep } from "utils";
 import numeral from "numeraljs";
 import useTotalBalances from "utils/useTotalBalances";
+import { useWeb3React } from "@web3-react/core";
 
 const useClaim = () => {
   const emptyClaimState = {
@@ -17,7 +17,9 @@ const useClaim = () => {
   const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
   const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
     useState(null);
-  const { address, contracts, web3Provider, rpcProvider } = useStore();
+  const { contracts, web3Provider } = useStore();
+  const { library, account } = useWeb3React();
+
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
   /*
    * ready -> ready to start claiming
@@ -43,7 +45,7 @@ const useClaim = () => {
   useEffect(() => {
     const getClaim = async () => {
       setLoaded(false);
-      const api = `/api/claim?account=${address}`;
+      const api = `/api/claim?account=${account}`;
       const res = await fetch(api);
 
       const claim = await res.json();
@@ -71,7 +73,7 @@ const useClaim = () => {
     getClaim();
 
     return () => setClaim(emptyClaimState);
-  }, [address]);
+  }, [account]);
 
   useEffect(() => {
     const loadTotalSupplyVeOGV = async () => {
@@ -111,7 +113,7 @@ const useClaim = () => {
         isValid: await distContract.isProofValid(
           claim.index,
           claim.amount,
-          address,
+          account,
           claim.proof
         ),
       };
@@ -137,11 +139,8 @@ const useClaim = () => {
               setOptionalClaimState("waiting-for-user");
               let claimResult;
               try {
-                claimResult = await (
-                  await useConnectSigner(
-                    contracts.OptionalDistributor,
-                    web3Provider
-                  )
+                claimResult = await contracts.OptionalDistributor.connect(
+                  library.getSigner(account)
                 )["claim(uint256,uint256,bytes32[],uint256)"](
                   claim.optional.index,
                   claim.optional.amount,
@@ -159,7 +158,7 @@ const useClaim = () => {
               setOptionalClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await rpcProvider.waitForTransaction(
+                receipt = await web3Provider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable
@@ -197,11 +196,8 @@ const useClaim = () => {
               setMandatoryClaimState("waiting-for-user");
               let claimResult;
               try {
-                claimResult = await (
-                  await useConnectSigner(
-                    contracts.MandatoryDistributor,
-                    web3Provider
-                  )
+                claimResult = contracts.MandatoryDistributor.connect(
+                  library.getSigner(account)
                 )["claim(uint256,uint256,bytes32[])"](
                   claim.mandatory.index,
                   claim.mandatory.amount,
@@ -218,7 +214,7 @@ const useClaim = () => {
               setMandatoryClaimState("waiting-for-network");
               let receipt;
               try {
-                receipt = await rpcProvider.waitForTransaction(
+                receipt = await web3Provider.waitForTransaction(
                   claimResult.hash
                 );
                 // sleep for 5 seconds on development so it is more noticeable
@@ -251,7 +247,7 @@ const useClaim = () => {
     };
 
     setupDistributors();
-  }, [address, contracts, claim, web3Provider]);
+  }, [account, contracts, claim, web3Provider]);
 
   return {
     optional: {

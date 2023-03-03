@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Card from "components/Card";
 import Link from "components/Link";
 import classNames from "classnames";
+import { useWeb3React } from "@web3-react/core";
 
 interface RegisterToVoteProps {
   withCard?: Boolean;
@@ -21,8 +22,11 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   showNoVeOgvMessage,
   whiteRegisterCta,
 }) => {
-  const { contracts, address, balances, pendingTransactions } = useStore();
+  const { contracts, balances, pendingTransactions } = useStore();
+  const { account: address } = useWeb3React();
   const { veOgv } = balances;
+  const { library, account } = useWeb3React();
+
   const [registerStatus, setRegisterStatus] = useState("ready");
   const { needToShowDelegation } = useShowDelegationModalOption();
 
@@ -38,7 +42,9 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
   const handleRegistration = async () => {
     setRegisterStatus("waiting-for-user");
     try {
-      const transaction = await contracts.OgvStaking.delegate(address);
+      const transaction = await contracts.OgvStaking.connect(
+        library.getSigner(account)
+      ).delegate(address);
       setRegisterStatus("waiting-for-network");
 
       useStore.setState({

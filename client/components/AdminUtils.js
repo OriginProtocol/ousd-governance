@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 import { useStore } from "utils/store";
 import { ZERO_ADDRESS } from "constants/index";
+import { useWeb3React } from "@web3-react/core";
 
 const AdminUtils = () => {
   const { contracts } = useStore();
+  const { library, account } = useWeb3React();
 
   const show = useMemo(() => {
     if (process.browser) {
@@ -33,7 +35,9 @@ const AdminUtils = () => {
   };
 
   const resetDelegation = async () => {
-    await contracts.OgvStaking.delegate(ZERO_ADDRESS);
+    await contracts.OgvStaking.connect(library.getSigner(account)).delegate(
+      ZERO_ADDRESS
+    );
   };
 
   const buttonClass = "px-2 py-1 my-1 border border-black rounded-md";

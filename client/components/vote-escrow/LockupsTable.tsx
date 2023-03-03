@@ -15,10 +15,12 @@ import Modal from "components/Modal";
 import { truncateEthAddress } from "utils";
 import EtherscanIcon from "components/EtherscanIcon";
 import ExternalLinkIcon from "../ExternalLinkIcon";
+import { useWeb3React } from "@web3-react/core";
 
 const LockupsTable: FunctionComponent = () => {
   const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =
     useStore();
+  const { library, account } = useWeb3React();
 
   const { reloadTotalBalances } = useTotalBalances();
   const { reloadAccountBalances } = useAccountBalances();
@@ -36,10 +38,9 @@ const LockupsTable: FunctionComponent = () => {
   }
 
   const handleUnlock = async (lockupId) => {
-    const transaction = await contracts.OgvStaking["unstake(uint256)"](
-      lockupId,
-      { gasLimit: 210000 }
-    );
+    const transaction = await contracts.OgvStaking.connect(
+      library.getSigner(account)
+    )["unstake(uint256)"](lockupId, { gasLimit: 210000 });
 
     useStore.setState({
       pendingTransactions: [

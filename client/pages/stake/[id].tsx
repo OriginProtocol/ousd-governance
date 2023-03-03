@@ -9,6 +9,7 @@ import { find } from "lodash";
 import Seo from "components/Seo";
 import CardGroup from "components/CardGroup";
 import AccountBalances from "components/vote-escrow/AccountBalances";
+import { useWeb3React } from "@web3-react/core";
 
 export async function getServerSideProps({
   res,
@@ -29,7 +30,8 @@ interface LockupSingleProps {
 }
 
 const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
-  const { web3Provider, address, lockups } = useStore();
+  const { web3Provider, lockups } = useStore();
+  const { account: address } = useWeb3React();
   const lockup = find(lockups, { lockupId: parseInt(lockupId) });
 
   if (!web3Provider) {

@@ -5,9 +5,10 @@ import OUSDContracts from "networks/network.mainnet.json";
 import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import { useWeb3React } from "@web3-react/core";
 
 const useContracts = () => {
-  const { web3Provider, chainId } = useStore();
+  const { chainId } = useWeb3React();
   const networkInfo = useNetworkInfo();
 
   useEffect(() => {
@@ -21,27 +22,16 @@ const useContracts = () => {
       const governanceContractDefinitions =
         CHAIN_CONTRACTS[networkInfo.envNetwork];
 
-      const mainnetProvider = new ethers.providers.JsonRpcProvider(
-        mainnetNetworkUrl
-      );
       const networkProvider = new ethers.providers.JsonRpcProvider(
         RPC_URLS[networkInfo.envNetwork]
       );
-
-      const provider = web3Provider || networkProvider;
-
-      let signer;
-      if (web3Provider) {
-        signer = await web3Provider.getSigner();
-      }
-
       const governanceContracts = Object.entries(
         governanceContractDefinitions
       ).map(([name, definition]) => {
-        const contract = new ethers.Contract(
+        let contract = new ethers.Contract(
           definition.address,
           definition.abi,
-          signer || provider
+          networkProvider
         );
         return {
           [name]: contract,
@@ -53,7 +43,7 @@ const useContracts = () => {
           const contract = new ethers.Contract(
             definition.address,
             definition.abi,
-            mainnetProvider
+            networkProvider
           );
           return {
             [name]: contract,
@@ -67,12 +57,12 @@ const useContracts = () => {
 
       contracts.loaded = true;
       useStore.setState({
-        rpcProvider: networkProvider,
+        web3Provider: networkProvider,
         contracts,
       });
     };
     loadContracts();
-  }, [web3Provider, chainId, networkInfo.envNetwork]);
+  }, [chainId, networkInfo.envNetwork]);
 };
 
 export default useContracts;

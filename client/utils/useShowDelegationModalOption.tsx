@@ -7,8 +7,7 @@ import { useStore } from "utils/store";
 import { ZERO_ADDRESS } from "constants/index";
 
 const useShowDelegationModalOption = () => {
-  const { ogvDelegateeAddress, refreshStatus, balances } = useStore();
-  const { veOgv } = balances;
+  const { ogvDelegateeAddress, refreshStatus } = useStore();
   const [needToShowDelegation, setNeedToShowDelegation] = useState(true);
 
   useEffect(() => {
