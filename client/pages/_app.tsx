@@ -14,6 +14,7 @@ import { GTM_ID, pageview } from "../lib/gtm";
 import { withWeb3Provider } from "hoc";
 import { useWeb3React } from "@web3-react/core";
 import { useStore } from "utils/store";
+import useEagerConnect from "utils/useEagerConnect";
 
 export function App({ Component, pageProps }) {
   const router = useRouter();
@@ -33,6 +34,7 @@ export function App({ Component, pageProps }) {
     if (!account) resetWeb3State();
   }, [account]);
 
+  useEagerConnect();
   useContracts();
   useTotalBalances();
   useAccountBalances();
