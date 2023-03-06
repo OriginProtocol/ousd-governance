@@ -17,6 +17,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  sentry: {
+    hideSourceMaps: true,
+  },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     /* Add any environmental variables here and they will be available in the JS code under
      * `process.env.[variable]`. 
@@ -65,10 +68,7 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
-
 module.exports = withSentryConfig(
-  module.exports,
+  nextConfig,
   { silent: true },
-  { hideSourcemaps: true },
 );
