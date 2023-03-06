@@ -22,7 +22,10 @@ export const RPC_URLS = {
 export const CHAIN_CONTRACTS = {
   1: MainnetGovernanceContracts,
   5: GoerliGovernanceContracts,
-  31337: LocalGovernanceContracts,
+  31337:
+    process.env.FORK === "true"
+      ? MainnetGovernanceContracts
+      : LocalGovernanceContracts,
 };
 
 let navItems = [

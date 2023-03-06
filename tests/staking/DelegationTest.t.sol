@@ -7,10 +7,12 @@ import "contracts/RewardsSource.sol";
 import "contracts/tests/MockOGV.sol";
 
 //
-// Sanity test of OpenZeppelin's voting and deletegation.
+// Sanity test of OpenZeppelin's voting and delegation.
 //
 
 contract DelegationTest is Test {
+    using stdStorage for StdStorage;
+
     MockOGV ogv;
     OgvStaking staking;
     RewardsSource source;
@@ -20,6 +22,7 @@ contract DelegationTest is Test {
     address taz = address(0x44);
     address alice = address(0x45);
     address bob = address(0x46);
+    address attacker = address(0x47);
     address team = address(0x50);
 
     uint256 constant EPOCH = 1 days;
@@ -139,6 +142,30 @@ contract DelegationTest is Test {
         assertEq(staking.delegates(oak), alice, "should not change delegation on extend");
     }
 
+    function testDelegateOnExtendForOlderStakes() external {
+        // For test purposes, undo auto-staking on user
+        vm.prank(oak);
+        staking.delegate(address(0));
+        stdstore.target(address(staking))
+            .sig(staking.hasDelegationSet.selector)
+            .with_key(oak)
+            .checked_write(false);
+
+        vm.roll(1);
+        
+        // Cannot vote because test undid auto-staking
+        assertEq(staking.getVotes(oak), 0, "can not vote");
+        assertEq(staking.delegates(oak), address(0), "no delegation");
+        assertEq(staking.hasDelegationSet(oak), false, "no hasDelegationSet");
+
+        // Extend should auto-delegate
+        vm.prank(oak);
+        staking.extend(0, 200 days);
+        assertEq(staking.delegates(oak), oak, "should auto delegate on extend");
+        assertEq(staking.hasDelegationSet(oak), true, "should have hasDelegationSet");
+        assertGt(staking.getVotes(oak), 1 * POINTS, "should have voting power after extend");
+    }
+
     function testDelegate() external {
         vm.roll(1);
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
@@ -200,4 +227,27 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(bob), 2 * POINTS, "should have voting power after delegation");
         assertEq(staking.delegates(oak), bob, "no change in delegation after staking");
     }
+
+    function testRenounceAttack() external {
+        // Alice can vote, because she is staked
+        assertEq(staking.getVotes(alice), 1 * POINTS, "can vote after staking");
+
+        // Alice renounces voting.
+        vm.prank(alice);
+        staking.delegate(address(0));
+
+        // Attacker attacks
+        vm.startPrank(attacker);
+        ogv.mint(attacker, 1 ether);
+        ogv.approve(address(staking), 1 ether);
+        staking.stake(1 ether, 100 days, alice);
+        vm.stopPrank();
+
+        vm.roll(2);
+
+        // Alice should still have renounced voting
+        assertEq(staking.getVotes(alice), 0, "can't vot after renouncing");
+    }
+
+    
 }
