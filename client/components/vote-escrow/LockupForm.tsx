@@ -155,13 +155,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const dist = end - epoch; // Distance between end of staking period and the very beginning when staking was launched
   const multiplier = dist / 365 / 86400;
   const veOgvFromOgvLockup = lockupAmount * votingDecayFactor ** multiplier;
-
+console.log(`LockupForm totalSupplyVeOgvAdjusted: ${totalSupplyVeOgvAdjusted}`)
   const ogvLockupRewardApy = getRewardsApy(
     veOgvFromOgvLockup,
     lockupAmount,
     totalSupplyVeOgvAdjusted
   );
-
+console.log(`YourLockups ogvLockupRewardApy: ${ogvLockupRewardApy}`)
   const validLockup = lockupAmount !== "0" && lockupDuration !== "0";
 
   const [approvalStatus, setApprovalStatus] = useState("ready");

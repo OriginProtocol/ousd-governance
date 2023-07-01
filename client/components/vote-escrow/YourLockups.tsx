@@ -41,14 +41,14 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   }
 
   const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
-
+console.log(`YourLockups totalSupplyVeOgv: ${totalSupplyVeOgv}`)
   // Standard APY figure, assumes 100 OGV locked for max duration
   const stakingApy = getRewardsApy(
     100 * 1.8 ** (48 / 12),
     100,
     totalSupplyVeOgv
   );
-
+console.log(`YourLockups stakingAPY: ${stakingApy}`)
   if (!lockups) {
     return (
       <Card>
