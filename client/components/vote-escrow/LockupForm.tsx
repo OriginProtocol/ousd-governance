@@ -145,7 +145,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
   const votingDecayFactor = 1.8;
 
-  const veOgvFromOgvLockup = lockupAmount * votingDecayFactor ** (lockupDuration / 12);
+  const veOgvFromOgvLockup =
+    lockupAmount * votingDecayFactor ** (lockupDuration / 12);
 
   const ogvLockupRewardApy = getRewardsApy(
     veOgvFromOgvLockup,
