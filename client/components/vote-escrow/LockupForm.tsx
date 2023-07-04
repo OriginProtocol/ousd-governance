@@ -123,11 +123,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     balances,
     allowances,
     blockTimestamp,
-    totalBalances,
   } = useStore();
   const router = useRouter();
-
-  const { totalSupplyVeOgvAdjusted } = totalBalances;
 
   const [lockupAmount, setLockupAmount] = useState(
     existingLockup
@@ -142,16 +139,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       : Math.floor((existingLockup.end - blockTimestamp) / SECONDS_IN_A_MONTH)
   ); // In months
 
-  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
-  const votingDecayFactor = 1.8;
-
-  const veOgvFromOgvLockup =
-    lockupAmount * votingDecayFactor ** (lockupDuration / 12);
-
-  const { stakingAPY: ogvLockupRewardApy, loading: apyLoading } = useStakingAPY(
-    lockupAmount,
-    lockupDuration
-  );
+  const {
+    stakingAPY: ogvLockupRewardApy,
+    loading: apyLoading,
+    veOgvReceived: veOgvFromOgvLockup,
+  } = useStakingAPY(lockupAmount, lockupDuration);
 
   const validLockup = lockupAmount !== "0" && lockupDuration !== "0";
 
