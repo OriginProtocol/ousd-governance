@@ -20,9 +20,9 @@ import moment from "moment";
 import { mdiArrowRight, mdiAlertCircle } from "@mdi/js";
 import Icon from "@mdi/react";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
-import { getRewardsApy } from "utils/apy";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -148,10 +148,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
   const veOgvFromOgvLockup =
     lockupAmount * votingDecayFactor ** (lockupDuration / 12);
 
-  const ogvLockupRewardApy = getRewardsApy(
-    veOgvFromOgvLockup,
+  const { stakingAPY: ogvLockupRewardApy, loading: apyLoading } = useStakingAPY(
     lockupAmount,
-    totalSupplyVeOgvAdjusted
+    lockupDuration
   );
 
   const validLockup = lockupAmount !== "0" && lockupDuration !== "0";
@@ -458,7 +457,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                 <div className="flex space-x-2 items-end">
                   <CardStat large>
                     {validLockup
-                      ? ogvLockupRewardApy.toFixed(2)
+                      ? apyLoading
+                        ? "--.--"
+                        : ogvLockupRewardApy.toFixed(2)
                       : (0.0).toFixed(2)}
                   </CardStat>
                   <CardDescription large>%</CardDescription>

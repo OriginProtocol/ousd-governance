@@ -7,12 +7,11 @@ import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
 import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
-import useClaim from "utils/useClaim";
-import { getRewardsApy } from "utils/apy";
 import Image from "next/image";
 import DisabledButtonToolTip from "../DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
 import { Web3Button } from "components/Web3Button";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface YourLockupsProps {}
 
@@ -28,7 +27,6 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
   const { reloadAccountBalances } = useAccountBalances();
-  const claim = useClaim();
   const [collectRewardsStatus, setCollectRewardsStatus] = useState("ready");
 
   let collectRewardsButtonText = "";
@@ -40,14 +38,8 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
     collectRewardsButtonText = "Waiting to be mined";
   }
 
-  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
-
   // Standard APY figure, assumes 100 OGV locked for max duration
-  const stakingApy = getRewardsApy(
-    100 * 1.8 ** (48 / 12),
-    100,
-    totalSupplyVeOgv
-  );
+  const { stakingAPY, loading: apyLoading } = useStakingAPY(100, 48);
 
   if (!lockups) {
     return (
@@ -123,7 +115,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             <span className="block pt-2">
               OGV stakers earn{" "}
               <span className="font-bold bg-secondary px-[4px] py-[1px] rounded">
-                {stakingApy.toFixed(2)}%
+                {apyLoading ? "--.--" : stakingAPY.toFixed(2)}%
               </span>{" "}
               variable APY
             </span>

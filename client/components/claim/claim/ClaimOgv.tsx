@@ -9,7 +9,6 @@ import Button from "components/Button";
 import RangeInput from "@/components/RangeInput";
 import useClaim from "utils/useClaim";
 import numeral from "numeraljs";
-import { getRewardsApy } from "utils/apy";
 import { decimal18Bn } from "utils";
 import PostClaimModal from "./PostClaimModal";
 import Icon from "@mdi/react";
@@ -18,6 +17,7 @@ import { SECONDS_IN_A_MONTH } from "../../../constants/index";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 import moment from "moment";
 import { useStore } from "utils/store";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface ClaimOgvProps {}
 
@@ -33,7 +33,6 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     maxLockupDurationInMonths
   );
   const [error, setError] = useState<string>(null);
-  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   if (!claim.loaded || !claim.optional.hasClaim) {
     return <></>;
   }
@@ -47,17 +46,14 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
 
   const veOgvFromOgvLockup =
     claimableOgv * votingDecayFactor ** (lockupDuration / 12);
-  const ogvLockupRewardApy = getRewardsApy(
-    veOgvFromOgvLockup,
-    claimableOgv,
-    totalSupplyVeOgv
-  );
-  const maxVeOgvFromOgvLockup = claimableOgv * votingDecayFactor ** (48 / 12);
-  const maxOgvLockupRewardApy = getRewardsApy(
-    maxVeOgvFromOgvLockup,
-    claimableOgv,
-    totalSupplyVeOgv
-  );
+
+  const { stakingAPY: ogvLockupRewardApy, loading: ogvLockupRewardLoading } =
+    useStakingAPY(claimableOgv, lockupDuration);
+
+  const {
+    stakingAPY: maxOgvLockupRewardApy,
+    loading: maxOgvLockupRewardLoading,
+  } = useStakingAPY(claimableOgv, 48);
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
@@ -134,7 +130,11 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
                       <div className="flex p-2 flex-col sm:items-end">
                         <div className="flex space-x-2 items-end">
                           <CardStat large>
-                            {isValidLockup ? ogvLockupRewardApy.toFixed(2) : 0}
+                            {isValidLockup
+                              ? ogvLockupRewardLoading
+                                ? "--.--"
+                                : ogvLockupRewardApy.toFixed(2)
+                              : 0}
                           </CardStat>
                           <CardDescription large>%</CardDescription>
                         </div>
@@ -270,8 +270,10 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
           {!isValidLockup && (
             <div className="p-6 bg-[#dd0a0a1a] border border-[#dd0a0a] rounded-lg text-xl text-center text-[#dd0a0a]">
               If you don&apos;t stake your OGV, you&apos;ll miss out on the{" "}
-              {maxOgvLockupRewardApy.toFixed(2)}% variable APY and maximized
-              voting power.{" "}
+              {maxOgvLockupRewardLoading
+                ? "--.--"
+                : maxOgvLockupRewardApy.toFixed(2)}
+              % variable APY and maximized voting power.{" "}
               <TokenAmount amount={totalLockedUpOgv} format="currency" /> OGV (
               {totalPercentageOfLockedUpOgv.toFixed(2)}% of the total supply)
               has already been staked by other users.

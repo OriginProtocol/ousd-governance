@@ -5,8 +5,7 @@ import Wrapper from "components/Wrapper";
 import Link from "components/Link";
 import Image from "next/image";
 import { navItems } from "../constants";
-import useClaim from "utils/useClaim";
-import { getRewardsApy } from "utils/apy";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface HeaderProps {
   hideNav?: boolean;
@@ -14,16 +13,8 @@ interface HeaderProps {
 
 const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
-  const claim = useClaim();
 
-  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
-
-  // Standard APY figure, assumes 100 OGV locked for max duration
-  const stakingApy = getRewardsApy(
-    100 * 1.8 ** (48 / 12),
-    100,
-    totalSupplyVeOgv
-  );
+  const { stakingAPY, loading: apyLoading } = useStakingAPY(100, 48);
 
   const overlayClassNames = classNames(
     "bg-black z-20 h-screen w-screen fixed top-0 transition duration-200 lg:hidden",
@@ -80,7 +71,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                               "
                             />
                             <span className="text-xs bg-white bg-opacity-10 px-2 py-[0.2rem] rounded-sm font-bold">
-                              {stakingApy.toFixed(2)}% vAPY
+                              {apyLoading ? "--.--" : stakingAPY.toFixed(2)}%
+                              vAPY
                             </span>
                           </div>
                         )}
@@ -152,7 +144,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                               "
                         />
                         <span className="text-xs bg-primary bg-opacity-100 px-2 py-[0.2rem] rounded-sm !font-light text-white">
-                          {stakingApy.toFixed(2)}% vAPY
+                          {apyLoading ? "--.--" : stakingAPY.toFixed(2)}% vAPY
                         </span>
                       </div>
                     )}
