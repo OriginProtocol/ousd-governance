@@ -12,9 +12,7 @@ const CardDescription: FunctionComponent<CardDescription> = ({
   alt,
   large,
 }) => {
-  const classes = classNames("text-xs", {
-    "text-gray-300": alt,
-    "text-[#8293a4]": !alt,
+  const classes = classNames("text-xs text-neutral", {
     "text-base": large,
   });
 

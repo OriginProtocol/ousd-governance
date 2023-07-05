@@ -140,18 +140,20 @@ const Home: NextPage<HomeProps> = ({
           {loading ? (
             <Loading />
           ) : (
-            <div className="space-y-4">
+            <div className="flex flex-col space-y-4">
               <ProposalTable
                 title="Recent Proposals"
                 proposalData={proposalData}
               />
               {proposalCount > 0 && (
-                <Link
-                  href="/proposals"
-                  className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
-                >
-                  View All Proposals
-                </Link>
+                <div className="flex flex-col items-center justify-center">
+                  <Link
+                    href="/proposals"
+                    className="py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
+                  >
+                    View All Proposals
+                  </Link>
+                </div>
               )}
             </div>
           )}
@@ -161,12 +163,14 @@ const Home: NextPage<HomeProps> = ({
           <div className="space-y-4">
             <LeaderboardTable voters={voters} />
             {voters && voters.length > 0 && (
-              <Link
-                href="/leaderboard"
-                className="btn rounded-full normal-case space-x-2 w-full btn-primary btn-outline disabled:border-gray-100 disabled:text-gray-300"
-              >
-                View Leaderboard
-              </Link>
+              <div className="flex flex-col items-center justify-center">
+                <Link
+                  href="/leaderboard"
+                  className="py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
+                >
+                  View Leaderboard
+                </Link>
+              </div>
             )}
           </div>
         </Card>

@@ -2,13 +2,13 @@ import { FunctionComponent } from "react";
 import Wrapper from "components/Wrapper";
 
 const Footer: FunctionComponent = () => (
-  <footer className="footer footer-center py-6 bg-base-100 text-gray-400 text-xs">
+  <footer className="footer footer-center py-6 bg-primary-content text-neutral text-xs">
     <Wrapper>
       <div className="w-full space-y-3 sm:space-y-0 sm:flex items-center justify-between">
         <ul className="flex space-x-5 lg:space-x-7">
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://analytics.ousd.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -18,7 +18,7 @@ const Footer: FunctionComponent = () => (
           </li>
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://angel.co/company/originprotocol/jobs"
               target="_blank"
               rel="noopener noreferrer"
@@ -28,7 +28,7 @@ const Footer: FunctionComponent = () => (
           </li>
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://docs.ousd.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -38,7 +38,7 @@ const Footer: FunctionComponent = () => (
           </li>
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://originprotocol.com/tos"
               target="_blank"
               rel="noopener noreferrer"
@@ -48,7 +48,7 @@ const Footer: FunctionComponent = () => (
           </li>
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://originprotocol.com/privacy"
               target="_blank"
               rel="noopener noreferrer"
@@ -58,7 +58,7 @@ const Footer: FunctionComponent = () => (
           </li>
           <li>
             <a
-              className="text-gray-400 hover:text-black"
+              className="text-gray-400 hover:text-neutral-focus"
               href="https://discord.gg/jyxpUSe"
               target="_blank"
               rel="noopener noreferrer"
@@ -69,7 +69,7 @@ const Footer: FunctionComponent = () => (
         </ul>
         <div className="flex space-x-5 lg:space-x-7">
           <a
-            className="text-gray-400 hover:text-black"
+            className="text-gray-400 hover:text-neutral-focus"
             href="https://originprotocol.com"
             target="_blank"
             rel="noopener noreferrer"

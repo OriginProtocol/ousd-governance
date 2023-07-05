@@ -5,7 +5,7 @@ interface CardLabelProps {
 }
 
 const CardLabel: FunctionComponent<CardLabelProps> = ({ children }) => (
-  <div className="text-sm text-[#8293a4]">{children}</div>
+  <div className="text-sm text-neutral">{children}</div>
 );
 
 export default CardLabel;

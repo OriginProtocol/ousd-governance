@@ -15,6 +15,7 @@ import Modal from "components/Modal";
 import { truncateEthAddress } from "utils";
 import EtherscanIcon from "components/EtherscanIcon";
 import ExternalLinkIcon from "../ExternalLinkIcon";
+import classnames from "classnames";
 
 const LockupsTable: FunctionComponent = () => {
   const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =
@@ -63,7 +64,7 @@ const LockupsTable: FunctionComponent = () => {
     <>
       <table className="table table-compact w-full mb-4">
         <thead>
-          <tr>
+          <tr className="border-accent border-opacity-[40%] text-neutral">
             <th>OGV</th>
             <th>Time remaining</th>
             <th>Lockup ends</th>
@@ -75,36 +76,46 @@ const LockupsTable: FunctionComponent = () => {
             lockups.map((lockup) => {
               return (
                 <>
-                  <tr key={`${lockup.lockupId}`}>
-                    <td>
+                  <tr
+                    key={`${lockup.lockupId}`}
+                    className="border-accent border-opacity-[40%]"
+                  >
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       <TokenAmount amount={lockup.amount} />
                     </td>
-                    <td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       <TimeToDate epoch={lockup.end} />
                     </td>
-                    <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
-                    <td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
+                      {moment.unix(lockup.end).format("MMM D, YYYY")}
+                    </td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       <TokenAmount amount={lockup.points} />
                     </td>
-                    <td>
+                    <td className="bg-inherit border-none">
                       <Link
-                        className="btn rounded-full btn-sm btn-primary"
+                        className="py-2 text-white px-4 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
                         href={`/stake/${lockup.lockupId}`}
                       >
                         Extend
                       </Link>
                     </td>
-                    <td>
-                      <Button
-                        white
-                        small
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
+                      <button
+                        className={classnames(
+                          "py-2 text-white px-4 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full",
+                          {
+                            "cursor-not-allowed opacity-30":
+                              blockTimestamp < lockup.end,
+                          }
+                        )}
                         disabled={blockTimestamp < lockup.end}
                         onClick={() => handleUnlock(lockup.lockupId)}
                       >
                         Unstake
-                      </Button>
+                      </button>
                     </td>
-                    <td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       <button
                         className="flex-shrink-0 flex items-center justify-center w-4 p-0"
                         onClick={() => {
@@ -129,7 +140,7 @@ const LockupsTable: FunctionComponent = () => {
         <h3 className="mb-4 text-lg">Transaction history</h3>
         <table className="table table-compact w-full">
           <thead>
-            <tr>
+            <tr className="bg-inherit border-accent border-opacity-[40%]">
               <th>Transaction time</th>
               <th>Event</th>
               <th>Transaction hash</th>
@@ -141,14 +152,17 @@ const LockupsTable: FunctionComponent = () => {
               modalLockup.transactions.map((transaction) => {
                 return (
                   <tr key={transaction.hash}>
-                    <td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       {moment(transaction.createdAt).format(
                         "MMM D, YYYY, HH:mm:ss"
                       )}
                     </td>
-                    <td>{transaction.event}</td>
-                    <td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
+                      {transaction.event}
+                    </td>
+                    <td className="bg-inherit border-accent border-opacity-[40%]">
                       <Link
+                        className="gradient-link"
                         href={
                           chainId === 5
                             ? `https://goerli.etherscan.io/tx/${transaction.hash}`
