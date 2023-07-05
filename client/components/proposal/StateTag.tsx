@@ -24,7 +24,9 @@ export const StateTag = ({ state }: { state: number }) => {
       {state == 1 && <StateBadge className="badge-warning">Active</StateBadge>}
       {state == 2 && <StateBadge className="badge-error">Cancelled</StateBadge>}
       {state == 3 && <StateBadge className="badge-error">Defeated</StateBadge>}
-      {state == 4 && <StateBadge className="badge-error">Succeeded</StateBadge>}
+      {state == 4 && (
+        <StateBadge className="badge-success">Succeeded</StateBadge>
+      )}
       {state == 5 && <StateBadge className="badge-success">Queued</StateBadge>}
       {state == 6 && <StateBadge className="badge-success">Expired</StateBadge>}
       {state == 7 && (
