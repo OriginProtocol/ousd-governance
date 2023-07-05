@@ -21,7 +21,7 @@ const LockupTable: FunctionComponent<LockupTableProps> = ({ lockup }) => {
   return (
     <table className="table table-compact w-full">
       <thead>
-        <tr>
+        <tr className="bg-inherit border-accent border-opacity-[40%]">
           <th>OGV</th>
           <th>Time remaining</th>
           <th>Lockup ends</th>
@@ -30,14 +30,16 @@ const LockupTable: FunctionComponent<LockupTableProps> = ({ lockup }) => {
       </thead>
       <tbody>
         <tr key={`${lockup.lockupId}`}>
-          <td>
+          <td className="bg-inherit border-accent border-opacity-[40%]">
             <TokenAmount amount={lockup.amount} />
           </td>
-          <td>
+          <td className="bg-inherit border-accent border-opacity-[40%]">
             <TimeToDate epoch={lockup.end} />
           </td>
-          <td>{moment.unix(lockup.end).format("MMM D, YYYY")}</td>
-          <td>
+          <td className="bg-inherit border-accent border-opacity-[40%]">
+            {moment.unix(lockup.end).format("MMM D, YYYY")}
+          </td>
+          <td className="bg-inherit border-accent border-opacity-[40%]">
             <TokenAmount amount={lockup.points} />
           </td>
         </tr>

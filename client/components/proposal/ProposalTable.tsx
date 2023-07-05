@@ -53,7 +53,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
     <>
       <RegisterToVote />
       {title && <SectionTitle>{title}</SectionTitle>}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto px-8 py-4 bg-secondary-content rounded-lg">
         <table className="table table-fixed w-full">
           <tbody>
             {proposalData.proposals?.map((proposal, index) => {
@@ -67,15 +67,16 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
               return (
                 <tr
                   key={index}
-                  className="cursor-pointer hover:bg-gray-100"
+                  className="cursor-pointer bg-inherit border-accent border-opacity-[40%]"
                   onClick={() => router.push(`/proposals/${proposal["0"]}`)}
                 >
-                  <td>
-                    <div className="space-y-1">
-                      <h3 className="text-lg truncate">
-                        <div dangerouslySetInnerHTML={{ __html: cleanTitle }} />
-                      </h3>
-                      <div className="text-gray-400 text-md">
+                  <td className="bg-inherit border-none px-0 py-8">
+                    <div className="space-y-2">
+                      <h3
+                        className="text-white truncate"
+                        dangerouslySetInnerHTML={{ __html: cleanTitle }}
+                      />
+                      <div className="text-neutral text-xs">
                         {id} •{" "}
                         {lastTx &&
                           `${lastTx?.event} ${moment(lastTx?.createdAt).format(
@@ -84,7 +85,7 @@ const ProposalTable: FunctionComponent<ProposalTableProps> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="w-1/4 text-right">
+                  <td className="bg-inherit border-none w-1/4 text-right">
                     <StateTag state={proposalData.states[index]} />
                   </td>
                 </tr>

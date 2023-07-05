@@ -1,21 +1,24 @@
 const originTheme = {
-  fontFamily: "Lato, sans-serif",
-  primary: "#4bbc8a",
-  "primary-content": "#ffffff",
-  "primary-focus": "#39996e",
-  secondary: "#18402d",
-  "secondary-content": "#ffffff",
-  "secondary-focus": "#0d3020",
-  accent: "#4bbc8a",
-  "accent-content": "#ffffff",
+  fontFamily: "Inter, sans-serif",
+  primary: "#0274F1",
+  "primary-content": "#141519",
+  "primary-focus": "#141519",
+  secondary: "#101113",
+  "secondary-content": "#1E1F25",
+  "secondary-focus": "#1E1F25",
+  accent: "#101113",
+  "accent-content": "#1E1F25",
+  white: "#FAFBFB",
   warning: "#f0c102",
-  neutral: "#d8d8d8",
+  neutral: "#828699",
   "neutral-content": "#333333",
-  "neutral-focus": "#c2c2c2",
+  "neutral-focus": "#ffffff",
   "base-100": "#fafbfc",
   "base-200": "#f2f3f5",
   "base-300": "#cdd7e0",
-  "--border-color": "red",
+  success: "#66FE90",
+  error: "#FF4E4E",
+  "--border-color": "#FF4E4E",
   "--btn-text-case": "capitalize",
   "--rounded-btn": "0.6125rem",
   "--rounded-badge": "0.25rem",
@@ -29,8 +32,16 @@ module.exports = {
   theme: {
     extend: {
       transitionProperty: {
-        'all': 'all',
-        'right': 'right',
+        all: "all",
+        right: "right",
+      },
+      fontFamily: {
+        primary: ["Inter", "sans-serif"],
+        header: ["Sailec", "sans-serif"],
+      },
+      colors: {
+        "gradient-from": "#8C66FC",
+        "gradient-to": "#0274F1",
       },
     },
   },
@@ -39,11 +50,11 @@ module.exports = {
     styled: true,
     themes: [
       {
-        'origin-theme': {
+        "origin-theme": {
           ...require("daisyui/src/colors/themes")["[data-theme=light]"],
           ...originTheme,
-        }
-      }
+        },
+      },
     ],
     base: true,
     utils: true,

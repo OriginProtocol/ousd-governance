@@ -87,7 +87,7 @@ export const addressContractName = (contracts, address: string): string => {
 export const etherscanLink = (contracts, address: string) => {
   return (
     <a
-      className="link link-primary"
+      className="link link-primary gradient-link"
       href={`https://etherscan.io/address/${address}`}
       target="_blank"
       rel="noreferrer"

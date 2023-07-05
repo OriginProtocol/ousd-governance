@@ -9,9 +9,9 @@ interface SupportTableProps {
 
 const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
   return (
-    <table className="table table-compact w-full">
+    <table className="table table-compact w-full bg-inherit">
       <thead>
-        <tr>
+        <tr className="bg-inherit border-accent border-opacity-[40%]">
           <th className="pl-0">Address</th>
           <th>Votes</th>
         </tr>
@@ -19,26 +19,27 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
       <tbody>
         {voters.map((voter) => {
           let votesBn;
-
           try {
             votesBn = BigNumber.from(voter.votes);
           } catch (e) {
             return (
-              <tr key={voter.address}>
-                <td className="pl-0">
+              <tr key={voter.address} className="bg-inherit">
+                <td className="pl-0 bg-inherit border-accent border-opacity-[40%]">
                   <Address address={voter.address} />
                 </td>
-                <td>-</td>
+                <td className="bg-inherit border-accent border-opacity-[40%]">
+                  -
+                </td>
               </tr>
             );
           }
 
           return (
-            <tr key={voter.address}>
-              <td className="pl-0">
+            <tr key={voter.address} className="bg-inherit">
+              <td className="pl-0 bg-inherit border-accent border-opacity-[40%]">
                 <Address address={voter.address} />
               </td>
-              <td>
+              <td className="bg-inherit border-accent border-opacity-[40%]">
                 <TokenAmount amount={ethers.utils.formatUnits(votesBn)} />
               </td>
             </tr>
@@ -46,9 +47,11 @@ const SupportTable: FunctionComponent<SupportTableProps> = ({ voters }) => {
         })}
 
         {voters.length < 1 && (
-          <tr>
-            <td className="pl-0">-</td>
-            <td>-</td>
+          <tr className="bg-inherit">
+            <td className="pl-0 bg-inherit border-accent border-opacity-[40%]">
+              -
+            </td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">-</td>
           </tr>
         )}
       </tbody>

@@ -17,12 +17,13 @@ import CardStat from "components/CardStat";
 import CardDescription from "components/CardDescription";
 import CardGroup from "components/CardGroup";
 import moment from "moment";
-import { mdiArrowRight, mdiAlertCircle } from "@mdi/js";
+import { mdiInformationOutline as InfoIcon } from "@mdi/js";
 import Icon from "@mdi/react";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
 import { getRewardsApy } from "utils/apy";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
+import classnames from "classnames";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -406,8 +407,6 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     }
   };
 
-  const now = new Date();
-
   return (
     <Card>
       <div className="space-y-2">
@@ -453,7 +452,13 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         <div className="space-y-6 pt-2 sm:pt-3">
           <div className="flex flex-col sm:text-right sm:w-1/3 sm:ml-auto">
             <ApyToolTip />
-            <Card noPadding noShadow red={!validLockup} dark={validLockup}>
+            <Card
+              noPadding
+              noShadow
+              red={!validLockup}
+              dark={validLockup}
+              className="!bg-primary-content"
+            >
               <div className="flex p-2 flex-col sm:items-end">
                 <div className="flex space-x-2 items-end">
                   <CardStat large>
@@ -461,19 +466,19 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                       ? ogvLockupRewardApy.toFixed(2)
                       : (0.0).toFixed(2)}
                   </CardStat>
-                  <CardDescription large>%</CardDescription>
+                  <span className="text-neutral text-sm">%</span>
                 </div>
               </div>
             </Card>
           </div>
         </div>
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Your stake summary</h2>
+          <h2 className="text-2xl font-bold font-header">Your stake summary</h2>
           <CardGroup horizontal twoCol>
-            <div className="space-y-2 flex flex-col">
-              <span className="text-sm">You are staking</span>
-              <Card tightPadding noShadow>
-                <div className="flex flex-col">
+            <div className="flex flex-col space-y-4">
+              <span className="text-sm text-neutral">Variable APY</span>
+              <Card tightPadding noShadow className="!border-1 !border-neutral">
+                <div className="flex flex-col justify-center">
                   <div className="flex space-x-[0.4rem] items-end">
                     <TokenIcon large src="/ogv.svg" alt="OGV" />
                     <CardStat large>
@@ -481,7 +486,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                     </CardStat>
                     <CardDescription large>OGV</CardDescription>
                   </div>
-                  <div className="block text-xs italic ml-11 mt-1 text-gray-400">
+                  <div className="block text-xs ml-11 mt-1 text-gray-400">
                     Unlocks{" "}
                     {moment(
                       parseInt(blockTimestamp) * 1000 +
@@ -491,10 +496,10 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                 </div>
               </Card>
             </div>
-            <div className="space-y-2 flex flex-col">
-              <span className="text-sm">Today you get</span>
-              <Card tightPadding noShadow>
-                <div className="flex">
+            <div className="flex flex-col space-y-4">
+              <span className="text-sm text-neutral">Variable APY</span>
+              <Card tightPadding noShadow className="!border-1 !border-neutral">
+                <div className="flex flex-col justify-center">
                   <div className="flex space-x-[0.4rem] items-end">
                     <TokenIcon large src="/veogv.svg" alt="veOGV" />
                     <CardStat large>
@@ -504,15 +509,6 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                   </div>
                 </div>
               </Card>
-            </div>
-            <div className="hidden sm:block absolute h-7 w-7 bg-white border rounded-full left-1/2 top-1/2 -ml-[14px]" />
-            <div className="hidden sm:block absolute h-full w-[8px] bg-white left-1/2 top-[20px] -ml-[4px]" />
-            <div className="rotate-90 sm:rotate-0 absolute h-7 w-7 left-1/2 top-1/2 mt-[15px] sm:mt-[6px] -ml-[16px] sm:-ml-[8px]">
-              <Icon
-                path={mdiArrowRight}
-                size={0.66}
-                className="text-gray-400"
-              />
             </div>
           </CardGroup>
         </div>
@@ -525,17 +521,17 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         )}
         {balances?.accruedRewards.gt(0) && (
           <div className="pt-2">
-            <div className="flex space-x-4 bg-gray-100 p-4 pb-5 border-t-4 border-gray-300">
+            <div className="flex space-x-4 bg-primary-content p-4 pb-5 rounded-lg mt-4">
               <Icon
-                path={mdiAlertCircle}
+                path={InfoIcon}
                 size={1}
-                className="text-accent flex-shrink-0"
+                className="text-white flex-shrink-0"
               />
-              <div>
-                <span className="block text-md font-bold text-gray-900">
+              <div className="flex flex-col space-y-4">
+                <span className="block text-lg text-white font-header">
                   OGV rewards will be collected
                 </span>
-                <span className="block text-sm text-gray-700">
+                <span className="block text-sm text-white">
                   You have accrued{" "}
                   {<TokenAmount amount={balances?.accruedRewards} />} OGV in
                   staking rewards. This OGV will be transferred to your wallet
@@ -546,9 +542,21 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             </div>
           </div>
         )}
-        <div className="flex pt-2">
+        <div className="flex flex-row items-center justify-end space-x-2 pt-6">
           <button
-            className="btn btn-primary md:btn-lg rounded-full mr-4 flex-1"
+            className={classnames(
+              "py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full",
+              {
+                "cursor-not-allowed opacity-30":
+                  !lockupAmount ||
+                  !lockupDuration ||
+                  allowances.ogv.gte(ethers.utils.parseUnits(lockupAmount)) ||
+                  approvalStatus === "waiting-for-user" ||
+                  approvalStatus === "waiting-for-network" ||
+                  lockupStatus === "waiting-for-user" ||
+                  lockupStatus === "waiting-for-network",
+              }
+            )}
             disabled={
               !lockupAmount ||
               !lockupDuration ||
@@ -563,7 +571,14 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             {approvalButtonText}
           </button>
           <button
-            className="btn btn-primary md:btn-lg rounded-full flex-1"
+            className={classnames(
+              "py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full",
+              {
+                "cursor-not-allowed opacity-30": !existingLockup
+                  ? actionDisabledNewLockup
+                  : actionDisabledExistingLockup,
+              }
+            )}
             disabled={
               !existingLockup
                 ? actionDisabledNewLockup

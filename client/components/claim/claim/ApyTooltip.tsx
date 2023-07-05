@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import ReactTooltip from "react-tooltip";
 import Icon from "@mdi/react";
-import { mdiAlertCircle } from "@mdi/js";
+import { mdiInformationOutline as InfoIcon } from "@mdi/js";
 
 interface ApyToolTipProps {}
 
@@ -30,12 +30,8 @@ const ApyToolTip: FunctionComponent<ApyToolTipProps> = () => {
           data-for="variable-apy"
           className="inline-flex space-x-1 items-center sm:justify-end w-auto mb-2"
         >
-          <span className="text-sm">Variable APY</span>
-          <Icon
-            path={mdiAlertCircle}
-            size={0.75}
-            className="text-secondary mx-auto"
-          />
+          <span className="text-sm text-neutral">Variable APY</span>
+          <Icon path={InfoIcon} size={0.75} className="text-neutral mx-auto" />
         </div>
       </div>
     </>
