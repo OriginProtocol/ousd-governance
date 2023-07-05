@@ -112,7 +112,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   return (
     <Card>
       <div className="mb-20">
-        <div className="space-y-4 bg-primary-content text-white -my-10 -mx-6 p-10 md:-mx-10">
+        <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
           <h2 className="text-2xl space-y-1 font-header">
             <span className="block border-b pb-3 border-secondary/[.15]">
               <span className="font-bold bg-secondary px-[4px] py-[1px] rounded gradient-link-alt">
