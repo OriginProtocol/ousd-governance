@@ -190,7 +190,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
                 newWindow
                 className="hover:opacity-80"
               >
-                <Image src="/huobi.png" alt="Huobi" width={300} height={105} />
+                <Image src="/huobi.svg" alt="Huobi" width={300} height={105} />
               </Link>
             </li>
             <li className="flex-1 px-4">
