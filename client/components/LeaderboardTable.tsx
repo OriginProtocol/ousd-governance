@@ -14,7 +14,7 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
   return (
     <table className="table w-full">
       <thead>
-        <tr>
+        <tr className="bg-inherit border-accent border-opacity-[40%]">
           <th>Rank</th>
           <th>Address</th>
           <th>Votes</th>
@@ -25,19 +25,25 @@ export const LeaderboardTable = ({ voters }: { voters: Array }) => {
       <tbody>
         {voters.map((voter, index) => (
           <tr key={index}>
-            <td>{index + 1}</td>
-            <td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">
+              {index + 1}
+            </td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">
               <Address address={voter.address} />
             </td>
-            <td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">
               <TokenAmount
                 amount={ethers.utils.formatUnits(
                   ethers.BigNumber.from(voter.votes)
                 )}
               />
             </td>
-            <td>{((voter.votes / totalSupplyVeOgv) * 100).toFixed(2)}%</td>
-            <td>{voter.proposalsVoted}</td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">
+              {((voter.votes / totalSupplyVeOgv) * 100).toFixed(2)}%
+            </td>
+            <td className="bg-inherit border-accent border-opacity-[40%]">
+              {voter.proposalsVoted}
+            </td>
           </tr>
         ))}
       </tbody>
