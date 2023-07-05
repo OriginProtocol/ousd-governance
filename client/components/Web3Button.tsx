@@ -202,7 +202,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
           className="flex items-center space-x-2 p-3 md:px-5 bg-secondary-content text-white rounded-full text-sm leading-none capitalize cursor-pointer"
         >
           <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
-          <div className="invisible md:visible md:flex">
+          <div className="flex">
             {truncateEthAddress(address)}
             {web3Provider.network.name === "unknown" && " / Lh"}
             {web3Provider.network.name === "goerli" && " / Goer"}

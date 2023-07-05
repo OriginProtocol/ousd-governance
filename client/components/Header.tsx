@@ -58,7 +58,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 </Link>
               </div>
               {!hideNav && (
-                <ul className="hidden lg:flex items-center space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto">
+                <ul className="hidden lg:flex items-center space-x-7 xl:space-x-10 font-light h-0 lg:h-auto">
                   {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
