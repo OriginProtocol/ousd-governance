@@ -12,7 +12,6 @@ import {
   websocketProvider,
 } from "constants/index";
 import { toast } from "react-toastify";
-import classNames from "classnames";
 import Link from "components/Link";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 
@@ -81,6 +80,13 @@ if (typeof window !== "undefined") {
     network: "mainnet",
     cacheProvider: true,
     providerOptions,
+    theme: {
+      background: "#101113",
+      main: "rgb(199, 199, 199)",
+      secondary: "rgb(136, 136, 136)",
+      border: "rgba(195, 195, 195, 0.14)",
+      hover: "#141519",
+    },
   });
   useStore.setState({ web3Modal });
 }
@@ -188,13 +194,6 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
     );
   }
 
-  const defaultClassName = classNames("", {
-    "btn btn-outline btn-sm border-[#bbc9da] text-white rounded-full text-sm capitalize font-normal hover:bg-white hover:text-secondary":
-      !inPage,
-    "btn btn-primary btn-lg rounded-full w-full h-[3.25rem] min-h-[3.25rem]":
-      inPage,
-  });
-
   return web3Provider ? (
     <div className="dropdown relative">
       {address && (
@@ -231,8 +230,13 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
       </div>
     </div>
   ) : (
-    <button className={defaultClassName} onClick={connect}>
-      {inPage ? "Connect wallet" : "Connect"}
-    </button>
+    <div className="flex items-center justify-center w-full">
+      <button
+        className="flex items-center justify-center text-sm py-2 text-white px-4 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
+        onClick={connect}
+      >
+        {inPage ? "Connect wallet" : "Connect"}
+      </button>
+    </div>
   );
 };

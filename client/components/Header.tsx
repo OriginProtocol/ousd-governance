@@ -45,8 +45,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
     <>
       <header className="py-6 md:py-8 bg-secondary">
         <Wrapper>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex flex-row items-center justify-between w-full">
+            <div className="flex flex-row items-center">
               <div className="flex-none -mb-1 mr-7 xl:mr-10">
                 <Link href="/">
                   <Image
@@ -58,7 +58,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                 </Link>
               </div>
               {!hideNav && (
-                <ul className="flex items-center space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto lg:visible lg:flex">
+                <ul className="hidden lg:flex items-center space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto">
                   {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
@@ -91,7 +91,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               )}
             </div>
             {!hideNav && (
-              <div className="flex-none flex items-center space-x-3 md:space-x-4">
+              <div className="flex flex-grow-1 flex-shrink-0 items-center space-x-3 md:space-x-4">
                 <button
                   className="flex lg:hidden"
                   onClick={() => setMenuIsOpen(true)}

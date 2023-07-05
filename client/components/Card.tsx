@@ -33,7 +33,7 @@ const Card: FunctionComponent<CardProps> = ({
       "p-6 md:p-10": !tightPadding && !noPadding,
       "shadow-lg": !noShadow,
       "px-4 py-5 md:px-5 md:py-6": tightPadding && !noPadding && noShadow,
-      "bg-[#dd0a0a1a] border-[#dd0a0a] text-[#dd0a0a]": red,
+      "text-error": red,
       "mt-6 h-full": margin,
     },
     className
