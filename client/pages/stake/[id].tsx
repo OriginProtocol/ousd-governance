@@ -57,11 +57,6 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
           <LockupForm existingLockup={lockup} />
         )}
       </CardGroup>
-      <div className="mt-6">
-        <Link className="btn rounded-full" href={`/stake`}>
-          &larr; Back to OGV Staking
-        </Link>
-      </div>
     </Wrapper>
   );
 };

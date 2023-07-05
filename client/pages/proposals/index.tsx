@@ -88,13 +88,11 @@ const Proposal: NextPage = ({ proposals }) => {
   return (
     <Wrapper narrow>
       <Seo title="Proposals" />
-      <PageTitle>Proposals</PageTitle>
+      <PageTitle>Origin DeFi Governance</PageTitle>
       {loading ? (
         <Loading />
       ) : (
-        <Card>
-          <ProposalTable proposalData={proposalData} />
-        </Card>
+          <ProposalTable title="Proposals" proposalData={proposalData} />
       )}
     </Wrapper>
   );

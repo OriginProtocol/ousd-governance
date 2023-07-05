@@ -22,7 +22,7 @@ const nextConfig = {
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     /* Add any environmental variables here and they will be available in the JS code under
-     * `process.env.[variable]`. 
+     * `process.env.[variable]`.
      *
      * Note: these get "baked in" to the code at build time when building for Goerli / Mainnet
      */
@@ -30,10 +30,10 @@ const nextConfig = {
       'production': {
         NETWORK_ID: 1
       },
-      'dev': {
+      'development': {
         NETWORK_ID: 31337,
         CLAIM_OPENS: 1657580400,
-        CLAIM_CLOSES: 1665356400,
+        CLAIM_CLOSES: 1720203082,
       },
       'staging': {
         NETWORK_ID: 5

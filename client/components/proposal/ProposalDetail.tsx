@@ -162,14 +162,14 @@ export const ProposalDetail = ({
   return (
     <>
       <div className="sm:flex space-y-4 sm:space-y-0 justify-between items-center mb-6">
-        <div className="mr-4 relative max-w-lg">
-          <PageTitle noBottomMargin>
-            <div
+        <div className="mr-4 relative max-w-lg space-y-2">
+          <div className="text-white text-2xl font-header">
+            <h2
               className="break-words"
               dangerouslySetInnerHTML={{ __html: cleanTitle }}
             />
-          </PageTitle>
-          <div className="text-white opacity-70 text-md">
+          </div>
+          <div className="text-neutral text-sm">
             {id.toString().padStart(3, "0")}
             {lastTx &&
               ` • ${lastTx?.event} ${moment(lastTx?.createdAt).format(
@@ -189,6 +189,7 @@ export const ProposalDetail = ({
           hasVoted={hasVoted}
           votingActive={proposalState === 1}
         />
+        <br />
         <CardGroup twoCol horizontal>
           <Card tightPadding>
             <SectionTitle noMarginBottom>For</SectionTitle>

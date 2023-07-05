@@ -112,17 +112,17 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   return (
     <Card>
       <div className="mb-20">
-        <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
-          <h2 className="text-2xl space-y-1">
+        <div className="space-y-4 bg-primary-content text-white -my-10 -mx-6 p-10 md:-mx-10">
+          <h2 className="text-2xl space-y-1 font-header">
             <span className="block border-b pb-3 border-secondary/[.15]">
-              <span className="font-bold bg-secondary px-[4px] py-[1px] rounded">
+              <span className="font-bold bg-secondary px-[4px] py-[1px] rounded gradient-link-alt">
                 {totalPercentageOfLockedUpOgv.toFixed(2)}%
               </span>{" "}
               of all OGV is currently staked
             </span>
             <span className="block pt-2">
               OGV stakers earn{" "}
-              <span className="font-bold bg-secondary px-[4px] py-[1px] rounded">
+              <span className="font-bold bg-secondary px-[4px] py-[1px] rounded gradient-link-alt">
                 {stakingApy.toFixed(2)}%
               </span>{" "}
               variable APY
@@ -130,21 +130,21 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
           </h2>
         </div>
       </div>
-      {lockups.length > 0 && <SectionTitle>Your stakes</SectionTitle>}
-      {lockups.length > 0 && <LockupsTable lockups={lockups} />}
+      {lockups.length > 0 && (
+        <>
+          <SectionTitle>Your stakes</SectionTitle>
+          <LockupsTable lockups={lockups} />
+        </>
+      )}
       {!(ogv.eq(0) && lockups.length === 0) && (
-        <div className="space-y-3 flex flex-col md:space-y-0 md:flex-row md:space-x-2">
+        <div className="space-y-3 flex flex-col items-center md:space-y-0 md:flex-row md:space-x-2">
           <DisabledButtonToolTip
             show={ogv.eq(0)}
             text="You have no OGV to stake yet"
           >
             <div>
               <Link
-                className={
-                  ogv.eq(0)
-                    ? "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-disabled"
-                    : "w-full btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] btn-primary"
-                }
+                className="flex items-center px-4 py-2 text-white bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
                 href="/stake/new"
               >
                 {lockups.length > 0
@@ -158,24 +158,29 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             text="You have no rewards to collect yet"
           >
             <div>
-              <Button
+              <button
+                className="text-white px-4 py-2"
+                style={{
+                  background:
+                    "linear-gradient(#1E1F25, #1E1F25) padding-box,linear-gradient(to right, #B361E6 20%, #6A36FC 80%) border-box",
+                  borderRadius: "50em",
+                  border: "1px solid transparent",
+                  borderImage: "linear-gradient(90deg, #B361E6, #6A36FC) 1",
+                }}
                 onClick={handleCollectRewards}
                 disabled={
                   collectRewardsStatus !== "ready" || accruedRewards.eq(0)
                 }
-                large
-                alt
-                fullWidth
               >
                 {collectRewardsButtonText}
-              </Button>
+              </button>
             </div>
           </DisabledButtonToolTip>
         </div>
       )}
       {ogv.eq(0) && lockups.length === 0 && (
         <div className="space-y-4">
-          <p className="text-lg text-center">
+          <p className="text-lg text-center font-header">
             OGV is available on many top exchanges
           </p>
           <ul className="flex space-x-2 items-center justify-center">
@@ -216,7 +221,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
             <Link
               href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
               newWindow
-              className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] w-full btn-primary"
+              className="flex items-center justify-center w-full py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
             >
               Buy OGV
             </Link>

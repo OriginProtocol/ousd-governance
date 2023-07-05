@@ -200,7 +200,7 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
       {address && (
         <label
           tabIndex={0}
-          className="flex items-center space-x-2 p-2 md:px-4 border border-[#bbc9da] text-white rounded-full text-sm leading-none capitalize cursor-pointer"
+          className="flex items-center space-x-2 p-3 md:px-5 bg-secondary-content text-white rounded-full text-sm leading-none capitalize cursor-pointer"
         >
           <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
           <div className="invisible md:visible md:flex">
@@ -212,22 +212,22 @@ export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
       )}
       <div
         tabIndex={0}
-        className="dropdown-content absolute top-full mt-3 right-0 bg-white p-3 md:p-4 rounded-xl border shadow-sm w-36 lg:w-full no-animation"
+        className="flex flex-col space-y-2 dropdown-content absolute top-full mt-3 right-0 bg-secondary-content p-3 md:p-4 rounded-xl border-none shadow-sm w-48 lg:w-full no-animation"
       >
-        <button
-          className="btn btn-primary btn-sm rounded-btn w-full"
-          onClick={disconnect}
-        >
-          Disconnect
-        </button>
         {needToShowDelegation && (
           <Link
-            className="btn btn-sm rounded-btn w-full mt-2 whitespace-nowrap"
+            className="flex items-center justify-center text-sm py-2 text-white px-3 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
             href="/register-vote"
           >
             Vote register
           </Link>
         )}
+        <button
+          className="text-sm py-1 text-white px-2 rounded-full"
+          onClick={disconnect}
+        >
+          Disconnect
+        </button>
       </div>
     </div>
   ) : (

@@ -10,6 +10,7 @@ interface CardProps {
   noShadow?: Boolean;
   red?: Boolean;
   margin?: Boolean;
+  className?: string;
 }
 
 const Card: FunctionComponent<CardProps> = ({
@@ -21,20 +22,21 @@ const Card: FunctionComponent<CardProps> = ({
   noShadow,
   red,
   margin,
+  className,
 }) => {
   const classes = classNames(
-    "overflow-x-auto w-full rounded-lg border h-full",
+    "overflow-x-auto w-full rounded-lg border border-accent-content h-full",
     {
-      "bg-secondary-focus text-white border-black": dark && !alt,
-      "bg-white text-black": !dark && !alt,
+      "bg-secondary-focus text-white border-accent-content": dark && !alt,
+      "bg-accent-content text-white": !dark && !alt,
       "p-4 md:p-5": tightPadding && !noPadding,
       "p-6 md:p-10": !tightPadding && !noPadding,
-      "bg-gray-100": alt && !dark,
       "shadow-lg": !noShadow,
       "px-4 py-5 md:px-5 md:py-6": tightPadding && !noPadding && noShadow,
       "bg-[#dd0a0a1a] border-[#dd0a0a] text-[#dd0a0a]": red,
       "mt-6 h-full": margin,
-    }
+    },
+    className
   );
 
   return <div className={classes}>{children}</div>;
