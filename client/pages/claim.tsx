@@ -3,21 +3,17 @@ import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { PageTitle } from "components/PageTitle";
 import Card from "components/Card";
+import Button from "components/Button";
 import useClaim from "utils/useClaim";
 import { getRewardsApy } from "utils/apy";
 import Link from "components/Link";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface ClaimPageProps {}
 
 const ClaimPage: NextPage<ClaimPageProps> = () => {
-  const claim = useClaim();
-  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
   // Standard APY figure, assumes 100 OGV locked for max duration
-  const stakingApy = getRewardsApy(
-    100 * 1.8 ** (48 / 12),
-    100,
-    totalSupplyVeOgv
-  );
+  const { stakingAPY, loading: apyLoading } = useStakingAPY(100, 48);
 
   return (
     <Wrapper narrow>
@@ -29,9 +25,9 @@ const ClaimPage: NextPage<ClaimPageProps> = () => {
             The claim period has now expired
           </h2>
           <div className="mt-4 text-sm">
-            {`All unclaimed OGV was burned after 90 days. You can still buy OGV and stake it for up to four years. Current OGV stakers are earning a vAPY of ${stakingApy.toFixed(
-              2
-            )}%.`}
+            {`All unclaimed OGV was burned after 90 days. You can still buy OGV and stake it for up to four years. Current OGV stakers are earning a vAPY of ${
+              apyLoading ? "--.--" : stakingAPY.toFixed(2)
+            }%.`}
           </div>
           <div className="mt-10">
             <Link

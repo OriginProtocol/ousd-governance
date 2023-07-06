@@ -9,9 +9,8 @@ import Icon from "@mdi/react";
 import { mdiWallet, mdiCheckCircle, mdiAlertCircle } from "@mdi/js";
 import { Loading } from "components/Loading";
 import Link from "components/Link";
-import { getRewardsApy } from "utils/apy";
 import { filter } from "lodash";
-import { BigNumber } from "ethers";
+import useStakingAPY from "utils/useStakingAPY";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -34,14 +33,8 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     split.gte(0)
   ).length;
 
-  const totalSupplyVeOgv = claim.staking.totalSupplyVeOgvAdjusted || 0;
-
   // Standard APY figure, assumes 100 OGV locked for max duration
-  const stakingApy = getRewardsApy(
-    100 * 1.8 ** (48 / 12),
-    100,
-    totalSupplyVeOgv
-  );
+  const { stakingAPY, loading: apyLoading } = useStakingAPY(100, 48);
 
   const claimValid =
     (hasClaim && claim.optional && claim.optional.isValid) ||
@@ -148,8 +141,9 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                         </div>
                         <div className="pt-9 space-y-4">
                           <p className="text-2xl">
-                            OGV stakers earn a {stakingApy.toFixed(2)}% variable
-                            APY
+                            OGV stakers earn a{" "}
+                            {apyLoading ? "--.--" : stakingAPY.toFixed(2)}%
+                            variable APY
                           </p>
                           <Link
                             href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
@@ -189,7 +183,9 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
                     </div>
                     <div className="pt-9 space-y-4">
                       <p className="text-2xl">
-                        OGV stakers earn a {stakingApy.toFixed(2)}% variable APY
+                        OGV stakers earn a{" "}
+                        {apyLoading ? "--.--" : stakingAPY.toFixed(2)}% variable
+                        APY
                       </p>
                       <Link
                         href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"

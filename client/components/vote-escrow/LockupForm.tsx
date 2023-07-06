@@ -20,9 +20,9 @@ import moment from "moment";
 import { mdiInformationOutline as InfoIcon } from "@mdi/js";
 import Icon from "@mdi/react";
 import ApyToolTip from "components/claim/claim/ApyTooltip";
-import { getRewardsApy } from "utils/apy";
 import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
+import useStakingAPY from "utils/useStakingAPY";
 import classnames from "classnames";
 
 interface LockupFormProps {
@@ -124,11 +124,8 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     balances,
     allowances,
     blockTimestamp,
-    totalBalances,
   } = useStore();
   const router = useRouter();
-
-  const { totalSupplyVeOgvAdjusted } = totalBalances;
 
   const [lockupAmount, setLockupAmount] = useState(
     existingLockup
@@ -143,17 +140,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
       : Math.floor((existingLockup.end - blockTimestamp) / SECONDS_IN_A_MONTH)
   ); // In months
 
-  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
-  const votingDecayFactor = 1.8;
-
-  const veOgvFromOgvLockup =
-    lockupAmount * votingDecayFactor ** (lockupDuration / 12);
-
-  const ogvLockupRewardApy = getRewardsApy(
-    veOgvFromOgvLockup,
-    lockupAmount,
-    totalSupplyVeOgvAdjusted
-  );
+  const {
+    stakingAPY: ogvLockupRewardApy,
+    loading: apyLoading,
+    veOgvReceived: veOgvFromOgvLockup,
+  } = useStakingAPY(lockupAmount, lockupDuration);
 
   const validLockup = lockupAmount !== "0" && lockupDuration !== "0";
 
@@ -463,7 +454,9 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
                 <div className="flex space-x-2 items-end">
                   <CardStat large>
                     {validLockup
-                      ? ogvLockupRewardApy.toFixed(2)
+                      ? apyLoading
+                        ? "--.--"
+                        : ogvLockupRewardApy.toFixed(2)
                       : (0.0).toFixed(2)}
                   </CardStat>
                   <span className="text-neutral text-sm">%</span>
