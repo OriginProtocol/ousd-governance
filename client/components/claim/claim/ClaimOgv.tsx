@@ -33,19 +33,11 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     maxLockupDurationInMonths
   );
   const [error, setError] = useState<string>(null);
-  if (!claim.loaded || !claim.optional.hasClaim) {
-    return <></>;
-  }
 
   const isValidLockup = lockupDuration > 0;
-  const claimableOgv = claim.optional.isValid
+  const claimableOgv = claim?.optional?.isValid
     ? numeral(claim.optional.amount.div(decimal18Bn).toString()).value()
     : 0;
-  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
-  const votingDecayFactor = 1.8;
-
-  const veOgvFromOgvLockup =
-    claimableOgv * votingDecayFactor ** (lockupDuration / 12);
 
   const { stakingAPY: ogvLockupRewardApy, loading: ogvLockupRewardLoading } =
     useStakingAPY(claimableOgv, lockupDuration);
@@ -54,6 +46,16 @@ const ClaimOgv: FunctionComponent<ClaimOgvProps> = () => {
     stakingAPY: maxOgvLockupRewardApy,
     loading: maxOgvLockupRewardLoading,
   } = useStakingAPY(claimableOgv, 48);
+
+  if (!claim.loaded || !claim.optional.hasClaim) {
+    return <></>;
+  }
+
+  // as specified here: https://github.com/OriginProtocol/ousd-governance/blob/master/contracts/OgvStaking.sol#L21
+  const votingDecayFactor = 1.8;
+
+  const veOgvFromOgvLockup =
+    claimableOgv * votingDecayFactor ** (lockupDuration / 12);
 
   let claimButtonText = "";
   if (isValidLockup && claim.optional.state === "ready") {
