@@ -26,7 +26,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
     <>
       <CardGroup horizontal fourCol>
         <Card dark tightPadding>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <CardLabel>Balance</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />
@@ -38,7 +38,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           </div>
         </Card>
         <Card dark tightPadding>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <CardLabel>Staked</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />
@@ -50,7 +50,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           </div>
         </Card>
         <Card dark tightPadding>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <CardLabel>Vote Balance</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/veogv.svg" alt="veOGV" small />
@@ -62,7 +62,7 @@ const AccountBalances: FunctionComponent<AccountBalancesProps> = () => {
           </div>
         </Card>
         <Card dark tightPadding>
-          <div className="space-y-1">
+          <div className="space-y-2">
             <CardLabel>Accrued Rewards</CardLabel>
             <div className="flex space-x-1 items-center">
               <TokenIcon src="/ogv.svg" alt="OGV" small />

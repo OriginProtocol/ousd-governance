@@ -2,10 +2,10 @@
 // with Sentry.
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-const { withSentryConfig } = require('@sentry/nextjs');
+const { withSentryConfig } = require("@sentry/nextjs");
 
 const path = require("path");
-require('dotenv').config()
+require("dotenv").config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -22,23 +22,23 @@ const nextConfig = {
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     /* Add any environmental variables here and they will be available in the JS code under
-     * `process.env.[variable]`. 
+     * `process.env.[variable]`.
      *
      * Note: these get "baked in" to the code at build time when building for Goerli / Mainnet
      */
     const envVars = {
-      'production': {
-        NETWORK_ID: 1
+      production: {
+        NETWORK_ID: 1,
       },
-      'dev': {
+      development: {
         NETWORK_ID: 31337,
-        CLAIM_OPENS: 1657580400,
-        CLAIM_CLOSES: 1665356400,
+        CLAIM_OPENS: 1657584000,
+        CLAIM_CLOSES: 1665360000,
       },
-      'staging': {
-        NETWORK_ID: 5
+      staging: {
+        NETWORK_ID: 5,
       },
-    }
+    };
 
     /**
      * Returns environment variables as an object
@@ -46,11 +46,11 @@ const nextConfig = {
     const env = Object.keys(process.env)
       .concat(Object.keys(envVars[process.env.NODE_ENV]))
       .reduce((acc, curr) => {
-        acc[`process.env.${curr}`] = JSON.stringify(process.env[curr])
-        return acc
-      }, {})
+        acc[`process.env.${curr}`] = JSON.stringify(process.env[curr]);
+        return acc;
+      }, {});
 
-    config.plugins.push(new webpack.DefinePlugin(env))
+    config.plugins.push(new webpack.DefinePlugin(env));
 
     if (isServer) {
       return {
@@ -68,7 +68,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(
-  nextConfig,
-  { silent: true },
-);
+module.exports = withSentryConfig(nextConfig, { silent: true });

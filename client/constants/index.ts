@@ -30,10 +30,6 @@ export const CHAIN_CONTRACTS = {
 
 let navItems = [
   {
-    href: "/claim",
-    label: "Claim",
-  },
-  {
     href: "/stake",
     label: "Stake",
   },
@@ -43,7 +39,12 @@ let navItems = [
     external: true,
   },
   {
-    href: "https://ousd.com/swap",
+    href: "https://app.oeth.com",
+    label: "Get OETH",
+    external: true,
+  },
+  {
+    href: "https://app.ousd.com",
     label: "Get OUSD",
     external: true,
   },

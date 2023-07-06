@@ -14,6 +14,7 @@ interface RangeInputProps {
   hideLabelFormatting?: Boolean;
 }
 
+// @ts-ignore
 const RangeInput: FunctionComponent<RangeInputProps> = ({
   label,
   counterUnit,
@@ -29,7 +30,7 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
   <>
     {!hideLabel && (
       <label className="label">
-        <span className="label-text text-lg flex justify-between items-center w-full">
+        <span className="label-text font-header text-white text-lg flex justify-between items-center w-full">
           <span>
             {label}&nbsp;
             {hideLabelFormatting ? value : <TokenAmount amount={value} />}
@@ -40,16 +41,22 @@ const RangeInput: FunctionComponent<RangeInputProps> = ({
     )}
     <div>
       <input
-        className="range range-lg range-accent"
+        className="range range-lg range-alt"
         type="range"
         min={min || "0"}
         max={max}
         value={value}
         onChange={onChange}
+        style={{
+          // @ts-ignore
+          "--value": value,
+          "--min": min,
+          "--max": max,
+        }}
       />
       {markers && markers.length > 0 && (
         <>
-          <div className="w-full flex justify-between text-xs text-gray-400">
+          <div className="w-full flex justify-between text-xs text-neutral">
             {markers.map((marker, index) => (
               <span key={index} className="flex flex-col items-center w-8">
                 <span>|</span>

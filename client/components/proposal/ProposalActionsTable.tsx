@@ -28,6 +28,7 @@ export const ProposalActionsTable = ({
   const [actionDeleteIndex, setActionDeleteIndex] = useState(null);
 
   let explorerPrefix: string | undefined;
+
   if (envNetwork === 1) {
     explorerPrefix = "https://etherscan.io/";
   } else if (envNetwork === 5) {
@@ -49,7 +50,7 @@ export const ProposalActionsTable = ({
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead>
-            <tr>
+            <tr className="bg-inherit border-accent border-opacity-[40%]">
               <td className="pl-0">Contract</td>
               <td>Function</td>
               <td>Argument Types</td>
@@ -60,13 +61,14 @@ export const ProposalActionsTable = ({
           <tbody>
             {proposalActions.targets.map((target, index) => (
               <tr key={index}>
-                <td className="pl-0">
+                <td className="pl-0 bg-inherit border-accent border-opacity-[40%]">
                   {explorerPrefix ? (
                     <a
-                      className="link link-primary"
+                      className="link link-primary gradient-link"
                       href={`${explorerPrefix}address/${target}`}
                       target="_blank"
                       rel="noreferrer"
+                      data-text={addressContractName(contracts, target)}
                     >
                       {addressContractName(contracts, target)}
                     </a>
@@ -74,17 +76,17 @@ export const ProposalActionsTable = ({
                     <>{addressContractName(contracts, target)}</>
                   )}
                 </td>
-                <td>
+                <td className="bg-inherit border-accent border-opacity-[40%]">
                   {functionNameFromSignature(proposalActions.signatures[index])}
                 </td>
-                <td>
+                <td className="bg-inherit border-accent border-opacity-[40%]">
                   {argumentsFromSignature(
                     proposalActions.signatures[index]
                   ).map((argument, index) => (
                     <div key={index}>{argument}</div>
                   ))}
                 </td>
-                <td>
+                <td className="bg-inherit border-accent border-opacity-[40%]">
                   {decodeCalldata(
                     proposalActions.signatures[index],
                     proposalActions.calldatas[index]
@@ -128,7 +130,7 @@ export const ProposalActionsTable = ({
                   })}
                 </td>
                 {ephemeral && (
-                  <td>
+                  <td className="bg-inherit border-accent border-opacity-[40%]">
                     <button
                       className="btn btn-muted btn-circle btn-xs"
                       onClick={() => {

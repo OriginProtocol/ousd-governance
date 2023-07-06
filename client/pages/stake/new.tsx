@@ -8,6 +8,7 @@ import Link from "components/Link";
 import Seo from "components/Seo";
 import CardGroup from "components/CardGroup";
 import AccountBalances from "components/vote-escrow/AccountBalances";
+import { SectionTitle } from "@/components/SectionTitle";
 
 const LockupNew: NextPage = () => {
   const { web3Provider } = useStore();
@@ -23,16 +24,12 @@ const LockupNew: NextPage = () => {
   return (
     <Wrapper narrow>
       <Seo title="New Stake" />
-      <PageTitle>New Stake</PageTitle>
+      <PageTitle>Origin DeFi Governance</PageTitle>
+      <SectionTitle>OGV Staking</SectionTitle>
       <CardGroup>
         <AccountBalances />
         <LockupForm />
       </CardGroup>
-      <div className="mt-6">
-        <Link className="btn rounded-full" href={`/stake`}>
-          &larr; Back to OGV Staking
-        </Link>
-      </div>
     </Wrapper>
   );
 };
