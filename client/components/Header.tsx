@@ -25,7 +25,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
   );
 
   const mobileMenuClassNames = classNames(
-    "flex flex-col pt-8 bg-white z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
+    "flex flex-col pt-8 bg-secondary z-30 fixed top-0 h-screen w-72 transition transition-right duration-200 lg:hidden",
     {
       "-right-full": !menuIsOpen,
       "right-0": menuIsOpen,
@@ -36,34 +36,34 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
     <>
       <header className="py-6 md:py-8 bg-secondary">
         <Wrapper>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="flex-none -mb-3 mr-7 xl:mr-10">
+          <div className="flex flex-row items-center justify-between w-full">
+            <div className="flex flex-row items-center">
+              <div className="flex-none -mb-1 mr-7 xl:mr-10">
                 <Link href="/">
                   <Image
-                    width="204"
-                    height="29"
+                    width="174"
+                    height="24"
                     src="/logo.svg"
                     alt="OUSD Governance"
                   />
                 </Link>
               </div>
               {!hideNav && (
-                <ul className="space-x-7 xl:space-x-10 font-light h-0 invisible lg:h-auto lg:visible lg:flex">
+                <ul className="hidden lg:flex items-center space-x-7 xl:space-x-10 font-light h-0 lg:h-auto">
                   {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
-                        className="group text-sm text-white flex space-x-2"
+                        className="group text-sm text-neutral hover:text-neutral-focus flex space-x-2"
                         currentClassName="font-normal"
                         href={href}
                         type={external ? "external" : "internal"}
                         newWindow={external}
                       >
-                        <span className="group-hover:underline">{label}</span>
+                        <span>{label}</span>
                         {href === "/stake" && (
                           <div className="flex items-center">
                             <div
-                              className="w-0 h-0 
+                              className="w-0 h-0
                               border-t-[0.25rem] border-t-transparent
                               border-r-[0.4rem] border-r-white
                               border-b-[0.25rem] border-b-transparent
@@ -83,7 +83,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               )}
             </div>
             {!hideNav && (
-              <div className="flex-none flex items-center space-x-3 md:space-x-4">
+              <div className="flex flex-grow-1 flex-shrink-0 items-center space-x-3 md:space-x-4">
                 <button
                   className="flex lg:hidden"
                   onClick={() => setMenuIsOpen(true)}
@@ -123,7 +123,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               {navItems.map(({ href, label, external }) => (
                 <li key={label}>
                   <Link
-                    className="px-6 py-3 hover:text-gray-700 text-black border-l-4 border-white flex space-x-2"
+                    className="px-6 py-3 hover:text-neutral-focus text-neutral border-l-4 border-accent-content flex space-x-2"
                     currentClassName="font-normal border-primary"
                     href={href}
                     onClick={
@@ -136,7 +136,7 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                     {href === "/stake" && (
                       <div className="flex items-center">
                         <div
-                          className="w-0 h-0 
+                          className="w-0 h-0
                               border-t-[0.25rem] border-t-transparent
                               border-r-[0.4rem] border-r-primary
                               border-b-[0.25rem] border-b-transparent

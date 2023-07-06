@@ -6,7 +6,6 @@ import type { ProposalDataType } from "pages/index";
 import { Loading } from "components/Loading";
 import { ProposalTable } from "components/proposal/ProposalTable";
 import { PageTitle } from "components/PageTitle";
-import Card from "components/Card";
 import Wrapper from "components/Wrapper";
 import prisma from "lib/prisma";
 import Seo from "components/Seo";
@@ -88,13 +87,11 @@ const Proposal: NextPage = ({ proposals }) => {
   return (
     <Wrapper narrow>
       <Seo title="Proposals" />
-      <PageTitle>Proposals</PageTitle>
+      <PageTitle>Origin DeFi Governance</PageTitle>
       {loading ? (
         <Loading />
       ) : (
-        <Card>
-          <ProposalTable proposalData={proposalData} />
-        </Card>
+        <ProposalTable title="Proposals" proposalData={proposalData} />
       )}
     </Wrapper>
   );

@@ -23,7 +23,7 @@ const Modal: FunctionComponent<ModalProps> = ({
     <div className={className} style={{ marginTop: 0 }} onClick={handleClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="modal-box overflow-hidden bg-white"
+        className="modal-box overflow-hidden bg-secondary text-white"
       >
         {showCloseIcon && handleClose && (
           <button

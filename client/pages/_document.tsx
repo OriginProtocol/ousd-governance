@@ -15,7 +15,7 @@ class OUSDGovernanceDocument extends Document {
           <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
           <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         </Head>
-        <body className="bg-base-100">
+        <body className="bg-primary-content">
           <noscript>
             <iframe
               src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}

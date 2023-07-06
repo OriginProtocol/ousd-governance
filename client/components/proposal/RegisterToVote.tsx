@@ -63,7 +63,7 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
 
   const hasTokensButUnregistered = veOgv.gt(0) && needToShowDelegation;
   const hasNoTokensAndUnregistered = veOgv.eq(0) && needToShowDelegation;
-  console.log("whiteRegisterCta", whiteRegisterCta, !whiteRegisterCta);
+
   const classes = classNames(
     "bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10",
     {
@@ -100,13 +100,13 @@ const RegisterToVote: FunctionComponent<RegisterToVoteProps> = ({
 
   const VeOgvMessage = () => (
     <div className={!withCard ? "mb-20" : ""}>
-      <div className="bg-white -my-10 -mx-6 p-10 md:-mx-10">
-        <h2 className="text-lg font-bold mb-2">Stake OGV</h2>
+      <div className="bg-inherit -my-10 -mx-6 p-10 md:-mx-10">
+        <h2 className="text-lg font-bold mb-2 font-header">Stake OGV</h2>
         <p className="mb-8">
           First stake some OGV and gain veOGV to be eligible for voting
         </p>
         <Link
-          className="btn rounded-full normal-case space-x-2 btn-lg h-[3.25rem] min-h-[3.25rem] min-w-[10.25rem] btn-primary"
+          className="py-3 text-white px-6 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
           href="/stake"
         >
           Stake

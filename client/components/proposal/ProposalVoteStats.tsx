@@ -27,7 +27,7 @@ export const ProposalVoteStats = ({
       <Card dark tightPadding>
         <div className="space-y-1">
           <CardLabel>Your Votes</CardLabel>
-          <div className="flex space-x-1 items-center">
+          <div className="flex space-x-2 items-center">
             <TokenIcon src="/veogv.svg" alt="veOGV" small />
             <CardStat small>
               <TokenAmount amount={votePower} />
@@ -38,7 +38,7 @@ export const ProposalVoteStats = ({
       <Card dark tightPadding>
         <div className="space-y-1 mb-4">
           <CardLabel>For Votes</CardLabel>
-          <div className="flex space-x-1 items-center">
+          <div className="flex space-x-2 items-center">
             <TokenIcon src="/veogv.svg" alt="veOGV" small />
             <CardStat small>
               <TokenAmount amount={proposal.forVotes} />
@@ -60,7 +60,7 @@ export const ProposalVoteStats = ({
       <Card dark tightPadding>
         <div className="space-y-1 mb-4">
           <CardLabel>Against Votes</CardLabel>
-          <div className="flex space-x-1 items-center">
+          <div className="flex space-x-2 items-center">
             <TokenIcon src="/veogv.svg" alt="veOGV" small />
             <CardStat small>
               <TokenAmount amount={proposal.againstVotes} />
@@ -80,9 +80,9 @@ export const ProposalVoteStats = ({
         )}
       </Card>
       <Card dark tightPadding>
-        <div className="space-y-1  mb-4">
+        <div className="space-y-1 mb-4">
           <CardLabel>Abstain Votes</CardLabel>
-          <div className="flex space-x-1 items-center">
+          <div className="flex space-x-2 items-center">
             <TokenIcon src="/veogv.svg" alt="veOGV" small />
             <CardStat small>
               <TokenAmount amount={proposal.abstainVotes} />

@@ -1,4 +1,5 @@
 import { FunctionComponent, ReactNode } from "react";
+import classnames from "classnames";
 
 interface CardStatProps {
   children: ReactNode;
@@ -12,13 +13,14 @@ const CardStat: FunctionComponent<CardStatProps> = ({
   small,
 }) => (
   <div
-    className={
+    className={classnames(
+      "font-header",
       large
         ? "text-4xl whitespace-nowrap"
         : small
         ? "text-xl whitespace-nowrap"
         : "text-2xl whitespace-nowrap"
-    }
+    )}
   >
     {children}
   </div>

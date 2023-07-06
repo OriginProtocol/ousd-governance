@@ -33,11 +33,12 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
             transaction.event !== "Succeeded" &&
             transaction.event !== "Queued" &&
             transaction.event !== "Executed";
+
           const iconClasses = classNames(
             "h-7 w-7 rounded-full text-white flex items-center justify-center",
             {
               "bg-gray-500": isGrey,
-              "bg-accent": !isGrey,
+              "bg-success": !isGrey,
             }
           );
 
@@ -47,13 +48,14 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
               className="flex space-x-4 items-center"
             >
               <span className={iconClasses}>
-                <Icon path={mdiCheck} size={0.66} />
+                <Icon path={mdiCheck} size={0.8} />
               </span>
               <div>
                 <div className="flex items-center space-x-1">
-                  <h3>{transaction.event}</h3>
+                  <h3 className="text-sm">{transaction.event}</h3>
                   {explorerPrefix && transaction.hash && (
                     <Link
+                      className="text-neutral"
                       href={`${explorerPrefix}tx/${transaction.hash}`}
                       newWindow
                     >
@@ -61,7 +63,7 @@ const ProposalHistory: FunctionComponent<ProposalHistoryProps> = ({
                     </Link>
                   )}
                 </div>
-                <p className="text-gray-500 text-sm">
+                <p className="text-neutral text-xs">
                   {moment(transaction.createdAt).format(
                     "MMM D, YYYY, HH:mm:ss"
                   )}

@@ -49,19 +49,14 @@ const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
       <PageTitle>Extend Stake</PageTitle>
       <CardGroup>
         <AccountBalances />
-        {!lockup && <p className="text-gray-300">No stake found.</p>}
+        {!lockup && <p className="text-neutral">No stake found.</p>}
         {lockup && lockup?.user !== address && (
-          <p className="text-gray-300">This lockup isn&apos;t yours.</p>
+          <p className="text-neutral">This lockup isn&apos;t yours.</p>
         )}
         {lockup && lockup?.user === address && (
           <LockupForm existingLockup={lockup} />
         )}
       </CardGroup>
-      <div className="mt-6">
-        <Link className="btn rounded-full" href={`/stake`}>
-          &larr; Back to OGV Staking
-        </Link>
-      </div>
     </Wrapper>
   );
 };
