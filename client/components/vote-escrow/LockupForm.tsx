@@ -476,7 +476,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           <h2 className="text-2xl font-bold font-header">Your stake summary</h2>
           <CardGroup horizontal twoCol>
             <div className="flex flex-col space-y-4">
-              <span className="text-sm text-neutral">Variable APY</span>
+              <span className="text-sm text-neutral">Amount locked</span>
               <Card tightPadding noShadow className="!border-1 !border-neutral">
                 <div className="flex flex-col justify-center">
                   <div className="flex space-x-[0.4rem] items-end">
@@ -497,7 +497,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
               </Card>
             </div>
             <div className="flex flex-col space-y-4">
-              <span className="text-sm text-neutral">Variable APY</span>
+              <span className="text-sm text-neutral">Voting power</span>
               <Card tightPadding noShadow className="!border-1 !border-neutral">
                 <div className="flex flex-col justify-center">
                   <div className="flex space-x-[0.4rem] items-end">
