@@ -7,6 +7,9 @@
     "url": "https://github.com/originprotocol/ousd-governance/issues",
     "email": "security@originprotocol.com"
   },
+  "engines": {
+    "node": "v16.20.0"
+  },
   "scripts": {
     "dev:web": "next dev",
     "dev:listener": "wait-on .next/server/listener.js && nodemon .next/server/listener.js",
