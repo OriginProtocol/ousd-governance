@@ -194,6 +194,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     approvalStatus === "waiting-for-network";
 
   const actionDisabledExistingLockup =
+    lockupDuration < 1 ||
     lockupDuration <=
       Math.floor((existingLockup?.end - blockTimestamp) / SECONDS_IN_A_MONTH) ||
     lockupStatus === "waiting-for-user" ||
@@ -409,7 +410,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
             max={formattedOgvBalance}
             value={lockupAmount}
             onChange={(e) => {
-              setLockupAmount(e.target.value);
+              setLockupAmount(
+                e.target.value === formattedOgvBalance
+                  ? ethers.utils.formatUnits(balances.ogv.toString())
+                  : e.target.value
+              );
             }}
             markers={lockupAmountInputMarkers}
             onMarkerClick={(markerValue) => {
@@ -428,7 +433,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
           counterUnit="months"
           min={"0"}
           max={maxLockupDurationInMonths}
-          value={lockupDuration}
+          value={Number(lockupDuration) >= 0 ? lockupDuration : 0}
           onChange={(e) => {
             setLockupDuration(e.target.value);
           }}
