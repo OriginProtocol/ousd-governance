@@ -5,9 +5,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isMobile } from "react-device-detect";
 import { useRouter } from "next/router";
+import { ethers } from "ethers";
+import { mainnetNetworkUrl } from "@/constants/index";
 
 export const TransactionListener = () => {
-  const { web3Provider, pendingTransactions } = useStore();
+  const { provider, pendingTransactions } = useStore();
   const router = useRouter();
   const prevPendingTransactions = usePrevious(pendingTransactions);
   const [isOnClaimPage, setIsOnClaimPage] = useState(false);
@@ -30,7 +32,7 @@ export const TransactionListener = () => {
 
     if (newTransactions.length > 0) {
       newTransactions.forEach((transaction) => {
-        web3Provider.once(transaction.hash, (minedTransaction) => {
+        provider.once(transaction.hash, (minedTransaction) => {
           if (
             transaction.onComplete &&
             typeof transaction.onComplete === "function"

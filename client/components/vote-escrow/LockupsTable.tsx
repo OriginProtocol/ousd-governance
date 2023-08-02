@@ -5,7 +5,6 @@ import TokenAmount from "components/TokenAmount";
 import { Loading } from "components/Loading";
 import TimeToDate from "components/TimeToDate";
 import Link from "components/Link";
-import Button from "components/Button";
 import { useStore } from "utils/store";
 import useAccountBalances from "utils/useAccountBalances";
 import useTotalBalances from "utils/useTotalBalances";

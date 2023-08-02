@@ -1,6 +1,5 @@
 import { FunctionComponent, useState } from "react";
 import Card from "components/Card";
-import Button from "components/Button";
 import Link from "components/Link";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
@@ -12,18 +11,15 @@ import DisabledButtonToolTip from "../DisabledButtonTooltip";
 import LockupsTable from "./LockupsTable";
 import { Web3Button } from "components/Web3Button";
 import useStakingAPY from "utils/useStakingAPY";
+import { useAccount, useSigner } from "wagmi";
 
 interface YourLockupsProps {}
 
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
-  const {
-    lockups,
-    pendingTransactions,
-    contracts,
-    balances,
-    totalBalances,
-    web3Provider,
-  } = useStore();
+  const { isConnected } = useAccount();
+  const { lockups, pendingTransactions, contracts, balances, totalBalances } =
+    useStore();
+  const { data: signer } = useSigner();
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
   const { reloadAccountBalances } = useAccountBalances();
@@ -54,7 +50,9 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
     let transaction;
     try {
-      transaction = await contracts.OgvStaking["collectRewards()"]({
+      transaction = await contracts.OgvStaking.connect(signer)[
+        "collectRewards()"
+      ]({
         gasLimit: 140000,
       });
     } catch (e) {
@@ -104,7 +102,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   return (
     <Card>
       <div className="mb-20">
-        <div className="space-y-4 bg-accent text-white -my-10 -mx-6 p-10 md:-mx-10">
+        <div className="space-y-4 bg-primary-content text-white -my-10 -mx-6 p-10 md:-mx-10">
           <h2 className="text-2xl space-y-1 font-header">
             <span className="block border-b pb-3 border-secondary/[.15]">
               <span className="font-bold bg-secondary px-[4px] py-[1px] rounded gradient-link-alt">
@@ -209,7 +207,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
               </Link>
             </li>
           </ul>
-          {web3Provider ? (
+          {isConnected ? (
             <Link
               href="https://app.uniswap.org/#/swap?outputCurrency=0x9c354503C38481a7A7a51629142963F98eCC12D0&chain=mainnet"
               newWindow

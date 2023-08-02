@@ -43,12 +43,9 @@ export const Address = ({
         href={`${explorerPrefix}address/${address}`}
         target="_blank"
         rel="noreferrer"
-        className="text-inherit inline-flex items-center"
+        className="text-inherit inline-flex items-center gradient-link"
       >
         <span className="mr-1">{addressDisplay}</span>
-        <span className="inline-block">
-          <Icon path={mdiOpenInNew} size={0.6} />
-        </span>
       </a>
     );
   } else {
