@@ -1,4 +1,7 @@
 import { useEffect } from "react";
+import { claimOpenTimestampPassed } from "utils";
+import dynamic from "next/dynamic";
+import Script from "next/script";
 import useAccountBalances from "utils/useAccountBalances";
 import useTotalBalances from "utils/useTotalBalances";
 import useContracts from "utils/useContracts";
@@ -26,13 +29,10 @@ import {
 import { WagmiConfig, createClient, configureChains } from "wagmi";
 import { mainnet, localhost } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
+import Layout from "../components/layout";
 import "@rainbow-me/rainbowkit/styles.css";
 import "../styles/globals.css";
-import Layout from "../components/layout";
-import { claimOpenTimestampPassed } from "utils";
-import Script from "next/script";
 import { GTM_ID, pageview } from "../lib/gtm";
-import GeoFenceCheck from "@/components/GeoFenceCheck";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +79,10 @@ const kitTheme = darkTheme({
   borderRadius: "large",
   fontStack: "system",
   overlayBlur: "small",
+});
+
+const GeoFenceCheck = dynamic(() => import("components/GeoFenceCheck"), {
+  ssr: false,
 });
 
 const Root = ({ Component, pageProps }) => {
