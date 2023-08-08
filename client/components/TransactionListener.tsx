@@ -5,8 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isMobile } from "react-device-detect";
 import { useRouter } from "next/router";
-import { ethers } from "ethers";
-import { mainnetNetworkUrl } from "@/constants/index";
 
 export const TransactionListener = () => {
   const { provider, pendingTransactions } = useStore();

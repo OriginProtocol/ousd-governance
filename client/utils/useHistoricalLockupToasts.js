@@ -38,9 +38,11 @@ const useHistoricalLockupToasts = () => {
     const address = event.args[0];
     const ogvLockedUp = event.args[2];
     const lockUpEnd = parseInt(event.args[3]);
+
     const blockTime =
-      (await rpcProvider?.getBlock(event.blockNumber)).timestamp ||
+      (await rpcProvider?.getBlock(event.blockNumber))?.timestamp ||
       Date.now() / 1000;
+
     const durationInMonths = Math.round(
       (lockUpEnd - blockTime) / SECONDS_IN_A_MONTH
     );
