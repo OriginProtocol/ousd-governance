@@ -24,6 +24,7 @@ import numeral from "numeraljs";
 import { decimal18Bn } from "utils";
 import useStakingAPY from "utils/useStakingAPY";
 import classnames from "classnames";
+import { useSigner } from "wagmi";
 
 interface LockupFormProps {
   existingLockup?: Object;
@@ -126,6 +127,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
     blockTimestamp,
   } = useStore();
   const router = useRouter();
+  const { data: signer } = useSigner();
 
   const [lockupAmount, setLockupAmount] = useState(
     existingLockup
@@ -219,11 +221,11 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
     let transaction;
     try {
-      transaction = await contracts.OriginDollarGovernance.approve(
-        contracts.OgvStaking.address,
-        ethers.constants.MaxUint256,
-        { gasLimit: 144300 }
-      );
+      transaction = await contracts.OriginDollarGovernance.connect(
+        signer
+      ).approve(contracts.OgvStaking.address, ethers.constants.MaxUint256, {
+        gasLimit: 144300,
+      });
     } catch (e) {
       setTransactionError("Error approving!");
       setApprovalStatus("ready");
@@ -273,6 +275,7 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
 
       // If lockup amount === 100% of the user's OGV balance then use the actual balance BigNumber
       let amountToStake = ethers.utils.parseUnits(lockupAmount);
+
       if (lockupAmount === formattedOgvBalance) {
         amountToStake = balances.ogv; // Prevents rounding
       }
@@ -282,15 +285,15 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         // When the user has delegation set already, it'll be ~200k.
         const maxGasNeeded = 350000 * 1.2; // Adds a buffer
 
-        const gasEstimate = await contracts.OgvStaking.estimateGas[
-          "stake(uint256,uint256)"
-        ](amountToStake, duration);
+        const gasEstimate = await contracts.OgvStaking.connect(
+          signer
+        ).estimateGas["stake(uint256,uint256)"](amountToStake, duration);
 
-        transaction = await contracts.OgvStaking["stake(uint256,uint256)"](
-          amountToStake,
-          duration,
-          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
-        );
+        transaction = await contracts.OgvStaking.connect(signer)[
+          "stake(uint256,uint256)"
+        ](amountToStake, duration, {
+          gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded),
+        });
       } catch (e) {
         setTransactionError("Error locking up!");
         setLockupStatus("ready");
@@ -348,15 +351,18 @@ const LockupForm: FunctionComponent<LockupFormProps> = ({ existingLockup }) => {
         // When the user has delegation set already, it'll be ~200k.
         const maxGasNeeded = 300000 * 1.2; // Adds a buffer
 
-        const gasEstimate = await contracts.OgvStaking.estimateGas[
-          "extend(uint256,uint256)"
-        ](existingLockup.lockupId, duration);
-
-        transaction = await contracts.OgvStaking["extend(uint256,uint256)"](
+        const gasEstimate = await contracts.OgvStaking.connect(
+          signer
+        ).estimateGas["extend(uint256,uint256)"](
           existingLockup.lockupId,
-          duration,
-          { gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded) }
+          duration
         );
+
+        transaction = await contracts.OgvStaking.connect(signer)[
+          "extend(uint256,uint256)"
+        ](existingLockup.lockupId, duration, {
+          gasLimit: Math.max(Math.ceil(gasEstimate * 1.25), maxGasNeeded),
+        });
       } catch (e) {
         setTransactionError("Error extending lockup!");
         setLockupStatus("ready");

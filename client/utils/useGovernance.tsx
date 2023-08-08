@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useStore } from "utils/store";
+import { useAccount } from "wagmi";
 
 const useGovernance = () => {
   const [proposalThreshold, setProposalThreshold] = useState(
     ethers.BigNumber.from(0)
   );
   const [votePower, setVotePower] = useState(ethers.BigNumber.from(0));
-  const { contracts, address, web3Provider } = useStore();
+  const { address, isConnected } = useAccount();
+  const { contracts } = useStore();
 
   useEffect(() => {
     const loadProposalThreshold = async () => {
@@ -24,10 +26,10 @@ const useGovernance = () => {
       const votePower = await contracts.OgvStaking.balanceOf(address);
       setVotePower(votePower);
     };
-    if (web3Provider && address && contracts.loaded) {
+    if (isConnected && address && contracts.loaded) {
       loadVotePower();
     }
-  }, [address, web3Provider, contracts]);
+  }, [address, isConnected, contracts]);
 
   return {
     proposalThreshold,

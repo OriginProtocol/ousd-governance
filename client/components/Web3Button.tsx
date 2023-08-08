@@ -1,242 +1,111 @@
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import { MewConnectConnector } from "@myetherwallet/mewconnect-connector";
-import { providers, utils } from "ethers";
-import { useCallback, useEffect, FunctionComponent } from "react";
-import WalletLink from "walletlink";
-import Web3Modal from "web3modal";
-import { truncateEthAddress, useNetworkInfo } from "utils/index";
-import { useStore } from "utils/store";
-import {
-  RPC_URLS,
-  mainnetNetworkUrl,
-  websocketProvider,
-} from "constants/index";
-import { toast } from "react-toastify";
-import Link from "components/Link";
+import Link from "next/link";
+import { ConnectButton as RainbowKitConnect } from "@rainbow-me/rainbowkit";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
+import classnames from "classnames";
 
-const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider, // required
-    options: {
-      rpc: RPC_URLS,
-    },
-  },
-  "custom-walletlink": {
-    display: {
-      logo: "https://play-lh.googleusercontent.com/PjoJoG27miSglVBXoXrxBSLveV6e3EeBPpNY55aiUUBM9Q1RCETKCOqdOkX2ZydqVf0",
-      name: "Coinbase",
-      description: "Connect to Coinbase Wallet (not Coinbase App)",
-    },
-    options: {
-      appName: "Coinbase", // Your app name
-      networkUrl: mainnetNetworkUrl,
-      chainId: 1,
-    },
-    package: WalletLink,
-    connector: async (_: any, options: any) => {
-      const { appName, networkUrl, chainId } = options;
-      const walletLink = new WalletLink({
-        appName,
-      });
-      const provider = walletLink.makeWeb3Provider(networkUrl, chainId);
-      await provider.enable();
-      return provider;
-    },
-  },
-  "custom-mew": {
-    display: {
-      logo: "/myetherwallet-icon.svg",
-      name: "MyEtherWallet",
-      description: "Connect to your MyEtherWallet",
-    },
-    package: MewConnectConnector,
-    options: {
-      appName: "MyEtherWallet", // Your app name
-      networkUrl: mainnetNetworkUrl,
-      chainId: 1,
-    },
-    connector: async () => {
-      const connector = new MewConnectConnector({
-        url: websocketProvider,
-      });
-      await connector.activate();
-      const provider = await connector.getProvider();
-      provider.enable();
-      return provider;
-    },
-  },
+const ConnectButton = ({ inPage = false, needToShowDelegation = false }) => {
+  const connectText = inPage ? "Connect wallet" : "Connect";
+  return (
+    <RainbowKitConnect.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        // Note: If your app doesn't use authentication, you
+        // can remove all 'authenticationStatus' checks
+        const ready = mounted && authenticationStatus !== "loading";
+
+        const connected =
+          ready &&
+          account &&
+          chain &&
+          (!authenticationStatus || authenticationStatus === "authenticated");
+
+        return (
+          <div
+            {...(!ready && {
+              "aria-hidden": true,
+              style: {
+                opacity: 0,
+                pointerEvents: "none",
+                userSelect: "none",
+              },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <button
+                    className={classnames(
+                      "flex items-center justify-center text-sm py-2 text-white px-4 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full",
+                      {
+                        "w-full": inPage,
+                      }
+                    )}
+                    onClick={() => {
+                      openConnectModal();
+                    }}
+                    type="button"
+                  >
+                    {connectText}
+                  </button>
+                );
+              }
+
+              if (chain.unsupported) {
+                return (
+                  <button
+                    className="flex items-center justify-center text-sm py-2 text-white px-4 bg-error rounded-full"
+                    onClick={openChainModal}
+                    type="button"
+                  >
+                    Wrong Network
+                  </button>
+                );
+              }
+
+              return (
+                <div className="flex flex-row items-center space-x-2">
+                  <button
+                    onClick={openAccountModal}
+                    type="button"
+                    className="flex flex-row items-center space-x-2 p-3 bg-secondary-content text-white rounded-full text-sm leading-none cursor-pointer"
+                  >
+                    <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
+                    <span>{account.displayName}</span>
+                  </button>
+                  {needToShowDelegation && (
+                    <Link href="/register-vote">
+                      <button className="hidden lg:flex items-center justify-center text-sm py-2 text-white px-3 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full">
+                        Vote register
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        );
+      }}
+    </RainbowKitConnect.Custom>
+  );
 };
-
-const networkNameMap = {
-  1: "Mainnet",
-  5: "Goerli",
-  31337: "localhost",
-};
-
-let web3Modal: any | undefined;
-if (typeof window !== "undefined") {
-  web3Modal = new Web3Modal({
-    network: "mainnet",
-    cacheProvider: true,
-    providerOptions,
-    theme: {
-      background: "#101113",
-      main: "rgb(199, 199, 199)",
-      secondary: "rgb(136, 136, 136)",
-      border: "rgba(195, 195, 195, 0.14)",
-      hover: "#141519",
-    },
-  });
-  useStore.setState({ web3Modal });
-}
 
 interface Web3ButtonProps {
-  inPage?: Boolean;
+  inPage?: boolean;
 }
 
-export const Web3Button: FunctionComponent<Web3ButtonProps> = ({ inPage }) => {
-  const { provider, web3Provider, address } = useStore();
-
-  const resetWeb3State = useStore((state) => state.reset);
-
-  const networkInfo = useNetworkInfo();
-
+export const Web3Button = ({ inPage }: Web3ButtonProps) => {
   const { needToShowDelegation } = useShowDelegationModalOption();
-
-  const connect = useCallback(
-    async function (isAutoconnect = false) {
-      if (!isAutoconnect) {
-        await web3Modal.clearCachedProvider();
-      }
-      let provider;
-      try {
-        provider = await web3Modal.connect();
-      } catch (e) {
-        console.warn("Connection error:", e);
-        return;
-      }
-
-      provider.on("chainChanged", (chainId) => {
-        useStore.setState({ chainId: Number(chainId) });
-      });
-
-      const web3Provider = new providers.Web3Provider(provider, "any");
-      const signer = web3Provider.getSigner();
-      const address = await signer.getAddress();
-      const network = await web3Provider.getNetwork();
-
-      provider.on("accountsChanged", async (accounts) => {
-        const newAccount: string =
-          accounts.length === 0 ? undefined : accounts[0];
-        let storeUpdate = {
-          address: utils.getAddress(newAccount), // ensure checksum address to prevent excess state updates
-        };
-        resetWeb3State();
-
-        if (newAccount !== undefined) {
-          storeUpdate = {
-            ...storeUpdate,
-            provider,
-            web3Provider,
-            chainId: network.chainId,
-          };
-        }
-        useStore.setState(storeUpdate);
-      });
-
-      // Add contracts
-      useStore.setState({
-        provider,
-        web3Provider,
-        address,
-        chainId: network.chainId,
-      });
-    },
-    [resetWeb3State]
-  );
-
-  const disconnect = useCallback(
-    async function () {
-      await web3Modal.clearCachedProvider();
-      if (provider?.disconnect && typeof provider.disconnect === "function") {
-        await provider.disconnect();
-      }
-      resetWeb3State();
-    },
-    [provider, resetWeb3State]
-  );
-
-  // Auto connect to the cached provider
-  useEffect(() => {
-    if (web3Modal.cachedProvider) {
-      connect(true);
-    }
-  }, [connect]);
-
-  if (web3Provider && !networkInfo.correct) {
-    return (
-      <button
-        className="btn btn-primary btn-error btn-sm rounded-btn"
-        onClick={() => {
-          toast.error(
-            `Please connect to ${
-              networkNameMap[networkInfo.envNetwork]
-            } network.`,
-            {
-              hideProgressBar: true,
-            }
-          );
-        }}
-      >
-        Wrong Network
-      </button>
-    );
-  }
-
-  return web3Provider ? (
-    <div className="dropdown relative">
-      {address && (
-        <label
-          tabIndex={0}
-          className="flex items-center space-x-2 p-3 md:px-5 bg-secondary-content text-white rounded-full text-sm leading-none capitalize cursor-pointer"
-        >
-          <span className="w-3 h-3 bg-[#4bbc8a] rounded-full" />
-          <div className="flex">
-            {truncateEthAddress(address)}
-            {web3Provider.network.name === "unknown" && " / Lh"}
-            {web3Provider.network.name === "goerli" && " / Goer"}
-          </div>
-        </label>
-      )}
-      <div
-        tabIndex={0}
-        className="flex flex-col space-y-2 dropdown-content absolute top-full mt-3 right-0 bg-secondary-content p-3 md:p-4 rounded-xl border-none shadow-sm w-48 lg:w-full no-animation"
-      >
-        {needToShowDelegation && (
-          <Link
-            className="flex items-center justify-center text-sm py-2 text-white px-3 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
-            href="/register-vote"
-          >
-            Vote register
-          </Link>
-        )}
-        <button
-          className="text-sm py-1 text-white px-2 rounded-full"
-          onClick={disconnect}
-        >
-          Disconnect
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="flex items-center justify-center w-full">
-      <button
-        className="flex items-center justify-center text-sm py-2 text-white px-4 bg-gradient-to-r from-gradient-from to-gradient-to rounded-full"
-        onClick={connect}
-      >
-        {inPage ? "Connect wallet" : "Connect"}
-      </button>
-    </div>
+  return (
+    <ConnectButton
+      inPage={inPage}
+      needToShowDelegation={needToShowDelegation}
+    />
   );
 };

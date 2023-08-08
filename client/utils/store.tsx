@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 
 type Web3DataType = {
   provider?: any;
-  web3Provider?: any;
   address?: string;
   chainId?: number;
   contracts: Object;
@@ -21,7 +20,6 @@ type StoreType = Web3DataType & {
 
 const defaultState: Web3DataType = {
   provider: null,
-  web3Provider: null,
   rpcProvider: null,
   address: undefined,
   chainId: null,

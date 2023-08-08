@@ -1,35 +1,41 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import { RPC_URLS } from "@/constants/index";
 
 const useBlock = () => {
   const networkInfo = useNetworkInfo();
-  const { web3Provider } = useStore();
-
+  const { isConnected } = useAccount();
   const [refetchBlock, setRefetchBlock] = useState(0);
 
   useEffect(() => {
     const getBlockTimestamp = async () => {
-      const currentBlock = await web3Provider?.getBlockNumber();
-      const block = await web3Provider?.getBlock(currentBlock);
-
+      const provider = new ethers.providers.JsonRpcProvider(
+        RPC_URLS[networkInfo.envNetwork]
+      );
+      const currentBlock = await provider?.getBlockNumber();
+      const block = await provider?.getBlock(currentBlock);
       return block?.timestamp;
     };
 
     let intervalId: ReturnType<typeof setInterval>;
 
-    if (web3Provider && networkInfo.correct) {
-      intervalId = setInterval(() => {
-        Promise.all([getBlockTimestamp()]).then(([blockTimestamp]) => {
-          useStore.setState({
-            blockTimestamp,
-          });
+    const pullTimestamp = () => {
+      Promise.all([getBlockTimestamp()]).then(([blockTimestamp]) => {
+        useStore.setState({
+          blockTimestamp,
         });
-      }, 4000);
+      });
+    };
+
+    if (isConnected && networkInfo.correct) {
+      intervalId = setInterval(pullTimestamp, 4000);
     }
 
     return () => clearInterval(intervalId);
-  }, [web3Provider, networkInfo.correct, refetchBlock]);
+  }, [isConnected, networkInfo.correct, networkInfo.envNetwork, refetchBlock]);
 
   return {
     refetchBlock: () => {

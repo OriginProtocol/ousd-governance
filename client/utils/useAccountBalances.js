@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import { useAccount } from "wagmi";
 
 const useAccountBalances = () => {
   const [reloadAccountAllowances, setReloadAccountAllowances] = useState(0);
@@ -8,7 +9,9 @@ const useAccountBalances = () => {
   const [reloadStakingDelegation, setReloadStakingDelegation] = useState(0);
 
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts, refreshStatus } = useStore();
+  const { address, isConnected } = useAccount();
+
+  const { contracts, refreshStatus } = useStore();
 
   useEffect(() => {
     const fetchOgvStakingDelegateeAddress = async () => {
@@ -36,7 +39,7 @@ const useAccountBalances = () => {
       return await contracts.OgvStaking.previewRewards(address);
     };
 
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (isConnected && address && networkInfo.correct && contracts.loaded) {
       Promise.all([
         loadOgvBalance(),
         loadVeOgvBalance(),
@@ -53,7 +56,7 @@ const useAccountBalances = () => {
     }
   }, [
     address,
-    web3Provider,
+    isConnected,
     contracts,
     reloadAccountBalances,
     networkInfo.correct,
@@ -67,7 +70,7 @@ const useAccountBalances = () => {
       );
     };
 
-    if (web3Provider && address && networkInfo.correct && contracts.loaded) {
+    if (isConnected && address && networkInfo.correct && contracts.loaded) {
       Promise.all([loadAllowance()]).then(([ogv_approval]) => {
         useStore.setState({
           allowances: {
@@ -78,7 +81,7 @@ const useAccountBalances = () => {
     }
   }, [
     address,
-    web3Provider,
+    isConnected,
     contracts,
     reloadAccountAllowances,
     networkInfo.correct,

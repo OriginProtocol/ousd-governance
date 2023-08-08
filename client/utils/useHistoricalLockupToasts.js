@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import { sample, random, maxBy, includes } from "lodash";
+import { useEffect } from "react";
+import { random, maxBy, includes } from "lodash";
 import { useStore } from "utils/store";
 import { toast } from "react-toastify";
-import { utils } from "ethers";
 import { truncateEthAddress } from "utils";
 import { SECONDS_IN_A_MONTH } from "../constants/index";
 import TokenAmount from "components/TokenAmount";
@@ -31,7 +30,7 @@ const _LockupContent = ({ shortAddress, ogvLockedUp, months, txHash }) => {
 };
 
 const useHistoricalLockupToasts = () => {
-  const { web3Provider, contracts, recentLockups } = useStore();
+  const { rpcProvider, contracts, recentLockups } = useStore();
   // 13.13 seconds is average block time (on 7.7.2022) ~
   const blocksToLookBack = 1300; // roughly 2 days
 
@@ -39,18 +38,16 @@ const useHistoricalLockupToasts = () => {
     const address = event.args[0];
     const ogvLockedUp = event.args[2];
     const lockUpEnd = parseInt(event.args[3]);
+
     const blockTime =
-      (await web3Provider?.getBlock(event.blockNumber)).timestamp ||
+      (await rpcProvider?.getBlock(event.blockNumber))?.timestamp ||
       Date.now() / 1000;
+
     const durationInMonths = Math.round(
       (lockUpEnd - blockTime) / SECONDS_IN_A_MONTH
     );
 
-    const shortAddress =
-      web3Provider?.chainId === 1
-        ? (await web3Provider.lookupAddress(address)) ||
-          truncateEthAddress(address)
-        : truncateEthAddress(address);
+    const shortAddress = truncateEthAddress(address);
 
     toast.success(
       <_LockupContent

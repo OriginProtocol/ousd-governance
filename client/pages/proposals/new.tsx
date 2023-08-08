@@ -21,10 +21,12 @@ import Wrapper from "components/Wrapper";
 import Seo from "components/Seo";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
 import { useRouter } from "next/router";
+import { useAccount } from "wagmi";
 
 const ProposalNew: NextPage = () => {
   const router = useRouter();
-  const { web3Provider, contracts, pendingTransactions } = useStore();
+  const { isConnected } = useAccount();
+  const { contracts, pendingTransactions } = useStore();
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [newProposalActions, setNewProposalActions] = useStickyState(
     [],
@@ -114,7 +116,7 @@ const ProposalNew: NextPage = () => {
     });
   };
 
-  if (!web3Provider) {
+  if (!isConnected) {
     return (
       <Wrapper narrow>
         <Disconnected />

@@ -9,6 +9,7 @@ import { find } from "lodash";
 import Seo from "components/Seo";
 import CardGroup from "components/CardGroup";
 import AccountBalances from "components/vote-escrow/AccountBalances";
+import { useAccount } from "wagmi";
 
 export async function getServerSideProps({
   res,
@@ -29,10 +30,11 @@ interface LockupSingleProps {
 }
 
 const LockupSingle: NextPage<LockupSingleProps> = ({ lockupId }) => {
-  const { web3Provider, address, lockups } = useStore();
+  const { lockups } = useStore();
+  const { address, isConnected } = useAccount();
   const lockup = find(lockups, { lockupId: parseInt(lockupId) });
 
-  if (!web3Provider) {
+  if (!isConnected) {
     return (
       <Wrapper narrow>
         <Disconnected />

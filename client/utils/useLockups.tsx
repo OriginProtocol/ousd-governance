@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useStore } from "utils/store";
-import { useNetworkInfo } from "utils/index";
-import { fetcher } from "utils/index";
+import { fetcher, useNetworkInfo } from "utils/index";
 import useSWR, { mutate } from "swr";
 import { sortBy } from "lodash";
+import { useAccount } from "wagmi";
 
 const useLockups = () => {
   const [reloadLockups, setReloadLockups] = useState(0);
-
   const networkInfo = useNetworkInfo();
-  const { web3Provider, address, contracts } = useStore();
+  const { address } = useAccount();
+  const { contracts } = useStore();
 
   const { data } = useSWR(`/api/lockups?account=${address}`, fetcher);
   // @TODO: Might need to fetch data another way as it doesn't reload instantly using set reloadLockups
@@ -44,7 +44,6 @@ const useLockups = () => {
     };
 
     if (
-      web3Provider &&
       networkInfo.correct &&
       address &&
       contracts.loaded &&
@@ -52,7 +51,7 @@ const useLockups = () => {
     ) {
       loadLockups();
     }
-  }, [web3Provider, networkInfo.correct, address, data, contracts]);
+  }, [networkInfo.correct, address, data, contracts]);
 
   return {
     reloadLockups: async () => {
