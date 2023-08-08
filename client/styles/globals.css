@@ -198,6 +198,8 @@ a {
   max-width: 469px;
   width: 100%;
   margin: 0 auto;
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
 }
 
 .geofence-modal .header {
@@ -246,7 +248,7 @@ a {
   line-height: 28px;
   letter-spacing: 0em;
   text-align: left;
-  margin: 0;
+  margin-top: 22px;
 }
 
 .geofence-modal .body {
