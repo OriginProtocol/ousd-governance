@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { ethers } from "ethers";
 import OUSDContracts from "networks/network.mainnet.json";
-import { CHAIN_CONTRACTS, mainnetNetworkUrl, RPC_URLS } from "constants/index";
+import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
 import { useAccount, useNetwork, useSigner } from "wagmi";
@@ -20,6 +20,7 @@ const useContracts = () => {
 
     const loadContracts = async () => {
       useStore.setState({
+        provider,
         contracts: {
           loaded: false,
         },

@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import { useState, useEffect } from "react";
 import { Disconnected } from "components/Disconnected";
 import Wrapper from "components/Wrapper";
 import { PageTitle } from "components/PageTitle";
@@ -11,8 +12,13 @@ import { useAccount } from "wagmi";
 
 const LockupNew: NextPage = () => {
   const { isConnected } = useAccount();
+  const [isMounted, setIsMounted] = useState(false);
 
-  if (!isConnected) {
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !isConnected) {
     return (
       <Wrapper narrow>
         <Disconnected />

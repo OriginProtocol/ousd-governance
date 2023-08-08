@@ -15,8 +15,11 @@ import { truncateEthAddress } from "utils";
 import EtherscanIcon from "components/EtherscanIcon";
 import ExternalLinkIcon from "../ExternalLinkIcon";
 import classnames from "classnames";
+import { useSigner } from "wagmi";
 
 const LockupsTable: FunctionComponent = () => {
+  const { data: signer } = useSigner();
+
   const { lockups, pendingTransactions, contracts, blockTimestamp, chainId } =
     useStore();
 
@@ -36,10 +39,13 @@ const LockupsTable: FunctionComponent = () => {
   }
 
   const handleUnlock = async (lockupId) => {
-    const transaction = await contracts.OgvStaking["unstake(uint256)"](
-      lockupId,
-      { gasLimit: 210000 }
-    );
+    const gasLimit = await contracts.OgvStaking.connect(signer).estimateGas[
+      "unstake(uint256)"
+    ](lockupId);
+
+    const transaction = await contracts.OgvStaking.connect(signer)[
+      "unstake(uint256)"
+    ](lockupId, { gasLimit });
 
     useStore.setState({
       pendingTransactions: [

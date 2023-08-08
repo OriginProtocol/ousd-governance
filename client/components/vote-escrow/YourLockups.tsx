@@ -1,24 +1,34 @@
 import { FunctionComponent, useState } from "react";
+import dynamic from "next/dynamic";
+import { toast } from "react-toastify";
+import Image from "next/image";
+import { useAccount, useSigner } from "wagmi";
 import Card from "components/Card";
 import Link from "components/Link";
 import { SectionTitle } from "components/SectionTitle";
 import { useStore } from "utils/store";
 import { Loading } from "components/Loading";
-import { toast } from "react-toastify";
 import useAccountBalances from "utils/useAccountBalances";
-import Image from "next/image";
-import DisabledButtonToolTip from "../DisabledButtonTooltip";
-import LockupsTable from "./LockupsTable";
 import { Web3Button } from "components/Web3Button";
 import useStakingAPY from "utils/useStakingAPY";
-import { useAccount, useSigner } from "wagmi";
+import DisabledButtonToolTip from "../DisabledButtonTooltip";
 
 interface YourLockupsProps {}
 
+const LockupsTable = dynamic(() => import("./LockupsTable"), {
+  ssr: false,
+});
+
 const YourLockups: FunctionComponent<YourLockupsProps> = () => {
   const { isConnected } = useAccount();
-  const { lockups, pendingTransactions, contracts, balances, totalBalances } =
-    useStore();
+  const {
+    lockups,
+    pendingTransactions,
+    contracts,
+    balances,
+    totalBalances,
+    rpcProvider,
+  } = useStore();
   const { data: signer } = useSigner();
   const { ogv, accruedRewards } = balances;
   const { totalPercentageOfLockedUpOgv } = totalBalances;
@@ -64,9 +74,7 @@ const YourLockups: FunctionComponent<YourLockupsProps> = () => {
 
     let receipt;
     try {
-      receipt = await contracts.rpcProvider.waitForTransaction(
-        transaction.hash
-      );
+      receipt = await rpcProvider.waitForTransaction(transaction.hash);
     } catch (e) {
       setCollectRewardsStatus("ready");
       throw e;
