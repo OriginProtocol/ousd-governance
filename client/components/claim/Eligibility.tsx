@@ -11,6 +11,7 @@ import { Loading } from "components/Loading";
 import Link from "components/Link";
 import { filter } from "lodash";
 import useStakingAPY from "utils/useStakingAPY";
+import { useAccount } from "wagmi";
 
 interface EligibilityProps {
   handleNextStep: () => void;
@@ -19,7 +20,8 @@ interface EligibilityProps {
 const Eligibility: FunctionComponent<EligibilityProps> = ({
   handleNextStep,
 }) => {
-  const { provider, web3Provider, address, web3Modal } = useStore();
+  const { address, isConnected } = useAccount();
+  const { provider } = useStore();
   const claim = useClaim();
   const { loaded, hasClaim } = claim;
 
@@ -44,16 +46,15 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
 
   const handleDisconnect = useCallback(
     async function () {
-      await web3Modal.clearCachedProvider();
       if (provider?.disconnect && typeof provider.disconnect === "function") {
         await provider.disconnect();
       }
       resetWeb3State();
     },
-    [web3Modal, provider, resetWeb3State]
+    [provider, resetWeb3State]
   );
 
-  if (web3Provider && !loaded) {
+  if (isConnected && !loaded) {
     return (
       <Card>
         <div className="py-20">
@@ -67,7 +68,7 @@ const Eligibility: FunctionComponent<EligibilityProps> = ({
     <>
       <Card>
         <div className="text-center">
-          {!web3Provider ? (
+          {!isConnected ? (
             <div className="space-y-4">
               <Icon path={mdiWallet} size={2} className="text-accent mx-auto" />
               <h2 className="text-2xl font-bold">

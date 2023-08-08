@@ -1,5 +1,5 @@
 name: OUSD Governance
-on: 
+on:
   pull_request:
     types: [opened, reopened]
   push:
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
           cache: "yarn"
           cache-dependency-path: |
             client/yarn.lock
@@ -63,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
           cache: "yarn"
           cache-dependency-path: |
             yarn.lock

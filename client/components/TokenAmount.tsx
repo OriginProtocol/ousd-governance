@@ -1,7 +1,7 @@
-import { FunctionComponent, ReactNode } from "react";
+import { FunctionComponent } from "react";
 import { BigNumber } from "ethers";
 import numeral from "numeraljs";
-import { useStore } from "utils/store";
+import { useAccount } from "wagmi";
 
 interface TokenAmount {
   amount: BigNumber | string | number;
@@ -14,7 +14,7 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({
   format,
   isWalletBalance,
 }) => {
-  const { web3Provider } = useStore();
+  const { isConnected } = useAccount();
 
   const formatMap = {
     abbreviatedCurrency: "0.00 a",
@@ -25,7 +25,7 @@ const TokenAmount: FunctionComponent<TokenAmount> = ({
 
   const usedFormat = formatMap[format] || formatMap["default"];
 
-  if (isWalletBalance && !web3Provider) {
+  if (isWalletBalance && !isConnected) {
     return <span className="uppercase">--.--</span>;
   }
 
