@@ -53,8 +53,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
                   {navItems.map(({ href, label, external }) => (
                     <li key={label}>
                       <Link
-                        className="group text-sm text-neutral hover:text-neutral-focus flex space-x-2"
-                        currentClassName="font-normal"
+                        className="group text-sm text-neutral hover:text-white flex space-x-2"
+                        currentClassName="!font-normal !text-white"
                         href={href}
                         type={external ? "external" : "internal"}
                         newWindow={external}
@@ -123,8 +123,8 @@ const Header: FunctionComponent<HeaderProps> = ({ hideNav }) => {
               {navItems.map(({ href, label, external }) => (
                 <li key={label}>
                   <Link
-                    className="px-6 py-3 hover:text-neutral-focus text-neutral border-l-4 border-accent-content flex space-x-2"
-                    currentClassName="font-normal border-primary"
+                    className="px-6 py-3 hover:text-white text-neutral border-l-4 border-accent-content flex space-x-2"
+                    currentClassName="!font-normal !border-primary !text-white"
                     href={href}
                     onClick={
                       !external ? () => setMenuIsOpen(false) : () => null

@@ -1,18 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ethers } from "ethers";
-// Note we don't have a Goerli deploy of OUSD contracts, so always use mainnet
 import OUSDContracts from "networks/network.mainnet.json";
-import { mainnetNetworkUrl, RPC_URLS, CHAIN_CONTRACTS } from "constants/index";
+import { CHAIN_CONTRACTS, RPC_URLS } from "constants/index";
 import { useStore } from "utils/store";
 import { useNetworkInfo } from "utils/index";
+import { useAccount, useNetwork, useSigner } from "wagmi";
 
 const useContracts = () => {
-  const { web3Provider, chainId } = useStore();
+  const { isConnected } = useAccount();
+  const { data: signer } = useSigner();
+  const { chain } = useNetwork();
+  const chainId = chain?.id;
   const networkInfo = useNetworkInfo();
 
   useEffect(() => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      RPC_URLS[networkInfo.envNetwork]
+    );
+
     const loadContracts = async () => {
       useStore.setState({
+        provider,
         contracts: {
           loaded: false,
         },
@@ -20,20 +28,6 @@ const useContracts = () => {
 
       const governanceContractDefinitions =
         CHAIN_CONTRACTS[networkInfo.envNetwork];
-
-      const mainnetProvider = new ethers.providers.JsonRpcProvider(
-        mainnetNetworkUrl
-      );
-      const networkProvider = new ethers.providers.JsonRpcProvider(
-        RPC_URLS[networkInfo.envNetwork]
-      );
-
-      const provider = web3Provider || networkProvider;
-
-      let signer;
-      if (web3Provider) {
-        signer = await web3Provider.getSigner();
-      }
 
       const governanceContracts = Object.entries(
         governanceContractDefinitions
@@ -53,7 +47,7 @@ const useContracts = () => {
           const contract = new ethers.Contract(
             definition.address,
             definition.abi,
-            mainnetProvider
+            provider
           );
           return {
             [name]: contract,
@@ -66,13 +60,15 @@ const useContracts = () => {
       );
 
       contracts.loaded = true;
+
       useStore.setState({
-        rpcProvider: networkProvider,
+        rpcProvider: provider,
         contracts,
       });
     };
+
     loadContracts();
-  }, [web3Provider, chainId, networkInfo.envNetwork]);
+  }, [isConnected, chainId, networkInfo.envNetwork]);
 };
 
 export default useContracts;

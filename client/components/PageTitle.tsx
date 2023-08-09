@@ -10,6 +10,8 @@ export const PageTitle: FunctionComponent<PageTitleProps> = ({
   noBottomMargin,
 }) => (
   <div className={noBottomMargin ? "" : "pb-5"}>
-    <h1 className="text-4xl text-white mt-6 font-bold">{children}</h1>
+    <h1 className="text-[40px] text-white mt-6 font-bold font-header">
+      {children}
+    </h1>
   </div>
 );

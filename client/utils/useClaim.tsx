@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { BigNumber } from "ethers";
 import { useStore } from "utils/store";
-import useConnectSigner from "utils/useConnectSigner";
 import { decimal18Bn, sleep } from "utils";
 import numeral from "numeraljs";
 import useTotalBalances from "utils/useTotalBalances";
+import { useAccount, useSigner } from "wagmi";
 
 const useClaim = () => {
+  const { address } = useAccount();
+  const { data: signer } = useSigner();
   const emptyClaimState = {
     optional: { hasClaim: false },
     mandatory: { hasClaim: false },
@@ -17,7 +19,7 @@ const useClaim = () => {
   const [totalSupplyVeOgv, setTotalSupplyVeOgv] = useState(null);
   const [totalSupplyVeOgvAdjusted, setTotalSupplyVeOgvAdjusted] =
     useState(null);
-  const { address, contracts, web3Provider, rpcProvider } = useStore();
+  const { contracts, rpcProvider } = useStore();
   const hasClaim = claim.optional.hasClaim || claim.mandatory.hasClaim;
   /*
    * ready -> ready to start claiming
@@ -138,10 +140,7 @@ const useClaim = () => {
               let claimResult;
               try {
                 claimResult = await (
-                  await useConnectSigner(
-                    contracts.OptionalDistributor,
-                    web3Provider
-                  )
+                  await contracts.OptionalDistributor.connect(signer)
                 )["claim(uint256,uint256,bytes32[],uint256)"](
                   claim.optional.index,
                   claim.optional.amount,
@@ -198,10 +197,7 @@ const useClaim = () => {
               let claimResult;
               try {
                 claimResult = await (
-                  await useConnectSigner(
-                    contracts.MandatoryDistributor,
-                    web3Provider
-                  )
+                  await contracts.MandatoryDistributor.connect(signer)
                 )["claim(uint256,uint256,bytes32[])"](
                   claim.mandatory.index,
                   claim.mandatory.amount,
@@ -251,7 +247,7 @@ const useClaim = () => {
     };
 
     setupDistributors();
-  }, [address, contracts, claim, web3Provider]);
+  }, [address, contracts, claim]);
 
   return {
     optional: {

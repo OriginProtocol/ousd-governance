@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { ethers, BigNumber } from "ethers";
 import { useStore } from "utils/store";
 import sanitizeHtml from "sanitize-html";
+import { useNetwork } from "wagmi";
 
 // Captures 0x + 4 characters, then the last 4 characters.
 const truncateRegex = /^(0x[a-zA-Z0-9]{4})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/;
@@ -106,7 +107,8 @@ export function usePrevious(value) {
 }
 
 export function useNetworkInfo() {
-  const { chainId } = useStore();
+  const { chain } = useNetwork();
+  const chainId = chain?.id;
   const envNetwork = Number(process.env.NETWORK_ID);
   return {
     walletNetwork: chainId,

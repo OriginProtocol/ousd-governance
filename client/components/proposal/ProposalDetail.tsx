@@ -11,7 +11,6 @@ import { useStore } from "utils/store";
 import { toast } from "react-toastify";
 import useShowDelegationModalOption from "utils/useShowDelegationModalOption";
 import { EnsureDelegationModal } from "components/proposal/EnsureDelegationModal";
-import { PageTitle } from "components/PageTitle";
 import { getCleanProposalContent } from "utils/index";
 import { Address } from "components/Address";
 import { SupportTable } from "./SupportTable";
@@ -19,6 +18,7 @@ import { StateTag } from "./StateTag";
 import { ProposalHistory } from "./ProposalHistory";
 import moment from "moment";
 import RegisterToVote from "components/proposal/RegisterToVote";
+import { useAccount, useSigner } from "wagmi";
 
 export const ProposalDetail = ({
   id,
@@ -35,7 +35,9 @@ export const ProposalDetail = ({
   voters: Array<object>;
   transactions: Array<object>;
 }) => {
-  const { address, contracts, pendingTransactions, rpcProvider } = useStore();
+  const { address } = useAccount();
+  const { data: signer } = useSigner();
+  const { contracts, pendingTransactions, rpcProvider } = useStore();
   const [proposalActions, setProposalActions] = useState(null);
   const { showModalIfApplicable } = useShowDelegationModalOption();
   const [proposal, setProposal] = useState(null);
@@ -139,7 +141,10 @@ export const ProposalDetail = ({
       return;
     }
 
-    const transaction = await Governance.castVote(proposalId, support);
+    const transaction = await Governance.connect(signer).castVote(
+      proposalId,
+      support
+    );
 
     useStore.setState({
       pendingTransactions: [
