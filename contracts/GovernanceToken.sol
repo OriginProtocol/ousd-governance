@@ -21,7 +21,7 @@ contract OriginDollarGovernance is
     constructor() initializer {}
 
     function initialize() public initializer {
-        __ERC20_init("Origin Dollar Governance", "OGV");
+        __ERC20_init("Origin DeFi Governance", "OGV");
         __Ownable_init();
         __UUPSUpgradeable_init();
 
