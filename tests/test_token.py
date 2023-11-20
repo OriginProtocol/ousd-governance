@@ -4,7 +4,7 @@ from .fixtures import token
 
 
 def test_name(token):
-    assert token.name() == "Origin Dollar Governance"
+    assert token.name() == "Origin DeFi Governance"
 
 
 def test_symbol(token):
