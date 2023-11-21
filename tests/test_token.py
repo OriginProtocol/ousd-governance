@@ -12,7 +12,7 @@ def test_staking_name(staking):
     assert staking.name() == "Vote Escrowed Origin DeFi Governance"
 
 def test_staking_symbol(staking):
-    assert staking.name() == "veOGV"
+    assert staking.symbol() == "veOGV"
 
 def test_decimals(token):
     assert token.decimals() == 18
