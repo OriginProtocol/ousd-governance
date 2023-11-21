@@ -59,7 +59,7 @@ def main():
         {
           'contract': governance,
           'signature': 'setVotingPeriod(uint256)',
-          'args': [BLOCKS_PER_DAY * 3] # 3 days
+          'args': [BLOCKS_PER_DAY * 2] # 2 days
         },
         {
           'contract': governance,
