@@ -12,10 +12,10 @@ GOVERNANCE_ADDRESS = "0x3cdd07c16614059e66344a7b579dab4f9516c0b6"
 def main():
   def deployment(deployer, FROM_DEPLOYER, local_provider, is_mainnet, is_fork, is_proposal_mode):
     # Existing contracts
-    veogv_proxy = OgvStakingProxy.at(VEOGV_PROXY_ADDRESS)
-    ogv_proxy = OriginDollarGovernance.at(OGV_PROXY_ADDRESS)
-    governance = Governance.at(GOVERNANCE_ADDRESS)
-  
+    veogv_proxy = Contract.from_abi("OgvStakingProxy", VEOGV_PROXY_ADDRESS, OgvStakingProxy.abi)
+    ogv_proxy = Contract.from_abi("OriginDollarGovernance", OGV_PROXY_ADDRESS, OriginDollarGovernance.abi)
+    governance = Contract.from_abi("Governance", GOVERNANCE_ADDRESS, Governance.abi)
+
     if not is_fork:
       # Dynamicly price gas, avoids over paying or TX's getting stuck
       priority_fee("2 gwei")

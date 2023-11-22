@@ -33,21 +33,25 @@ def governanceProposal(deployment):
 
     if (len(actions) > 0):
         ogvGovernor = Contract.from_explorer(GOVERNOR_FIVE)
-        with TemporaryFork():
+        proposal_args = [
+            [action['contract'].address for action in actions],
+            [0 for action in actions],
+            [action['signature'] for action in actions],
+            # To explain this code salad:
+            #  - action['signature'][:action['signature'].index('(')] -> this part gets the function name from signature
+            #  - encode_input(*action['args']) -> encodes said function data
+            #  - [10:] trim first 10 character to trim function name signature away from data
+            [getattr(action['contract'], action['signature'][:action['signature'].index('(')]).encode_input(*action['args'])[10:] for action in actions],
+            deploymentInfo['name'],
+        ]
 
+        if is_fork:
             print('Creating governance proposal on fork')
-            propose_tx = ogvGovernor.propose(
-                [action['contract'].address for action in actions],
-                [0 for action in actions],
-                [action['signature'] for action in actions],
-                # To explain this code salad:
-                #  - action['signature'][:action['signature'].index('(')] -> this part gets the function name from signature
-                #  - encode_input(*action['args']) -> encodes said function data
-                #  - [10:] trim first 10 character to trim function name signature away from data
-                [getattr(action['contract'], action['signature'][:action['signature'].index('(')]).encode_input(*action['args'])[10:] for action in actions],
-                deploymentInfo['name'],
+            ogvGovernor.propose(
+                *proposal_args,
                 {'from': GOV_MULTISIG}
             )
+            # Simulate execution on fork
             proposalId = propose_tx.events['ProposalCreated'][0][0]['proposalId']
 
             # Move forward 30s so that we can vote
@@ -69,10 +73,17 @@ def governanceProposal(deployment):
             print("Executing proposal")
             ogvGovernor.execute(proposalId, {'from': GOV_MULTISIG})
 
+        else:
+            propose_data = ogvGovernor.propose.encode_input(
+                *proposal_args
+            )
+
+        print("Raw Args", proposal_args)
 
         print("Execute the following transaction to create OGV Governance proposal")
-        print("To: {}".format(propose_tx.receiver))
-        print("Data: {}".format(propose_tx.input))
+        print("To: {}".format(GOVERNOR_FIVE))
+        print("Data: {}".format(propose_data))
+
 
 def timetravel(seconds):
     brownie.chain.sleep(seconds + 1)
