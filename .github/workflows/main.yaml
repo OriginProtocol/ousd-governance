@@ -78,6 +78,9 @@ jobs:
 
       - name: Install Requirements
         run: pip install -r requirements.txt
+      
+      - name: Create .env
+        run: touch .env
 
       - name: Run tests
         run: brownie test --network hardhat

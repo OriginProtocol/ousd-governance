@@ -54,4 +54,8 @@ contract OriginDollarGovernance is
         override
         onlyOwner
     {}
+
+    function name() public view virtual override returns (string memory) {
+        return "Origin DeFi Governance";
+    }
 }
