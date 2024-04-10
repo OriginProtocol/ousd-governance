@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
+
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {ERC20Permit} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {ERC20Permit} from
+    "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {RewardsSource} from "./RewardsSource.sol";
@@ -20,11 +22,13 @@ contract OgvStaking is ERC20Votes {
 
     // 2. Staking and Lockup Storage
     uint256 constant YEAR_BASE = 18e17;
+
     struct Lockup {
         uint128 amount;
         uint128 end;
         uint256 points;
     }
+
     mapping(address => Lockup[]) public lockups;
 
     // 3. Reward Storage
@@ -35,36 +39,22 @@ contract OgvStaking is ERC20Votes {
 
     // Used to track any calls to `delegate()` method. When this isn't
     // set to true, voting powers are delegated to the receiver of the stake
-    // when `stake()` or `extend()` method are called. 
-    // For existing stakers with delegation set, This will remain `false` 
+    // when `stake()` or `extend()` method are called.
+    // For existing stakers with delegation set, This will remain `false`
     // unless the user calls `delegate()` method.
     mapping(address => bool) public hasDelegationSet;
 
     // Events
-    event Stake(
-        address indexed user,
-        uint256 lockupId,
-        uint256 amount,
-        uint256 end,
-        uint256 points
-    );
-    event Unstake(
-        address indexed user,
-        uint256 lockupId,
-        uint256 amount,
-        uint256 end,
-        uint256 points
-    );
+    event Stake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
+    event Unstake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
     event Reward(address indexed user, uint256 amount);
 
     // 1. Core Functions
 
-    constructor(
-        address ogv_,
-        uint256 epoch_,
-        uint256 minStakeDuration_,
-        address rewardsSource_
-    ) ERC20("", "") ERC20Permit("veOGV") {
+    constructor(address ogv_, uint256 epoch_, uint256 minStakeDuration_, address rewardsSource_)
+        ERC20("", "")
+        ERC20Permit("veOGV")
+    {
         ogv = ERC20(ogv_);
         epoch = epoch_;
         minStakeDuration = minStakeDuration_;
@@ -83,11 +73,7 @@ contract OgvStaking is ERC20Votes {
         revert("Staking: Transfers disabled");
     }
 
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) public override returns (bool) {
+    function transferFrom(address, address, uint256) public override returns (bool) {
         revert("Staking: Transfers disabled");
     }
 
@@ -106,11 +92,7 @@ contract OgvStaking is ERC20Votes {
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
     /// @param to address to receive ownership of the stake
-    function stake(
-        uint256 amount,
-        uint256 duration,
-        address to
-    ) external {
+    function stake(uint256 amount, uint256 duration, address to) external {
         _stake(amount, duration, to);
     }
 
@@ -133,21 +115,14 @@ contract OgvStaking is ERC20Votes {
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
     /// @param to address to receive ownership of the stake
-    function _stake(
-        uint256 amount,
-        uint256 duration,
-        address to
-    ) internal {
+    function _stake(uint256 amount, uint256 duration, address to) internal {
         require(to != address(0), "Staking: To the zero address");
         require(amount <= type(uint128).max, "Staking: Too much");
         require(amount > 0, "Staking: Not enough");
 
         // duration checked inside previewPoints
         (uint256 points, uint256 end) = previewPoints(amount, duration);
-        require(
-            points + totalSupply() <= type(uint192).max,
-            "Staking: Max points exceeded"
-        );
+        require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
         _collectRewards(to);
         lockups[to].push(
             Lockup({
@@ -203,10 +178,7 @@ contract OgvStaking is ERC20Votes {
         uint256 oldAmount = lockup.amount;
         uint256 oldEnd = lockup.end;
         uint256 oldPoints = lockup.points;
-        (uint256 newPoints, uint256 newEnd) = previewPoints(
-            oldAmount,
-            duration
-        );
+        (uint256 newPoints, uint256 newEnd) = previewPoints(oldAmount, duration);
         require(newEnd > oldEnd, "Staking: New lockup must be longer");
         lockup.end = uint128(newEnd);
         lockup.points = newPoints;
@@ -227,11 +199,7 @@ contract OgvStaking is ERC20Votes {
     /// @param duration number of seconds to stake for
     /// @return points staking points that would be returned
     /// @return end staking period end date
-    function previewPoints(uint256 amount, uint256 duration)
-        public
-        view
-        returns (uint256, uint256)
-    {
+    function previewPoints(uint256 amount, uint256 duration) public view returns (uint256, uint256) {
         require(duration >= minStakeDuration, "Staking: Too short");
         require(duration <= 1461 days, "Staking: Too long");
         uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
@@ -260,8 +228,7 @@ contract OgvStaking is ERC20Votes {
         }
         uint256 _accRewardPerShare = accRewardPerShare;
         _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
-        uint256 netRewardsPerShare = _accRewardPerShare -
-            rewardDebtPerShare[user];
+        uint256 netRewardsPerShare = _accRewardPerShare - rewardDebtPerShare[user];
         return (balanceOf(user) * netRewardsPerShare) / 1e12;
     }
 
@@ -281,14 +248,14 @@ contract OgvStaking is ERC20Votes {
         uint256 supply = totalSupply();
         if (supply > 0) {
             uint256 preBalance = ogv.balanceOf(address(this));
-            try rewardsSource.collectRewards() {} catch {
+            try rewardsSource.collectRewards() {}
+            catch {
                 // Governance staking should continue, even if rewards fail
             }
             uint256 collected = ogv.balanceOf(address(this)) - preBalance;
             accRewardPerShare += (collected * 1e12) / supply;
         }
-        uint256 netRewardsPerShare = accRewardPerShare -
-            rewardDebtPerShare[user];
+        uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
         uint256 netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
         rewardDebtPerShare[user] = accRewardPerShare;
         if (netRewards == 0) {

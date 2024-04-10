@@ -9,7 +9,6 @@ import "contracts/tests/MockOGV.sol";
 //
 // Sanity test of OpenZeppelin's voting and delegation.
 //
-
 contract DelegationTest is Test {
     using stdStorage for StdStorage;
 
@@ -60,12 +59,12 @@ contract DelegationTest is Test {
 
     function testAutoDelegateOnStake() external {
         vm.roll(1);
-        
+
         // Can vote immediately after staking
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
         assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
         assertEq(staking.delegates(oak), oak, "self-delegated after staking");
-        
+
         vm.roll(2);
 
         // Can opt out of voting after staking
@@ -78,7 +77,7 @@ contract DelegationTest is Test {
 
     function testAutoDelegateOnStakeToOthers() external {
         vm.roll(1);
-        
+
         // Alice should have voting power after taz stakes for her
         assertEq(staking.getVotes(alice), POINTS, "can vote after staking");
         assertEq(staking.getVotes(taz), 0, "should not have voting power");
@@ -86,7 +85,7 @@ contract DelegationTest is Test {
         assertEq(staking.getPastVotes(taz, block.number - 1), 0, "should not have voting power");
         assertEq(staking.delegates(alice), alice, "delegated to receiver after staking");
         assertEq(staking.delegates(taz), address(0), "should not have a delegatee set");
-        
+
         vm.roll(2);
 
         // Alice can opt out of voting after staking
@@ -99,7 +98,7 @@ contract DelegationTest is Test {
 
     function testDelegateOnExtendAfterRenounce() external {
         vm.roll(1);
-        
+
         // Can vote immediately after staking
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
         assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
@@ -123,7 +122,7 @@ contract DelegationTest is Test {
 
     function testDelegateOnExtendAfterTransfer() external {
         vm.roll(1);
-        
+
         // Can vote immediately after staking
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
         assertEq(staking.delegates(oak), oak, "self-delegated after staking");
@@ -146,13 +145,10 @@ contract DelegationTest is Test {
         // For test purposes, undo auto-staking on user
         vm.prank(oak);
         staking.delegate(address(0));
-        stdstore.target(address(staking))
-            .sig(staking.hasDelegationSet.selector)
-            .with_key(oak)
-            .checked_write(false);
+        stdstore.target(address(staking)).sig(staking.hasDelegationSet.selector).with_key(oak).checked_write(false);
 
         vm.roll(1);
-        
+
         // Cannot vote because test undid auto-staking
         assertEq(staking.getVotes(oak), 0, "can not vote");
         assertEq(staking.delegates(oak), address(0), "no delegation");
@@ -193,7 +189,7 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
         assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
         assertEq(staking.delegates(oak), oak, "self-delegated after staking");
-        
+
         // Can opt out of voting
         vm.roll(2);
         vm.prank(oak);
@@ -210,7 +206,7 @@ contract DelegationTest is Test {
         assertEq(staking.getVotes(oak), 1 * POINTS, "can vote after staking");
         assertEq(staking.getPastVotes(oak, block.number - 1), 0, "should not have voting power before staking");
         assertEq(staking.delegates(oak), oak, "self-delegated after staking");
-        
+
         // Delegate to someone else
         vm.roll(2);
         vm.prank(oak);
@@ -248,6 +244,4 @@ contract DelegationTest is Test {
         // Alice should still have renounced voting
         assertEq(staking.getVotes(alice), 0, "can't vot after renouncing");
     }
-
-    
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
+
 import {Governable} from "./Governable.sol";
 
 interface Mintable {
@@ -21,6 +22,7 @@ contract RewardsSource is Governable {
         uint64 end; // Internal use only. By duplicating the start of the next slope, we can save a slot read
         uint128 ratePerDay;
     }
+
     Slope[] public inflationSlopes;
 
     uint256 constant MAX_KNEES = 48;
@@ -71,7 +73,7 @@ contract RewardsSource is Governable {
     ///
     /// @return rewards OGV that would be collected
     function previewRewards() external view returns (uint256) {
-        (uint256 rewards, ) = _calculateInflation();
+        (uint256 rewards,) = _calculateInflation();
 
         // When previewing rewards, check contract's own OGV balance,
         // and if present, send that along as part of the rewards
@@ -149,14 +151,8 @@ contract RewardsSource is Governable {
         }
         slopes[length - 1].end = type(uint64).max;
         for (uint256 i = 0; i < length; i++) {
-            require(
-                slopes[i].ratePerDay <= MAX_INFLATION_PER_DAY,
-                "Rewards: RatePerDay too high"
-            );
-            require(
-                slopes[i].start > minSlopeStart,
-                "Rewards: Start times must increase"
-            );
+            require(slopes[i].ratePerDay <= MAX_INFLATION_PER_DAY, "Rewards: RatePerDay too high");
+            require(slopes[i].start > minSlopeStart, "Rewards: Start times must increase");
             if (i < length - 1) {
                 slopes[i].end = slopes[i + 1].start;
                 minSlopeStart = slopes[i].start;

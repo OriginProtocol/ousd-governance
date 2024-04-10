@@ -26,12 +26,12 @@ contract OgvStakingTest is Test {
         source = new RewardsSource(address(ogv));
 
         RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
-        rewardsProxy.initialize(address(source), team, '');
+        rewardsProxy.initialize(address(source), team, "");
         source = RewardsSource(address(rewardsProxy));
 
         staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
         OgvStakingProxy stakingProxy = new OgvStakingProxy();
-        stakingProxy.initialize(address(staking), team, '');
+        stakingProxy.initialize(address(staking), team, "");
         staking = OgvStaking(address(stakingProxy));
 
         source.setRewardsTarget(address(staking));
@@ -51,10 +51,7 @@ contract OgvStakingTest is Test {
 
     function testStakeUnstake() public {
         vm.startPrank(alice);
-        (uint256 previewPoints, uint256 previewEnd) = staking.previewPoints(
-            10 ether,
-            10 days
-        );
+        (uint256 previewPoints, uint256 previewEnd) = staking.previewPoints(10 ether, 10 days);
 
         uint256 beforeOgv = ogv.balanceOf(alice);
         uint256 beforeOgvStaking = ogv.balanceOf(address(staking));
@@ -64,19 +61,12 @@ contract OgvStakingTest is Test {
         assertEq(ogv.balanceOf(alice), beforeOgv - 10 ether);
         assertEq(ogv.balanceOf(address(staking)), beforeOgvStaking + 10 ether);
         assertEq(staking.balanceOf(alice), previewPoints);
-        (
-            uint128 lockupAmount,
-            uint128 lockupEnd,
-            uint256 lockupPoints
-        ) = staking.lockups(alice, 0);
+        (uint128 lockupAmount, uint128 lockupEnd, uint256 lockupPoints) = staking.lockups(alice, 0);
         assertEq(lockupAmount, 10 ether);
         assertEq(lockupEnd, EPOCH + 10 days);
         assertEq(lockupEnd, previewEnd);
         assertEq(lockupPoints, previewPoints);
-        assertEq(
-            staking.accRewardPerShare(),
-            staking.rewardDebtPerShare(alice)
-        );
+        assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(alice));
 
         vm.warp(31 days);
         staking.unstake(0);
@@ -87,10 +77,7 @@ contract OgvStakingTest is Test {
         assertEq(lockupAmount, 0);
         assertEq(lockupEnd, 0);
         assertEq(lockupPoints, 0);
-        assertEq(
-            staking.accRewardPerShare(),
-            staking.rewardDebtPerShare(alice)
-        );
+        assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(alice));
     }
 
     function testMatchedDurations() public {
@@ -154,10 +141,8 @@ contract OgvStakingTest is Test {
         // and should have the same points.
         assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
 
-        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking
-            .lockups(alice, 0);
-        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking
-            .lockups(bob, 0);
+        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking.lockups(alice, 0);
+        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking.lockups(bob, 0);
         assertEq(aliceAmount, bobAmount, "same amount");
         assertEq(aliceEnd, bobEnd, "same end");
         assertEq(alicePoints, bobPoints, "same points");
@@ -179,10 +164,8 @@ contract OgvStakingTest is Test {
         // and should have the same points.
         assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
 
-        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking
-            .lockups(alice, 0);
-        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking
-            .lockups(bob, 0);
+        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking.lockups(alice, 0);
+        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking.lockups(bob, 0);
         assertEq(aliceAmount, bobAmount, "same amount");
         assertEq(aliceEnd, bobEnd, "same end");
         assertEq(alicePoints, bobPoints, "same points");
@@ -247,19 +230,9 @@ contract OgvStakingTest is Test {
         uint256 afterOgv = ogv.balanceOf(alice);
 
         uint256 collectedRewards = afterOgv - beforeOgv;
-        assertApproxEqAbs(
-            collectedRewards,
-            8 ether,
-            1e8,
-            "actual amount should be correct"
-        );
+        assertApproxEqAbs(collectedRewards, 8 ether, 1e8, "actual amount should be correct");
         assertEq(collectedRewards, preview, "preview should match actual");
-        assertApproxEqAbs(
-            preview,
-            8 ether,
-            1e8,
-            "preview amount should be correct"
-        );
+        assertApproxEqAbs(preview, 8 ether, 1e8, "preview amount should be correct");
     }
 
     function testCollectedRewardsJumpInOut() public {
@@ -288,10 +261,7 @@ contract OgvStakingTest is Test {
         staking.collectRewards(); // Alice collects
         vm.prank(bob);
         staking.collectRewards(); // Bob collects
-        assertEq(
-            ogv.balanceOf(alice) - aliceBefore,
-            ogv.balanceOf(bob) - bobBefore
-        );
+        assertEq(ogv.balanceOf(alice) - aliceBefore, ogv.balanceOf(bob) - bobBefore);
     }
 
     function testMultipleUnstake() public {
@@ -424,13 +394,9 @@ contract OgvStakingTest is Test {
         staking.unstake(1);
     }
 
-    function testFuzzCanAlwaysWithdraw(
-        uint96 amountA,
-        uint96 amountB,
-        uint64 durationA,
-        uint64 durationB,
-        uint64 start
-    ) public {
+    function testFuzzCanAlwaysWithdraw(uint96 amountA, uint96 amountB, uint64 durationA, uint64 durationB, uint64 start)
+        public
+    {
         uint256 HUNDRED_YEARS = 100 * 366 days;
         uint256 LAST_START = HUNDRED_YEARS - 1461 days;
         vm.warp(start % LAST_START);
@@ -484,7 +450,7 @@ contract OgvStakingTest is Test {
         vm.prank(bob);
         staking.stake(1e18, 10 days, bob);
         uint256 y = (356 days + start + 10 days) / 365 days;
-        uint256 maxPoints = 2**y * 1e18;
+        uint256 maxPoints = 2 ** y * 1e18;
         assertLt(staking.balanceOf(bob), maxPoints);
     }
 }
