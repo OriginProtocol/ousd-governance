@@ -1,8 +1,10 @@
-name: OUSD Governance
+name: Origin DeFi Governance
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
   push:
+    branches:
+      - 'master'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
