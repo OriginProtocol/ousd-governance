@@ -23,7 +23,7 @@ contract RewardsSourceTest is Test {
 
         // Setup Rewards Proxy
         RewardsSourceProxy rewardsProxy = new RewardsSourceProxy();
-        rewardsProxy.initialize(address(rewards), team, '');
+        rewardsProxy.initialize(address(rewards), team, "");
         rewards = RewardsSource(address(rewardsProxy));
         // Configure Rewards
         rewards.setRewardsTarget(address(staking));
@@ -226,7 +226,7 @@ contract RewardsSourceTest is Test {
         ogv.mint(address(rewards), 13 ether);
         vm.warp(EPOCH - 1000);
         assertEq(ogv.balanceOf(address(rewards)), 13 ether, "BB: Rewards should only hold current buyback funds");
-        
+
         // Verify preview
         assertEq(rewards.previewRewards(), 13 ether, "BB:  Preview wrong");
         // Verify collect
@@ -262,7 +262,6 @@ contract RewardsSourceTest is Test {
         assertEq(ogv.balanceOf(staking), (13 ether + 11 ether + 15 ether + 20 ether), "Inf: Staking balance wrong");
     }
 
-
     function testFuzzExtraRewards(uint16 duration, uint64 extraRewards) external {
         vm.prank(team);
         RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
@@ -274,13 +273,13 @@ contract RewardsSourceTest is Test {
 
         uint256 startSnapshot = vm.snapshot();
         // First, run without extra rewards, and record ending balance
-        vm.warp(EPOCH+duration);
+        vm.warp(EPOCH + duration);
         rewards.collectRewards();
         uint256 inflationOnly = ogv.balanceOf(address(staking));
         // Then, run the same period with rewards, and check math
         vm.revertTo(startSnapshot);
-        vm.warp(EPOCH+duration);
-        
+        vm.warp(EPOCH + duration);
+
         // Preview math
         assertEq(rewards.previewRewards(), inflationOnly);
         ogv.mint(address(rewards), extraRewards);

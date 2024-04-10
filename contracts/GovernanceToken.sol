@@ -25,7 +25,7 @@ contract OriginDollarGovernance is
         __Ownable_init();
         __UUPSUpgradeable_init();
 
-        _mint(msg.sender, 1000000000 * 10**decimals());
+        _mint(msg.sender, 1000000000 * 10 ** decimals());
     }
 
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
@@ -49,11 +49,7 @@ contract OriginDollarGovernance is
         _grantRole(DEFAULT_ADMIN_ROLE, _account);
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyOwner
-    {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function name() public view virtual override returns (string memory) {
         return "Origin DeFi Governance";

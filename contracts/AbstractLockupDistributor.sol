@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import
+    "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/contracts/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/cryptography/MerkleProof.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
 
@@ -19,12 +20,7 @@ abstract contract AbstractLockupDistributor {
     // This is a packed array of booleans.
     mapping(uint256 => uint256) private claimedBitMap;
 
-    constructor(
-        address _token,
-        bytes32 _merkleRoot,
-        address _stakingContract,
-        uint256 _endBlock
-    ) {
+    constructor(address _token, bytes32 _merkleRoot, address _stakingContract, uint256 _endBlock) {
         token = _token;
         merkleRoot = _merkleRoot;
         stakingContract = _stakingContract;
@@ -50,17 +46,14 @@ abstract contract AbstractLockupDistributor {
     function setClaimed(uint256 _index) internal {
         uint256 claimedWordIndex = _index / 256;
         uint256 claimedBitIndex = _index % 256;
-        claimedBitMap[claimedWordIndex] =
-            claimedBitMap[claimedWordIndex] |
-            (1 << claimedBitIndex);
+        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
     }
 
-    function isProofValid(
-        uint256 _index,
-        uint256 _amount,
-        address _account,
-        bytes32[] calldata _merkleProof
-    ) external view returns (bool) {
+    function isProofValid(uint256 _index, uint256 _amount, address _account, bytes32[] calldata _merkleProof)
+        external
+        view
+        returns (bool)
+    {
         // Verify the Merkle proof.
         bytes32 node = keccak256(abi.encodePacked(_index, _account, _amount));
         return MerkleProof.verify(_merkleProof, merkleRoot, node);
@@ -70,11 +63,10 @@ abstract contract AbstractLockupDistributor {
      * @dev burn all the remaining OGV balance
      */
     function burnRemainingOGV() external {
-    	require(block.number >= endBlock, "Can not yet burn the remaining OGV");
-    	uint256 burnAmount = IERC20(token).balanceOf(address(this));
+        require(block.number >= endBlock, "Can not yet burn the remaining OGV");
+        uint256 burnAmount = IERC20(token).balanceOf(address(this));
 
-    	ERC20BurnableUpgradeable(token).burn(burnAmount);
-    	emit OGVBurned(burnAmount);
-
+        ERC20BurnableUpgradeable(token).burn(burnAmount);
+        emit OGVBurned(burnAmount);
     }
 }

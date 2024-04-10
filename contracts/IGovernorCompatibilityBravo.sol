@@ -109,9 +109,5 @@ abstract contract IGovernorCompatibilityBravo is IGovernor {
     /**
      * @dev Part of the Governor Bravo's interface: _"Gets the receipt for a voter on a given proposal"_.
      */
-    function getReceipt(uint256 proposalId, address voter)
-        public
-        view
-        virtual
-        returns (Receipt memory);
+    function getReceipt(uint256 proposalId, address voter) public view virtual returns (Receipt memory);
 }

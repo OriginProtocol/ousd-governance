@@ -17,11 +17,7 @@ contract Governance is
 {
     constructor(ERC20Votes _token, TimelockController _timelock)
         Governor("OUSD Governance")
-        GovernorSettings(
-            1, /* 1 block */
-            17280, /* ~3 days (86400 / 15) * 3 */
-            10000000 * 1e18 /* 10 mio veOgv */
-        )
+        GovernorSettings(1, /* 1 block */ 17280, /* ~3 days (86400 / 15) * 3 */ 10000000 * 1e18 /* 10 mio veOgv */ )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20) // Default quorum denominator is 100, so 20/100 or 20%
         GovernorTimelockControl(_timelock)
@@ -44,20 +40,11 @@ contract Governance is
         uint256[] memory values,
         bytes[] memory calldatas,
         string memory description
-    )
-        public
-        override(Governor, GovernorCompatibilityBravo, IGovernor)
-        returns (uint256)
-    {
+    ) public override(Governor, GovernorCompatibilityBravo, IGovernor) returns (uint256) {
         return super.propose(targets, values, calldatas, description);
     }
 
-    function proposalThreshold()
-        public
-        view
-        override(Governor, GovernorSettings)
-        returns (uint256)
-    {
+    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.proposalThreshold();
     }
 
@@ -80,12 +67,7 @@ contract Governance is
         return super._cancel(targets, values, calldatas, descriptionHash);
     }
 
-    function _executor()
-        internal
-        view
-        override(Governor, GovernorTimelockControl)
-        returns (address)
-    {
+    function _executor() internal view override(Governor, GovernorTimelockControl) returns (address) {
         return super._executor();
     }
 
@@ -108,13 +90,7 @@ contract Governance is
         return super.proposalDeadline(proposalId);
     }
 
-    function _castVote(
-        uint256 proposalId,
-        address account,
-        uint8 support,
-        string memory reason,
-        bytes memory params
-    )
+    function _castVote(uint256 proposalId, address account, uint8 support, string memory reason, bytes memory params)
         internal
         virtual
         override(Governor, GovernorPreventLateQuorum)

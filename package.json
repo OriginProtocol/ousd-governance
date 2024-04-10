@@ -6,10 +6,7 @@
     "node": "./node.sh fork",
     "deploy:contracts:dev": "brownie run deploy main client/networks/governance.localhost.json",
     "generate-merkle-tree": "CHAIN_ID=1 ts-node generate-merkle-tree.ts",
-    "generate-merkle-tree:dev": "CHAIN_ID=31337 ts-node generate-merkle-tree.ts",
-    "build": "cd client && yarn install && yarn run build",
-    "start:web": "cd client && yarn run start:web",
-    "start:listener": "cd client && yarn run start:listener"
+    "generate-merkle-tree:dev": "CHAIN_ID=31337 ts-node generate-merkle-tree.ts"
   },
   "dependencies": {
     "ethers": "^5.6.8",

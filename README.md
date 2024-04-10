@@ -83,69 +83,6 @@ In another terminal:
 brownie console --network hardhat-fork
 ```
 
-## Running the DApp and listener
-
-First, install the dependencies:
-
-```bash
-cd client
-yarn install
-```
-
-Copy `client/sample.env` to `client/.env`.
-
-Setup postgresql locally and create a database and update the `DATABASE_URL` in your `client/.env`
-
-_A typical postgres example looks like `postgres://user:secret@localhost:5432/ousdgovernance`._
-
-Push the database and generate a client:
-
-```bash
-npx prisma db push
-```
-
-(these are already defaults in `client/sample.env`)
-Set the `NETWORK_ID` env var to 31337.
-Set the `WEB3_PROVIDER` variable in your environment.
-_The hardhat RPC default is `http://127.0.0.1:8545`._
-
-Then, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-This will start both the NextJS app and a listener script monitoring your local blockchain for changes.
-
-# Deploying the dApp
-
-This section details the playbook for deploying the dApp.
-
-## Environments
-
-Commits to the following branches will automatically deploying to the associated Heroku environments:
-
-1. `stable` -> [Production](https://governance.ousd.com/claim)
-2. `staging` -> [Staging](https://ousd-governance-goerli.herokuapp.com/)
-
-The production environment references the mainnet contracts in this repo. The staging environment references contracts deployed to Goerli.
-
-Note: You shouldn't commit to `stable` directly. Only merge from `master` (where new features are merged via approved pull request).
-
-## Production Deployment Process
-
-1. Take a database backup before you start: `heroku pg:backups:capture --app=ousd-governance-production`. Note: You must be authorised with Heroku to run this command. Contact Franck to be added if you're not already.
-
-1. Take a note of the last commit hash that's confirmed as working in production. You can find this in the `stable` branch's [commit history](https://github.com/OriginProtocol/ousd-governance/commits/stable).
-
-1. Merge from `master` to `stable` to initiate a deployment. You can check progress in the [Heroku Dashboard](https://dashboard.heroku.com/apps/ousd-governance-production) where you'll find error logs should your deployment fail.
-
-1. Once deployed, check the [production environment](https://governance.ousd.com/) in your browser to make sure that things are working as expected. If yes, you're done!
-
-1. If the release causes issues in production, don't be afraid to roll back while you diagnose the issue. Especially if users are impacted. You can do this by reverting your commit: `git revert [commit hash]` and pushing the resulting revert commit to `stable`. Or, if you want to keep a cleaner commit history, reset the `stable` branch to the last commit hash of the previous release: `git reset [commit hash] --hard` and push this to `stable` using `git push stable --force`. Note: You should only force push if you're 100% certain of the change.
-
 ## Deploying contracts
 
 Setup environment variables:
@@ -241,29 +178,7 @@ If required, follow this process post deployment:
 
 Here are some places you may come unstuck when setting up locally. If you find any yourself, please document them here to help your fellow engineers:
 
-## 1. How do we populate the database with proposal data post-transaction submission?
-
-**Problem:**
-
-You're adding proposals and the transactions are going through on-chain, but confirmed proposals aren't showing in the UI. You might experience [listener.ts](/client/listener.ts) outputting lots of `info: Got confirmed block` messages, but nothing to confirm the script is picking up `ProposalCreated` events.
-
-**Explanation:**
-
-Proposals aren't pushed to the database from the front-end submision handler. Instead, [listener.ts](/client/listener.ts) monitors your local node, detects when the `ProposalCreated` event is fired, then adds the proposal to the database. However, these events can't be picked up when the starting block number is off in your database.
-
-**Solution:**
-
-Because we [start from the last seen block saved in the database](/client/listener.ts#L121), you may experience issues if this number is out of sync. To quickly solve:
-
-1. Comment out the database lookup function
-2. Add `ethereumEvents.start(0)` beneath to ensure a start from the beginning
-3. Run `yarn run dev`
-4. Revert what you changed
-5. Run `yarn run dev` again
-
-You should now see proposals added to the database when you submit transactions.
-
-## 2. M1 macs (ARM architecture)
+## 1. M1 macs (ARM architecture)
 
 **Problem:**
 
