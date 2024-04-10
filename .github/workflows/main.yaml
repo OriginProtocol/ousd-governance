@@ -12,37 +12,18 @@ env:
 
 jobs:
   lint:
-    name: DApp Linter
+    name: Contracts Linter
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Cache Compiler Installations
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.solcx
-            ~/.vvm
-          key: compiler-cache
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-          cache: "yarn"
-          cache-dependency-path: |
-            client/yarn.lock
-
-      - name: Install NPM dependencies
-        run: yarn
-        working-directory: client
-
-      - name: Client linting
-        run: yarn run prettier:check
-        working-directory: client
+      - name: Run Linter
+        run: forge fmt --check
 
   brownie-tests:
     name: Brownie tests
