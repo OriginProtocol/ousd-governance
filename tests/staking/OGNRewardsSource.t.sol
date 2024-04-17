@@ -46,6 +46,7 @@ contract OGNRewardsSourceTest is Test {
         vm.warp(block.number + 100);
 
         // Should allow collecting rewards
+        vm.prank(staking);
         rewards.collectRewards();
 
         assertEq(rewards.previewRewards(), 0 ether, "Pending reward mismatch");
@@ -53,27 +54,21 @@ contract OGNRewardsSourceTest is Test {
         assertEq(ogn.balanceOf(address(staking)), 10000 ether, "Rewards not distributed to staking");
     }
 
-    function testCollectBeforeChangeRate() public {
-        // Accumulate some rewards
-        vm.warp(block.number + 100);
-
-        // Should allow Strategist to change
-        vm.prank(strategist);
-        rewards.setRewardsPerSecond(1.25 ether);
-
-        // Should've collected reward before change
-        assertEq(ogn.balanceOf(address(staking)), 10000 ether, "Rewards not distributed to staking");
-    }
-
-    function testRevertWhenTargetNotSet() public {
-        // Disable rewards
-        vm.prank(governor);
-        rewards.setRewardsTarget(address(0));
-
+    function testCollectPermission() public {
         // Time travel
         vm.warp(block.number + 100);
 
-        vm.expectRevert(bytes4(keccak256("RewardsTargetNotSet()")));
+        // Should allow rewardsTarget to collect rewards
+        vm.prank(staking);
+        rewards.collectRewards();
+
+        // Should not allow anyone else to collect rewards
+        vm.prank(governor);
+        vm.expectRevert(bytes4(keccak256("UnauthorizedCaller()")));
+        rewards.collectRewards();
+
+        vm.prank(alice);
+        vm.expectRevert(bytes4(keccak256("UnauthorizedCaller()")));
         rewards.collectRewards();
     }
 
@@ -86,6 +81,7 @@ contract OGNRewardsSourceTest is Test {
         vm.warp(block.number + 100);
 
         // Should allow collecting rewards
+        vm.prank(staking);
         rewards.collectRewards();
 
         // Shouldn't have any change

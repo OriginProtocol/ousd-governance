@@ -7,7 +7,6 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.s
 
 contract OGNRewardsSource is Governable, Initializable {
     error UnauthorizedCaller();
-    error RewardsTargetNotSet();
     error InvalidRewardRate();
 
     event StrategistUpdated(address _address);
@@ -63,16 +62,10 @@ contract OGNRewardsSource is Governable, Initializable {
 
     /// @dev Collect pending rewards
     /// @return rewardAmount Amount of reward collected
-    function collectRewards() external returns (uint256) {
-        return _collectRewards();
-    }
-
-    /// @dev Collect pending rewards
-    /// @return rewardAmount Amount of reward collected
-    function _collectRewards() internal returns (uint256 rewardAmount) {
+    function collectRewards() external returns (uint256 rewardAmount) {
         address _target = rewardsTarget;
-        if (_target == address(0)) {
-            revert RewardsTargetNotSet();
+        if (_target != msg.sender) {
+            revert UnauthorizedCaller();
         }
 
         // Compute pending rewards
@@ -144,9 +137,6 @@ contract OGNRewardsSource is Governable, Initializable {
         if (_rewardsPerSecond > type(uint192).max) {
             revert InvalidRewardRate();
         }
-
-        // Collect any pending rewards at current rate
-        _collectRewards();
 
         // Update storage
         RewardConfig storage _config = rewardConfig;
