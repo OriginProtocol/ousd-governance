@@ -90,7 +90,7 @@ contract ExponentialStaking is ERC20Votes {
     function stake(uint256 amountIn, uint256 duration, address to, bool stakeRewards, int256 lockupId) external {
         require(to != address(0), "Staking: To the zero address");
         require(duration >= minStakeDuration, "Staking: Too short");
-        require(duration <= maxStakeDuration, "Staking: Too long");
+        // Too long checked in preview points
 
         uint256 newAmount = amountIn;
         uint256 oldPoints = 0;
@@ -226,7 +226,7 @@ contract ExponentialStaking is ERC20Votes {
     /// @return points staking points that would be returned
     /// @return end staking period end date
     function previewPoints(uint256 amount, uint256 duration) public view returns (uint256, uint256) {
-        require(duration <= 1461 days, "Staking: Too long");
+        require(duration <= maxStakeDuration, "Staking: Too long");
         uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
         uint256 end = start + duration;
         uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
