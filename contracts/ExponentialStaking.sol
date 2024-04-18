@@ -41,6 +41,7 @@ contract ExponentialStaking is ERC20Votes {
     event Stake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
     event Unstake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
     event Reward(address indexed user, uint256 amount);
+    event Penalty(address indexed user, uint256 amount);
 
     // Core ERC20 Functions
 
@@ -167,6 +168,7 @@ contract ExponentialStaking is ERC20Votes {
         _burn(msg.sender, points);
         if (penalty > 0) {
             asset.transfer(address(rewardsSource), penalty);
+            emit Penalty(msg.sender, penalty);
         }
         asset.transfer(msg.sender, withdrawAmount);
         emit Unstake(msg.sender, lockupId, withdrawAmount, end, points);
