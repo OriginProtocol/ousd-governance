@@ -5,7 +5,7 @@ import {Governable} from "./Governable.sol";
 import {Initializable} from "./upgrades/Initializable.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
 
-contract OGNRewardsSource is Governable, Initializable {
+contract FixedRateRewardsSource is Governable, Initializable {
     error UnauthorizedCaller();
     error InvalidRewardRate();
 
@@ -14,7 +14,7 @@ contract OGNRewardsSource is Governable, Initializable {
     event RewardsPerSecondChanged(uint256 newRPS, uint256 oldRPS);
     event RewardCollected(uint256 amountCollected);
 
-    address public immutable ogn;
+    address public immutable rewardToken;
 
     address public strategistAddr;
 
@@ -39,8 +39,8 @@ contract OGNRewardsSource is Governable, Initializable {
         _;
     }
 
-    constructor(address _ogn) {
-        ogn = _ogn;
+    constructor(address _rewardToken) {
+        rewardToken = _rewardToken;
     }
 
     /// @dev Initialize the proxy implementation
@@ -82,7 +82,7 @@ contract OGNRewardsSource is Governable, Initializable {
 
             // Intentionally skipping balance check to save some gas
             // since `transfer` anyway would fail in case of low balance
-            IERC20(ogn).transfer(_target, rewardAmount);
+            IERC20(rewardToken).transfer(_target, rewardAmount);
         }
     }
 
@@ -126,13 +126,13 @@ contract OGNRewardsSource is Governable, Initializable {
     }
 
     /// @dev Set the rate of reward emission
-    /// @param _rewardsPerSecond Amount of OGN to distribute per second
+    /// @param _rewardsPerSecond Amount of rewardToken to distribute per second
     function setRewardsPerSecond(uint256 _rewardsPerSecond) external onlyGovernorOrStrategist {
         _setRewardsPerSecond(_rewardsPerSecond);
     }
 
     /// @dev Set the rate of reward emission
-    /// @param _rewardsPerSecond Amount of OGN to distribute per second
+    /// @param _rewardsPerSecond Amount of rewardToken to distribute per second
     function _setRewardsPerSecond(uint256 _rewardsPerSecond) internal {
         if (_rewardsPerSecond > type(uint192).max) {
             revert InvalidRewardRate();

@@ -1,11 +1,11 @@
 import "forge-std/Test.sol";
-import "contracts/upgrades/OGNRewardsSourceProxy.sol";
-import "contracts/OGNRewardsSource.sol";
+import "contracts/upgrades/FixedRateRewardsSourceProxy.sol";
+import "contracts/FixedRateRewardsSource.sol";
 import "contracts/tests/MockOGN.sol";
 
-contract OGNRewardsSourceTest is Test {
+contract FixedRateRewardsSourceTest is Test {
     MockOGN ogn;
-    OGNRewardsSource rewards;
+    FixedRateRewardsSource rewards;
 
     address staking = address(0x42);
     address governor = address(0x43);
@@ -15,12 +15,12 @@ contract OGNRewardsSourceTest is Test {
     function setUp() public {
         vm.startPrank(governor);
         ogn = new MockOGN();
-        rewards = new OGNRewardsSource(address(ogn));
+        rewards = new FixedRateRewardsSource(address(ogn));
 
         // Setup Rewards Proxy
-        OGNRewardsSourceProxy rewardsProxy = new OGNRewardsSourceProxy();
+        FixedRateRewardsSourceProxy rewardsProxy = new FixedRateRewardsSourceProxy();
         rewardsProxy.initialize(address(rewards), governor, "");
-        rewards = OGNRewardsSource(address(rewardsProxy));
+        rewards = FixedRateRewardsSource(address(rewardsProxy));
 
         // Configure Rewards
         rewards.initialize(strategist, staking, uint192(100 ether)); // 100 OGN per second
