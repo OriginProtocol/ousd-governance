@@ -29,7 +29,7 @@ contract OgvStakingTest is Test {
         rewardsProxy.initialize(address(source), team, "");
         source = RewardsSource(address(rewardsProxy));
 
-        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source));
+        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source), address(0));
         OgvStakingProxy stakingProxy = new OgvStakingProxy();
         stakingProxy.initialize(address(staking), team, "");
         staking = OgvStaking(address(stakingProxy));

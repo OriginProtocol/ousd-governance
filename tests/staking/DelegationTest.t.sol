@@ -32,7 +32,7 @@ contract DelegationTest is Test {
         vm.startPrank(team);
         ogv = new MockOGV();
         source = new RewardsSource(address(ogv));
-        staking = new OgvStaking(address(ogv), EPOCH, 7 days, address(source));
+        staking = new OgvStaking(address(ogv), EPOCH, 7 days, address(source), address(0));
         source.setRewardsTarget(address(staking));
         vm.stopPrank();
 
