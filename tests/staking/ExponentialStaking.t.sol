@@ -6,7 +6,7 @@ import "contracts/upgrades/RewardsSourceProxy.sol";
 import "contracts/upgrades/OgvStakingProxy.sol";
 import "contracts/ExponentialStaking.sol";
 import "contracts/RewardsSource.sol";
-import "contracts/tests/MockOgv.sol";
+import "contracts/tests/MockOGV.sol";
 
 contract exponentialStakingTest is Test {
     MockOGV ogn;
