@@ -4,4 +4,4 @@ pragma solidity 0.8.10;
 
 import {InitializeGovernedUpgradeabilityProxy} from "./InitializeGovernedUpgradeabilityProxy.sol";
 
-contract OGNRewardsSourceProxy is InitializeGovernedUpgradeabilityProxy {}
+contract FixedRateRewardsSourceProxy is InitializeGovernedUpgradeabilityProxy {}
