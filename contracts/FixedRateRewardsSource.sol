@@ -69,11 +69,10 @@ contract FixedRateRewardsSource is Governable, Initializable {
         }
 
         // Compute pending rewards
-        RewardConfig storage _config = rewardConfig;
-        rewardAmount = _previewRewards(_config);
+        rewardAmount = previewRewards();
 
         // Update timestamp
-        _config.lastCollect = uint64(block.timestamp);
+        rewardConfig.lastCollect = uint64(block.timestamp);
 
         if (rewardAmount > 0) {
             // Should not revert if there's no reward to transfer.
@@ -88,15 +87,10 @@ contract FixedRateRewardsSource is Governable, Initializable {
 
     /// @dev Compute pending rewards since last collect
     /// @return rewardAmount Amount of reward that'll be distributed if collected now
-    function previewRewards() external view returns (uint256) {
-        return _previewRewards(rewardConfig);
-    }
-
-    /// @dev Compute pending rewards since last collect
-    /// @param _rewardConfig RewardConfig
-    /// @return rewardAmount Amount of reward that'll be distributed if collected now
-    function _previewRewards(RewardConfig memory _rewardConfig) internal view returns (uint256) {
-        return (block.timestamp - _rewardConfig.lastCollect) * rewardConfig.rewardsPerSecond;
+    function previewRewards() public view returns (uint256) {
+        RewardConfig memory _config = rewardConfig;
+        return (block.timestamp - _config.lastCollect) * _config.rewardsPerSecond;
+        // return _previewRewards(rewardConfig);
     }
 
     /// @dev Set address of the strategist
