@@ -142,14 +142,11 @@ contract OgvStaking is ERC20Votes {
     /// @param lockupIds Array of the lockup IDs to unstake
     /// @return unstakedAmount OGV amount unstaked
     /// @return rewardCollected OGV reward amount collected
-    function unstake(uint256[] memory lockupIds)
-        external
-        returns (uint256 unstakedAmount, uint256 rewardCollected)
-    {
+    function unstake(uint256[] memory lockupIds) external returns (uint256 unstakedAmount, uint256 rewardCollected) {
         return _unstake(msg.sender, lockupIds);
     }
 
-    /// @notice Unstakes lockups of an user. 
+    /// @notice Unstakes lockups of an user.
     ///         Can only be called by the Migrator.
     /// @param staker Address of the user
     /// @param lockupIds Array of the lockup IDs to unstake
@@ -163,7 +160,7 @@ contract OgvStaking is ERC20Votes {
         return _unstake(staker, lockupIds);
     }
 
-    /// @notice Unstakes lockups of an user. 
+    /// @notice Unstakes lockups of an user.
     /// @param staker Address of the user
     /// @param lockupIds Array of the lockup IDs to unstake
     /// @return unstakedAmount OGV amount unstaked

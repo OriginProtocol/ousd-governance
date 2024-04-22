@@ -45,7 +45,7 @@ contract Migrator is Governable {
 
     /**
      * @notice Starts the migration and sets it to end after
-     *          365 days. Also, approves xOGN to transfer OGN 
+     *          365 days. Also, approves xOGN to transfer OGN
      *          held in this contract. Can be invoked only once
      */
     function start() external onlyGovernor {
@@ -61,13 +61,13 @@ contract Migrator is Governable {
 
     /**
      * @notice Decommissions the contract. Can be called only
-     *          after a year since `start()` was invoked. Burns 
+     *          after a year since `start()` was invoked. Burns
      *          all OGV held in the contract and transfers OGN
      *          to address(1).
      */
     function decommission() external {
         // Only after a year of staking
-        if (isMigrationActive()) {
+        if (endTime == 0 || isMigrationActive()) {
             revert MigrationNotComplete();
         }
 
@@ -84,7 +84,7 @@ contract Migrator is Governable {
             // OGN doesn't allow burning of tokens. Has `onlyOwner`
             // modifier on `burn` and `burnFrom` methods. Also,
             // `transfer` has a address(0) check. So, this transfers
-            // everything to address(1). The `owner` multisig of 
+            // everything to address(1). The `owner` multisig of
             // OGN token can call `burnFrom(address(1))` later.abi
 
             ogn.transfer(address(1), ognBalance);
@@ -101,7 +101,7 @@ contract Migrator is Governable {
 
     /**
      * @notice Solvency Checks
-     * 
+     *
      * This ensures that the contract never transfers more than
      * desired OGN amount in any case. This takes a balance diff
      * of OGV and OGN and makes sure that the difference adds up.
@@ -169,10 +169,10 @@ contract Migrator is Governable {
 
     /**
      * @notice Migrates OGV stakes to OGN. Can also include unstaked OGN & OGV
-     *          balances from the user's wallet (if specified). 
+     *          balances from the user's wallet (if specified).
      * @param lockupIds OGV Lockup IDs to be migrated
-     * @param ogvAmountFromWallet Unstaked OGV balance to migrate & stake
-     * @param ognAmountFromWallet Unstaked OGN balance to stake
+     * @param ogvAmountFromWallet Extra OGV balance from user's wallet to migrate & stake
+     * @param ognAmountFromWallet Extra OGN balance from user's wallet to stake
      * @param migrateRewards If true, Migrate & Stake received rewards
      * @param newStakeDuration Duration of the new stake
      */
@@ -203,6 +203,11 @@ contract Migrator is Governable {
 
         ogvAmountFromWallet += ogvAmountUnlocked;
 
+        if (ognAmountFromWallet > 0) {
+            // Transfer in additional OGN to stake from user's wallet
+            ogn.transferFrom(msg.sender, address(this), ognAmountFromWallet);
+        }
+
         // Migrate OGV to OGN and include that along with existing balance
         ognAmountFromWallet += _migrate(ogvAmountFromWallet, address(this));
 
@@ -218,5 +223,4 @@ contract Migrator is Governable {
         // TODO: Emit new lockupId?
         emit LockupsMigrated(msg.sender, lockupIds, newStakeDuration);
     }
-
 }

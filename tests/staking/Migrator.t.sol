@@ -175,7 +175,7 @@ contract MigratorTest is Test {
         migrator.migrateAll();
 
         vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
-        migrator.migrate(new uint256[](1), 0, false, 0);
+        migrator.migrate(new uint256[](1), 0, 0, false, 0);
 
         vm.stopPrank();
     }
@@ -203,7 +203,7 @@ contract MigratorTest is Test {
         lockupIds[0] = 0;
         lockupIds[1] = 1;
 
-        migrator.migrate(lockupIds, 0, false, 300 days);
+        migrator.migrate(lockupIds, 0, 0, false, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
@@ -231,7 +231,7 @@ contract MigratorTest is Test {
         uint256[] memory lockupIds = new uint256[](1);
         lockupIds[0] = 0;
 
-        migrator.migrate(lockupIds, 0, false, 300 days);
+        migrator.migrate(lockupIds, 0, 0, false, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
@@ -266,7 +266,7 @@ contract MigratorTest is Test {
         lockupIds[0] = 0;
         lockupIds[1] = 1;
 
-        migrator.migrate(lockupIds, 500 ether, false, 300 days);
+        migrator.migrate(lockupIds, 500 ether, 0, false, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
@@ -294,7 +294,7 @@ contract MigratorTest is Test {
         uint256[] memory lockupIds = new uint256[](0);
 
         vm.expectRevert(bytes4(keccak256("LockupIdsRequired()")));
-        migrator.migrate(lockupIds, 500 ether, false, 300 days);
+        migrator.migrate(lockupIds, 500 ether, 0, false, 300 days);
 
         vm.stopPrank();
     }
@@ -314,6 +314,7 @@ contract MigratorTest is Test {
 
         migrator.migrate(
             lockupIds,
+            0,
             0,
             true, // Include reward as well
             300 days
