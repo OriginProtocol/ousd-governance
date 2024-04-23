@@ -59,21 +59,27 @@ contract MigratorTest is Test {
         // Begin migration
         migrator.start();
 
+        migrator.transferExcessTokens(governor);
+
         vm.stopPrank();
 
         // ... with allowance for Migrator
         vm.startPrank(alice);
         ogv.approve(address(migrator), type(uint256).max);
+        ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(ogvStaking), type(uint256).max);
         vm.stopPrank();
 
         vm.startPrank(bob);
         ogv.approve(address(migrator), type(uint256).max);
+        ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(ogvStaking), type(uint256).max);
         vm.stopPrank();
     }
 
     function testBalanceMigration() public {
+        uint256 maxOgnAmount = ogn.balanceOf(address(migrator));
+
         vm.startPrank(alice);
         migrator.migrate(100 ether);
         vm.stopPrank();
@@ -84,21 +90,7 @@ contract MigratorTest is Test {
 
         assertEq(ogv.balanceOf(address(migrator)), 100 ether, "Less OGV received");
 
-        assertEq(ogn.balanceOf(address(migrator)), 10000000 ether - 9.137 ether, "More OGN sent");
-    }
-
-    function testAllBalanceMigration() public {
-        vm.startPrank(alice);
-        migrator.migrateAll();
-        vm.stopPrank();
-
-        assertEq(ogv.balanceOf(alice), 0, "More OGV sent");
-
-        assertEq(ogn.balanceOf(alice), 913700 ether, "Less OGN received");
-
-        assertEq(ogv.balanceOf(address(migrator)), 10000000 ether, "Less OGV received");
-
-        assertEq(ogn.balanceOf(address(migrator)), 10000000 ether - 913700 ether, "More OGN sent");
+        assertEq(ogn.balanceOf(address(migrator)), maxOgnAmount - 9.137 ether, "More OGN sent");
     }
 
     function testDustBalanceMigration() public {
@@ -108,8 +100,10 @@ contract MigratorTest is Test {
     }
 
     function testBurnOnDecomission() public {
+        uint256 maxOgnAmount = ogn.balanceOf(address(migrator));
+
         vm.startPrank(alice);
-        migrator.migrateAll();
+        migrator.migrate(1 ether);
         vm.stopPrank();
 
         vm.warp(migrator.endTime() + 100);
@@ -120,43 +114,42 @@ contract MigratorTest is Test {
 
         assertEq(ogn.balanceOf(address(migrator)), 0 ether, "OGN leftover");
 
-        assertEq(ogn.balanceOf(address(1)), 10000000 ether - 913700 ether, "OGN not sent to burn address");
+        assertEq(ogn.balanceOf(address(0xdead)), maxOgnAmount - 0.09137 ether, "OGN not sent to burn address");
     }
 
     function testSolvencyDuringMigrate() public {
+        uint256 maxOgnAmount = ogn.balanceOf(address(migrator));
+
         vm.startPrank(alice);
-        ogn.setNetTransferAmount(10000000 ether);
+        ogn.setNetTransferAmount(100 ether);
         vm.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("BalanceMismatch(uint256,uint256,uint256)")),
-                10000000 ether,
-                913700 ether,
-                10000000 ether
+                bytes4(keccak256("ContractInsolvent(uint256,uint256)")),
+                maxOgnAmount - 0.09137 ether,
+                maxOgnAmount - 100 ether
             )
         );
-        migrator.migrateAll();
+        migrator.migrate(1 ether);
 
-        ogn.setNetTransferAmount(923700 ether);
+        ogn.setNetTransferAmount(0.09138 ether);
         vm.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("BalanceMismatch(uint256,uint256,uint256)")),
-                10000000 ether,
-                913700 ether,
-                923700 ether
+                bytes4(keccak256("ContractInsolvent(uint256,uint256)")),
+                maxOgnAmount - 0.09137 ether,
+                maxOgnAmount - 0.09138 ether
             )
         );
-        migrator.migrateAll();
+        migrator.migrate(1 ether);
 
-        ogn.setNetTransferAmount(913701 ether);
+        ogn.setNetTransferAmount(0.091371115 ether);
         vm.expectRevert(
             abi.encodeWithSelector(
-                bytes4(keccak256("BalanceMismatch(uint256,uint256,uint256)")),
-                10000000 ether,
-                913700 ether,
-                913701 ether
+                bytes4(keccak256("ContractInsolvent(uint256,uint256)")),
+                maxOgnAmount - 0.09137 ether,
+                maxOgnAmount - 0.091371115 ether
             )
         );
-        migrator.migrateAll();
+        migrator.migrate(1 ether);
 
         vm.stopPrank();
     }
@@ -172,10 +165,10 @@ contract MigratorTest is Test {
         migrator.migrate(100 ether);
 
         vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
-        migrator.migrateAll();
+        migrator.migrate(1 ether);
 
         vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
-        migrator.migrate(new uint256[](1), 0, 0, false, 0);
+        migrator.migrate(new uint256[](1), 0, 0, false, 1 ether, 0);
 
         vm.stopPrank();
     }
@@ -203,11 +196,13 @@ contract MigratorTest is Test {
         lockupIds[0] = 0;
         lockupIds[1] = 1;
 
-        migrator.migrate(lockupIds, 0, 0, false, 300 days);
+        uint256 stakeAmount = (11000 ether * 0.09137 ether) / 1 ether;
+
+        migrator.migrate(lockupIds, 0, 0, false, stakeAmount, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
-        assertEq(amount, (11000 ether * 0.09137 ether) / 1 ether, "Lockup not migrated");
+        assertEq(amount, stakeAmount, "Lockup not migrated");
 
         vm.expectRevert();
         (amount, end, points) = ognStaking.lockups(alice, 1);
@@ -231,11 +226,13 @@ contract MigratorTest is Test {
         uint256[] memory lockupIds = new uint256[](1);
         lockupIds[0] = 0;
 
-        migrator.migrate(lockupIds, 0, 0, false, 300 days);
+        uint256 stakeAmount = (10000 ether * 0.09137 ether) / 1 ether;
+
+        migrator.migrate(lockupIds, 0, 0, false, stakeAmount, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
-        assertEq(amount, (10000 ether * 0.09137 ether) / 1 ether, "Lockup not migrated");
+        assertEq(amount, stakeAmount, "Lockup not migrated");
 
         vm.expectRevert();
         (amount, end, points) = ognStaking.lockups(alice, 1);
@@ -255,7 +252,7 @@ contract MigratorTest is Test {
         vm.stopPrank();
     }
 
-    function testMigrateBothBalanceAndStakes() public {
+    function testMigrateStakesWithOGVBalance() public {
         vm.startPrank(alice);
         ogvStaking.mockStake(10000 ether, 365 days);
         ogvStaking.mockStake(1000 ether, 20 days);
@@ -266,11 +263,13 @@ contract MigratorTest is Test {
         lockupIds[0] = 0;
         lockupIds[1] = 1;
 
-        migrator.migrate(lockupIds, 500 ether, 0, false, 300 days);
+        uint256 stakeAmount = (11500 ether * 0.09137 ether) / 1 ether;
+
+        migrator.migrate(lockupIds, 500 ether, 0, false, stakeAmount, 300 days);
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
-        assertEq(amount, (11500 ether * 0.09137 ether) / 1 ether, "Lockup not migrated");
+        assertEq(amount, stakeAmount, "Lockup not migrated");
 
         // Should have updated balance correctly
         assertEq(ogv.balanceOf(alice), balanceBefore - 500 ether, "Balance mismatch");
@@ -294,7 +293,7 @@ contract MigratorTest is Test {
         uint256[] memory lockupIds = new uint256[](0);
 
         vm.expectRevert(bytes4(keccak256("LockupIdsRequired()")));
-        migrator.migrate(lockupIds, 500 ether, 0, false, 300 days);
+        migrator.migrate(lockupIds, 500 ether, 0, false, 9000 ether, 300 days);
 
         vm.stopPrank();
     }
@@ -311,18 +310,98 @@ contract MigratorTest is Test {
         // Arbitrary reward
         ogvStaking.setRewardShare(2 * 1e11);
         uint256 expectedRewards = ogvStaking.previewRewards(alice);
+        uint256 stakeAmount = ((11000 ether + expectedRewards) * 0.09137 ether) / 1 ether;
 
         migrator.migrate(
             lockupIds,
             0,
             0,
             true, // Include reward as well
+            stakeAmount,
             300 days
         );
 
         // Should have merged it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
-        assertEq(amount, ((11000 ether + expectedRewards) * 0.09137 ether) / 1 ether, "Lockup not migrated");
+        assertEq(amount, stakeAmount, "Lockup not migrated");
+
+        vm.expectRevert();
+        (amount, end, points) = ognStaking.lockups(alice, 1);
+
+        // Should have removed OGV staked
+        for (uint256 i = 0; i < lockupIds.length; ++i) {
+            (amount, end, points) = ogvStaking.lockups(alice, lockupIds[i]);
+            assertEq(amount, 0, "Lockup still exists");
+            assertEq(end, 0, "Lockup still exists");
+            assertEq(points, 0, "Lockup still exists");
+        }
+
+        vm.stopPrank();
+    }
+
+    function testMigrateStakesWithOGNBalance() public {
+        vm.startPrank(alice);
+        ogvStaking.mockStake(10000 ether, 365 days);
+        ogvStaking.mockStake(1000 ether, 20 days);
+
+        ogn.mint(alice, 500 ether);
+
+        uint256 ognBalanceBefore = ogn.balanceOf(alice);
+
+        uint256[] memory lockupIds = new uint256[](2);
+        lockupIds[0] = 0;
+        lockupIds[1] = 1;
+
+        uint256 stakeAmount = ognBalanceBefore + ((11000 ether * 0.09137 ether) / 1 ether);
+
+        migrator.migrate(lockupIds, 0, 500 ether, false, stakeAmount, 300 days);
+
+        // Should have merged it in a single OGN lockup
+        (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
+        assertEq(amount, stakeAmount, "Lockup not migrated");
+
+        // Should have updated balance correctly
+        assertEq(ogn.balanceOf(alice), 0, "OGN Balance mismatch");
+
+        vm.expectRevert();
+        (amount, end, points) = ognStaking.lockups(alice, 1);
+
+        // Should have removed OGV staked
+        for (uint256 i = 0; i < lockupIds.length; ++i) {
+            (amount, end, points) = ogvStaking.lockups(alice, lockupIds[i]);
+            assertEq(amount, 0, "Lockup still exists");
+            assertEq(end, 0, "Lockup still exists");
+            assertEq(points, 0, "Lockup still exists");
+        }
+
+        vm.stopPrank();
+    }
+
+    function testMigrateStakesWithOGNAndOGVBalances() public {
+        vm.startPrank(alice);
+        ogvStaking.mockStake(10000 ether, 365 days);
+        ogvStaking.mockStake(1000 ether, 20 days);
+
+        ogn.mint(alice, 500 ether);
+
+        uint256 ognBalanceBefore = ogn.balanceOf(alice);
+        uint256 ogvBalanceBefore = ogv.balanceOf(alice);
+
+        uint256[] memory lockupIds = new uint256[](2);
+        lockupIds[0] = 0;
+        lockupIds[1] = 1;
+
+        uint256 stakeAmount = ognBalanceBefore + ((11500 ether * 0.09137 ether) / 1 ether);
+
+        migrator.migrate(lockupIds, 500 ether, ognBalanceBefore, false, stakeAmount, 300 days);
+
+        // Should have merged it in a single OGN lockup
+        (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
+        assertEq(amount, stakeAmount, "Lockup not migrated");
+
+        // Should have updated balance correctly
+        assertEq(ogn.balanceOf(alice), 0, "OGN Balance mismatch");
+        assertEq(ogv.balanceOf(alice), ogvBalanceBefore - 500 ether, "OGN Balance mismatch");
 
         vm.expectRevert();
         (amount, end, points) = ognStaking.lockups(alice, 1);

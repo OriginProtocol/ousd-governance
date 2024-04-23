@@ -14,12 +14,22 @@ contract MockOGVStaking is OgvStaking {
         OgvStaking(ogv_, epoch_, minStakeDuration_, rewardsSource_, migrator_)
     {}
 
+    function _previewPoints(uint256 amount, uint256 duration) internal view returns (uint256, uint256) {
+        require(duration >= minStakeDuration, "Staking: Too short");
+        require(duration <= 1461 days, "Staking: Too long");
+        uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
+        uint256 end = start + duration;
+        uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
+        uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
+        return ((amount * multiplier) / 1e18, end);
+    }
+
     function mockStake(uint256 amountIn, uint256 duration) external {
         Lockup memory lockup;
 
         ogv.transferFrom(msg.sender, address(this), amountIn);
 
-        (uint256 points, uint256 end) = previewPoints(amountIn, duration);
+        (uint256 points, uint256 end) = _previewPoints(amountIn, duration);
         require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
 
         lockup.end = uint128(end);

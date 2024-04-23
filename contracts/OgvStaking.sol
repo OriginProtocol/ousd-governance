@@ -176,6 +176,8 @@ contract OgvStaking is ERC20Votes {
         // Collect rewards
         rewardCollected = _collectRewards(staker);
 
+        uint256 unstakedPoints = 0;
+
         for (uint256 i = 0; i < lockupIds.length; ++i) {
             uint256 lockupId = lockupIds[i];
             Lockup memory lockup = lockups[staker][lockupId];
@@ -184,6 +186,7 @@ contract OgvStaking is ERC20Votes {
             uint256 points = lockup.points;
 
             unstakedAmount += amount;
+            unstakedPoints += points;
 
             // Make sure it isn't unstaked already
             if (end == 0) {
@@ -192,10 +195,13 @@ contract OgvStaking is ERC20Votes {
 
             delete lockups[staker][lockupId]; // Keeps empty in array, so indexes are stable
 
-            _burn(staker, points);
-            ogv.transfer(staker, amount);
             emit Unstake(staker, lockupId, amount, end, points);
         }
+
+        // Transfer unstaked OGV
+        ogv.transfer(staker, unstakedAmount);
+        // ... and burn veOGV
+        _burn(staker, unstakedPoints);
     }
 
     /// @notice Extend a stake lockup for additional points.
@@ -223,13 +229,7 @@ contract OgvStaking is ERC20Votes {
     /// @return points staking points that would be returned
     /// @return end staking period end date
     function previewPoints(uint256 amount, uint256 duration) public view returns (uint256, uint256) {
-        require(duration >= minStakeDuration, "Staking: Too short");
-        require(duration <= 1461 days, "Staking: Too long");
-        uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
-        uint256 end = start + duration;
-        uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
-        uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
-        return ((amount * multiplier) / 1e18, end);
+        revert StakingDisabled();
     }
 
     // 3. Reward functions
@@ -237,7 +237,7 @@ contract OgvStaking is ERC20Votes {
     /// @notice Collect all earned OGV rewards.
     /// @return rewardCollected OGV reward amount collected
     function collectRewards() external returns (uint256 rewardCollected) {
-        _collectRewards(msg.sender);
+        return _collectRewards(msg.sender);
     }
 
     /// @notice Shows the amount of OGV a user would receive if they collected
