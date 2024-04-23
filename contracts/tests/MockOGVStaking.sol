@@ -25,6 +25,10 @@ contract MockOGVStaking is OgvStaking {
     }
 
     function mockStake(uint256 amountIn, uint256 duration) external {
+        mockStake(amountIn, duration, msg.sender);
+    }
+
+    function mockStake(uint256 amountIn, uint256 duration, address to) public {
         Lockup memory lockup;
 
         ogv.transferFrom(msg.sender, address(this), amountIn);
@@ -36,12 +40,12 @@ contract MockOGVStaking is OgvStaking {
         lockup.amount = uint128(amountIn);
         lockup.points = points;
 
-        uint256 lockupId = lockups[msg.sender].length;
+        uint256 lockupId = lockups[to].length;
 
-        lockups[msg.sender].push(lockup);
+        lockups[to].push(lockup);
 
-        _mint(msg.sender, points);
-        emit Stake(msg.sender, uint256(lockupId), amountIn, end, points);
+        _mint(to, points);
+        emit Stake(to, uint256(lockupId), amountIn, end, points);
     }
 
     function setRewardShare(uint256 _accRewardPerShare) external {
