@@ -146,6 +146,7 @@ contract ExponentialStaking is ERC20Votes {
                 _delegate(to, to);
             }
             require(numLockups < uint256(type(int256).max), "Staking: Too many lockups");
+            lockupId = int256(numLockups - 1);
         }
         _mint(to, newPoints - oldPoints);
         emit Stake(to, uint256(lockupId), newAmount, newEnd, newPoints);
