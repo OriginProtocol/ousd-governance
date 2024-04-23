@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import "forge-std/Test.sol";
 import "contracts/upgrades/RewardsSourceProxy.sol";
 import "contracts/upgrades/OgvStakingProxy.sol";
+import "contracts/tests/MockOGVStaking.sol";
 import "contracts/OgvStaking.sol";
 import "contracts/RewardsSource.sol";
 import "contracts/tests/MockOGV.sol";
@@ -11,11 +12,13 @@ import "contracts/tests/MockOGV.sol";
 contract OgvStakingTest is Test {
     MockOGV ogv;
     OgvStaking staking;
+
     RewardsSource source;
 
     address alice = address(0x42);
     address bob = address(0x43);
     address team = address(0x44);
+    address migrator = address(0x50);
 
     uint256 constant EPOCH = 1 days;
     uint256 constant MIN_STAKE_DURATION = 7 days;
@@ -29,428 +32,203 @@ contract OgvStakingTest is Test {
         rewardsProxy.initialize(address(source), team, "");
         source = RewardsSource(address(rewardsProxy));
 
-        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source), address(0));
-        OgvStakingProxy stakingProxy = new OgvStakingProxy();
-        stakingProxy.initialize(address(staking), team, "");
-        staking = OgvStaking(address(stakingProxy));
+        staking = new OgvStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source), migrator);
+        MockOGVStaking mockStaking =
+            new MockOGVStaking(address(ogv), EPOCH, MIN_STAKE_DURATION, address(source), migrator);
 
-        source.setRewardsTarget(address(staking));
+        OgvStakingProxy stakingProxy = new OgvStakingProxy();
+        stakingProxy.initialize(address(mockStaking), team, "");
+
+        source.setRewardsTarget(address(stakingProxy));
+
+        mockStaking = MockOGVStaking(address(stakingProxy));
+        mockStaking.setRewardShare(2 * 1e11);
+
+        ogv.mint(alice, 10000 ether);
+        ogv.mint(bob, 10000 ether);
+        ogv.mint(team, 100000000 ether);
         vm.stopPrank();
 
-        ogv.mint(alice, 1000 ether);
-        ogv.mint(bob, 1000 ether);
-        ogv.mint(team, 100000000 ether);
-
-        vm.prank(alice);
-        ogv.approve(address(staking), 1e70);
-        vm.prank(bob);
-        ogv.approve(address(staking), 1e70);
-        vm.prank(team);
-        ogv.approve(address(source), 1e70);
-    }
-
-    function testStakeUnstake() public {
         vm.startPrank(alice);
-        (uint256 previewPoints, uint256 previewEnd) = staking.previewPoints(10 ether, 10 days);
+        ogv.approve(address(stakingProxy), 1e70);
+        mockStaking.mockStake(2000 ether, 365 days);
+        mockStaking.mockStake(1000 ether, 20 days);
+        vm.stopPrank();
 
-        uint256 beforeOgv = ogv.balanceOf(alice);
-        uint256 beforeOgvStaking = ogv.balanceOf(address(staking));
+        vm.startPrank(bob);
+        ogv.approve(address(stakingProxy), 1e70);
+        mockStaking.mockStake(3300 ether, 60 days);
+        vm.stopPrank();
 
-        staking.stake(10 ether, 10 days);
-
-        assertEq(ogv.balanceOf(alice), beforeOgv - 10 ether);
-        assertEq(ogv.balanceOf(address(staking)), beforeOgvStaking + 10 ether);
-        assertEq(staking.balanceOf(alice), previewPoints);
-        (uint128 lockupAmount, uint128 lockupEnd, uint256 lockupPoints) = staking.lockups(alice, 0);
-        assertEq(lockupAmount, 10 ether);
-        assertEq(lockupEnd, EPOCH + 10 days);
-        assertEq(lockupEnd, previewEnd);
-        assertEq(lockupPoints, previewPoints);
-        assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(alice));
-
-        vm.warp(31 days);
-        staking.unstake(0);
-
-        assertEq(ogv.balanceOf(alice), beforeOgv);
-        assertEq(ogv.balanceOf(address(staking)), 0);
-        (lockupAmount, lockupEnd, lockupPoints) = staking.lockups(alice, 0);
-        assertEq(lockupAmount, 0);
-        assertEq(lockupEnd, 0);
-        assertEq(lockupPoints, 0);
-        assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(alice));
+        vm.startPrank(team);
+        stakingProxy.upgradeTo(address(staking));
+        staking = OgvStaking(address(stakingProxy));
+        ogv.approve(address(source), 1e70);
+        vm.stopPrank();
     }
 
-    function testMatchedDurations() public {
-        vm.prank(alice);
-        staking.stake(10 ether, 1000 days, alice);
-
-        vm.warp(EPOCH + 900 days);
-        vm.prank(bob);
-        staking.stake(10 ether, 100 days, bob);
-
-        // Now both have 10 OGV staked for 100 days remaining
-        // which should mean that they have the same number of points
-        assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
+    function testStake() public {
+        vm.expectRevert(bytes4(keccak256("StakingDisabled()")));
+        staking.stake(100, 100);
     }
 
-    function testPreStaking() public {
-        vm.prank(alice);
-        staking.stake(100 ether, 100 days, alice);
-
-        vm.warp(EPOCH);
-        vm.prank(bob);
-        staking.stake(100 ether, 100 days, bob);
-
-        // Both should have the same points
-        assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
-    }
-
-    function testZeroStake() public {
-        vm.prank(alice);
-        vm.expectRevert("Staking: Not enough");
-        staking.stake(0 ether, 100 days, alice);
-    }
-
-    function testStakeTooMuch() public {
-        vm.prank(alice);
-        vm.expectRevert("Staking: Too much");
-        staking.stake(1e70, 100 days, alice);
-    }
-
-    function testStakeTooLong() public {
-        vm.prank(alice);
-        vm.expectRevert("Staking: Too long");
-        staking.stake(1 ether, 1700 days, alice);
-    }
-
-    function testStakeTooShort() public {
-        vm.prank(alice);
-        vm.expectRevert("Staking: Too short");
-        staking.stake(1 ether, 6 days, alice);
+    function testStakeTo() public {
+        vm.expectRevert(bytes4(keccak256("StakingDisabled()")));
+        staking.stake(100, 100, address(0xdead));
     }
 
     function testExtend() public {
-        vm.prank(alice);
-        staking.stake(100 ether, 100 days, alice);
-
-        vm.startPrank(bob);
-        staking.stake(100 ether, 10 days, bob);
-        staking.extend(0, 100 days);
-
-        // Both are now locked up for the same amount of time,
-        // and should have the same points.
-        assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
-
-        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking.lockups(alice, 0);
-        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking.lockups(bob, 0);
-        assertEq(aliceAmount, bobAmount, "same amount");
-        assertEq(aliceEnd, bobEnd, "same end");
-        assertEq(alicePoints, bobPoints, "same points");
-        assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(bob));
+        vm.expectRevert(bytes4(keccak256("StakingDisabled()")));
+        staking.extend(1, 100);
     }
 
-    function testDoubleExtend() public {
-        vm.warp(EPOCH + 600 days);
-
-        vm.prank(alice);
-        staking.stake(100 ether, 100 days, alice);
-
-        vm.startPrank(bob);
-        staking.stake(100 ether, 10 days, bob);
-        staking.extend(0, 50 days);
-        staking.extend(0, 100 days);
-
-        // Both are now locked up for the same amount of time,
-        // and should have the same points.
-        assertEq(staking.balanceOf(alice), staking.balanceOf(bob));
-
-        (uint128 aliceAmount, uint128 aliceEnd, uint256 alicePoints) = staking.lockups(alice, 0);
-        (uint128 bobAmount, uint128 bobEnd, uint256 bobPoints) = staking.lockups(bob, 0);
-        assertEq(aliceAmount, bobAmount, "same amount");
-        assertEq(aliceEnd, bobEnd, "same end");
-        assertEq(alicePoints, bobPoints, "same points");
+    function testPreviewPoints() public {
+        vm.expectRevert(bytes4(keccak256("StakingDisabled()")));
+        staking.previewPoints(1, 100);
     }
 
-    function testShortExtendFail() public {
-        vm.prank(alice);
-        staking.stake(100 ether, 100 days, alice);
+    function testDisabledInflation() public {
+        uint256 expectedRewards = (staking.balanceOf(alice) * 2 ether) / 10 ether;
 
-        vm.startPrank(bob);
-        staking.stake(100 ether, 11 days, bob);
-        vm.expectRevert("Staking: New lockup must be longer");
-        staking.extend(0, 10 days);
-    }
+        assertEq(staking.previewRewards(alice), expectedRewards, "Inflation not disabled");
 
-    function testDoubleStake() external {
-        vm.startPrank(alice);
+        vm.warp(EPOCH + 100 days);
+        assertEq(staking.previewRewards(alice), expectedRewards, "Inflation not disabled");
 
-        uint256 beforeOgv = ogv.balanceOf(alice);
-        staking.stake(3 ether, 10 days, alice);
-        uint256 midOgv = ogv.balanceOf(alice);
-        uint256 midPoints = staking.balanceOf(alice);
-        staking.stake(5 ether, 40 days, alice);
-
-        vm.warp(EPOCH + 50 days);
-        staking.unstake(1);
-
-        assertEq(midPoints, staking.balanceOf(alice));
-        assertEq(midOgv, ogv.balanceOf(alice));
-
-        staking.unstake(0);
-        assertEq(0, staking.balanceOf(alice)); // No points, since all unstaked
-        assertEq(beforeOgv, ogv.balanceOf(alice)); // All OGV back
-    }
-
-    function testNoEarlyUnstake() public {
-        vm.startPrank(alice);
-        staking.stake(10 ether, 1000 days, alice);
-        vm.warp(999 days);
-        vm.expectRevert("Staking: End of lockup not reached");
-        staking.unstake(0);
+        vm.warp(EPOCH + 2000 days);
+        assertEq(staking.previewRewards(alice), expectedRewards, "Inflation not disabled");
     }
 
     function testCollectRewards() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](3);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 4 ether;
-        slopes[1].start = uint64(EPOCH + 2 days);
-        slopes[1].ratePerDay = 2 ether;
-        slopes[2].start = uint64(EPOCH + 7 days);
-        slopes[2].ratePerDay = 1 ether;
-        vm.prank(team);
-        source.setInflation(slopes); // Add from start
+        uint256 balanceBefore = ogv.balanceOf(alice);
+        uint256 expectedRewards = (staking.balanceOf(alice) * 2 ether) / 10 ether;
 
+        // Should allow claiming rewards once
+        vm.prank(alice);
+        staking.collectRewards();
+
+        assertEq(ogv.balanceOf(alice), expectedRewards + balanceBefore, "Reward not collected");
+
+        assertEq(staking.previewRewards(alice), 0, "Reward not collected");
+
+        // Should not allow claiming more than once
+        vm.prank(alice);
+        staking.collectRewards();
+
+        assertEq(ogv.balanceOf(alice), expectedRewards + balanceBefore, "Reward collected more than once");
+    }
+
+    function testUnstake() public {
+        // Should have no penaly for early unstaking
         vm.startPrank(alice);
-        staking.stake(1 ether, 360 days, alice);
 
-        vm.warp(EPOCH + 2 days);
-        uint256 beforeOgv = ogv.balanceOf(alice);
-        uint256 preview = staking.previewRewards(alice);
-        staking.collectRewards();
-        uint256 afterOgv = ogv.balanceOf(alice);
+        uint256 ogvBalanceBefore = ogv.balanceOf(alice);
+        uint256 veOgvBalanceBefore = staking.balanceOf(alice);
 
-        uint256 collectedRewards = afterOgv - beforeOgv;
-        assertApproxEqAbs(collectedRewards, 8 ether, 1e8, "actual amount should be correct");
-        assertEq(collectedRewards, preview, "preview should match actual");
-        assertApproxEqAbs(preview, 8 ether, 1e8, "preview amount should be correct");
-    }
+        (uint128 amount, uint128 end, uint256 points) = staking.lockups(alice, 1);
 
-    function testCollectedRewardsJumpInOut() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
+        (uint256 unstakedAmount, uint256 rewardCollected) = staking.unstake(1);
 
-        vm.prank(team);
-        source.setInflation(slopes);
+        assertEq(unstakedAmount, amount, "Penalty applied with Unstake");
 
-        vm.prank(alice);
-        staking.stake(1 ether, 10 days, alice);
+        assertEq((veOgvBalanceBefore * 2 ether) / 10 ether, rewardCollected, "Reward mismatch");
 
-        // One day later
-        vm.warp(EPOCH + 1 days);
-        vm.prank(alice);
-        staking.collectRewards(); // Alice collects
+        assertEq(staking.balanceOf(alice), veOgvBalanceBefore - points, "veOGV not burned");
 
-        vm.prank(bob);
-        staking.stake(1 ether, 9 days, bob); // Bob stakes
+        assertEq(ogv.balanceOf(alice), ogvBalanceBefore + unstakedAmount + rewardCollected, "OGV balance mismatch");
 
-        vm.warp(EPOCH + 2 days); // Alice and bob should split rewards evenly
-        uint256 aliceBefore = ogv.balanceOf(alice);
-        uint256 bobBefore = ogv.balanceOf(bob);
-        vm.prank(alice);
-        staking.collectRewards(); // Alice collects
-        vm.prank(bob);
-        staking.collectRewards(); // Bob collects
-        assertEq(ogv.balanceOf(alice) - aliceBefore, ogv.balanceOf(bob) - bobBefore);
-    }
+        (amount, end, points) = staking.lockups(alice, 1);
 
-    function testMultipleUnstake() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
+        assertEq(end, 0, "Not unstaked");
 
-        vm.prank(team);
-        source.setInflation(slopes);
+        assertEq(points, 0, "Not unstaked, points mismatch");
 
-        vm.startPrank(alice);
-        staking.stake(1 ether, 10 days, alice);
-        vm.warp(EPOCH + 11 days);
-        staking.unstake(0);
-        vm.expectRevert("Staking: Already unstaked this lockup");
-        staking.unstake(0);
-    }
+        assertEq(amount, 0, "Not unstaked, amount mismatch");
 
-    function testCollectRewardsOnExpand() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
-
-        vm.prank(team);
-        source.setInflation(slopes);
-
-        vm.prank(alice);
-        staking.stake(1 ether, 10 days);
-        vm.prank(bob);
-        staking.stake(1 ether, 10 days);
-
-        vm.warp(EPOCH + 6 days);
-
-        vm.prank(bob);
-        staking.collectRewards();
-        vm.prank(alice);
-        staking.extend(0, 10 days);
-
-        assertEq(ogv.balanceOf(alice), ogv.balanceOf(bob));
-    }
-
-    function testNoSupplyShortCircuts() public {
-        uint256 beforeAlice = ogv.balanceOf(alice);
-
-        vm.prank(alice);
-        staking.previewRewards(alice);
-        assertEq(ogv.balanceOf(alice), beforeAlice);
-
-        vm.prank(alice);
-        staking.collectRewards();
-        assertEq(ogv.balanceOf(alice), beforeAlice);
-
-        vm.prank(bob);
-        staking.stake(1 ether, 9 days, bob);
-
-        vm.prank(alice);
-        staking.previewRewards(alice);
-        assertEq(ogv.balanceOf(alice), beforeAlice);
-
-        vm.prank(alice);
-        staking.collectRewards();
-        assertEq(ogv.balanceOf(alice), beforeAlice);
-    }
-
-    function testMultipleStakesSameBlock() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](3);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 4 ether;
-        slopes[1].start = uint64(EPOCH + 2 days);
-        slopes[1].ratePerDay = 2 ether;
-        slopes[2].start = uint64(EPOCH + 7 days);
-        slopes[2].ratePerDay = 1 ether;
-        vm.prank(team);
-        source.setInflation(slopes); // Add from start
-
-        vm.prank(alice);
-        staking.stake(1 ether, 360 days, alice);
-
-        vm.warp(EPOCH + 9 days);
-
-        vm.prank(alice);
-        staking.stake(1 ether, 60 days, alice);
-        vm.prank(bob);
-        staking.stake(1 ether, 90 days, bob);
-        vm.prank(alice);
-        staking.stake(1 ether, 180 days, alice);
-        vm.prank(bob);
-        staking.stake(1 ether, 240 days, bob);
-        vm.prank(alice);
-        staking.stake(1 ether, 360 days, alice);
-        vm.prank(alice);
-        staking.collectRewards();
-        vm.prank(alice);
-        staking.collectRewards();
-    }
-
-    function testZeroSupplyRewardDebtPerShare() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
-        vm.prank(team);
-        source.setInflation(slopes);
-
-        vm.prank(alice);
-        staking.stake(1 ether, 10 days);
-        vm.prank(bob);
-        staking.stake(1 ether, 10 days);
-
-        // Alice will unstake, setting her rewardDebtPerShare
-        vm.warp(EPOCH + 10 days);
-        vm.prank(alice);
-        staking.unstake(0);
-
-        // Bob unstakes, setting the total supply to zero
-        vm.warp(EPOCH + 20 days);
-        vm.prank(bob);
-        staking.unstake(0);
-
-        // Alice stakes.
-        //   Even with the total supply being zero, it is important that
-        //   Alice's rewardDebtPerShare per share be set to match the accRewardPerShare
-        vm.prank(alice);
-        staking.stake(1 ether, 10 days);
-
-        // Alice unstakes later.
-        //   If rewardDebtPerShare was wrong, this will fail because she will
-        //   try to collect more OGV than the contract has
-        vm.warp(EPOCH + 30 days);
-        vm.prank(alice);
+        // Should revert if it's already unstaked
+        vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("AlreadyUnstaked(uint256)")), uint256(1)));
         staking.unstake(1);
+
+        vm.stopPrank();
     }
 
-    function testFuzzCanAlwaysWithdraw(uint96 amountA, uint96 amountB, uint64 durationA, uint64 durationB, uint64 start)
-        public
-    {
-        uint256 HUNDRED_YEARS = 100 * 366 days;
-        uint256 LAST_START = HUNDRED_YEARS - 1461 days;
-        vm.warp(start % LAST_START);
+    function testUnstakeMultiple() public {
+        vm.startPrank(alice);
 
-        durationA = durationA % uint64(1461 days);
-        durationB = durationB % uint64(1461 days);
-        if (durationA < 7 days) {
-            durationA = 7 days;
-        }
-        if (durationB < 7 days) {
-            durationB = 7 days;
-        }
-        if (amountA < 1) {
-            amountA = 1;
-        }
-        if (amountB < 1) {
-            amountB = 1;
+        uint256 ogvBalanceBefore = ogv.balanceOf(alice);
+        uint256 veOgvBalanceBefore = staking.balanceOf(alice);
+
+        uint256[] memory lockupIds = new uint256[](2);
+        lockupIds[1] = 1;
+        (uint256 unstakedAmount, uint256 rewardCollected) = staking.unstake(lockupIds);
+
+        assertEq(unstakedAmount, 3000 ether, "Penalty applied with Unstake");
+
+        assertEq((veOgvBalanceBefore * 2 ether) / 10 ether, rewardCollected, "Reward mismatch");
+
+        assertEq(staking.balanceOf(alice), 0, "veOGV not burned");
+
+        assertEq(ogv.balanceOf(alice), ogvBalanceBefore + unstakedAmount + rewardCollected, "OGV balance mismatch");
+
+        for (uint256 i = 0; i < 2; ++i) {
+            (uint128 amount, uint128 end, uint256 points) = staking.lockups(alice, i);
+
+            assertEq(end, 0, "Not unstaked");
+
+            assertEq(points, 0, "Not unstaked, points mismatch");
+
+            assertEq(amount, 0, "Not unstaked, amount mismatch");
+
+            // Should revert if it's already unstaked
+            vm.expectRevert(abi.encodeWithSelector(bytes4(keccak256("AlreadyUnstaked(uint256)")), i));
+            staking.unstake(i);
         }
 
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
+        vm.stopPrank();
+    }
+
+    function testUnstakeForMigration() public {
+        vm.startPrank(migrator);
+
+        uint256 ogvBalanceBefore = ogv.balanceOf(alice);
+        uint256 veOgvBalanceBefore = staking.balanceOf(alice);
+
+        uint256[] memory lockupIds = new uint256[](2);
+        lockupIds[1] = 1;
+        (uint256 unstakedAmount, uint256 rewardCollected) = staking.unstakeFrom(alice, lockupIds);
+
+        assertEq(unstakedAmount, 3000 ether, "Penalty applied with Unstake");
+
+        assertEq((veOgvBalanceBefore * 2 ether) / 10 ether, rewardCollected, "Reward mismatch");
+
+        assertEq(staking.balanceOf(alice), 0, "veOGV not burned");
+
+        assertEq(ogv.balanceOf(alice), ogvBalanceBefore + unstakedAmount + rewardCollected, "OGV balance mismatch");
+
+        for (uint256 i = 0; i < 2; ++i) {
+            (uint128 amount, uint128 end, uint256 points) = staking.lockups(alice, i);
+
+            assertEq(end, 0, "Not unstaked");
+
+            assertEq(points, 0, "Not unstaked, points mismatch");
+
+            assertEq(amount, 0, "Not unstaked, amount mismatch");
+        }
+
+        vm.stopPrank();
+    }
+
+    function testUnstakeFromPermission() public {
         vm.prank(team);
-        source.setInflation(slopes);
-
-        vm.prank(alice);
-        ogv.mint(alice, amountA);
-        vm.prank(alice);
-        ogv.approve(address(staking), amountA);
-        vm.prank(alice);
-        staking.stake(amountA, durationA, alice);
-
-        vm.prank(bob);
-        ogv.mint(bob, amountB);
-        vm.prank(bob);
-        ogv.approve(address(staking), amountB);
-        vm.prank(bob);
-        staking.stake(amountB, durationB, bob);
-
-        vm.warp(HUNDRED_YEARS);
-        vm.prank(alice);
-        staking.unstake(0);
-        vm.prank(bob);
-        staking.unstake(0);
+        uint256[] memory lockupIds = new uint256[](1);
+        vm.expectRevert(bytes4(keccak256("NotMigrator()")));
+        staking.unstakeFrom(alice, lockupIds);
     }
 
-    function testFuzzSemiSanePowerFunction(uint256 start) public {
-        uint256 HUNDRED_YEARS = 100 * 366 days;
-        start = start % HUNDRED_YEARS;
-        vm.warp(start);
-        vm.prank(bob);
-        staking.stake(1e18, 10 days, bob);
-        uint256 y = (356 days + start + 10 days) / 365 days;
-        uint256 maxPoints = 2 ** y * 1e18;
-        assertLt(staking.balanceOf(bob), maxPoints);
+    function testUnstakeLockupLength() public {
+        vm.prank(alice);
+        uint256[] memory lockupIds = new uint256[](0);
+        vm.expectRevert(bytes4(keccak256("NoLockupsToUnstake()")));
+        staking.unstake(lockupIds);
     }
 }
