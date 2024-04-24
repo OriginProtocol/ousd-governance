@@ -186,7 +186,7 @@ contract ExponentialStakingTest is Test {
 
         vm.startPrank(bob);
         staking.stake(100 ether, 11 days, bob, false, NEW_STAKE);
-        vm.expectRevert("Staking: New lockup must be longer");
+        vm.expectRevert("Staking: New lockup must not be shorter");
         staking.stake(1 ether, 8 days, bob, false, 0);
     }
 
