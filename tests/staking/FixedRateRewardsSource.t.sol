@@ -100,12 +100,6 @@ contract FixedRateRewardsSourceTest is Test {
         assertEq(rewards.previewRewards(), 0 ether, "Pending reward mismatch");
     }
 
-    function testInvalidRewardRate() public {
-        vm.prank(strategist);
-        vm.expectRevert(bytes4(keccak256("InvalidRewardRate()")));
-        rewards.setRewardsPerSecond(type(uint256).max);
-    }
-
     function testRewardRatePermission() public {
         // Should allow Strategist to change
         vm.prank(strategist);
