@@ -267,4 +267,12 @@ contract ExponentialStaking is ERC20Votes {
         (uint256 currentPoints,) = previewPoints(1e36, 0); // 1e36 saves a later multiplication
         return amount * ((currentPoints / fullPoints)) / 1e18;
     }
+
+    /// @notice Returns the total number of lockups the user has
+    ///         created so far (including expired & unstaked ones)
+    /// @param user Address
+    /// @return asset Number of lockups the user has had
+    function getLockupsCount(address user) external view returns (uint256) {
+        return lockups[user].length;
+    }
 }
