@@ -167,10 +167,6 @@ contract Migrator is Governable {
             revert MigrationIsInactive();
         }
 
-        if (newStakeAmount == 0) {
-            revert InvalidStakeAmount();
-        }
-
         if (lockupIds.length == 0) {
             revert LockupIdsRequired();
         }
@@ -198,19 +194,20 @@ contract Migrator is Governable {
         }
 
         uint256 ognToWallet = ognAmountFromWallet - newStakeAmount;
-
         if (ognToWallet > 0) {
             ogn.transfer(msg.sender, ognToWallet);
         }
 
-        // Stake it
-        ognStaking.stake(
-            newStakeAmount,
-            newStakeDuration,
-            msg.sender,
-            false,
-            -1 // New stake
-        );
+        if (newStakeAmount > 0) {
+            // Stake it
+            ognStaking.stake(
+                newStakeAmount,
+                newStakeDuration,
+                msg.sender,
+                false,
+                -1 // New stake
+            );
+        }
 
         emit LockupsMigrated(msg.sender, lockupIds, newStakeAmount, newStakeDuration);
     }
