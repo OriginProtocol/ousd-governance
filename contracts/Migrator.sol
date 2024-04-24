@@ -105,8 +105,8 @@ contract Migrator is Governable {
             // OGN doesn't allow burning of tokens. Has `onlyOwner`
             // modifier on `burn` and `burnFrom` methods. Also,
             // `transfer` has a address(0) check. So, this transfers
-            // everything to address(1). The `owner` multisig of
-            // OGN token can call `burnFrom(address(1))` later.abi
+            // everything to address(0xdead). The `owner` multisig of
+            // OGN token can call `burnFrom(address(0xdead))` later.
 
             ogn.transfer(address(0xdead), ognBalance);
         }
