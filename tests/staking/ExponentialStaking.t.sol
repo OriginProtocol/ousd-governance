@@ -61,9 +61,11 @@ contract ExponentialStakingTest is Test {
 
         uint256 beforeOgv = ogn.balanceOf(alice);
         uint256 beforexOGN = ogn.balanceOf(address(staking));
+        assertEq(staking.lockupsCount(alice), 0);
 
         staking.stake(10 ether, 10 days, alice, false, NEW_STAKE);
 
+        assertEq(staking.lockupsCount(alice), 1);
         assertEq(ogn.balanceOf(alice), beforeOgv - 10 ether);
         assertEq(ogn.balanceOf(address(staking)), beforexOGN + 10 ether);
         assertEq(staking.balanceOf(alice), previewPoints);
@@ -77,6 +79,7 @@ contract ExponentialStakingTest is Test {
         vm.warp(31 days);
         staking.unstake(0);
 
+        assertEq(staking.lockupsCount(alice), 1);
         assertEq(ogn.balanceOf(alice), beforeOgv);
         assertEq(ogn.balanceOf(address(staking)), 0);
         (lockupAmount, lockupEnd, lockupPoints) = staking.lockups(alice, 0);
@@ -156,6 +159,39 @@ contract ExponentialStakingTest is Test {
         assertEq(aliceEnd, bobEnd, "same end");
         assertEq(alicePoints, bobPoints, "same points");
         assertEq(staking.accRewardPerShare(), staking.rewardDebtPerShare(bob));
+    }
+
+    function testExtendOnOtherUser() public {
+        vm.prank(alice);
+        staking.stake(1 ether, 60 days, alice, false, NEW_STAKE);
+
+        vm.expectRevert("Staking: Self only");
+        vm.prank(bob);
+        staking.stake(1 ether, 60 days, alice, false, 0);
+
+        vm.expectRevert("Staking: Self only");
+        vm.prank(bob);
+        staking.stake(1 ether, 60 days, alice, true, NEW_STAKE);
+    }
+
+    function testExtendOnClosed() public {
+        vm.prank(alice);
+        staking.stake(1 ether, 60 days, alice, false, NEW_STAKE);
+        vm.prank(alice);
+        staking.unstake(0);
+
+        vm.expectRevert("Staking: Already closed stake");
+        vm.prank(alice);
+        staking.stake(1 ether, 80 days, alice, false, 0);
+    }
+
+    function testExtendNoChange() public {
+        vm.prank(alice);
+        staking.stake(1 ether, 60 days, alice, false, NEW_STAKE);
+
+        vm.expectRevert("Staking: Must have increased amount or duration");
+        vm.prank(alice);
+        staking.stake(0, 60 days, alice, false, 0);
     }
 
     function testDoubleExtend() public {
@@ -300,13 +336,6 @@ contract ExponentialStakingTest is Test {
     }
 
     function testMultipleUnstake() public {
-        RewardsSource.Slope[] memory slopes = new RewardsSource.Slope[](1);
-        slopes[0].start = uint64(EPOCH);
-        slopes[0].ratePerDay = 2 ether;
-
-        vm.prank(team);
-        source.setInflation(slopes);
-
         vm.startPrank(alice);
         staking.stake(1 ether, 10 days, alice, false, NEW_STAKE);
         vm.warp(EPOCH + 11 days);
@@ -315,22 +344,29 @@ contract ExponentialStakingTest is Test {
         staking.unstake(0);
     }
 
+    function testUnstakeNeverStaked() public {
+        vm.startPrank(alice);
+        vm.expectRevert();
+        staking.unstake(0);
+    }
+
     function testEarlyUnstake() public {
         vm.startPrank(alice);
         vm.warp(EPOCH);
         staking.stake(1 ether, 200 days, alice, false, NEW_STAKE);
 
-        // console.log("----");
-        // for(uint256 i = 0; i < 721; i++){
-        //     console.log(i, staking.previewWithdraw(1e18, EPOCH + i * 1 days));
-        // }
-        // console.log("----");
-
         vm.warp(EPOCH + 100 days);
         uint256 before = ogn.balanceOf(alice);
+        uint256 beforeCollected = ogn.balanceOf(address(source));
+        uint256 expectedWithdraw = staking.previewWithdraw(1 ether, EPOCH + 200 days);
+
         staking.unstake(0);
+
         uint256 returnAmount = ogn.balanceOf(alice) - before;
         assertEq(returnAmount, 911937178579591520);
+        assertEq(expectedWithdraw, returnAmount);
+        uint256 penaltyCollected = ogn.balanceOf(address(source)) - beforeCollected;
+        assertEq(penaltyCollected, 1 ether - 911937178579591520);
     }
 
     function testCollectRewardsOnExpand() public {
@@ -479,8 +515,12 @@ contract ExponentialStakingTest is Test {
         ogn.mint(alice, amountA);
         vm.prank(alice);
         ogn.approve(address(staking), amountA);
+        assertEq(staking.balanceOf(alice), 0);
+        // preview check
+        (uint256 expectedPoints,) = staking.previewPoints(amountA, durationA);
         vm.prank(alice);
         staking.stake(amountA, durationA, alice, false, NEW_STAKE);
+        assertEq(staking.balanceOf(alice), expectedPoints);
 
         vm.prank(bob);
         ogn.mint(bob, amountB);

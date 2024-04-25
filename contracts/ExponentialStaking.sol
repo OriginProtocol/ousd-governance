@@ -142,12 +142,12 @@ contract ExponentialStaking is ERC20Votes {
         } else {
             lockups[to].push(lockup);
             uint256 numLockups = lockups[to].length;
+            require(numLockups < uint256(type(int256).max), "Staking: Too many lockups");
+            lockupId = int256(numLockups - 1);
             // Delegate voting power to the receiver, if unregistered and first stake
             if (numLockups == 1 && delegates(to) == address(0)) {
                 _delegate(to, to);
             }
-            require(numLockups < uint256(type(int256).max), "Staking: Too many lockups");
-            lockupId = int256(numLockups - 1);
         }
         _mint(to, newPoints - oldPoints);
         emit Stake(to, uint256(lockupId), newAmount, newEnd, newPoints);
@@ -273,7 +273,7 @@ contract ExponentialStaking is ERC20Votes {
     ///         created so far (including expired & unstaked ones)
     /// @param user Address
     /// @return asset Number of lockups the user has had
-    function getLockupsCount(address user) external view returns (uint256) {
+    function lockupsCount(address user) external view returns (uint256) {
         return lockups[user].length;
     }
 }
