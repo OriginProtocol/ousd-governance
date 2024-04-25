@@ -47,7 +47,7 @@ contract FixedRateRewardsSource is Governable, Initializable {
     /// @param _strategistAddr Address of the Strategist
     /// @param _rewardsTarget Address that receives rewards
     /// @param _rewardsPerSecond Rate of reward emission
-    function initialize(address _strategistAddr, address _rewardsTarget, uint256 _rewardsPerSecond)
+    function initialize(address _strategistAddr, address _rewardsTarget, uint192 _rewardsPerSecond)
         external
         initializer
     {
@@ -121,20 +121,16 @@ contract FixedRateRewardsSource is Governable, Initializable {
 
     /// @dev Set the rate of reward emission
     /// @param _rewardsPerSecond Amount of rewardToken to distribute per second
-    function setRewardsPerSecond(uint256 _rewardsPerSecond) external onlyGovernorOrStrategist {
+    function setRewardsPerSecond(uint192 _rewardsPerSecond) external onlyGovernorOrStrategist {
         _setRewardsPerSecond(_rewardsPerSecond);
     }
 
     /// @dev Set the rate of reward emission
     /// @param _rewardsPerSecond Amount of rewardToken to distribute per second
-    function _setRewardsPerSecond(uint256 _rewardsPerSecond) internal {
-        if (_rewardsPerSecond > type(uint192).max) {
-            revert InvalidRewardRate();
-        }
-
+    function _setRewardsPerSecond(uint192 _rewardsPerSecond) internal {
         // Update storage
         RewardConfig storage _config = rewardConfig;
         emit RewardsPerSecondChanged(_rewardsPerSecond, _config.rewardsPerSecond);
-        _config.rewardsPerSecond = uint192(_rewardsPerSecond);
+        _config.rewardsPerSecond = _rewardsPerSecond;
     }
 }
