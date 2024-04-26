@@ -89,8 +89,7 @@ contract Migrator is Governable {
         uint256 availableOGN = ogn.balanceOf(address(this));
 
         if (endTime == 0 || isMigrationActive()) {
-            uint256 totalOGV = ogv.totalSupply() - ogv.balanceOf(address(this));
-            uint256 maxOGNNeeded = (totalOGV * CONVERSION_RATE) / 1 ether;
+            uint256 maxOGNNeeded = (ogv.totalSupply() * CONVERSION_RATE) / 1 ether;
             ogn.transfer(treasury, availableOGN - maxOGNNeeded);
         } else {
             emit Decommissioned();
