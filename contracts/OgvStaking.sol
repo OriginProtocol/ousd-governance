@@ -44,14 +44,22 @@ contract OgvStaking is ERC20Votes {
     // unless the user calls `delegate()` method.
     mapping(address => bool) public hasDelegationSet;
 
+    // Migrator contract address
+    address public immutable migratorAddr;
+
     // Events
     event Stake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
     event Unstake(address indexed user, uint256 lockupId, uint256 amount, uint256 end, uint256 points);
     event Reward(address indexed user, uint256 amount);
 
-    // 1. Core Functions
+    // Errors
+    error NotMigrator();
+    error StakingDisabled();
+    error NoLockupsToUnstake();
+    error AlreadyUnstaked(uint256 lockupId);
 
-    constructor(address ogv_, uint256 epoch_, uint256 minStakeDuration_, address rewardsSource_)
+    // 1. Core Functions
+    constructor(address ogv_, uint256 epoch_, uint256 minStakeDuration_, address rewardsSource_, address migrator_)
         ERC20("", "")
         ERC20Permit("veOGV")
     {
@@ -59,6 +67,7 @@ contract OgvStaking is ERC20Votes {
         epoch = epoch_;
         minStakeDuration = minStakeDuration_;
         rewardsSource = RewardsSource(rewardsSource_);
+        migratorAddr = migrator_;
     }
 
     function name() public pure override returns (string memory) {
@@ -77,6 +86,14 @@ contract OgvStaking is ERC20Votes {
         revert("Staking: Transfers disabled");
     }
 
+    modifier onlyMigrator() {
+        if (migratorAddr != msg.sender) {
+            revert NotMigrator();
+        }
+
+        _;
+    }
+
     // 2. Staking and Lockup Functions
 
     /// @notice Stake OGV to an address that may not be the same as the
@@ -93,7 +110,7 @@ contract OgvStaking is ERC20Votes {
     /// @param duration in seconds for the stake
     /// @param to address to receive ownership of the stake
     function stake(uint256 amount, uint256 duration, address to) external {
-        _stake(amount, duration, to);
+        revert StakingDisabled();
     }
 
     /// @notice Stake OGV
@@ -108,54 +125,83 @@ contract OgvStaking is ERC20Votes {
     /// @param amount OGV to lockup in the stake
     /// @param duration in seconds for the stake
     function stake(uint256 amount, uint256 duration) external {
-        _stake(amount, duration, msg.sender);
-    }
-
-    /// @dev Internal method used for public staking
-    /// @param amount OGV to lockup in the stake
-    /// @param duration in seconds for the stake
-    /// @param to address to receive ownership of the stake
-    function _stake(uint256 amount, uint256 duration, address to) internal {
-        require(to != address(0), "Staking: To the zero address");
-        require(amount <= type(uint128).max, "Staking: Too much");
-        require(amount > 0, "Staking: Not enough");
-
-        // duration checked inside previewPoints
-        (uint256 points, uint256 end) = previewPoints(amount, duration);
-        require(points + totalSupply() <= type(uint192).max, "Staking: Max points exceeded");
-        _collectRewards(to);
-        lockups[to].push(
-            Lockup({
-                amount: uint128(amount), // max checked in require above
-                end: uint128(end),
-                points: points
-            })
-        );
-        _mint(to, points);
-        ogv.transferFrom(msg.sender, address(this), amount); // Important that it's sender
-
-        if (!hasDelegationSet[to] && delegates(to) == address(0)) {
-            // Delegate voting power to the receiver, if unregistered
-            _delegate(to, to);
-        }
-
-        emit Stake(to, lockups[to].length - 1, amount, end, points);
+        revert StakingDisabled();
     }
 
     /// @notice Collect staked OGV for a lockup and any earned rewards.
     /// @param lockupId the id of the lockup to unstake
-    function unstake(uint256 lockupId) external {
-        Lockup memory lockup = lockups[msg.sender][lockupId];
-        uint256 amount = lockup.amount;
-        uint256 end = lockup.end;
-        uint256 points = lockup.points;
-        require(block.timestamp >= end, "Staking: End of lockup not reached");
-        require(end != 0, "Staking: Already unstaked this lockup");
-        _collectRewards(msg.sender);
-        delete lockups[msg.sender][lockupId]; // Keeps empty in array, so indexes are stable
-        _burn(msg.sender, points);
-        ogv.transfer(msg.sender, amount);
-        emit Unstake(msg.sender, lockupId, amount, end, points);
+    /// @return unstakedAmount OGV amount unstaked
+    /// @return rewardCollected OGV reward amount collected
+    function unstake(uint256 lockupId) external returns (uint256 unstakedAmount, uint256 rewardCollected) {
+        uint256[] memory lockupIds = new uint256[](1);
+        lockupIds[0] = lockupId;
+        return _unstake(msg.sender, lockupIds);
+    }
+
+    /// @notice Unstake multiple lockups at once.
+    /// @param lockupIds Array of the lockup IDs to unstake
+    /// @return unstakedAmount OGV amount unstaked
+    /// @return rewardCollected OGV reward amount collected
+    function unstake(uint256[] memory lockupIds) external returns (uint256 unstakedAmount, uint256 rewardCollected) {
+        return _unstake(msg.sender, lockupIds);
+    }
+
+    /// @notice Unstakes lockups of an user.
+    ///         Can only be called by the Migrator.
+    /// @param staker Address of the user
+    /// @param lockupIds Array of the lockup IDs to unstake
+    /// @return unstakedAmount OGV amount unstaked
+    /// @return rewardCollected OGV reward amount collected
+    function unstakeFrom(address staker, uint256[] memory lockupIds)
+        external
+        onlyMigrator
+        returns (uint256 unstakedAmount, uint256 rewardCollected)
+    {
+        return _unstake(staker, lockupIds);
+    }
+
+    /// @notice Unstakes lockups of an user.
+    /// @param staker Address of the user
+    /// @param lockupIds Array of the lockup IDs to unstake
+    /// @return unstakedAmount OGV amount unstaked
+    /// @return rewardCollected OGV reward amount collected
+    function _unstake(address staker, uint256[] memory lockupIds)
+        internal
+        returns (uint256 unstakedAmount, uint256 rewardCollected)
+    {
+        if (lockupIds.length == 0) {
+            revert NoLockupsToUnstake();
+        }
+
+        // Collect rewards
+        rewardCollected = _collectRewards(staker);
+
+        uint256 unstakedPoints = 0;
+
+        for (uint256 i = 0; i < lockupIds.length; ++i) {
+            uint256 lockupId = lockupIds[i];
+            Lockup memory lockup = lockups[staker][lockupId];
+            uint256 amount = lockup.amount;
+            uint256 end = lockup.end;
+            uint256 points = lockup.points;
+
+            unstakedAmount += amount;
+            unstakedPoints += points;
+
+            // Make sure it isn't unstaked already
+            if (end == 0) {
+                revert AlreadyUnstaked(lockupId);
+            }
+
+            delete lockups[staker][lockupId]; // Keeps empty in array, so indexes are stable
+
+            emit Unstake(staker, lockupId, amount, end, points);
+        }
+
+        // Transfer unstaked OGV
+        ogv.transfer(staker, unstakedAmount);
+        // ... and burn veOGV
+        _burn(staker, unstakedPoints);
     }
 
     /// @notice Extend a stake lockup for additional points.
@@ -172,24 +218,7 @@ contract OgvStaking is ERC20Votes {
     /// @param lockupId the id of the old lockup to extend
     /// @param duration number of seconds from now to stake for
     function extend(uint256 lockupId, uint256 duration) external {
-        // duration checked inside previewPoints
-        _collectRewards(msg.sender);
-        Lockup memory lockup = lockups[msg.sender][lockupId];
-        uint256 oldAmount = lockup.amount;
-        uint256 oldEnd = lockup.end;
-        uint256 oldPoints = lockup.points;
-        (uint256 newPoints, uint256 newEnd) = previewPoints(oldAmount, duration);
-        require(newEnd > oldEnd, "Staking: New lockup must be longer");
-        lockup.end = uint128(newEnd);
-        lockup.points = newPoints;
-        lockups[msg.sender][lockupId] = lockup;
-        _mint(msg.sender, newPoints - oldPoints);
-        if (!hasDelegationSet[msg.sender] && delegates(msg.sender) == address(0)) {
-            // Delegate voting power to the receiver, if unregistered
-            _delegate(msg.sender, msg.sender);
-        }
-        emit Unstake(msg.sender, lockupId, oldAmount, oldEnd, oldPoints);
-        emit Stake(msg.sender, lockupId, oldAmount, newEnd, newPoints);
+        revert StakingDisabled();
     }
 
     /// @notice Preview the number of points that would be returned for the
@@ -200,20 +229,15 @@ contract OgvStaking is ERC20Votes {
     /// @return points staking points that would be returned
     /// @return end staking period end date
     function previewPoints(uint256 amount, uint256 duration) public view returns (uint256, uint256) {
-        require(duration >= minStakeDuration, "Staking: Too short");
-        require(duration <= 1461 days, "Staking: Too long");
-        uint256 start = block.timestamp > epoch ? block.timestamp : epoch;
-        uint256 end = start + duration;
-        uint256 endYearpoc = ((end - epoch) * 1e18) / 365 days;
-        uint256 multiplier = PRBMathUD60x18.pow(YEAR_BASE, endYearpoc);
-        return ((amount * multiplier) / 1e18, end);
+        revert StakingDisabled();
     }
 
     // 3. Reward functions
 
     /// @notice Collect all earned OGV rewards.
-    function collectRewards() external {
-        _collectRewards(msg.sender);
+    /// @return rewardCollected OGV reward amount collected
+    function collectRewards() external returns (uint256 rewardCollected) {
+        return _collectRewards(msg.sender);
     }
 
     /// @notice Shows the amount of OGV a user would receive if they collected
@@ -222,45 +246,40 @@ contract OgvStaking is ERC20Votes {
     /// @param user to preview rewards for
     /// @return OGV rewards amount
     function previewRewards(address user) external view returns (uint256) {
-        uint256 supply = totalSupply();
-        if (supply == 0) {
+        if (totalSupply() == 0) {
             return 0; // No one has any points to even get rewards
         }
-        uint256 _accRewardPerShare = accRewardPerShare;
-        _accRewardPerShare += (rewardsSource.previewRewards() * 1e12) / supply;
-        uint256 netRewardsPerShare = _accRewardPerShare - rewardDebtPerShare[user];
+        uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
         return (balanceOf(user) * netRewardsPerShare) / 1e12;
     }
 
     /// @dev Internal function to handle rewards accounting.
     ///
-    /// 1. Collect new rewards for everyone
-    /// 2. Calculate this user's rewards and accounting
-    /// 3. Distribute this user's rewards
+    /// 1. Calculate this user's rewards and accounting
+    /// 2. Distribute this user's rewards, if any
     ///
     /// This function *must* be called before any user balance changes.
     ///
     /// This will always update the user's rewardDebtPerShare to match
-    /// accRewardPerShare, which is essential to the accounting.
+    /// accRewardPerShare, which is essential to the accounting. This
+    /// wouldn't allow user to claim rewards twice
     ///
     /// @param user to collect rewards for
-    function _collectRewards(address user) internal {
-        uint256 supply = totalSupply();
-        if (supply > 0) {
-            uint256 preBalance = ogv.balanceOf(address(this));
-            try rewardsSource.collectRewards() {}
-            catch {
-                // Governance staking should continue, even if rewards fail
-            }
-            uint256 collected = ogv.balanceOf(address(this)) - preBalance;
-            accRewardPerShare += (collected * 1e12) / supply;
+    /// @param netRewards Net reward collected for user
+    function _collectRewards(address user) internal returns (uint256 netRewards) {
+        if (totalSupply() == 0) {
+            return 0; // No one has any points to even get rewards
         }
+
         uint256 netRewardsPerShare = accRewardPerShare - rewardDebtPerShare[user];
-        uint256 netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
+        netRewards = (balanceOf(user) * netRewardsPerShare) / 1e12;
+
         rewardDebtPerShare[user] = accRewardPerShare;
+
         if (netRewards == 0) {
-            return;
+            return 0;
         }
+
         ogv.transfer(user, netRewards);
         emit Reward(user, netRewards);
     }
