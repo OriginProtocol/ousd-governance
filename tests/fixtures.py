@@ -135,7 +135,7 @@ def rewards(token):
 
 @pytest.fixture
 def staking(token, rewards):
-    return run("deploy_staking", "main", (token.address, DAY, rewards.address))
+    return run("deploy_staking", "main", (token.address, DAY, rewards.address, True))
 
 @pytest.fixture
 def whale_voter(token, staking):
@@ -143,7 +143,7 @@ def whale_voter(token, staking):
     voter = accounts[3]
     amount = int(1e9) * int(1e18)
     token.approve(staking.address, amount) # Uses coins from default address
-    staking.stake(amount, WEEK * 52 * 4, voter)
+    staking.mockStake(amount, WEEK * 52 * 4, voter)
     return voter
 
 @pytest.fixture

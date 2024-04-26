@@ -46,6 +46,11 @@ contract MockOGVStaking is OgvStaking {
 
         _mint(to, points);
         emit Stake(to, uint256(lockupId), amountIn, end, points);
+
+        if (!hasDelegationSet[to]) {
+            hasDelegationSet[to] = true;
+            super._delegate(to, to);
+        }
     }
 
     function setRewardShare(uint256 _accRewardPerShare) external {
