@@ -106,8 +106,8 @@ contract MigratorTest is Test {
         vm.stopPrank();
 
         vm.warp(migrator.endTime() + 100);
-
-        migrator.decommission();
+        vm.prank(governor);
+        migrator.transferExcessTokens(address(0xdead));
 
         assertEq(ogn.balanceOf(address(migrator)), 0 ether, "OGN leftover");
         assertEq(ogn.balanceOf(address(0xdead)), maxOgnAmount - 0.09137 ether, "OGN not sent to burn address");
@@ -165,20 +165,6 @@ contract MigratorTest is Test {
         ids[0] = 0;
         migrator.migrate(ids, 0, 0, false, 0, 0);
         vm.stopPrank();
-    }
-
-    function testRevertDecommissionBeforeEnd() public {
-        vm.warp(migrator.endTime() - 1000);
-
-        vm.expectRevert(bytes4(keccak256("MigrationNotComplete()")));
-        migrator.decommission();
-    }
-
-    function testRevertDecommissionBeforeStart() public {
-        Migrator newMigrator = new Migrator(address(ogv), address(ogn), address(1), address(1));
-
-        vm.expectRevert(bytes4(keccak256("MigrationNotComplete()")));
-        newMigrator.decommission();
     }
 
     function testMigrateStakes() public {
