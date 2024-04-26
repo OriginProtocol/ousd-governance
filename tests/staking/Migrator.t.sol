@@ -79,17 +79,16 @@ contract MigratorTest is Test {
 
     function testBalanceMigration() public {
         uint256 maxOgnAmount = ogn.balanceOf(address(migrator));
+        uint256 ogvSupply = ogv.totalSupply();
 
         vm.startPrank(alice);
         migrator.migrate(100 ether);
         vm.stopPrank();
 
-        assertEq(ogv.balanceOf(alice), 10000000 ether - 100 ether, "More OGV sent");
+        assertEq(ogv.balanceOf(alice), 10000000 ether - 100 ether, "More OGV burnt");
+        assertEq(ogv.totalSupply(), ogvSupply - 100 ether, "OGV supply mismatch");
 
         assertEq(ogn.balanceOf(alice), 9.137 ether, "Less OGN received");
-
-        assertEq(ogv.balanceOf(address(migrator)), 100 ether, "Less OGV received");
-
         assertEq(ogn.balanceOf(address(migrator)), maxOgnAmount - 9.137 ether, "More OGN sent");
     }
 
@@ -110,10 +109,7 @@ contract MigratorTest is Test {
 
         migrator.decommission();
 
-        assertEq(ogv.balanceOf(address(migrator)), 0 ether, "OGV leftover");
-
         assertEq(ogn.balanceOf(address(migrator)), 0 ether, "OGN leftover");
-
         assertEq(ogn.balanceOf(address(0xdead)), maxOgnAmount - 0.09137 ether, "OGN not sent to burn address");
     }
 
@@ -154,22 +150,20 @@ contract MigratorTest is Test {
         vm.stopPrank();
     }
 
-    function testRevertMigrateAfterTimelimit() public {
+    function testMigrateAfterTimelimit() public {
+        // Should allow migration even after timelimit
+        // but before decommission
+        vm.startPrank(alice);
+        ogvStaking.mockStake(10000 ether, 365 days);
+
         vm.warp(migrator.endTime() + 100);
 
         assertEq(migrator.isMigrationActive(), false, "Migration state not changed");
 
-        vm.startPrank(alice);
-
-        vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
-        migrator.migrate(100 ether);
-
-        vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
         migrator.migrate(1 ether);
-
-        vm.expectRevert(bytes4(keccak256("MigrationIsInactive()")));
-        migrator.migrate(new uint256[](1), 0, 0, false, 1 ether, 0);
-
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 0;
+        migrator.migrate(ids, 0, 0, false, 0, 0);
         vm.stopPrank();
     }
 

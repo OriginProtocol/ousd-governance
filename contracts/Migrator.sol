@@ -56,8 +56,7 @@ contract Migrator is Governable {
         _;
 
         uint256 availableOGN = ogn.balanceOf(address(this));
-        uint256 totalOGV = ogv.totalSupply() - ogv.balanceOf(address(this));
-        uint256 maxOGNNeeded = (totalOGV * CONVERSION_RATE) / 1 ether;
+        uint256 maxOGNNeeded = (ogv.totalSupply() * CONVERSION_RATE) / 1 ether;
 
         if (availableOGN < maxOGNNeeded) {
             revert ContractInsolvent(maxOGNNeeded, availableOGN);
@@ -83,7 +82,7 @@ contract Migrator is Governable {
     /**
      * @notice Decommissions the contract. Can be called only
      *          after a year since `start()` was invoked. Burns
-     *          all OGV held in the contract and transfers OGN
+     *          all OGN in the contract by transferring them to
      *          to address(0xdead).
      */
     function decommission() external {
@@ -93,12 +92,6 @@ contract Migrator is Governable {
         }
 
         emit Decommissioned();
-
-        uint256 ogvBalance = ogv.balanceOf(address(this));
-        if (ogvBalance > 0) {
-            // Burn all OGV
-            ogv.burn(ogvBalance);
-        }
 
         uint256 ognBalance = ogn.balanceOf(address(this));
         if (ognBalance > 0) {
@@ -137,7 +130,9 @@ contract Migrator is Governable {
     }
 
     /**
-     * @notice Migrates the specified amount of OGV to OGN
+     * @notice Migrates the specified amount of OGV to OGN.
+     *          Does not check if migration is active since
+     *          that's okay (until we decommission).
      * @param ogvAmount Amount of OGV to migrate
      * @return ognReceived OGN Received
      */
@@ -148,6 +143,8 @@ contract Migrator is Governable {
     /**
      * @notice Migrates OGV stakes to OGN. Can also include unstaked OGN & OGV
      *          balances from the user's wallet (if specified).
+     *          Does not check if migration is active since that's okay (until
+     *          we decommission the contract).
      * @param lockupIds OGV Lockup IDs to be migrated
      * @param ogvAmountFromWallet Extra OGV balance from user's wallet to migrate & stake
      * @param ognAmountFromWallet Extra OGN balance from user's wallet to stake
@@ -163,10 +160,6 @@ contract Migrator is Governable {
         uint256 newStakeAmount,
         uint256 newStakeDuration
     ) external isSolvent {
-        if (!isMigrationActive()) {
-            revert MigrationIsInactive();
-        }
-
         if (lockupIds.length == 0) {
             revert LockupIdsRequired();
         }
@@ -217,15 +210,11 @@ contract Migrator is Governable {
      * @return ognReceived OGN Received
      */
     function _migrate(uint256 ogvAmount, address receiver) internal returns (uint256 ognReceived) {
-        if (!isMigrationActive()) {
-            revert MigrationIsInactive();
-        }
-
         ognReceived = (ogvAmount * CONVERSION_RATE) / 1 ether;
 
         emit TokenExchanged(ogvAmount, ognReceived);
 
-        ogv.transferFrom(msg.sender, address(this), ogvAmount);
+        ogv.burnFrom(msg.sender, ogvAmount);
 
         if (receiver != address(this)) {
             // When migrating stakes, the contract would directly

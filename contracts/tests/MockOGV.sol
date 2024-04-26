@@ -13,4 +13,8 @@ contract MockOGV is ERC20 {
     function burn(uint256 amount) external {
         _burn(msg.sender, amount);
     }
+
+    function burnFrom(address owner, uint256 amount) external {
+        _burn(owner, amount);
+    }
 }
