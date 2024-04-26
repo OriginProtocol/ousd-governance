@@ -16,7 +16,7 @@ import {RewardsSource} from "./RewardsSource.sol";
 /// The balance received for staking (and thus the voting power and rewards
 /// distribution) goes up exponentially by the end of the staked period.
 contract ExponentialStaking is ERC20Votes {
-    uint256 public immutable epoch; // timestamp
+    uint256 public immutable epoch; // Start of staking program - timestamp
     ERC20 public immutable asset; // Must not allow reentrancy
     RewardsSource public immutable rewardsSource;
     uint256 public immutable minStakeDuration; // in seconds
@@ -136,17 +136,18 @@ contract ExponentialStaking is ERC20Votes {
 
         // Update or create lockup
         if (lockupId != NEW_STAKE) {
-            require(newEnd > oldEnd, "Staking: New lockup must be longer");
+            require(newEnd >= oldEnd, "Staking: New lockup must not be shorter");
+            require(newPoints > oldPoints, "Staking: Must have increased amount or duration");
             lockups[to][uint256(lockupId)] = lockup;
         } else {
             lockups[to].push(lockup);
             uint256 numLockups = lockups[to].length;
+            require(numLockups < uint256(type(int256).max), "Staking: Too many lockups");
+            lockupId = int256(numLockups - 1);
             // Delegate voting power to the receiver, if unregistered and first stake
             if (numLockups == 1 && delegates(to) == address(0)) {
                 _delegate(to, to);
             }
-            require(numLockups < uint256(type(int256).max), "Staking: Too many lockups");
-            lockupId = int256(numLockups - 1);
         }
         _mint(to, newPoints - oldPoints);
         emit Stake(to, uint256(lockupId), newAmount, newEnd, newPoints);
@@ -266,5 +267,13 @@ contract ExponentialStaking is ERC20Votes {
         (uint256 fullPoints,) = previewPoints(1e18, fullDuration);
         (uint256 currentPoints,) = previewPoints(1e36, 0); // 1e36 saves a later multiplication
         return amount * ((currentPoints / fullPoints)) / 1e18;
+    }
+
+    /// @notice Returns the total number of lockups the user has
+    ///         created so far (including expired & unstaked ones)
+    /// @param user Address
+    /// @return asset Number of lockups the user has had
+    function lockupsCount(address user) external view returns (uint256) {
+        return lockups[user].length;
     }
 }
