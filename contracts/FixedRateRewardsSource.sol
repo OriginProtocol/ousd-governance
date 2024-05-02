@@ -87,10 +87,15 @@ contract FixedRateRewardsSource is Governable, Initializable {
 
     /// @dev Compute pending rewards since last collect
     /// @return rewardAmount Amount of reward that'll be distributed if collected now
-    function previewRewards() public view returns (uint256) {
+    function previewRewards() public view returns (uint256 rewardAmount) {
         RewardConfig memory _config = rewardConfig;
-        return (block.timestamp - _config.lastCollect) * _config.rewardsPerSecond;
-        // return _previewRewards(rewardConfig);
+
+        rewardAmount = (block.timestamp - _config.lastCollect) * _config.rewardsPerSecond;
+
+        uint256 balance = IERC20(rewardToken).balanceOf(address(this));
+        if (rewardAmount > balance) {
+            rewardAmount = balance;
+        }
     }
 
     /// @dev Set address of the strategist
