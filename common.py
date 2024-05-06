@@ -61,6 +61,10 @@ def governanceProposal(deployment):
             deploymentInfo['name'],
         ]
 
+        propose_data = ogvGovernor.propose.encode_input(
+            *proposal_args
+        )
+
         if is_fork:
             print('Creating governance proposal on fork')
             propose_tx = ogvGovernor.propose(
@@ -89,11 +93,6 @@ def governanceProposal(deployment):
 
             print("Executing proposal")
             ogvGovernor.execute(proposalId, {'from': GOV_MULTISIG})
-
-        else:
-            propose_data = ogvGovernor.propose.encode_input(
-                *proposal_args
-            )
 
         print("Raw Args", proposal_args)
 
