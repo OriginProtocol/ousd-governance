@@ -89,8 +89,10 @@ contract FixedRateRewardsSource is Governable, Initializable {
     /// @return rewardAmount Amount of reward that'll be distributed if collected now
     function previewRewards() public view returns (uint256) {
         RewardConfig memory _config = rewardConfig;
+        if (_config.lastCollect == 0) {
+            return 0;
+        }
         return (block.timestamp - _config.lastCollect) * _config.rewardsPerSecond;
-        // return _previewRewards(rewardConfig);
     }
 
     /// @dev Set address of the strategist
