@@ -100,6 +100,18 @@ contract FixedRateRewardsSourceTest is Test {
         assertEq(rewards.previewRewards(), 0 ether, "Pending reward mismatch");
     }
 
+    function testLowBalanceCollection() public {
+        // Should also allow disabling rewards
+        vm.prank(strategist);
+        rewards.setRewardsPerSecond(2000000 ether);
+
+        // Should never show more than balance
+        vm.warp(block.number + 10);
+        assertEq(rewards.previewRewards(), 1000000 ether, "Pending reward mismatch");
+        vm.warp(block.number + 123);
+        assertEq(rewards.previewRewards(), 1000000 ether, "Pending reward mismatch");
+    }
+
     function testRewardRatePermission() public {
         // Should allow Strategist to change
         vm.prank(strategist);
