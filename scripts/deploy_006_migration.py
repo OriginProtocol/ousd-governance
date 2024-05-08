@@ -36,12 +36,7 @@ def main():
     ousd_buyback = interface.IBuyback(ousd_buyback_proxy.address)
     oeth_buyback = interface.IBuyback(oeth_buyback_proxy.address)
 
-    # Deploy OGN Governance
-    xogn_governance = Governance.deploy(xogn_proxy, TIMELOCK, FROM_DEPLOYER)
-    # TODO: Decide on Governance params
-    print("xOGN Governance deployed at {}".format(xogn_governance.address))
-
-    # Deploy OGV implementation
+    # Deploy veOGV implementation
     ogv_min_staking = 30 * 24 * 60 * 60 # 2592000 -> 30 days
     ogv_epoch = 1657584000
     veogv_impl = OgvStaking.deploy(
@@ -55,8 +50,8 @@ def main():
     print("OGVStaking Implementation deployed at {}".format(veogv_impl.address))
 
     # Deploy xOGN implementation
-    ogn_min_staking = 7 * 24 * 60 * 60 # 7 days
-    ogn_epoch = 24 * 60 * 60 # 1 day
+    ogn_min_staking = 30 * 24 * 60 * 60 # 30 days
+    ogn_epoch = 1716163200 # May 20, 2024 GMT
     xogn_impl = ExponentialStaking.deploy(
       OGN_ADDRESS, 
       ogn_epoch, 
@@ -74,7 +69,7 @@ def main():
     print("ExponentialStaking proxy initialized")
 
     # Deploy FixedRateRewardsSource
-    rewards_per_second = 100 # TODO: Decide on the params
+    rewards_per_second = 0 # TODO: Decide on the params
     ogn_rewardssource_impl = FixedRateRewardsSource.deploy(OGN_ADDRESS, FROM_DEPLOYER)
     print("FixedRateRewardsSource implementation deployed at {}".format(ogn_rewardssource_impl.address))
     # ogn_rewardssource = FixedRateRewardsSource.at(ogn_rewardssource_proxy.address)
@@ -114,9 +109,6 @@ def main():
       MigratorProxy.publish_source(migrator_proxy)
       ExponentialStakingProxy.publish_source(xogn_proxy)
 
-      # Verify Governance
-      Governance.publish_source(xogn_governance)
-
       # Verify implementations
       OgvStaking.publish_source(veogv_impl)
       FixedRateRewardsSource.publish_source(ogn_rewardssource_impl)
@@ -124,7 +116,7 @@ def main():
       ExponentialStaking.publish_source(xogn_impl)
       
     return {
-      'name': 'Deploy OGV-OGN Migration contracts and OGN Governance',
+      'name': 'Deploy OGV-OGN Migration contracts and revoke OGV Governance roles',
       'actions': [
         ### OGV Governance
         {
@@ -134,24 +126,23 @@ def main():
           'args': [veogv_impl.address]
         },
 
-        ### OGN Governance
         {
-          # Grant proposer role to OGN Governance
+          # Revoke proposer role from OGV Governance
           'contract': timelock,
-          'signature': 'grantRole(bytes32,address)',
-          'args': [web3.keccak(text="PROPOSER_ROLE"), xogn_governance.address]
+          'signature': 'revokeRole(bytes32,address)',
+          'args': [web3.keccak(text="PROPOSER_ROLE"), GOVERNOR_FIVE]
         },
         {
-          # Grant canceller role to OGN Governance
+          # Revoke canceller role from OGV Governance
           'contract': timelock,
-          'signature': 'grantRole(bytes32,address)',
-          'args': [web3.keccak(text="CANCELLER_ROLE"), xogn_governance.address]
+          'signature': 'revokeRole(bytes32,address)',
+          'args': [web3.keccak(text="CANCELLER_ROLE"), GOVERNOR_FIVE]
         },
         {
-          # Grant executor role to OGN Governance
+          # Revoke executor role from OGV Governance
           'contract': timelock,
-          'signature': 'grantRole(bytes32,address)',
-          'args': [web3.keccak(text="EXECUTOR_ROLE"), xogn_governance.address]
+          'signature': 'revokeRole(bytes32,address)',
+          'args': [web3.keccak(text="EXECUTOR_ROLE"), GOVERNOR_FIVE]
         },
 
         ### Buybacks
