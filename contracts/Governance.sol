@@ -17,7 +17,7 @@ contract Governance is
 {
     constructor(ERC20Votes _token, TimelockController _timelock)
         Governor("Origin DeFi Governance")
-        GovernorSettings(1, /* 1 block */ 14416, /* ~2 days (86400 / 12) * 2 */ 10000000 * 1e18 /* 10 mio veOgv */ )
+        GovernorSettings(1, /* 1 block */ 14416, /* ~2 days (86400 / 12) * 2 */ 100000 * 1e18 /* 100k xOGN */ )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20) // Default quorum denominator is 100, so 20/100 or 20%
         GovernorTimelockControl(_timelock)
