@@ -38,7 +38,6 @@ yarn install
 ## Running contract tests (brownie)
 
 ```bash
-cd contracts
 brownie test --network hardhat
 ```
 
