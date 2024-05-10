@@ -3,20 +3,14 @@ import os
 from brownie import *
 from brownie.network import priority_fee
 from common import *
-
-VEOGV_PROXY_ADDRESS = "0x0c4576ca1c365868e162554af8e385dc3e7c66d9"
-OGV_PROXY_ADDRESS = "0x9c354503c38481a7a7a51629142963f98ecc12d0"
-REWARDS_PROXY_ADDRESS = "0x7d82e86cf1496f9485a8ea04012afeb3c7489397"
-
-OGN_ADDRESS = "0x8207c1ffc5b6804f6024322ccf34f29c3541ae26"
-
-OUSD_BUYBACK_PROXY_ADDRESS = "0xD7B28d06365b85933c64E11e639EA0d3bC0e3BaB"
-OETH_BUYBACK_PROXY_ADDRESS = "0xFD6c58850caCF9cCF6e8Aee479BFb4Df14a362D2"
+from .migration_sanity_checks import migration_sanity_checks
 
 # TODO: Update after deploying buyback contracts
-OUSD_BUYBACK_NEW_IMPL_ADDRESS = "0xdd753cb1fc4e8c72c5a40254ac064515301d11e0"
-OETH_BUYBACK_NEW_IMPL_ADDRESS = "0x6c952cc410a253e70f3383028c7e0a7f477b921c"
+OUSD_BUYBACK_NEW_IMPL_ADDRESS = "0xbc77B8EFafabdF46f94Dfb4A422d541c5037799C"
+OETH_BUYBACK_NEW_IMPL_ADDRESS = "0x69D343A52bC13Dc19cBD0d2A77baC320CCB69B9a"
 
+xogn = None
+migrator = None
 def main():
   def deployment(deployer, FROM_DEPLOYER, local_provider, is_mainnet, is_fork, is_proposal_mode):
     veogv_proxy = Contract.from_abi("OgvStakingProxy", VEOGV_PROXY_ADDRESS, OgvStakingProxy.abi)
@@ -48,6 +42,7 @@ def main():
       FROM_DEPLOYER
     )
     print("OGVStaking Implementation deployed at {}".format(veogv_impl.address))
+    veogv = Contract.from_abi("OgvStaking", veogv_proxy.address, veogv_impl.abi)
 
     # Deploy xOGN implementation
     ogn_min_staking = 30 * 24 * 60 * 60 # 30 days
@@ -67,6 +62,8 @@ def main():
       FROM_DEPLOYER
     )
     print("ExponentialStaking proxy initialized")
+    global xogn
+    xogn = Contract.from_abi("ExponentialStaking", xogn_proxy.address, xogn_impl.abi)
 
     # Deploy FixedRateRewardsSource
     rewards_per_second = 0 # TODO: Decide on the params
@@ -98,7 +95,8 @@ def main():
       FROM_DEPLOYER
     )
     print("Migrator proxy initialized")
-    # migrator = Migrator.at(migrator_proxy.address)
+    global migrator
+    migrator = Contract.from_abi("Migrator", migrator_proxy.address, migrator_impl.abi)
 
     if is_mainnet:
       # Verify contract on etherscan on mainnet
@@ -173,4 +171,11 @@ def main():
       ]
     }
 
+  if is_fork:
+    brownie.chain.snapshot()
+
   governanceProposal(deployment)
+  
+  if is_fork:
+    migration_sanity_checks(migrator, xogn)
+    brownie.chain.revert()

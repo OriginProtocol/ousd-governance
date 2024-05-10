@@ -11,6 +11,16 @@ GOV_MULTISIG = '0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899'
 GOVERNOR_FIVE = '0x3cdd07c16614059e66344a7b579dab4f9516c0b6'
 TIMELOCK = '0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F'
 
+OGN_ADDRESS = "0x8207c1ffc5b6804f6024322ccf34f29c3541ae26"
+VEOGV_PROXY_ADDRESS = "0x0c4576ca1c365868e162554af8e385dc3e7c66d9"
+OGV_PROXY_ADDRESS = "0x9c354503c38481a7a7a51629142963f98ecc12d0"
+REWARDS_PROXY_ADDRESS = "0x7d82e86cf1496f9485a8ea04012afeb3c7489397"
+
+OGN_TOKEN_GOVERNOR = "0x72426BA137DEC62657306b12B1E869d43FeC6eC7"
+
+OUSD_BUYBACK_PROXY_ADDRESS = "0xD7B28d06365b85933c64E11e639EA0d3bC0e3BaB"
+OETH_BUYBACK_PROXY_ADDRESS = "0xFD6c58850caCF9cCF6e8Aee479BFb4Df14a362D2"
+
 local_provider = "127.0.0.1" in web3.provider.endpoint_uri or "localhost" in web3.provider.endpoint_uri
 is_mainnet = web3.chain_id == 1 and not local_provider
 is_fork = web3.chain_id == 1337 or local_provider
@@ -31,15 +41,13 @@ def governanceProposal(deployment):
 
     deploymentInfo = deployment(deployer, FROM_DEPLOYER, local_provider, is_mainnet, is_fork, is_proposal_mode)
 
-    impersonate_sim = os.getenv('IMPERSONATE_SIM') == 'true'
-
     if not is_proposal_mode:
         return
 
     actions = deploymentInfo['actions']
 
     if (len(actions) > 0):
-        if impersonate_sim:
+        if os.getenv('IMPERSONATE_SIM') == 'true':
             # Impersonate timelock and simulate the actions
             # bypassing the proposal flow (makes testing faster)
             timelock = accounts.at(TIMELOCK, force=True)
@@ -98,23 +106,25 @@ def governanceProposal(deployment):
 
         print("Raw Args", proposal_args)
 
-        print("Execute the following transaction to create OGV Governance proposal")
+        print("Execute the following transaction to create the Governance proposal")
         print("To: {}".format(GOVERNOR_FIVE))
         print("Data: {}".format(propose_data))
 
-def multisigProposal(deployment, post_execution, dry_run=True):
+def multisigProposal(deployment, post_execution, dry_run=False):
     deployer = accounts.add(os.environ["DEPLOYER_KEY"])
     FROM_DEPLOYER = {'from': deployer}
     FROM_MULTISIG = {'from': GOV_MULTISIG}
 
-    multisig_actions = deployment(deployer, FROM_DEPLOYER, FROM_MULTISIG, is_mainnet, is_fork)
-
-    if len(multisig_actions) == 0:
-        return
-
     if dry_run:
         # Take a snapshot
         brownie.chain.snapshot()
+
+    multisig_actions = deployment(deployer, FROM_DEPLOYER, FROM_MULTISIG, is_mainnet, is_fork)
+
+    if len(multisig_actions) == 0:
+        # Revert snapshot
+        brownie.chain.revert()
+        return
 
     # Build actions
     print("Impersonating multisig to simulate actions...")
