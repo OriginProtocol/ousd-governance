@@ -1,6 +1,7 @@
 import os
 from brownie import *
 import brownie
+import time
 
 BLOCK_INTERVAL = 12 # 1 block every 12 seconds
 BLOCKS_PER_DAY = 86400 / BLOCK_INTERVAL
@@ -9,6 +10,10 @@ STRATEGIST = '0xF14BBdf064E3F67f51cd9BD646aE3716aD938FDC'
 GOV_MULTISIG = '0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899'
 GOVERNOR_FIVE = '0x3cdd07c16614059e66344a7b579dab4f9516c0b6'
 TIMELOCK = '0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F'
+
+local_provider = "127.0.0.1" in web3.provider.endpoint_uri or "localhost" in web3.provider.endpoint_uri
+is_mainnet = web3.chain_id == 1 and not local_provider
+is_fork = web3.chain_id == 1337 or local_provider
 
 class TemporaryFork:
     def __enter__(self):
@@ -22,9 +27,6 @@ class TemporaryFork:
 def governanceProposal(deployment):
     deployer = accounts.add(os.environ["DEPLOYER_KEY"])
     FROM_DEPLOYER = {'from': deployer}
-    local_provider = "127.0.0.1" in web3.provider.endpoint_uri or "localhost" in web3.provider.endpoint_uri
-    is_mainnet = web3.chain_id == 1 and not local_provider
-    is_fork = web3.chain_id == 1337 or local_provider
     is_proposal_mode = os.getenv('MODE') == 'build_ogv_gov_proposal'
 
     deploymentInfo = deployment(deployer, FROM_DEPLOYER, local_provider, is_mainnet, is_fork, is_proposal_mode)
@@ -100,6 +102,69 @@ def governanceProposal(deployment):
         print("To: {}".format(GOVERNOR_FIVE))
         print("Data: {}".format(propose_data))
 
+def multisigProposal(deployment, post_execution, dry_run=True):
+    deployer = accounts.add(os.environ["DEPLOYER_KEY"])
+    FROM_DEPLOYER = {'from': deployer}
+    FROM_MULTISIG = {'from': GOV_MULTISIG}
+
+    multisig_actions = deployment(deployer, FROM_DEPLOYER, FROM_MULTISIG, is_mainnet, is_fork)
+
+    if len(multisig_actions) == 0:
+        return
+
+    if dry_run:
+        # Take a snapshot
+        brownie.chain.snapshot()
+
+    # Build actions
+    print("Impersonating multisig to simulate actions...")
+    accounts.at(GOV_MULTISIG, force=True)
+
+    failed = False
+    txs = []
+    for action in multisig_actions:
+        try:
+            # Run action
+            action['function'](*action['args'], { 'from': GOV_MULTISIG })
+
+            # Add to list to build Gnosis JSON
+            txs.append({
+                'to': action['contract'].address,
+                'data': action['function'].encode_input(*action['args']),
+                'value': '0',
+                "contractMethod": None,
+                "contractInputsValues": None,
+            })
+        except e:
+            failed = True
+            print("Failing to run multisig action", e)
+            break
+
+    if not failed:
+        if post_execution is not None:
+            post_execution(multisig_actions, FROM_MULTISIG)
+
+        gnosis_json = {
+            "version": "1.0",
+            "chainId": "1",
+            "createdAt": int(time.time()),
+            "meta": {
+                "name": "Transactions Batch",
+                "description": "",
+                "txBuilderVersion": "1.16.1",
+                "createdFromSafeAddress": "0xF14BBdf064E3F67f51cd9BD646aE3716aD938FDC",
+                "createdFromOwnerAddress": "",
+                # "checksum": "0x"
+            },
+            "transactions": txs,
+        }
+        print("\n\nGnosis json:")
+        print(gnosis_json)
+        print("\n\n")
+
+    if dry_run:
+        # Revert snapshot
+        brownie.chain.revert()
 
 def timetravel(seconds):
     brownie.chain.sleep(int(seconds) + 1)
