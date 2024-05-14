@@ -31,8 +31,6 @@ contract Migrator is Governable {
     event LockupsMigrated(address indexed user, uint256[] ogvLockupIds, uint256 newStakeAmount, uint256 newDuration);
 
     error MigrationAlreadyStarted();
-    error MigrationIsInactive();
-    error MigrationNotComplete();
     error ContractInsolvent(uint256 expectedOGN, uint256 availableOGN);
     error LockupIdsRequired();
     error InvalidStakeAmount();
