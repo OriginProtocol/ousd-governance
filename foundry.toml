@@ -9,3 +9,4 @@ remappings = [
   "OpenZeppelin/openzeppelin-contracts-upgradeable@4.6.0/=./lib/openzeppelin-contracts-upgradeable",
   "paulrberg/prb-math@2.5.0/=./lib/prb-math"
 ]
+fs_permissions = [{ access = "read-write", path = "./build"}]

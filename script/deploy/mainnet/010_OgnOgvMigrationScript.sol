@@ -5,7 +5,6 @@ pragma solidity 0.8.10;
 import "./BaseMainnetScript.sol";
 import {Vm} from "forge-std/Vm.sol";
 
-
 import {Addresses} from "contracts/utils/Addresses.sol";
 
 import {FixedRateRewardsSourceProxy} from "contracts/upgrades/FixedRateRewardsSourceProxy.sol";
@@ -18,7 +17,6 @@ import {OgvStaking} from "contracts/OgvStaking.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
 
-
 // To be extracted
 library GovFive {
     struct GovFiveAction {
@@ -26,6 +24,7 @@ library GovFive {
         string fullsig;
         bytes data;
     }
+
     struct GovFiveProposal {
         string name;
         string description;
@@ -40,57 +39,36 @@ library GovFive {
         prop.description = description;
     }
 
-    function action(GovFiveProposal storage prop, address receiver, string memory fullsig, bytes memory data) internal {
-        prop.actions.push(GovFiveAction({
-            receiver:receiver,
-            fullsig: fullsig,
-            data: data
-            }));
+    function action(GovFiveProposal storage prop, address receiver, string memory fullsig, bytes memory data)
+        internal
+    {
+        prop.actions.push(GovFiveAction({receiver: receiver, fullsig: fullsig, data: data}));
     }
 
     function execute(GovFiveProposal storage prop) internal {
         address VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
         Vm vm = Vm(VM_ADDRESS);
-        for(uint256 i = 0; i < prop.actions.length; i++ ){
+        for (uint256 i = 0; i < prop.actions.length; i++) {
             GovFiveAction memory action = prop.actions[i];
             bytes memory sig = abi.encodePacked(bytes4(keccak256(bytes(action.fullsig))));
             vm.prank(Addresses.TIMELOCK);
             action.receiver.call(abi.encodePacked(sig, action.data));
         }
     }
-
-
 }
 
 contract OgnOgvMigrationScript is BaseMainnetScript {
-
-    // DeployerRecord stuff to be extracted as well
-    struct DeployRecord {
-        string name;
-        address addr;
-    }
-    DeployRecord[] public deploys;
-    function _recordDeploy(string memory name, address addr) internal {
-        deploys.push(DeployRecord({name: name, addr: addr}));
-        console.log(string(abi.encodePacked("> Deployed ", name, " at")), addr);
-    }
-    // End DeployRecord
-
-
     using GovFive for GovFive.GovFiveProposal;
+
     GovFive.GovFiveProposal govFive;
-    
 
     FixedRateRewardsSourceProxy ognRewardsSourceProxy;
     OgvStaking veOgvImpl;
-
 
     constructor() {
         // Will only execute script before this block number
         // deployBlockNum = ;
     }
-
-
 
     function _execute() internal override {
         console.log("Deploy:");
@@ -136,7 +114,8 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         // 3. veOGV implimentation contract to upgrade to
         uint256 ogvMinStaking = 30 * 24 * 60 * 60; // 2592000 -> 30 days
         uint256 ogvEpoch = OgvStaking(Addresses.VEOGV).epoch(); // Use old value.
-        veOgvImpl = new OgvStaking(Addresses.OGV, ogvEpoch, ogvMinStaking, Addresses.OGV_REWARDS_PROXY, address(migratorProxy));
+        veOgvImpl =
+            new OgvStaking(Addresses.OGV, ogvEpoch, ogvMinStaking, Addresses.OGV_REWARDS_PROXY, address(migratorProxy));
         _recordDeploy("VEOGV_IMPL", address(veOgvImpl));
 
         //
@@ -150,25 +129,35 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
     function _fork() internal override {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
-        
+
         govFive.setName("OGV Migration to OGN");
         // Todo: Fuller description
         govFive.setDescription("Deploy OGV-OGN migration contracts and revoke OGV Governance roles");
 
         console.log(address(veOgvImpl));
-        govFive.action(Addresses.VEOGV, 'upgradeTo(address)', abi.encode(address(veOgvImpl)));
+        govFive.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(address(veOgvImpl)));
 
-        govFive.action(Addresses.TIMELOCK, 'revokeRole(bytes32,address)', abi.encode(timelock.PROPOSER_ROLE(), Addresses.GOVERNOR_FIVE));
-        govFive.action(Addresses.TIMELOCK, 'revokeRole(bytes32,address)', abi.encode(timelock.CANCELLER_ROLE(), Addresses.GOVERNOR_FIVE));
-        govFive.action(Addresses.TIMELOCK, 'revokeRole(bytes32,address)', abi.encode(timelock.EXECUTOR_ROLE(), Addresses.GOVERNOR_FIVE));
+        govFive.action(
+            Addresses.TIMELOCK,
+            "revokeRole(bytes32,address)",
+            abi.encode(timelock.PROPOSER_ROLE(), Addresses.GOVERNOR_FIVE)
+        );
+        govFive.action(
+            Addresses.TIMELOCK,
+            "revokeRole(bytes32,address)",
+            abi.encode(timelock.CANCELLER_ROLE(), Addresses.GOVERNOR_FIVE)
+        );
+        govFive.action(
+            Addresses.TIMELOCK,
+            "revokeRole(bytes32,address)",
+            abi.encode(timelock.EXECUTOR_ROLE(), Addresses.GOVERNOR_FIVE)
+        );
 
-        govFive.action(Addresses.OUSD_BUYBACK, 'upgradeTo(address)', abi.encode(Addresses.OUSD_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OUSD_BUYBACK, 'setRewardsSource(address)', abi.encode(address(ognRewardsSourceProxy)));
-        govFive.action(Addresses.OETH_BUYBACK, 'upgradeTo(address)', abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OETH_BUYBACK, 'setRewardsSource(address)', abi.encode(address(ognRewardsSourceProxy)));
-
+        govFive.action(Addresses.OUSD_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OUSD_BUYBACK_IMPL)); // Todo, use latest deployed address
+        govFive.action(Addresses.OUSD_BUYBACK, "setRewardsSource(address)", abi.encode(address(ognRewardsSourceProxy)));
+        govFive.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
+        govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(address(ognRewardsSourceProxy)));
 
         govFive.execute(); // One day lives up a level, and this contract returns a generic governance struct with a function pointers
-
     }
 }

@@ -3,12 +3,33 @@
 pragma solidity 0.8.10;
 
 import "forge-std/Script.sol";
+import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
 abstract contract BaseMainnetScript is Script {
     uint256 public deployBlockNum = type(uint256).max;
     bool isForked = false;
+
+    // DeployerRecord stuff to be extracted as well
+    struct DeployRecord {
+        string name;
+        address addr;
+    }
+
+    DeployRecord[] public deploys;
+
+    function _recordDeploy(string memory name, address addr) internal {
+        deploys.push(DeployRecord({name: name, addr: addr}));
+        console.log(string(abi.encodePacked("> Deployed ", name, " at")), addr);
+    }
+    // End DeployRecord
+
+    function getAllDeployRecords() external view returns (DeployRecord[] memory) {
+        return deploys;
+    }
+
+    function setUp() external {}
 
     function run() external {
         if (block.chainid != 1) {
@@ -20,7 +41,9 @@ abstract contract BaseMainnetScript is Script {
             return;
         }
 
-        isForked = vm.envOr("IS_FORK", false);
+        isForked = vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.Test)
+            || vm.isContext(VmSafe.ForgeContext.TestGroup);
+
         if (isForked) {
             address impersonator = Addresses.INITIAL_DEPLOYER;
             console.log("Running script on mainnet fork impersonating: %s", impersonator);

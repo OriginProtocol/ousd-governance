@@ -16,3 +16,4 @@ out/
 .vscode
 brownie-deploy/
 .idea
+deployments-fork.json
