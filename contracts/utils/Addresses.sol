@@ -6,6 +6,9 @@ library Addresses {
     address public constant STRATEGIST = 0xF14BBdf064E3F67f51cd9BD646aE3716aD938FDC;
     address public constant GOVERNOR_FIVE = 0x3cdD07c16614059e66344a7b579DAB4f9516C0b6;
 
+    address public constant OGN_GOVERNOR = 0x72426BA137DEC62657306b12B1E869d43FeC6eC7;
+    address public constant GOV_MULTISIG = 0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899;
+
     address public constant INITIAL_DEPLOYER = address(0x1001);
     address public constant OGN = 0x8207c1FfC5B6804F6024322CcF34F29c3541Ae26;
     address public constant OGV = 0x9c354503C38481a7A7a51629142963F98eCC12D0;

@@ -6,8 +6,9 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 
 import {BaseMainnetScript} from "./mainnet/BaseMainnetScript.sol";
 
-import {XOGNSetup} from "./mainnet/010_xOGNSetup.sol";
+import {XOGNSetupScript} from "./mainnet/010_xOGNSetupScript.sol";
 import {OgnOgvMigrationScript} from "./mainnet/011_OgnOgvMigrationScript.sol";
+import {XOGNGovernanceScript} from "./mainnet/012_xOGNGovernanceScript.sol";
 
 contract DeployManager is Script {
     mapping(string => address) public deployedContracts;
@@ -56,8 +57,9 @@ contract DeployManager is Script {
 
     function run() external {
         // TODO: Use vm.readDir to recursively build this?
-        _runDeployFile(new XOGNSetup());
+        _runDeployFile(new XOGNSetupScript());
         _runDeployFile(new OgnOgvMigrationScript());
+        _runDeployFile(new XOGNGovernanceScript());
     }
 
     function _runDeployFile(BaseMainnetScript deployScript) internal {

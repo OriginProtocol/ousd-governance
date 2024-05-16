@@ -1,1 +1,6 @@
-{ "1": { "executions": {}, "contracts": {} } }
+{
+  "1": {
+    "executions": {},
+    "contracts": {}
+  }
+}

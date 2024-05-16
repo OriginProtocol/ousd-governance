@@ -17,7 +17,7 @@ import {OgvStaking} from "contracts/OgvStaking.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
 
-contract XOGNSetup is BaseMainnetScript {
+contract XOGNSetupScript is BaseMainnetScript {
     FixedRateRewardsSourceProxy ognRewardsSourceProxy;
     OgvStaking veOgvImpl;
 
@@ -50,7 +50,7 @@ contract XOGNSetup is BaseMainnetScript {
         xOgnProxy.initialize(address(xognImpl), Addresses.TIMELOCK, "");
 
         //
-        // 2. Rewards implimentation and init
+        // 3. Rewards implimentation and init
         uint256 rewardsPerSecond = 0; //TODO: Decide on the params
         FixedRateRewardsSource fixedRateRewardsSourceImpl = new FixedRateRewardsSource(Addresses.OGN);
         _recordDeploy("OGN_REWARDS_SOURCE_IMPL", address(fixedRateRewardsSourceImpl));
@@ -62,6 +62,4 @@ contract XOGNSetup is BaseMainnetScript {
         );
         ognRewardsSourceProxy.initialize(address(fixedRateRewardsSourceImpl), Addresses.TIMELOCK, implInitData);
     }
-
-    function _fork() internal override {}
 }
