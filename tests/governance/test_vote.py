@@ -81,8 +81,8 @@ def test_proposal_can_fail_vote(
     token.approve(staking.address, amount * 2, {"from": bob})
     token.grantMinterRole(rewards.address, {"from": alice})
     rewards.setRewardsTarget(staking.address, {"from": alice})
-    staking.stake(amount, WEEK, alice, {"from": alice})
-    staking.stake(amount * 2, WEEK, bob, {"from": bob})
+    staking.mockStake(amount, WEEK, alice, {"from": alice})
+    staking.mockStake(amount * 2, WEEK, bob, {"from": bob})
     tx = governance.propose(
         [governance.address],
         [0],

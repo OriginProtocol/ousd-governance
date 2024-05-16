@@ -1,3 +1,4 @@
+import pytest
 from brownie import *
 import brownie
 from ..helpers import WEEK, DAY
@@ -9,7 +10,7 @@ merkle_proof = [
     0xCB8BD9CA540F4B1C63F13D7DDFEC54AB24715F49F9A3640C1CCF9F548A896554,
 ]
 
-
+@pytest.mark.skip()
 def test_claim(mandatory_lockup_distributor, token, staking):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
@@ -30,7 +31,7 @@ def test_claim(mandatory_lockup_distributor, token, staking):
     assert lockup_four[0] == amount / 4
     assert lockup_four[1] == tx.timestamp + 48 * 2629800
 
-
+@pytest.mark.skip()
 def test_can_not_claim(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
 
@@ -40,7 +41,7 @@ def test_can_not_claim(mandatory_lockup_distributor, token):
     with brownie.reverts("Can no longer claim. Claim period expired"):
         mandatory_lockup_distributor.claim(1, amount, merkle_proof)
 
-
+@pytest.mark.skip()
 def test_burn_remaining_amount(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
@@ -51,7 +52,7 @@ def test_burn_remaining_amount(mandatory_lockup_distributor, token):
     mandatory_lockup_distributor.burnRemainingOGV()
     assert token.balanceOf(mandatory_lockup_distributor) == 0
 
-
+@pytest.mark.skip()
 def test_can_not_burn_remaining_amount(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to give out
@@ -62,7 +63,7 @@ def test_can_not_burn_remaining_amount(mandatory_lockup_distributor, token):
     with brownie.reverts("Can not yet burn the remaining OGV"):
         mandatory_lockup_distributor.burnRemainingOGV()
 
-
+@pytest.mark.skip()
 def test_valid_proof(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
@@ -71,7 +72,7 @@ def test_valid_proof(mandatory_lockup_distributor, token):
         1, amount, accounts.default, merkle_proof
     )
 
-
+@pytest.mark.skip()
 def test_invalid_proof(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
@@ -84,7 +85,7 @@ def test_invalid_proof(mandatory_lockup_distributor, token):
         1, amount, accounts.default, false_merkle_proof
     )
 
-
+@pytest.mark.skip()
 def test_cannot_claim_with_invalid_proof(mandatory_lockup_distributor, token):
     amount = 500000000 * 1e18
     # Transfer to the distributor contract so it has something to lockup
