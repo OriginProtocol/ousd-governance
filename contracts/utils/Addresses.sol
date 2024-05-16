@@ -12,8 +12,8 @@ library Addresses {
     address public constant OGV_REWARDS_PROXY = 0x7d82E86CF1496f9485a8ea04012afeb3C7489397;
     address public constant VEOGV = 0x0C4576Ca1c365868E162554AF8e385dc3e7C66D9;
 
-    address public constant OUSD_BUYBACK = address(34);
-    address public constant OETH_BUYBACK = address(35);
-    address public constant OUSD_BUYBACK_IMPL = address(34);
-    address public constant OETH_BUYBACK_IMPL = address(35);
+    address public constant OUSD_BUYBACK = 0xD7B28d06365b85933c64E11e639EA0d3bC0e3BaB;
+    address public constant OETH_BUYBACK = 0xFD6c58850caCF9cCF6e8Aee479BFb4Df14a362D2;
+    address public constant OUSD_BUYBACK_IMPL = 0xbc77B8EFafabdF46f94Dfb4A422d541c5037799C;
+    address public constant OETH_BUYBACK_IMPL = 0x69D343A52bC13Dc19cBD0d2A77baC320CCB69B9a;
 }

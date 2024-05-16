@@ -62,65 +62,30 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
     GovFive.GovFiveProposal govFive;
 
-    FixedRateRewardsSourceProxy ognRewardsSourceProxy;
-    OgvStaking veOgvImpl;
+    string public constant override DEPLOY_NAME = "011_OgnOgvMigrationScript";
 
-    constructor() {
-        // Will only execute script before this block number
-        // deployBlockNum = ;
-    }
+    constructor() {}
 
     function _execute() internal override {
         console.log("Deploy:");
         console.log("------------");
 
-        // 1. Deploy proxy contracts
-        //    Since these contracts reference each other, we deploy all the proxies first
-        //    so that the addresses are available in implimentation constructors.
-        FixedRateRewardsSourceProxy ognRewardsSourceProxy = new FixedRateRewardsSourceProxy();
-        _recordDeploy("OGN_REWARDS_SOURCE", address(ognRewardsSourceProxy));
-
-        ExponentialStakingProxy xOgnProxy = new ExponentialStakingProxy();
-        _recordDeploy("XOGN", address(xOgnProxy));
+        address xOgnProxy = deployedContracts["XOGN"];
 
         MigratorProxy migratorProxy = new MigratorProxy();
         _recordDeploy("MIGRATOR", address(migratorProxy));
 
         //
-        // 2. XOGN implimentation and init
-        uint256 ognEpoch = 1717041600; // May 30, 2024 GMT
-        uint256 ognMinStaking = 30 * 24 * 60 * 60; // 30 days
-        ExponentialStaking xognImpl =
-            new ExponentialStaking(Addresses.OGN, ognEpoch, ognMinStaking, address(ognRewardsSourceProxy));
-        _recordDeploy("XOGN_IMPL", address(xognImpl));
-
-        console.log("- xOgnProxy init");
-        xOgnProxy.initialize(address(xognImpl), Addresses.TIMELOCK, "");
-
-        //
-        // 2. Rewards implimentation and init
-        uint256 rewardsPerSecond = 0; //TODO: Decide on the params
-        FixedRateRewardsSource fixedRateRewardsSourceImpl = new FixedRateRewardsSource(Addresses.OGN);
-        _recordDeploy("OGN_REWARDS_SOURCE_IMPL", address(fixedRateRewardsSourceImpl));
-
-        console.log("- OGN rewards init");
-        bytes memory implInitData = string.concat(
-            fixedRateRewardsSourceImpl.initialize.selector,
-            abi.encode(Addresses.STRATEGIST, address(xOgnProxy), rewardsPerSecond)
-        );
-        ognRewardsSourceProxy.initialize(address(fixedRateRewardsSourceImpl), Addresses.TIMELOCK, implInitData);
-
-        //
         // 3. veOGV implimentation contract to upgrade to
         uint256 ogvMinStaking = 30 * 24 * 60 * 60; // 2592000 -> 30 days
         uint256 ogvEpoch = OgvStaking(Addresses.VEOGV).epoch(); // Use old value.
-        veOgvImpl =
+        OgvStaking veOgvImpl =
             new OgvStaking(Addresses.OGV, ogvEpoch, ogvMinStaking, Addresses.OGV_REWARDS_PROXY, address(migratorProxy));
         _recordDeploy("VEOGV_IMPL", address(veOgvImpl));
 
         //
         // 4. Migrator Contract
-        Migrator migratorImpl = new Migrator(Addresses.OGV, Addresses.OGN, Addresses.VEOGV, address(xOgnProxy));
+        Migrator migratorImpl = new Migrator(Addresses.OGV, Addresses.OGN, Addresses.VEOGV, xOgnProxy);
         _recordDeploy("MIGRATOR_IMPL", address(migratorImpl));
 
         console.log("- Migrator init");
@@ -130,12 +95,15 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
     function _fork() internal override {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
+        address ognRewardsSourceProxy = deployedContracts["OGN_REWARDS_SOURCE"];
+        address veOgvImpl = deployedContracts["VEOGV_IMPL"];
+
         govFive.setName("OGV Migration to OGN");
         // Todo: Fuller description
         govFive.setDescription("Deploy OGV-OGN migration contracts and revoke OGV Governance roles");
 
         console.log(address(veOgvImpl));
-        govFive.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(address(veOgvImpl)));
+        govFive.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(veOgvImpl));
 
         govFive.action(
             Addresses.TIMELOCK,
@@ -154,9 +122,9 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         );
 
         govFive.action(Addresses.OUSD_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OUSD_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OUSD_BUYBACK, "setRewardsSource(address)", abi.encode(address(ognRewardsSourceProxy)));
+        govFive.action(Addresses.OUSD_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
         govFive.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(address(ognRewardsSourceProxy)));
+        govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
 
         govFive.execute(); // One day lives up a level, and this contract returns a generic governance struct with a function pointers
     }

@@ -19,14 +19,21 @@ abstract contract BaseMainnetScript is Script {
 
     DeployRecord[] public deploys;
 
+    mapping(string => address) public deployedContracts;
+
     function _recordDeploy(string memory name, address addr) internal {
         deploys.push(DeployRecord({name: name, addr: addr}));
         console.log(string(abi.encodePacked("> Deployed ", name, " at")), addr);
+        deployedContracts[name] = addr;
     }
     // End DeployRecord
 
     function getAllDeployRecords() external view returns (DeployRecord[] memory) {
         return deploys;
+    }
+
+    function preloadDeployedContract(string memory name, address addr) external {
+        deployedContracts[name] = addr;
     }
 
     function setUp() external {}
@@ -64,6 +71,8 @@ abstract contract BaseMainnetScript is Script {
             vm.stopBroadcast();
         }
     }
+
+    function DEPLOY_NAME() external view virtual returns (string memory);
 
     function _execute() internal virtual {}
 
