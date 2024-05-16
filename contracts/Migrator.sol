@@ -31,8 +31,6 @@ contract Migrator is Governable {
     event LockupsMigrated(address indexed user, uint256[] ogvLockupIds, uint256 newStakeAmount, uint256 newDuration);
 
     error MigrationAlreadyStarted();
-    error MigrationIsInactive();
-    error MigrationNotComplete();
     error ContractInsolvent(uint256 expectedOGN, uint256 availableOGN);
     error LockupIdsRequired();
     error InvalidStakeAmount();
@@ -80,44 +78,20 @@ contract Migrator is Governable {
     }
 
     /**
-     * @notice Decommissions the contract. Can be called only
-     *          after a year since `start()` was invoked. Burns
-     *          all OGN in the contract by transferring them to
-     *          to address(0xdead).
-     */
-    function decommission() external {
-        // Only after a year of staking
-        if (endTime == 0 || isMigrationActive()) {
-            revert MigrationNotComplete();
-        }
-
-        emit Decommissioned();
-
-        uint256 ognBalance = ogn.balanceOf(address(this));
-        if (ognBalance > 0) {
-            // OGN doesn't allow burning of tokens. Has `onlyOwner`
-            // modifier on `burn` and `burnFrom` methods. Also,
-            // `transfer` has a address(0) check. So, this transfers
-            // everything to address(0xdead). The `owner` multisig of
-            // OGN token can call `burnFrom(address(0xdead))` later.
-
-            ogn.transfer(address(0xdead), ognBalance);
-        }
-    }
-
-    /**
      * @notice Computes the amount of OGN needed for migration
      *          and if the contract has more OGN than that, it
-     *          transfers it back to the treasury.
+     *          transfers it back to the treasury. If migration complete, transfers all.
      * @param treasury Address that receives excess OGN
      */
-    function transferExcessTokens(address treasury) external onlyGovernor isSolvent {
+    function transferExcessTokens(address treasury) external onlyGovernor {
         uint256 availableOGN = ogn.balanceOf(address(this));
-        uint256 totalOGV = ogv.totalSupply() - ogv.balanceOf(address(this));
-        uint256 maxOGNNeeded = (totalOGV * CONVERSION_RATE) / 1 ether;
 
-        if (availableOGN > maxOGNNeeded) {
+        if (endTime == 0 || isMigrationActive()) {
+            uint256 maxOGNNeeded = (ogv.totalSupply() * CONVERSION_RATE) / 1 ether;
             ogn.transfer(treasury, availableOGN - maxOGNNeeded);
+        } else {
+            emit Decommissioned();
+            ogn.transfer(treasury, availableOGN);
         }
     }
 
