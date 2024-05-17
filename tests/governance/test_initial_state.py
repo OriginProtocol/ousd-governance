@@ -4,7 +4,7 @@ from ..fixtures import governance, timelock_controller, token, staking, rewards
 
 
 def test_name(governance):
-    assert governance.name() == "OUSD Governance"
+    assert governance.name() == "Origin DeFi Governance"
 
 
 def test_counting_mode(governance):
