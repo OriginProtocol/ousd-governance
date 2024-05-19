@@ -25,7 +25,7 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
     GovFive.GovFiveProposal govFive;
 
-    string public constant override DEPLOY_NAME = "011_OgnOgvMigrationScript";
+    string public constant override DEPLOY_NAME = "011_OgnOgvMigration";
 
     constructor() {}
 
