@@ -35,6 +35,21 @@ library GovFive {
         prop.actions.push(GovFiveAction({receiver: receiver, fullsig: fullsig, data: data}));
     }
 
+    function printTxData(GovFiveProposal storage prop) internal {
+        console.log("-----------------------------------");
+        console.log("Create following tx on Gnosis safe:");
+        console.log("-----------------------------------");
+        for (uint256 i = 0; i < prop.actions.length; i++) {
+            GovFiveAction memory propAction = prop.actions[i];
+            bytes memory sig = abi.encodePacked(bytes4(keccak256(bytes(propAction.fullsig))));
+
+            console.log("### Tx", i + 1);
+            console.log("Address:", propAction.receiver);
+            console.log("Data:");
+            console.logBytes(abi.encodePacked(sig, propAction.data));
+        }
+    }
+
     function execute(GovFiveProposal storage prop) internal {
         address VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
         Vm vm = Vm(VM_ADDRESS);

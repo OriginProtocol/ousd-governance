@@ -44,9 +44,11 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         Governance governance = new Governance(ERC20Votes(xOgnProxy), TimelockController(payable(Addresses.TIMELOCK)));
 
         _recordDeploy("XOGN_GOV", address(governance));
+
+        _buildGnosisTx();
     }
 
-    function _fork() internal override {
+    function _buildGnosisTx() internal {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
         address xognGov = deployedContracts["XOGN_GOV"];
@@ -59,16 +61,21 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         govFive.action(Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.CANCELLER_ROLE(), xognGov));
         govFive.action(Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.EXECUTOR_ROLE(), xognGov));
 
-        // Enable rewards
+        // Enable rewards for staking
         govFive.action(
             deployedContracts["OGN_REWARDS_SOURCE"],
             "setRewardsPerSecond(uint192)",
             abi.encode(uint192(REWARDS_PER_SECOND))
         );
 
+        govFive.printTxData();
+    }
+
+    function _fork() internal override {
         // Go to the start of everything
         vm.warp(OGN_EPOCH);
 
-        govFive.execute(); // One day lives up a level, and this contract returns a generic governance struct with a function pointers
+        // Simulate execute on fork
+        govFive.execute();
     }
 }
