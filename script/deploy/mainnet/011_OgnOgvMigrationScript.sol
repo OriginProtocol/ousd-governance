@@ -89,7 +89,9 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         govFive.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
         govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
 
-        govFive.printTxData();
+        if (!isForked) {
+            govFive.printTxData();
+        }
     }
 
     function _fork() internal override {

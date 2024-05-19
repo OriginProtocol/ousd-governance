@@ -68,7 +68,9 @@ contract XOGNGovernanceScript is BaseMainnetScript {
             abi.encode(uint192(REWARDS_PER_SECOND))
         );
 
-        govFive.printTxData();
+        if (!isForked) {
+            govFive.printTxData();
+        }
     }
 
     function _fork() internal override {
