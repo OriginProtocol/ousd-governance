@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.10;
+
 import "forge-std/Test.sol";
 import "contracts/upgrades/FixedRateRewardsSourceProxy.sol";
 import "contracts/FixedRateRewardsSource.sol";

@@ -17,6 +17,8 @@ import {OgvStaking} from "contracts/OgvStaking.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
 import {GovFive} from "contracts/utils/GovFive.sol";
+import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
+import {IOGNGovernance} from "contracts/interfaces/IOGNGovernance.sol";
 
 contract OgnOgvMigrationScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
@@ -89,6 +91,26 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         govFive.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
         govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
 
+        // Mint token proposal from OGN governance
+        IMintableERC20 ogv = IMintableERC20(Addresses.OGV);
+        // Mint additional OGN, will get returned after starting migration
+        uint256 ognToMint = ((ogv.totalSupply() * 0.09137 ether) / 1 ether) + 1_000_000 ether;
+
+        address[] memory targets = new address[](1);
+        string[] memory sigs = new string[](1);
+        bytes[] memory calldatas = new bytes[](1);
+
+        // OGN Gov 1: Mint OGN
+        targets[0] = Addresses.OGN;
+        sigs[0] = "mint(address,uint256)";
+        calldatas[0] = abi.encode(deployedContracts["MIGRATOR"], ognToMint);
+
+        govFive.action(
+            Addresses.OGN_GOVERNOR,
+            "propose(address[],string[],bytes[],string)",
+            abi.encode(targets, sigs, calldatas, "")
+        );
+
         if (!isForked) {
             govFive.printTxData();
         }
@@ -97,5 +119,37 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
     function _fork() internal override {
         // Simulate execute on fork
         govFive.execute();
+
+        vm.startPrank(Addresses.GOV_MULTISIG);
+
+        IOGNGovernance ognGovernance = IOGNGovernance(Addresses.OGN_GOVERNOR);
+        uint256 proposalId = ognGovernance.proposalCount();
+
+        uint256 state = ognGovernance.state(proposalId);
+
+        if (state == 0) {
+            console.log("Queueing OGN multisig proposal...");
+            ognGovernance.queue(proposalId);
+            state = ognGovernance.state(proposalId);
+        }
+
+        if (state == 1) {
+            console.log("Executing OGN multisig proposal...");
+            vm.warp(block.timestamp + 2 days);
+            ognGovernance.execute(proposalId);
+        }
+        vm.stopPrank();
+
+        IMintableERC20 ogn = IMintableERC20(Addresses.OGN);
+
+        // Start migration
+        vm.startPrank(Addresses.TIMELOCK);
+        // TODO: To be called by multisig after mint proposal is executed
+        Migrator migrator = Migrator(deployedContracts["MIGRATOR"]);
+        migrator.start();
+        migrator.transferExcessTokens(Addresses.GOV_MULTISIG);
+        vm.stopPrank();
+
+        console.log("Migration started");
     }
 }
