@@ -17,6 +17,6 @@ library Addresses {
 
     address public constant OUSD_BUYBACK = 0xD7B28d06365b85933c64E11e639EA0d3bC0e3BaB;
     address public constant OETH_BUYBACK = 0xFD6c58850caCF9cCF6e8Aee479BFb4Df14a362D2;
-    address public constant OUSD_BUYBACK_IMPL = 0xbc77B8EFafabdF46f94Dfb4A422d541c5037799C;
-    address public constant OETH_BUYBACK_IMPL = 0x69D343A52bC13Dc19cBD0d2A77baC320CCB69B9a;
+    address public constant OUSD_BUYBACK_IMPL = 0x386d8fEC5b6d5B5E36a48A376644e36239dB65d6;
+    address public constant OETH_BUYBACK_IMPL = 0x4F11d31f781B57051764a3823b24d520626b4833;
 }

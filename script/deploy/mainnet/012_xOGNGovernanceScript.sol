@@ -18,48 +18,10 @@ import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
 import {Governance} from "contracts/Governance.sol";
 
+import {GovFive} from "contracts/utils/GovFive.sol";
+
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
-
-// To be extracted
-library GovFive {
-    struct GovFiveAction {
-        address receiver;
-        string fullsig;
-        bytes data;
-    }
-
-    struct GovFiveProposal {
-        string name;
-        string description;
-        GovFiveAction[] actions;
-    }
-
-    function setName(GovFiveProposal storage prop, string memory name) internal {
-        prop.name = name;
-    }
-
-    function setDescription(GovFiveProposal storage prop, string memory description) internal {
-        prop.description = description;
-    }
-
-    function action(GovFiveProposal storage prop, address receiver, string memory fullsig, bytes memory data)
-        internal
-    {
-        prop.actions.push(GovFiveAction({receiver: receiver, fullsig: fullsig, data: data}));
-    }
-
-    function execute(GovFiveProposal storage prop) internal {
-        address VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
-        Vm vm = Vm(VM_ADDRESS);
-        for (uint256 i = 0; i < prop.actions.length; i++) {
-            GovFiveAction memory action = prop.actions[i];
-            bytes memory sig = abi.encodePacked(bytes4(keccak256(bytes(action.fullsig))));
-            vm.prank(Addresses.TIMELOCK);
-            action.receiver.call(abi.encodePacked(sig, action.data));
-        }
-    }
-}
 
 contract XOGNGovernanceScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
@@ -67,6 +29,9 @@ contract XOGNGovernanceScript is BaseMainnetScript {
     GovFive.GovFiveProposal govFive;
 
     string public constant override DEPLOY_NAME = "012_xOGNGovernance";
+
+    uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+    uint256 constant REWARDS_PER_SECOND = 300000 ether / uint256(24 * 60 * 60); // 300k per day
 
     constructor() {}
 
@@ -86,13 +51,23 @@ contract XOGNGovernanceScript is BaseMainnetScript {
 
         address xognGov = deployedContracts["XOGN_GOV"];
 
-        govFive.setName("Enable OGN Governance");
-        // Todo: Fuller description
+        govFive.setName("Enable OGN Governance & Begin Rewards");
+
         govFive.setDescription("Grant roles on Timelock to OGN Governance");
 
         govFive.action(Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.PROPOSER_ROLE(), xognGov));
         govFive.action(Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.CANCELLER_ROLE(), xognGov));
         govFive.action(Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.EXECUTOR_ROLE(), xognGov));
+
+        // Enable rewards
+        govFive.action(
+            deployedContracts["OGN_REWARDS_SOURCE"],
+            "setRewardsPerSecond(uint192)",
+            abi.encode(uint192(REWARDS_PER_SECOND))
+        );
+
+        // Go to the start of everything
+        vm.warp(OGN_EPOCH);
 
         govFive.execute(); // One day lives up a level, and this contract returns a generic governance struct with a function pointers
     }

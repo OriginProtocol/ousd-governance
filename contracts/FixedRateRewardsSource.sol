@@ -90,10 +90,6 @@ contract FixedRateRewardsSource is Governable, Initializable {
     function previewRewards() public view returns (uint256 rewardAmount) {
         RewardConfig memory _config = rewardConfig;
 
-        if (_config.lastCollect == 0) {
-            return 0;
-        }
-
         rewardAmount = (block.timestamp - _config.lastCollect) * _config.rewardsPerSecond;
         uint256 balance = IERC20(rewardToken).balanceOf(address(this));
         if (rewardAmount > balance) {
@@ -139,6 +135,11 @@ contract FixedRateRewardsSource is Governable, Initializable {
         // Update storage
         RewardConfig storage _config = rewardConfig;
         emit RewardsPerSecondChanged(_rewardsPerSecond, _config.rewardsPerSecond);
+        if (_config.rewardsPerSecond == 0) {
+            // When changing rate from zero to non-zero,
+            // Update lastCollect timestamp as well
+            _config.lastCollect = uint64(block.timestamp);
+        }
         _config.rewardsPerSecond = _rewardsPerSecond;
     }
 }

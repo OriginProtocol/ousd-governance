@@ -17,10 +17,9 @@ import {OgvStaking} from "contracts/OgvStaking.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
 
-contract XOGNSetupScript is BaseMainnetScript {
-    FixedRateRewardsSourceProxy ognRewardsSourceProxy;
-    OgvStaking veOgvImpl;
+import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
 
+contract XOGNSetupScript is BaseMainnetScript {
     string public constant override DEPLOY_NAME = "010_xOGNSetup";
 
     constructor() {}
@@ -51,7 +50,8 @@ contract XOGNSetupScript is BaseMainnetScript {
 
         //
         // 3. Rewards implimentation and init
-        uint256 rewardsPerSecond = 0; //TODO: Decide on the params
+        // Reward rate is 0, Will be set later when we want initiate rewards
+        uint256 rewardsPerSecond = 0;
         FixedRateRewardsSource fixedRateRewardsSourceImpl = new FixedRateRewardsSource(Addresses.OGN);
         _recordDeploy("OGN_REWARDS_SOURCE_IMPL", address(fixedRateRewardsSourceImpl));
 
@@ -61,5 +61,13 @@ contract XOGNSetupScript is BaseMainnetScript {
             abi.encode(Addresses.STRATEGIST, address(xOgnProxy), rewardsPerSecond)
         );
         ognRewardsSourceProxy.initialize(address(fixedRateRewardsSourceImpl), Addresses.TIMELOCK, implInitData);
+    }
+
+    function _fork() internal override {
+        IMintableERC20 ogn = IMintableERC20(Addresses.OGN);
+
+        // Mint enough OGN to fund 100 days of rewards
+        vm.prank(Addresses.OGN_GOVERNOR);
+        ogn.mint(deployedContracts["OGN_REWARDS_SOURCE"], 30_000_000 ether);
     }
 }

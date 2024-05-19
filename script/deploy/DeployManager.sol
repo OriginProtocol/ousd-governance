@@ -95,7 +95,6 @@ contract DeployManager is Script {
         /**
          * Pre-deployment
          */
-        BaseMainnetScript.DeployRecord[] memory deploys;
         string memory networkDeployments = "";
         string[] memory existingContracts = vm.parseJsonKeys(fileContents, contractsKey);
         for (uint256 i = 0; i < existingContracts.length; ++i) {
