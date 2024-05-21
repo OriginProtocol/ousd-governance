@@ -50,15 +50,12 @@ contract XOGNSetupScript is BaseMainnetScript {
 
         //
         // 3. Rewards implimentation and init
-        // Reward rate is 0, Will be set later when we want initiate rewards
-        uint256 rewardsPerSecond = 0;
         FixedRateRewardsSource fixedRateRewardsSourceImpl = new FixedRateRewardsSource(Addresses.OGN);
         _recordDeploy("OGN_REWARDS_SOURCE_IMPL", address(fixedRateRewardsSourceImpl));
 
         console.log("- OGN rewards init");
         bytes memory implInitData = string.concat(
-            fixedRateRewardsSourceImpl.initialize.selector,
-            abi.encode(Addresses.STRATEGIST, address(xOgnProxy), rewardsPerSecond)
+            fixedRateRewardsSourceImpl.initialize.selector, abi.encode(Addresses.STRATEGIST, address(xOgnProxy))
         );
         ognRewardsSourceProxy.initialize(address(fixedRateRewardsSourceImpl), Addresses.TIMELOCK, implInitData);
     }

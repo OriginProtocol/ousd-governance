@@ -26,8 +26,10 @@ contract FixedRateRewardsSourceTest is Test {
         rewardsProxy.initialize(address(rewards), governor, "");
         rewards = FixedRateRewardsSource(address(rewardsProxy));
 
+        // Initialize
+        rewards.initialize(strategist, staking);
         // Configure Rewards
-        rewards.initialize(strategist, staking, uint192(100 ether)); // 100 OGN per second
+        rewards.setRewardsPerSecond(uint192(100 ether)); // 100 OGN per second
 
         // Make sure contract has enough OGN for rewards
         ogn.mint(address(rewardsProxy), 1000000 ether);

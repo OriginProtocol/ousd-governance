@@ -46,18 +46,12 @@ contract FixedRateRewardsSource is Governable, Initializable {
     /// @dev Initialize the proxy implementation
     /// @param _strategistAddr Address of the Strategist
     /// @param _rewardsTarget Address that receives rewards
-    /// @param _rewardsPerSecond Rate of reward emission
-    function initialize(address _strategistAddr, address _rewardsTarget, uint192 _rewardsPerSecond)
-        external
-        initializer
-    {
+    function initialize(address _strategistAddr, address _rewardsTarget) external initializer {
         _setStrategistAddr(_strategistAddr);
         _setRewardsTarget(_rewardsTarget);
 
         // Rewards start from the moment the contract is initialized
         rewardConfig.lastCollect = uint64(block.timestamp);
-
-        _setRewardsPerSecond(_rewardsPerSecond);
     }
 
     /// @dev Collect pending rewards
@@ -136,8 +130,12 @@ contract FixedRateRewardsSource is Governable, Initializable {
         RewardConfig storage _config = rewardConfig;
         emit RewardsPerSecondChanged(_rewardsPerSecond, _config.rewardsPerSecond);
         if (_config.rewardsPerSecond == 0) {
-            // When changing rate from zero to non-zero,
-            // Update lastCollect timestamp as well
+            /* This contract code allows for contract deployment & initialization and then the contract can be live for quite
+             * some time before it is funded and `_rewardsPerSecond` are set to non 0 value. In that case the vesting period 
+             * from contract initialization until now would be taken into account instead of the time since the contract has been
+             * "activated" by setting the `setRewardsPerSecond`. To mitigate the issue we update the `_config.lastCollect`
+             * to current time.
+             */
             _config.lastCollect = uint64(block.timestamp);
         }
         _config.rewardsPerSecond = _rewardsPerSecond;

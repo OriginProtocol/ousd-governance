@@ -12,3 +12,6 @@ remappings = [
   "paulrberg/prb-math@2.5.0/=./lib/prb-math"
 ]
 fs_permissions = [{ access = "read-write", path = "./build"}]
+extra_output_files = [
+  "metadata"
+]
