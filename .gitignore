@@ -17,3 +17,4 @@ out/
 brownie-deploy/
 .idea
 deployments-fork.json
+broadcast/*
