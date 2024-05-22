@@ -130,6 +130,8 @@ contract DeployManager is Script {
             deployedContracts[name] = addr;
         }
 
+        // Sleep 0.5s so that the previous write is complete
+        vm.sleep(500);
         vm.writeJson(networkDeployments, deploymentsFilePath, contractsKey);
         console.log("> Deployment addresses stored.");
 
