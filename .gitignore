@@ -16,5 +16,5 @@ out/
 .vscode
 brownie-deploy/
 .idea
-deployments-fork.json
+deployments-fork*.json
 broadcast/*

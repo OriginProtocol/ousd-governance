@@ -32,12 +32,14 @@ contract XOGNGovernanceForkTest is Test {
 
     int256 constant NEW_STAKE = -1;
 
-    function setUp() external {
+    constructor() {
         deployManager = new DeployManager();
 
         deployManager.setUp();
         deployManager.run();
+    }
 
+    function setUp() external {
         xogn = ExponentialStaking(deployManager.getDeployment("XOGN"));
         timelock = Timelock(payable(Addresses.TIMELOCK));
         xognGov = Governance(payable(deployManager.getDeployment("XOGN_GOV")));
