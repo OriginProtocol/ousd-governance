@@ -24,12 +24,14 @@ contract MigratorForkTest is Test {
 
     address public ogvWhale = Addresses.GOV_MULTISIG;
 
-    function setUp() external {
+    constructor() {
         deployManager = new DeployManager();
 
         deployManager.setUp();
         deployManager.run();
+    }
 
+    function setUp() external {
         migrator = Migrator(deployManager.getDeployment("MIGRATOR"));
 
         veogv = OgvStaking(Addresses.VEOGV);

@@ -1,6 +1,13 @@
 {
   "1": {
-    "executions": {},
-    "contracts": {}
+    "executions": {
+      "010_xOGNSetup": 1716312107
+    },
+    "contracts": {
+      "OGN_REWARDS_SOURCE": "0x7609c88E5880e934dd3A75bCFef44E31b1Badb8b",
+      "OGN_REWARDS_SOURCE_IMPL": "0x16890bdd817Ed1c4654430d67329CB20b0B71bB0",
+      "XOGN": "0x63898b3b6Ef3d39332082178656E9862bee45C57",
+      "XOGN_IMPL": "0x97711c7a5D64A064a95d10e37f786d2bD8b1F3c8"
+    }
   }
 }

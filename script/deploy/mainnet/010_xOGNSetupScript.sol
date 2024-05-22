@@ -60,11 +60,5 @@ contract XOGNSetupScript is BaseMainnetScript {
         ognRewardsSourceProxy.initialize(address(fixedRateRewardsSourceImpl), Addresses.TIMELOCK, implInitData);
     }
 
-    function _fork() internal override {
-        IMintableERC20 ogn = IMintableERC20(Addresses.OGN);
-
-        // Mint enough OGN to fund 100 days of rewards
-        vm.prank(Addresses.OGN_GOVERNOR);
-        ogn.mint(deployedContracts["OGN_REWARDS_SOURCE"], 30_000_000 ether);
-    }
+    function _fork() internal override {}
 }

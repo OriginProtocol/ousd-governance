@@ -20,6 +20,8 @@ import {Governance} from "contracts/Governance.sol";
 
 import {GovFive} from "contracts/utils/GovFive.sol";
 
+import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
+
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
@@ -74,6 +76,12 @@ contract XOGNGovernanceScript is BaseMainnetScript {
     }
 
     function _fork() internal override {
+        IMintableERC20 ogn = IMintableERC20(Addresses.OGN);
+
+        // Mint enough OGN to fund 100 days of rewards
+        vm.prank(Addresses.OGN_GOVERNOR);
+        ogn.mint(deployedContracts["OGN_REWARDS_SOURCE"], 30_000_000 ether);
+
         // Go to the start of everything
         vm.warp(OGN_EPOCH);
 
