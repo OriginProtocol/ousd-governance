@@ -53,6 +53,13 @@ forge install
 forge test
 ```
 
+## Running fork tests (forge)
+
+```bash
+forge install
+forge test --fork-url $ALCHEMY_PROVIDER_URL -vvv --mc "ForkTest"
+```
+
 ## Running a local node
 
 Copy `dev.env` to `.env` and fill out the `PROVIDER_URL`

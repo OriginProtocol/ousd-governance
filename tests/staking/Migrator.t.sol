@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.10;
+
 import "forge-std/Test.sol";
 
 import "contracts/Migrator.sol";
@@ -190,9 +194,9 @@ contract MigratorTest is Test {
         // Should have removed OGV staked
         for (uint256 i = 0; i < lockupIds.length; ++i) {
             (amount, end, points) = ogvStaking.lockups(alice, lockupIds[i]);
-            assertEq(amount, 0, "Lockup still exists");
-            assertEq(end, 0, "Lockup still exists");
-            assertEq(points, 0, "Lockup still exists");
+            assertEq(amount, 0, "Amount: Lockup still exists");
+            assertEq(end, 0, "End: Lockup still exists");
+            assertEq(points, 0, "Points: Lockup still exists");
         }
 
         vm.stopPrank();
@@ -220,9 +224,9 @@ contract MigratorTest is Test {
         // Should have removed OGV staked
         for (uint256 i = 0; i < lockupIds.length; ++i) {
             (amount, end, points) = ogvStaking.lockups(alice, lockupIds[i]);
-            assertEq(amount, 0, "Lockup still exists");
-            assertEq(end, 0, "Lockup still exists");
-            assertEq(points, 0, "Lockup still exists");
+            assertEq(amount, 0, "Amount: Lockup still exists");
+            assertEq(end, 0, "End: Lockup still exists");
+            assertEq(points, 0, "Points: Lockup still exists");
         }
 
         // Shouldn't have deleted other migration

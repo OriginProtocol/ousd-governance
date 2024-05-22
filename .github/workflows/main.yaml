@@ -80,4 +80,20 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Run tests
-        run: forge test -vvv
+        run: forge test --no-match-contract "(Fork)" -vvv
+
+  foundry-fork-tests:
+    name: Foundry Fork tests
+    runs-on: ubuntu-latest
+    env:
+      PROVIDER_URL: ${{ secrets.PROVIDER_URL }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run tests
+        run: forge test --match-contract "ForkTest" --fork-url $PROVIDER_URL
