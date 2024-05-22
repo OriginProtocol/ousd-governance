@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "./Governable.sol";
+import {ERC20Burnable} from
+    "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {Governable} from "./Governable.sol";
 
 interface IStaking {
     function delegates(address staker) external view returns (address);
