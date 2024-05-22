@@ -140,12 +140,12 @@ def test_late_vote_extends_quorum(
         "Set voting delay",
         {"from": whale_voter},
     )
-    mine_blocks(web3, "0x4371")  # 16 less than is required for vote end
+    mine_blocks(web3, "0x3840")  # 16 less than is required for vote end
     assert governance.state(tx.return_value) == 1
     governance.castVote(tx.return_value, 1, {"from": whale_voter})
     proposal = governance.proposals(tx.return_value)
-    # Extends for 2 days beyond the current block
-    assert proposal[4] == (86400 / 15) * 2 + web3.eth.block_number
+    # Extends for 1 day beyond the current block
+    assert proposal[4] == 7208 + web3.eth.block_number
 
 
 def test_timelock_proposal_can_be_cancelled(

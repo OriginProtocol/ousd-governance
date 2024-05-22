@@ -228,7 +228,7 @@ contract OgvStaking is ERC20Votes {
     /// @param duration number of seconds to stake for
     /// @return points staking points that would be returned
     /// @return end staking period end date
-    function previewPoints(uint256 amount, uint256 duration) public view returns (uint256, uint256) {
+    function previewPoints(uint256 amount, uint256 duration) public pure returns (uint256, uint256) {
         revert StakingDisabled();
     }
 

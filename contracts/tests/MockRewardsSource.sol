@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 contract MockRewardsSource {
     constructor() {}
 
-    function previewRewards() external view returns (uint256) {
+    function previewRewards() external pure returns (uint256) {
         return 0;
     }
 

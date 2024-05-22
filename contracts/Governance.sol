@@ -16,12 +16,12 @@ contract Governance is
     GovernorPreventLateQuorum
 {
     constructor(ERC20Votes _token, TimelockController _timelock)
-        Governor("OUSD Governance")
-        GovernorSettings(1, /* 1 block */ 17280, /* ~3 days (86400 / 15) * 3 */ 10000000 * 1e18 /* 10 mio veOgv */ )
+        Governor("Origin DeFi Governance")
+        GovernorSettings(1, /* 1 block */ 14416, /* ~2 days (86400 / 12) * 2 */ 100000 * 1e18 /* 100k xOGN */ )
         GovernorVotes(_token)
         GovernorVotesQuorumFraction(20) // Default quorum denominator is 100, so 20/100 or 20%
         GovernorTimelockControl(_timelock)
-        GovernorPreventLateQuorum(11520) // ~2 days (86400 / 15) * 2
+        GovernorPreventLateQuorum(7208) // ~1 days (86400 / 12)
     {}
 
     // The following functions are overrides required by Solidity.
