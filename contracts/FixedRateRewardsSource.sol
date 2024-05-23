@@ -134,7 +134,7 @@ contract FixedRateRewardsSource is Governable, Initializable {
             // and it is safe to reset the last rewards time to the current time.
             // We do this so that when enabling rewards after a period of not having rewards,
             // we don’t pay out rewards for time before the rewards are enabled.
-            // 
+            //
             // Other than transitions from zero, this contract will pay out past rewards time at the new rate.
             // Call collectRewards before changing rates if you care about precise reward accuracy.
             _config.lastCollect = uint64(block.timestamp);
