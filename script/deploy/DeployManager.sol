@@ -10,19 +10,18 @@ import {XOGNSetupScript} from "./mainnet/010_xOGNSetupScript.sol";
 import {OgnOgvMigrationScript} from "./mainnet/011_OgnOgvMigrationScript.sol";
 import {XOGNGovernanceScript} from "./mainnet/012_xOGNGovernanceScript.sol";
 
+import "contracts/utils/VmHelper.sol";
+
 contract DeployManager is Script {
+    using VmHelper for Vm;
+
     mapping(string => address) public deployedContracts;
     mapping(string => bool) public scriptsExecuted;
 
     string internal forkFileId = "";
 
-    function isForked() public view returns (bool) {
-        return vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.Test)
-            || vm.isContext(VmSafe.ForgeContext.TestGroup);
-    }
-
     function getDeploymentFilePath() public view returns (string memory) {
-        return isForked() ? getForkDeploymentFilePath() : getMainnetDeploymentFilePath();
+        return vm.isForkEnv() ? getForkDeploymentFilePath() : getMainnetDeploymentFilePath();
     }
 
     function getMainnetDeploymentFilePath() public view returns (string memory) {
@@ -30,11 +29,11 @@ contract DeployManager is Script {
     }
 
     function getForkDeploymentFilePath() public view returns (string memory) {
-        return string(abi.encodePacked(vm.projectRoot(), "/build/deployments-fork-", forkFileId, ".json"));
+        return string(abi.encodePacked(vm.projectRoot(), "/build/deployments-fork", forkFileId, ".json"));
     }
 
     function setUp() external {
-        forkFileId = Strings.toString(block.timestamp);
+        forkFileId = vm.isTestEnv() ? Strings.toString(block.timestamp) : "";
 
         string memory chainIdStr = Strings.toString(block.chainid);
         string memory chainIdKey = string(abi.encodePacked(".", chainIdStr));
@@ -53,7 +52,7 @@ contract DeployManager is Script {
             );
         }
 
-        if (isForked()) {
+        if (vm.isForkEnv()) {
             // Duplicate Mainnet File
             vm.writeFile(getForkDeploymentFilePath(), vm.readFile(mainnetFilePath));
         }
@@ -67,6 +66,10 @@ contract DeployManager is Script {
     }
 
     function _runDeployFile(BaseMainnetScript deployScript) internal {
+        if (deployScript.skip()) {
+            return;
+        }
+
         string memory chainIdStr = Strings.toString(block.chainid);
         string memory chainIdKey = string(abi.encodePacked(".", chainIdStr));
 

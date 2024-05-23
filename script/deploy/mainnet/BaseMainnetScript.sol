@@ -6,8 +6,14 @@ import "forge-std/Script.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
+import {GovProposal, GovProposalHelper} from "contracts/utils/GovProposalHelper.sol";
+
+import "utils/VmHelper.sol";
 
 abstract contract BaseMainnetScript is Script {
+    using VmHelper for Vm;
+    using GovProposalHelper for GovProposal;
+
     uint256 public deployBlockNum = type(uint256).max;
     bool isForked = false;
 
@@ -48,8 +54,7 @@ abstract contract BaseMainnetScript is Script {
             return;
         }
 
-        isForked = vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.Test)
-            || vm.isContext(VmSafe.ForgeContext.TestGroup);
+        isForked = vm.isForkEnv();
 
         if (isForked) {
             address impersonator = Addresses.INITIAL_DEPLOYER;
@@ -74,7 +79,11 @@ abstract contract BaseMainnetScript is Script {
 
     function DEPLOY_NAME() external view virtual returns (string memory);
 
-    function _execute() internal virtual {}
+    function skip() external view virtual returns (bool) {
+        return false;
+    }
 
-    function _fork() internal virtual {}
+    function _execute() internal virtual;
+
+    function _fork() internal virtual;
 }
