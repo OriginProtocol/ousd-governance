@@ -33,7 +33,7 @@ contract DeployManager is Script {
     }
 
     function setUp() external {
-        forkFileId = vm.isTestEnv() ? Strings.toString(block.timestamp) : "";
+        forkFileId = Strings.toString(block.timestamp);
 
         string memory chainIdStr = Strings.toString(block.chainid);
         string memory chainIdKey = string(abi.encodePacked(".", chainIdStr));
