@@ -67,12 +67,6 @@ contract OGNRewardsSourceForkTest is Test {
     }
 
     function testRewardDistribution() external {
-        if (block.timestamp < (OGN_EPOCH - 2 days)) {
-            // If it's post launch date, skip this test
-            (uint64 lastColect,) = ognRewardsSource.rewardConfig();
-            assertEq(lastColect, OGN_EPOCH, "last collect not updated (before deploy)");
-        }
-
         uint256 rewardsBefore = ognRewardsSource.previewRewards();
         vm.warp(block.timestamp + 1 days);
         assertEq(

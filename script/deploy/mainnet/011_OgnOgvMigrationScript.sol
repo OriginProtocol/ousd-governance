@@ -153,8 +153,5 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
         // Simulate proposal on OGV Governance
         govProposal.simulate(Addresses.GOVERNOR_FIVE);
-
-        // Go to the start of everything
-        vm.warp(OGN_EPOCH); // 30th of May
     }
 }
