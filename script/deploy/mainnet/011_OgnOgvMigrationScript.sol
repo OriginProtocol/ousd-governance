@@ -151,10 +151,10 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         vm.prank(Addresses.GOV_MULTISIG);
         ogn.approve(Addresses.TIMELOCK, additionalOGN);
 
-        // Go to the start of everything
-        vm.warp(OGN_EPOCH - 2 days); // 28th of May
+        // Simulate proposal on OGV Governance
+        govProposal.simulate(Addresses.GOVERNOR_FIVE);
 
-        // Simulate execute on fork by impersonating Timelock
-        govProposal.impersonateAndSimulate();
+        // Go to the start of everything
+        vm.warp(OGN_EPOCH); // 30th of May
     }
 }

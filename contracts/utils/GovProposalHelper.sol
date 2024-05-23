@@ -6,7 +6,8 @@ import {Addresses} from "contracts/utils/Addresses.sol";
 import "forge-std/console.sol";
 
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
-// import {IGovernor} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/IGovernor.sol";
+import {IGovernor} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/IGovernor.sol";
+import {Governance} from "../Governance.sol";
 
 import "contracts/utils/VmHelper.sol";
 
@@ -82,11 +83,7 @@ library GovProposalHelper {
         (address[] memory targets, uint256[] memory values, bytes[] memory calldatas) = getParams(prop);
 
         proposeCalldata = abi.encodeWithSignature(
-            "propose(address[] memory,uint256[] memory,bytes[] memory,string memory)",
-            targets,
-            values,
-            calldatas,
-            prop.description
+            "propose(address[],uint256[],bytes[],string)", targets, values, calldatas, prop.description
         );
     }
 
@@ -106,5 +103,76 @@ library GovProposalHelper {
         }
         vm.stopPrank();
         console.log("Governance proposal simulation complete");
+    }
+
+    function simulate(GovProposal memory prop, address governanceAddr) internal {
+        address VM_ADDRESS = address(uint160(uint256(keccak256("hevm cheat code"))));
+        Vm vm = Vm(VM_ADDRESS);
+
+        uint256 proposalId = id(prop);
+
+        Governance governance = Governance(payable(governanceAddr));
+
+        vm.startPrank(Addresses.GOV_MULTISIG);
+
+        uint256 snapshot = governance.proposalSnapshot(proposalId);
+
+        if (snapshot == 0) {
+            // Proposal doesn't exists, create it
+            console.log("Creating proposal...");
+            bytes memory proposeData = getProposeCalldata(prop);
+            (bool success, bytes memory data) = governanceAddr.call(proposeData);
+        }
+
+        IGovernor.ProposalState state = governance.state(proposalId);
+
+        if (state == IGovernor.ProposalState.Executed) {
+            // Skipping executed proposal
+            return;
+        }
+
+        if (state == IGovernor.ProposalState.Pending) {
+            console.log("Waiting for voting period...");
+            // Wait for voting to start
+            vm.roll(block.number + 10);
+            vm.warp(block.timestamp + 10 minutes);
+
+            state = governance.state(proposalId);
+        }
+
+        if (state == IGovernor.ProposalState.Active) {
+            console.log("Voting on proposal...");
+            // Vote on proposal
+            governance.castVote(proposalId, 1);
+            // Wait for voting to end
+            vm.roll(governance.proposalDeadline(proposalId) + 20);
+            vm.warp(block.timestamp + 2 days);
+
+            state = governance.state(proposalId);
+        }
+
+        if (state == IGovernor.ProposalState.Succeeded) {
+            console.log("Queuing proposal...");
+            governance.queue(proposalId);
+
+            state = governance.state(proposalId);
+        }
+
+        if (state == IGovernor.ProposalState.Queued) {
+            console.log("Executing proposal");
+            // Wait for timelock
+            vm.roll(governance.proposalEta(proposalId) + 20);
+            vm.warp(block.timestamp + 2 days);
+
+            governance.execute(proposalId);
+
+            state = governance.state(proposalId);
+        }
+
+        if (state != IGovernor.ProposalState.Executed) {
+            revert("Unexpected proposal state");
+        }
+
+        vm.stopPrank();
     }
 }
