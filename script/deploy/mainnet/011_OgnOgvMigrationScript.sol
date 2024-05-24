@@ -29,7 +29,7 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
     uint256 public constant OGN_TO_MINT = 409_664_846 ether;
 
     // From `script/ExtraOGNForMigration.s.sol`, rounded off
-    uint256 public constant EXTRA_OGN_FOR_MIGRATION = 3_000_000 ether;
+    uint256 public constant EXTRA_OGN_FOR_MIGRATION = 3_010_000 ether;
 
     uint256 public constant EXTRA_OGN_FOR_REWARDS = 344_736 ether;
 
