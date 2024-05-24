@@ -71,6 +71,7 @@ abstract contract BaseMainnetScript is Script {
 
         if (isForked) {
             vm.stopPrank();
+            _buildGovernanceProposal();
             _fork();
         } else {
             vm.stopBroadcast();
