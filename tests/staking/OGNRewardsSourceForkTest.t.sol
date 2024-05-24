@@ -27,7 +27,7 @@ contract OGNRewardsSourceForkTest is Test {
 
     uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
-    uint256 constant REWARDS_PER_SECOND = 300000 ether / uint256(24 * 60 * 60); // 300k per day
+    uint256 constant REWARDS_PER_SECOND = 0.57 ether;
 
     int256 constant NEW_STAKE = -1;
 
