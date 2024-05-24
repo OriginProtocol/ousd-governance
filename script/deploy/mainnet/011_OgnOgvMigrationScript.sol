@@ -21,9 +21,9 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
     string public constant override DEPLOY_NAME = "011_OgnOgvMigration";
 
-    GovProposal govProposal;
+    GovProposal public govProposal;
 
-    uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+    uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
     // Ref: https://snapshot.org/#/origingov.eth/proposal/0x741893a4d9838c0b69fac03650756e21fe00ec35b5309626bb0d6b816f861f9b
     uint256 public constant OGN_TO_MINT = 409_664_846 ether;
@@ -31,11 +31,9 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
     // From `script/ExtraOGNForMigration.s.sol`, rounded off
     uint256 public constant EXTRA_OGN_FOR_MIGRATION = 3_000_000 ether;
 
-    // TODO: Find right number
-    uint256 public constant EXTRA_OGN_FOR_REWARDS = 300_000_000 ether;
+    uint256 public constant EXTRA_OGN_FOR_REWARDS = 344_736 ether;
 
-    // TODO: Confirm reward rate
-    uint256 constant REWARDS_PER_SECOND = 300000 ether / uint256(24 * 60 * 60); // 300k per day
+    uint256 public constant REWARDS_PER_SECOND = 0.57 ether;
 
     constructor() {}
 
@@ -64,10 +62,10 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         console.log("- Migrator init");
         migratorProxy.initialize(address(migratorImpl), Addresses.TIMELOCK, "");
 
-        _buildGovernanceProposal();
+        // _buildGovernanceProposal();
     }
 
-    function _buildGovernanceProposal() internal {
+    function _buildGovernanceProposal() internal override {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
         address ognRewardsSourceProxy = deployedContracts["OGN_REWARDS_SOURCE"];

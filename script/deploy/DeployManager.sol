@@ -93,12 +93,6 @@ contract DeployManager is Script {
             scriptsExecuted[executionKeys[i]] = true;
         }
 
-        if (scriptsExecuted[deployScript.DEPLOY_NAME()]) {
-            // TODO: Handle any active governance proposal
-            console.log("Skipping already deployed script");
-            return;
-        }
-
         /**
          * Pre-deployment
          */
@@ -115,38 +109,44 @@ contract DeployManager is Script {
             deployScript.preloadDeployedContract(existingContracts[i], deployedAddr);
         }
 
-        // Deployment
-        deployScript.setUp();
-        deployScript.run();
+        if (scriptsExecuted[deployScript.DEPLOY_NAME()]) {
+            // Governance handling
+            deployScript.handleGovernanceProposal();
+            console.log("Skipping already deployed script");
+        } else {
+            // Deployment
+            deployScript.setUp();
+            deployScript.run();
 
-        /**
-         * Post-deployment
-         */
-        BaseMainnetScript.DeployRecord[] memory records = deployScript.getAllDeployRecords();
+            /**
+             * Post-deployment
+             */
+            BaseMainnetScript.DeployRecord[] memory records = deployScript.getAllDeployRecords();
 
-        for (uint256 i = 0; i < records.length; ++i) {
-            string memory name = records[i].name;
-            address addr = records[i].addr;
+            for (uint256 i = 0; i < records.length; ++i) {
+                string memory name = records[i].name;
+                address addr = records[i].addr;
 
-            console.log(string(abi.encodePacked("> Recorded Deploy of ", name, " at")), addr);
-            networkDeployments = vm.serializeAddress(contractsKey, name, addr);
-            deployedContracts[name] = addr;
+                console.log(string(abi.encodePacked("> Recorded Deploy of ", name, " at")), addr);
+                networkDeployments = vm.serializeAddress(contractsKey, name, addr);
+                deployedContracts[name] = addr;
+            }
+
+            // Sleep 0.5s so that the previous write is complete
+            vm.sleep(500);
+            vm.writeJson(networkDeployments, deploymentsFilePath, contractsKey);
+            console.log("> Deployment addresses stored.");
+
+            /**
+             * Write Execution History
+             */
+            currentExecutions = vm.serializeUint(executionsKey, deployScript.DEPLOY_NAME(), block.timestamp);
+
+            // Sleep 0.5s so that the previous write is complete
+            vm.sleep(500);
+            vm.writeJson(currentExecutions, deploymentsFilePath, executionsKey);
+            console.log("> Deploy script execution complete.");
         }
-
-        // Sleep 0.5s so that the previous write is complete
-        vm.sleep(500);
-        vm.writeJson(networkDeployments, deploymentsFilePath, contractsKey);
-        console.log("> Deployment addresses stored.");
-
-        /**
-         * Write Execution History
-         */
-        currentExecutions = vm.serializeUint(executionsKey, deployScript.DEPLOY_NAME(), block.timestamp);
-
-        // Sleep 0.5s so that the previous write is complete
-        vm.sleep(500);
-        vm.writeJson(currentExecutions, deploymentsFilePath, executionsKey);
-        console.log("> Deploy script execution complete.");
     }
 
     function getDeployment(string calldata contractName) external view returns (address) {
