@@ -21,11 +21,11 @@ contract XOGNGovernanceScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
     using VmHelper for Vm;
 
-    GovFive.GovFiveProposal govProposal;
+    GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "012_xOGNGovernance";
 
-    uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+    uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
     constructor() {}
 
@@ -42,7 +42,7 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         _buildGovernanceProposal();
     }
 
-    function _buildGovernanceProposal() internal {
+    function _buildGovernanceProposal() internal override {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
         address xognGov = deployedContracts["XOGN_GOV"];

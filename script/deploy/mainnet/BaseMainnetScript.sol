@@ -86,4 +86,11 @@ abstract contract BaseMainnetScript is Script {
     function _execute() internal virtual;
 
     function _fork() internal virtual;
+
+    function _buildGovernanceProposal() internal virtual {}
+
+    function handleGovernanceProposal() external virtual {
+        _buildGovernanceProposal();
+        _fork();
+    }
 }

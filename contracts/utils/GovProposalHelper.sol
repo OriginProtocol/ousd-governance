@@ -118,9 +118,17 @@ library GovProposalHelper {
         uint256 snapshot = governance.proposalSnapshot(proposalId);
 
         if (snapshot == 0) {
-            // Proposal doesn't exists, create it
-            console.log("Creating proposal...");
             bytes memory proposeData = getProposeCalldata(prop);
+
+            console.log("----------------------------------");
+            console.log("Create following tx on Governance:");
+            console.log("To:", governanceAddr);
+            console.log("Data:");
+            console.logBytes(proposeData);
+            console.log("----------------------------------");
+
+            // Proposal doesn't exists, create it
+            console.log("Creating proposal on fork...");
             (bool success, bytes memory data) = governanceAddr.call(proposeData);
         }
 
