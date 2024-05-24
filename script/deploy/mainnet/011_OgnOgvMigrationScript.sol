@@ -71,7 +71,12 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         address ognRewardsSourceProxy = deployedContracts["OGN_REWARDS_SOURCE"];
         address veOgvImpl = deployedContracts["VEOGV_IMPL"];
 
-        govProposal.setDescription("Deploy OGV-OGN migration contracts and revoke OGV Governance roles");
+        govProposal.setDescription(
+            "OGV>OGN Migration Contracts"
+            "\n\nThis proposal deploys, funds and enables the Migrator contract which can be used to migrate OGV to OGN and also veOGV to xOGN."
+            "\n\nThe proposal mints 409,664,846 OGN (as specificed in the previous off-chain snapshot governance proposal). It also uses some OGN from the treasury multisig to account for the increase in OGV supply due to inflation since the snapshot proposal was posted."
+            "\n\nThis proposal also revokes all roles that the OGV Governance has on the Timelock. Buyback contracts are upgraded to buy OGN instead of OGV"
+        );
 
         // Realize any pending rewards
         govProposal.action(Addresses.VEOGV, "collectRewards()", "");
