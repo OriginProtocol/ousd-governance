@@ -159,7 +159,7 @@ library GovProposalHelper {
             console.log("Voting on proposal...");
             // Vote on proposal
             try governance.castVote(proposalId, 1) {}
-            catch () {}
+            catch {}
             // Wait for voting to end
             vm.roll(governance.proposalDeadline(proposalId) + 20);
             vm.warp(block.timestamp + 2 days);
