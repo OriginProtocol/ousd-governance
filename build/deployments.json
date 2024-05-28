@@ -2,9 +2,11 @@
   "1": {
     "executions": {
       "010_xOGNSetup": 1716312107,
-      "011_OgnOgvMigration": 1716485925
+      "011_OgnOgvMigration": 1716485925,
+      "012_MigrationZapper": 1716910212
     },
     "contracts": {
+      "MIGRATION_ZAPPER": "0xC202CDa20A8C34C7a282890eAE2Bb9CC0B115877",
       "MIGRATOR": "0x95c347D6214614A780847b8aAF4f96Eb84f4da6d",
       "MIGRATOR_IMPL": "0x946e9BED9EDebEBCE95Dea72bDD38F8c3F6efd2E",
       "OGN_REWARDS_SOURCE": "0x7609c88E5880e934dd3A75bCFef44E31b1Badb8b",
