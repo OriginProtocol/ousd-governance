@@ -48,7 +48,7 @@ contract XOGNGovernanceForkTest is Test {
 
         ognRewardsSource = deployManager.getDeployment("OGN_REWARDS_SOURCE");
 
-        vm.startPrank(Addresses.OGN_GOVERNOR);
+        vm.startPrank(Addresses.TIMELOCK);
         ogn.mint(alice, 200000 ether);
         ogn.mint(bob, 200000 ether);
         ogn.mint(xognWhale, 1000_000_000 ether);
@@ -68,7 +68,7 @@ contract XOGNGovernanceForkTest is Test {
     }
 
     function testVotingDelay() external view {
-        assertEq(xognGov.votingDelay(), 1, "Incorrect voting delay");
+        assertEq(xognGov.votingDelay(), 7200, "Incorrect voting delay");
     }
 
     function testVotingPeriod() external view {
@@ -201,8 +201,8 @@ contract XOGNGovernanceForkTest is Test {
         assertEq(uint256(xognGov.state(proposalId)), 0, "Proposal wasn't created");
 
         // Wait for voting to start
-        vm.warp(block.timestamp + 10 minutes);
-        vm.roll(block.number + 100);
+        vm.warp(block.timestamp + 1 days);
+        vm.roll(block.number + 7300);
         assertEq(uint256(xognGov.state(proposalId)), 1, "Proposal isn't active");
 
         // Vote on proposal
@@ -258,8 +258,8 @@ contract XOGNGovernanceForkTest is Test {
         assertEq(uint256(xognGov.state(proposalId)), 0, "Proposal wasn't created");
 
         // Wait for voting to start
-        vm.warp(block.timestamp + 10 minutes);
-        vm.roll(block.number + 100);
+        vm.warp(block.timestamp + 1 days);
+        vm.roll(block.number + 7300);
         assertEq(uint256(xognGov.state(proposalId)), 1, "Proposal isn't active");
 
         // Vote on proposal

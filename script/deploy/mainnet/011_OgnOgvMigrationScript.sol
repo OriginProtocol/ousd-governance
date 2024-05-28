@@ -7,25 +7,33 @@ import {Vm} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
-import {FixedRateRewardsSourceProxy} from "contracts/upgrades/FixedRateRewardsSourceProxy.sol";
-import {ExponentialStakingProxy} from "contracts/upgrades/ExponentialStakingProxy.sol";
 import {MigratorProxy} from "contracts/upgrades/MigratorProxy.sol";
 
-import {ExponentialStaking} from "contracts/ExponentialStaking.sol";
-import {FixedRateRewardsSource} from "contracts/FixedRateRewardsSource.sol";
 import {OgvStaking} from "contracts/OgvStaking.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {Timelock} from "contracts/Timelock.sol";
-import {GovFive} from "contracts/utils/GovFive.sol";
 import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
-import {IOGNGovernance} from "contracts/interfaces/IOGNGovernance.sol";
+
+import {GovProposal, GovProposalHelper} from "contracts/utils/GovProposalHelper.sol";
 
 contract OgnOgvMigrationScript is BaseMainnetScript {
-    using GovFive for GovFive.GovFiveProposal;
-
-    GovFive.GovFiveProposal govFive;
+    using GovProposalHelper for GovProposal;
 
     string public constant override DEPLOY_NAME = "011_OgnOgvMigration";
+
+    GovProposal public govProposal;
+
+    uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+
+    // Ref: https://snapshot.org/#/origingov.eth/proposal/0x741893a4d9838c0b69fac03650756e21fe00ec35b5309626bb0d6b816f861f9b
+    uint256 public constant OGN_TO_MINT = 409_664_846 ether;
+
+    // From `script/ExtraOGNForMigration.s.sol`, rounded off
+    uint256 public constant EXTRA_OGN_FOR_MIGRATION = 3_010_000 ether;
+
+    uint256 public constant EXTRA_OGN_FOR_REWARDS = 344_736 ether;
+
+    uint256 public constant REWARDS_PER_SECOND = 0.57 ether;
 
     constructor() {}
 
@@ -54,102 +62,99 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
         console.log("- Migrator init");
         migratorProxy.initialize(address(migratorImpl), Addresses.TIMELOCK, "");
 
-        _buildGnosisTx();
+        // _buildGovernanceProposal();
     }
 
-    function _buildGnosisTx() internal {
+    function _buildGovernanceProposal() internal override {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
         address ognRewardsSourceProxy = deployedContracts["OGN_REWARDS_SOURCE"];
         address veOgvImpl = deployedContracts["VEOGV_IMPL"];
 
-        govFive.setName("OGV Migration to OGN");
-        // Todo: Fuller description
-        govFive.setDescription("Deploy OGV-OGN migration contracts and revoke OGV Governance roles");
+        govProposal.setDescription(
+            "OGV>OGN Migration Contracts"
+            "\n\nThis proposal deploys, funds and enables the Migrator contract which can be used to migrate OGV to OGN and also veOGV to xOGN."
+            "\n\nThe proposal mints 409,664,846 OGN (as specificed in the previous off-chain snapshot governance proposal). It also uses some OGN from the treasury multisig to account for the increase in OGV supply due to inflation since the snapshot proposal was posted."
+            "\n\nThis proposal also revokes all roles that the OGV Governance has on the Timelock. Buyback contracts are upgraded to buy OGN instead of OGV"
+        );
 
-        console.log(address(veOgvImpl));
-        govFive.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(veOgvImpl));
+        // Realize any pending rewards
+        govProposal.action(Addresses.VEOGV, "collectRewards()", "");
+        // Upgrade veOGV implementation
+        govProposal.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(veOgvImpl));
 
-        govFive.action(
+        // Revoke access from OGV governance
+        govProposal.action(
             Addresses.TIMELOCK,
             "revokeRole(bytes32,address)",
             abi.encode(timelock.PROPOSER_ROLE(), Addresses.GOVERNOR_FIVE)
         );
-        govFive.action(
+        govProposal.action(
             Addresses.TIMELOCK,
             "revokeRole(bytes32,address)",
             abi.encode(timelock.CANCELLER_ROLE(), Addresses.GOVERNOR_FIVE)
         );
-        govFive.action(
+        govProposal.action(
             Addresses.TIMELOCK,
             "revokeRole(bytes32,address)",
             abi.encode(timelock.EXECUTOR_ROLE(), Addresses.GOVERNOR_FIVE)
         );
 
-        govFive.action(Addresses.OUSD_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OUSD_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OUSD_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
-        govFive.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL)); // Todo, use latest deployed address
-        govFive.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
+        // Upgrade buyback contracts & configure them
+        govProposal.action(Addresses.OUSD_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OUSD_BUYBACK_IMPL));
+        govProposal.action(Addresses.OUSD_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
+        govProposal.action(Addresses.OETH_BUYBACK, "upgradeTo(address)", abi.encode(Addresses.OETH_BUYBACK_IMPL));
+        govProposal.action(Addresses.OETH_BUYBACK, "setRewardsSource(address)", abi.encode(ognRewardsSourceProxy));
 
-        // Mint token proposal from OGN governance
-        IMintableERC20 ogv = IMintableERC20(Addresses.OGV);
-        // Mint additional OGN, will get returned after starting migration
-        uint256 ognToMint = ((ogv.totalSupply() * 0.09137 ether) / 1 ether) + 1_000_000 ether;
-
-        address[] memory targets = new address[](1);
-        string[] memory sigs = new string[](1);
-        bytes[] memory calldatas = new bytes[](1);
-
-        // OGN Gov 1: Mint OGN
-        targets[0] = Addresses.OGN;
-        sigs[0] = "mint(address,uint256)";
-        calldatas[0] = abi.encode(deployedContracts["MIGRATOR"], ognToMint);
-
-        govFive.action(
-            Addresses.OGN_GOVERNOR,
-            "propose(address[],string[],bytes[],string)",
-            abi.encode(targets, sigs, calldatas, "")
+        // Mint OGN required
+        govProposal.action(
+            Addresses.OGN, "mint(address,uint256)", abi.encode(deployedContracts["MIGRATOR"], OGN_TO_MINT)
         );
 
-        if (!isForked) {
-            govFive.printTxData();
-        }
+        // Transfer in excess OGN from Multisig (for migration)
+        govProposal.action(
+            Addresses.OGN,
+            "transferFrom(address,address,uint256)",
+            abi.encode(Addresses.GOV_MULTISIG, deployedContracts["MIGRATOR"], EXTRA_OGN_FOR_MIGRATION)
+        );
+
+        // Transfer in OGN from Multisig (for rewards)
+        govProposal.action(
+            Addresses.OGN,
+            "transferFrom(address,address,uint256)",
+            abi.encode(Addresses.GOV_MULTISIG, deployedContracts["OGN_REWARDS_SOURCE"], EXTRA_OGN_FOR_REWARDS)
+        );
+
+        // Enable rewards for staking
+        govProposal.action(
+            deployedContracts["OGN_REWARDS_SOURCE"],
+            "setRewardsPerSecond(uint192)",
+            abi.encode(uint192(REWARDS_PER_SECOND))
+        );
+
+        // Start migration
+        govProposal.action(deployedContracts["MIGRATOR"], "start()", "");
+
+        // Ensure solvency and transfer out excess OGN
+        govProposal.action(
+            deployedContracts["MIGRATOR"], "transferExcessTokens(address)", abi.encode(Addresses.GOV_MULTISIG)
+        );
     }
 
     function _fork() internal override {
-        // Simulate execute on fork
-        govFive.execute();
-
-        vm.startPrank(Addresses.GOV_MULTISIG);
-
-        IOGNGovernance ognGovernance = IOGNGovernance(Addresses.OGN_GOVERNOR);
-        uint256 proposalId = ognGovernance.proposalCount();
-
-        uint256 state = ognGovernance.state(proposalId);
-
-        if (state == 0) {
-            console.log("Queueing OGN multisig proposal...");
-            ognGovernance.queue(proposalId);
-            state = ognGovernance.state(proposalId);
-        }
-
-        if (state == 1) {
-            console.log("Executing OGN multisig proposal...");
-            vm.warp(block.timestamp + 2 days);
-            ognGovernance.execute(proposalId);
-        }
-        vm.stopPrank();
-
         IMintableERC20 ogn = IMintableERC20(Addresses.OGN);
 
-        // Start migration
-        vm.startPrank(Addresses.TIMELOCK);
-        // TODO: To be called by multisig after mint proposal is executed
-        Migrator migrator = Migrator(deployedContracts["MIGRATOR"]);
-        migrator.start();
-        migrator.transferExcessTokens(Addresses.GOV_MULTISIG);
-        vm.stopPrank();
+        // Make sure multisig has enough of OGN
+        // to fund migration and rewards
+        uint256 additionalOGN = EXTRA_OGN_FOR_MIGRATION + EXTRA_OGN_FOR_REWARDS;
+        vm.prank(Addresses.TIMELOCK);
+        ogn.mint(Addresses.GOV_MULTISIG, additionalOGN);
 
-        console.log("Migration started");
+        // And timelock can move it
+        vm.prank(Addresses.GOV_MULTISIG);
+        ogn.approve(Addresses.TIMELOCK, additionalOGN);
+
+        // Simulate proposal on OGV Governance
+        govProposal.simulate(Addresses.GOVERNOR_FIVE);
     }
 }
