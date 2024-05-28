@@ -8,7 +8,8 @@ import {BaseMainnetScript} from "./mainnet/BaseMainnetScript.sol";
 
 import {XOGNSetupScript} from "./mainnet/010_xOGNSetupScript.sol";
 import {OgnOgvMigrationScript} from "./mainnet/011_OgnOgvMigrationScript.sol";
-import {XOGNGovernanceScript} from "./mainnet/012_xOGNGovernanceScript.sol";
+import {MigrationZapperScript} from "./mainnet/012_MigrationZapperScript.sol";
+import {XOGNGovernanceScript} from "./mainnet/013_xOGNGovernanceScript.sol";
 
 import "contracts/utils/VmHelper.sol";
 
@@ -62,6 +63,7 @@ contract DeployManager is Script {
         // TODO: Use vm.readDir to recursively build this?
         _runDeployFile(new XOGNSetupScript());
         _runDeployFile(new OgnOgvMigrationScript());
+        _runDeployFile(new MigrationZapperScript());
         _runDeployFile(new XOGNGovernanceScript());
     }
 
