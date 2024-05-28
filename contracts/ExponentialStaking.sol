@@ -21,8 +21,8 @@ contract ExponentialStaking is ERC20Votes {
     RewardsSource public immutable rewardsSource;
     uint256 public immutable minStakeDuration; // in seconds
     uint256 public constant maxStakeDuration = 365 days;
-    uint256 constant YEAR_BASE = 14e17;
-    int256 constant NEW_STAKE = -1;
+    uint256 public constant YEAR_BASE = 14e17;
+    int256 public constant NEW_STAKE = -1;
 
     // 2. Staking and Lockup Storage
     struct Lockup {
