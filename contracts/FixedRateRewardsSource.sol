@@ -7,7 +7,6 @@ import {IERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/
 
 contract FixedRateRewardsSource is Governable, Initializable {
     error UnauthorizedCaller();
-    error InvalidRewardRate();
 
     event StrategistUpdated(address _address);
     event RewardsTargetChange(address target, address previousTarget);
