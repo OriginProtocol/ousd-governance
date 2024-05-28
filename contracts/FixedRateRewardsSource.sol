@@ -129,12 +129,13 @@ contract FixedRateRewardsSource is Governable, Initializable {
         RewardConfig storage _config = rewardConfig;
         emit RewardsPerSecondChanged(_rewardsPerSecond, _config.rewardsPerSecond);
         if (_config.rewardsPerSecond == 0) {
-            /* This contract code allows for contract deployment & initialization and then the contract can be live for quite
-             * some time before it is funded and `_rewardsPerSecond` are set to non 0 value. In that case the vesting period 
-             * from contract initialization until now would be taken into account instead of the time since the contract has been
-             * "activated" by setting the `setRewardsPerSecond`. To mitigate the issue we update the `_config.lastCollect`
-             * to current time.
-             */
+            // If rewardsPerSecond is zero, then there are no past rewards accrued,
+            // and it is safe to reset the last rewards time to the current time.
+            // We do this so that when enabling rewards after a period of not having rewards,
+            // we don’t pay out rewards for time before the rewards are enabled.
+            //
+            // Other than transitions from zero, this contract will pay out past rewards time at the new rate.
+            // Call collectRewards before changing rates if you care about precise reward accuracy.
             _config.lastCollect = uint64(block.timestamp);
         }
         _config.rewardsPerSecond = _rewardsPerSecond;
