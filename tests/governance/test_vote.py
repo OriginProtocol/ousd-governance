@@ -14,7 +14,7 @@ def test_create_proposal(governance, staking, token, whale_voter):
         "Switch to new Convex implementation",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     proposal_quorum = governance.quorum(tx.block_number)
     assert approx(proposal_quorum, staking.getPastTotalSupply(tx.block_number) * 0.2)
 
@@ -40,7 +40,7 @@ def test_can_cancel_proposal(governance, staking, token, whale_voter):
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     governance.cancel(tx.return_value, {"from": whale_voter})
     assert governance.state(tx.return_value) == 2
 
@@ -56,7 +56,7 @@ def test_proposal_can_pass_vote(governance, staking, token, whale_voter, timeloc
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     proposal_quorum = governance.quorum(tx.block_number)
     expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.2
     assert approx(proposal_quorum, expected_quorum)
@@ -91,7 +91,7 @@ def test_proposal_can_fail_vote(
         "Set voting delay",
         {"from": accounts[0]},
     )
-    chain.mine()
+    chain.mine(7201)
     proposal_quorum = governance.quorum(tx.block_number)
     expected_quorum = staking.getPastTotalSupply(tx.block_number) * 0.2
     assert approx(proposal_quorum, expected_quorum)
@@ -117,7 +117,7 @@ def test_proposal_can_be_queued_and_executed_in_timelock(
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     governance.castVote(tx.return_value, 1, {"from": whale_voter})
     mine_blocks(web3)
     governance.queue(tx.return_value, {"from": whale_voter})
@@ -159,7 +159,7 @@ def test_timelock_proposal_can_be_cancelled(
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     governance.castVote(tx.return_value, 1, {"from": whale_voter})
     mine_blocks(web3)
     governance.queue(tx.return_value, {"from": whale_voter})
@@ -185,7 +185,7 @@ def test_timelock_proposal_can_be_cancelled_after_time_passes(
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     governance.castVote(tx.return_value, 1, {"from": whale_voter})
     mine_blocks(web3)
     governance.queue(tx.return_value, {"from": whale_voter})
@@ -209,7 +209,7 @@ def test_timelock_proposal_can_not_be_cancelled_after_is_executed(
         "Set voting delay",
         {"from": whale_voter},
     )
-    chain.mine()
+    chain.mine(7201)
     governance.castVote(tx.return_value, 1, {"from": whale_voter})
     mine_blocks(web3)
     assert governance.state(tx.return_value) == 4
