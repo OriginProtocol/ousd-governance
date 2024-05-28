@@ -48,7 +48,7 @@ contract XOGNStakingForkTest is Test {
 
         ognRewardsSource = deployManager.getDeployment("OGN_REWARDS_SOURCE");
 
-        vm.startPrank(Addresses.OGN_GOVERNOR);
+        vm.startPrank(Addresses.TIMELOCK);
         ogn.mint(alice, 200000 ether);
         ogn.mint(bob, 200000 ether);
         ogn.mint(xognWhale, 1000_000_000 ether);
