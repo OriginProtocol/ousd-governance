@@ -12,7 +12,7 @@ def test_counting_mode(governance):
 
 
 def test_voting_delay(governance):
-    assert governance.votingDelay() == 1  # 1 block
+    assert governance.votingDelay() == 7200  # 1 block
 
 
 def test_voting_period(governance):
