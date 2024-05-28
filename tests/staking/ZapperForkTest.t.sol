@@ -76,7 +76,7 @@ contract ZapperForkTest is Test {
         uint256[] memory lockupIds = new uint256[](0);
         uint256 stakeAmount = (100 ether * 0.09137 ether) / 1 ether;
 
-        zapper.migrate(100 ether, 1 ether, 300 days);
+        zapper.migrate(100 ether, stakeAmount, 300 days);
 
         // Should have it in a single OGN lockup
         (uint128 amount, uint128 end, uint256 points) = xogn.lockups(ogvWhale, 0);
