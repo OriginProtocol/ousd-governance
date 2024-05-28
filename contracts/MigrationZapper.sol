@@ -12,11 +12,17 @@ contract MigrationZapper {
     IMigrator public immutable migrator;
     IStaking public immutable ognStaking;
 
-    constructor(address _ogv, address _ogn, address _migrator, address _ognStaking) {
+    address public immutable governor;
+
+    error NotGovernor();
+
+    constructor(address _ogv, address _ogn, address _migrator, address _ognStaking, address _governor) {
         ogv = IMintableERC20(_ogv);
         ogn = IMintableERC20(_ogn);
         migrator = IMigrator(_migrator);
         ognStaking = IStaking(_ognStaking);
+
+        governor = _governor;
     }
 
     function initialize() external {
@@ -60,5 +66,23 @@ contract MigrationZapper {
             false,
             -1 // New stake
         );
+
+        // Transfer remaining OGN to the receiver
+        if (ognReceived > newStakeAmount) {
+            ogn.transfer(msg.sender, ognReceived - newStakeAmount);
+        }
+    }
+
+    /**
+     * Transfers any tokens sent by mistake out of the contract
+     * @param token Token address
+     * @param amount Amount of token to transfer
+     */
+    function transferTokens(address token, uint256 amount) external {
+        if (msg.sender != governor) {
+            revert NotGovernor();
+        }
+
+        IMintableERC20(token).transfer(governor, amount);
     }
 }

@@ -84,4 +84,38 @@ contract ZapperForkTest is Test {
 
         vm.stopPrank();
     }
+
+    function testMigrateBalanceAndPartialStake() public {
+        vm.startPrank(ogvWhale);
+
+        uint256[] memory lockupIds = new uint256[](0);
+        uint256 stakeAmount = (50 ether * 0.09137 ether) / 1 ether;
+
+        uint256 ognBalanceBefore = ogn.balanceOf(ogvWhale);
+
+        zapper.migrate(100 ether, stakeAmount, 300 days);
+
+        // Should have it in a single OGN lockup
+        (uint128 amount, uint128 end, uint256 points) = xogn.lockups(ogvWhale, 0);
+        assertEq(amount, stakeAmount, "Balance not staked");
+
+        assertEq(ogn.balanceOf(ogvWhale), ognBalanceBefore + stakeAmount, "Less OGN received");
+
+        vm.stopPrank();
+    }
+
+    function testTransferTokens() public {
+        vm.startPrank(ogvWhale);
+        ogn.transfer(address(zapper), 100 ether);
+        vm.stopPrank();
+
+        vm.startPrank(Addresses.TIMELOCK);
+        zapper.transferTokens(address(ogn), 100 ether);
+        vm.stopPrank();
+
+        vm.startPrank(ogvWhale);
+        vm.expectRevert(bytes4(keccak256("NotGovernor()")));
+        zapper.transferTokens(address(ogn), 100 ether);
+        vm.stopPrank();
+    }
 }

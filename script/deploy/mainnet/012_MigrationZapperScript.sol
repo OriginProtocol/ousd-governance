@@ -33,8 +33,9 @@ contract MigrationZapperScript is BaseMainnetScript {
         console.log("Deploy:");
         console.log("------------");
 
-        MigrationZapper zapper =
-            new MigrationZapper(Addresses.OGV, Addresses.OGN, deployedContracts["MIGRATOR"], deployedContracts["XOGN"]);
+        MigrationZapper zapper = new MigrationZapper(
+            Addresses.OGV, Addresses.OGN, deployedContracts["MIGRATOR"], deployedContracts["XOGN"], Addresses.TIMELOCK
+        );
         _recordDeploy("MIGRATION_ZAPPER", address(zapper));
 
         // Make sure Migrator can move OGV and OGN
