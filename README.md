@@ -90,6 +90,11 @@ In another terminal:
 brownie console --network hardhat-fork
 ```
 
+## Deploying contracts (with Foundry)
+```
+$ DEPLOYER_PRIVATE_KEY=$DEPLOYER_PRIVATE_KEY forge script script/deploy/DeployManager.sol:DeployManager --fork-url $ALCHEMY_PROVIDER_URL --slow --legacy --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+```
+
 ## Deploying contracts
 
 Setup environment variables:

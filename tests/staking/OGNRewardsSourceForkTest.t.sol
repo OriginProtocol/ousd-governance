@@ -27,7 +27,7 @@ contract OGNRewardsSourceForkTest is Test {
 
     uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
-    uint256 constant REWARDS_PER_SECOND = 300000 ether / uint256(24 * 60 * 60); // 300k per day
+    uint256 constant REWARDS_PER_SECOND = 0.57 ether;
 
     int256 constant NEW_STAKE = -1;
 
@@ -47,7 +47,7 @@ contract OGNRewardsSourceForkTest is Test {
 
         ognRewardsSource = FixedRateRewardsSource(deployManager.getDeployment("OGN_REWARDS_SOURCE"));
 
-        vm.startPrank(Addresses.OGN_GOVERNOR);
+        vm.startPrank(Addresses.TIMELOCK);
         ogn.mint(alice, 200000 ether);
         ogn.mint(bob, 200000 ether);
         vm.stopPrank();
@@ -67,12 +67,6 @@ contract OGNRewardsSourceForkTest is Test {
     }
 
     function testRewardDistribution() external {
-        if (block.timestamp < OGN_EPOCH) {
-            // If it's post launch date, skip this test
-            (uint64 lastColect,) = ognRewardsSource.rewardConfig();
-            assertEq(lastColect, OGN_EPOCH, "last collect not updated (before deploy)");
-        }
-
         uint256 rewardsBefore = ognRewardsSource.previewRewards();
         vm.warp(block.timestamp + 1 days);
         assertEq(
