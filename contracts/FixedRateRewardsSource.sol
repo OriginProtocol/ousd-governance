@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {Governable} from "./Governable.sol";
 import {Initializable} from "./upgrades/Initializable.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/IERC20.sol";
 
 contract FixedRateRewardsSource is Governable, Initializable {
     error UnauthorizedCaller();
