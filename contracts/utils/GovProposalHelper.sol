@@ -169,8 +169,9 @@ library GovProposalHelper {
         if (state == IGovernor.ProposalState.Queued) {
             console.log("Executing proposal");
             // Wait for timelock
-            vm.roll(governance.proposalEta(proposalId) + 20);
-            vm.warp(block.timestamp + 2 days);
+            uint256 propEta = governance.proposalEta(proposalId);
+            vm.roll(block.number + 10);
+            vm.warp(propEta + 20);
 
             governance.execute(proposalId);
 
