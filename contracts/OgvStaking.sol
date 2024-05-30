@@ -21,7 +21,7 @@ contract OgvStaking is ERC20Votes {
     uint256 public immutable minStakeDuration; // in seconds
 
     // 2. Staking and Lockup Storage
-    uint256 constant YEAR_BASE = 18e17;
+    uint256 public constant YEAR_BASE = 18e17;
 
     struct Lockup {
         uint128 amount;
