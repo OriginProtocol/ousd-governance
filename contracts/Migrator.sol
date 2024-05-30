@@ -5,15 +5,7 @@ import {ERC20Burnable} from
     "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Governable} from "./Governable.sol";
 
-interface IStaking {
-    function delegates(address staker) external view returns (address);
-
-    // From OGVStaking.sol
-    function unstakeFrom(address staker, uint256[] memory lockupIds) external returns (uint256, uint256);
-
-    // From ExponentialStaking.sol
-    function stake(uint256 amountIn, uint256 duration, address to, bool stakeRewards, int256 lockupId) external;
-}
+import {IStaking} from "./interfaces/IStaking.sol";
 
 contract Migrator is Governable {
     ERC20Burnable public immutable ogv;
