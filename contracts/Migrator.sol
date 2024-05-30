@@ -127,19 +127,20 @@ contract Migrator is Governable {
         uint256 newStakeAmount,
         uint256 newStakeDuration
     ) external isSolvent {
-        if (lockupIds.length == 0) {
-            revert LockupIdsRequired();
-        }
+        if (lockupIds.length > 0) {
+            // Unstake if there are any lockups
+            (uint256 ogvAmountUnlocked, uint256 rewardsCollected) = ogvStaking.unstakeFrom(msg.sender, lockupIds);
 
-        // Unstake
-        (uint256 ogvAmountUnlocked, uint256 rewardsCollected) = ogvStaking.unstakeFrom(msg.sender, lockupIds);
+            if (migrateRewards) {
+                // Include rewards if needed
+                ogvAmountFromWallet += rewardsCollected;
+            }
 
-        if (migrateRewards) {
-            // Include rewards if needed
+            ogvAmountFromWallet += ogvAmountUnlocked;
+        } else if (migrateRewards) {
+            uint256 rewardsCollected = ogvStaking.collectRewardsFrom(msg.sender);
             ogvAmountFromWallet += rewardsCollected;
         }
-
-        ogvAmountFromWallet += ogvAmountUnlocked;
 
         if (ognAmountFromWallet > 0) {
             // Transfer in additional OGN to stake from user's wallet
