@@ -25,7 +25,6 @@ contract Migrator is Governable {
 
     error MigrationAlreadyStarted();
     error ContractInsolvent(uint256 expectedOGN, uint256 availableOGN);
-    error LockupIdsRequired();
     error InvalidStakeAmount();
 
     constructor(address _ogv, address _ogn, address _ogvStaking, address _ognStaking) {
@@ -131,12 +130,12 @@ contract Migrator is Governable {
             // Unstake if there are any lockups
             (uint256 ogvAmountUnlocked, uint256 rewardsCollected) = ogvStaking.unstakeFrom(msg.sender, lockupIds);
 
+            ogvAmountFromWallet += ogvAmountUnlocked;
+
             if (migrateRewards) {
                 // Include rewards if needed
                 ogvAmountFromWallet += rewardsCollected;
             }
-
-            ogvAmountFromWallet += ogvAmountUnlocked;
         } else if (migrateRewards) {
             uint256 rewardsCollected = ogvStaking.collectRewardsFrom(msg.sender);
             ogvAmountFromWallet += rewardsCollected;
