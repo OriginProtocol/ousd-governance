@@ -94,14 +94,14 @@ contract MigratorForkTest is Test {
         uint256 ognTransferred = (amount * 9137e8) / 1e13;
 
         uint256[] memory lockupIds = new uint256[](1);
-        lockupIds[0] = 13;
+        lockupIds[0] = 2;
         migrator.migrate(lockupIds, 0, 0, false, 0, 0);
         assertEq(ogv.totalSupply(), ogvSupply - amount, "OGV supply mismatch");
         assertEq(ogn.balanceOf(address(migrator)), migratorOGNReserve - ognTransferred, "OGN reserve balance mismatch");
         assertEq(ogv.balanceOf(ogvWhale), ogvBalanceBefore, "Change in OGV balance");
         assertEq(ogn.balanceOf(ogvWhale), ognBalanceBefore + ognTransferred, "No change in OGN balance");
 
-        (amount, end, points) = veogv.lockups(ogvWhale, 13);
+        (amount, end, points) = veogv.lockups(ogvWhale, 2);
         assertEq(amount, 0, "Amount: Lockup still exists");
         assertEq(end, 0, "End: Lockup still exists");
         assertEq(points, 0, "Points: Lockup still exists");
@@ -113,7 +113,7 @@ contract MigratorForkTest is Test {
         vm.startPrank(ogvWhale);
 
         uint256[] memory lockupIds = new uint256[](1);
-        lockupIds[0] = 13;
+        lockupIds[0] = 2;
 
         (uint128 amount, uint128 end, uint256 points) = veogv.lockups(ogvWhale, 13);
 
@@ -125,13 +125,13 @@ contract MigratorForkTest is Test {
         (amount, end, points) = xogn.lockups(ogvWhale, 0);
         assertEq(amount, stakeAmount, "Lockup not migrated");
 
-        (amount, end, points) = veogv.lockups(ogvWhale, 13);
+        (amount, end, points) = veogv.lockups(ogvWhale, 2);
         assertEq(amount, 0, "Amount: Lockup still exists");
         assertEq(end, 0, "End: Lockup still exists");
         assertEq(points, 0, "Points: Lockup still exists");
 
         // Shouldn't have deleted other migration
-        (amount, end, points) = veogv.lockups(ogvWhale, 14);
+        (amount, end, points) = veogv.lockups(ogvWhale, 3);
         assertEq(amount > 0, true, "Other lockup deleted");
 
         vm.stopPrank();
@@ -161,8 +161,8 @@ contract MigratorForkTest is Test {
 
         // Check migrating stakes as well
         uint256[] memory lockupIds = new uint256[](2);
-        lockupIds[0] = 13;
-        lockupIds[1] = 14;
+        lockupIds[0] = 2;
+        lockupIds[1] = 3;
         migrator.migrate(lockupIds, 0, 0, false, 0, 0);
 
         vm.stopPrank();
