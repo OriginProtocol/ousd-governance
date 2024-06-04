@@ -60,7 +60,7 @@ contract OGNRewardsSourceForkTest is Test {
         ogn.approve(address(xogn), 1e70);
         vm.stopPrank();
 
-        vm.warp(OGN_EPOCH + 100 days);
+        vm.warp(OGN_EPOCH);
     }
 
     function testRewardRate() external view {
@@ -69,12 +69,18 @@ contract OGNRewardsSourceForkTest is Test {
     }
 
     function testRewardDistribution() external {
+        (uint64 lastCollect,) = ognRewardsSource.rewardConfig();
+        vm.warp(lastCollect);
+
         uint256 rewardsBefore = ognRewardsSource.previewRewards();
-        vm.warp(block.timestamp + 1 days);
-        assertEq(
-            rewardsBefore + ognRewardsSource.previewRewards(),
-            uint256(REWARDS_PER_SECOND * 60 * 60 * 24),
-            "Invalid reward after 1d"
-        );
+        vm.warp(lastCollect + 1 days);
+
+        uint256 rewardsFor24h = uint256(REWARDS_PER_SECOND * 60 * 60 * 24);
+        uint256 balance = ogn.balanceOf(address(ognRewardsSource));
+        if (rewardsFor24h > balance) {
+            rewardsFor24h = balance;
+        }
+
+        assertEq(rewardsBefore + ognRewardsSource.previewRewards(), rewardsFor24h, "Invalid reward after 1d");
     }
 }

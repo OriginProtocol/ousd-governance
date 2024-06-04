@@ -62,7 +62,7 @@ contract XOGNStakingForkTest is Test {
         ogn.approve(address(xogn), 1e70);
         vm.stopPrank();
 
-        vm.warp(OGN_EPOCH + 100 days);
+        vm.warp(OGN_EPOCH);
     }
 
     function testTokenName() external view {
@@ -97,8 +97,6 @@ contract XOGNStakingForkTest is Test {
 
     function testUnstake() external {
         vm.startPrank(alice);
-
-        console.log(FixedRateRewardsSource(ognRewardsSource).previewRewards());
 
         xogn.stake(
             1000 ether, // 1k OGN
