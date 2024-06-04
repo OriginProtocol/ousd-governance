@@ -59,6 +59,8 @@ contract OGNRewardsSourceForkTest is Test {
         vm.startPrank(bob);
         ogn.approve(address(xogn), 1e70);
         vm.stopPrank();
+
+        vm.warp(OGN_EPOCH + 100 days);
     }
 
     function testRewardRate() external view {
