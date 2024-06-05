@@ -231,4 +231,13 @@ contract OgvStakingTest is Test {
         vm.expectRevert(bytes4(keccak256("NoLockupsToUnstake()")));
         staking.unstake(lockupIds);
     }
+
+    function testCollectRewardsPermission() public {
+        vm.prank(migrator);
+        staking.collectRewardsFrom(alice);
+
+        vm.prank(team);
+        vm.expectRevert(bytes4(keccak256("NotMigrator()")));
+        staking.collectRewardsFrom(alice);
+    }
 }

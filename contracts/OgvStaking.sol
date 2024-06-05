@@ -204,6 +204,12 @@ contract OgvStaking is ERC20Votes {
         _burn(staker, unstakedPoints);
     }
 
+    /// @notice Collects rewards from an user
+    /// @param staker Address of the user
+    function collectRewardsFrom(address staker) external onlyMigrator returns (uint256 rewardCollected) {
+        rewardCollected = _collectRewards(staker);
+    }
+
     /// @notice Extend a stake lockup for additional points.
     ///
     /// The stake end time is computed from the current time + duration, just

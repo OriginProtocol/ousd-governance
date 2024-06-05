@@ -15,6 +15,8 @@ import {ExponentialStaking} from "contracts/ExponentialStaking.sol";
 import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
 
 contract ZapperForkTest is Test {
+    uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+
     DeployManager public deployManager;
 
     Migrator public migrator;
@@ -24,7 +26,7 @@ contract ZapperForkTest is Test {
     IMintableERC20 public ogv;
     IMintableERC20 public ogn;
 
-    address public ogvWhale = Addresses.GOV_MULTISIG;
+    address public ogvWhale = 0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137;
 
     constructor() {
         deployManager = new DeployManager();
@@ -48,6 +50,12 @@ contract ZapperForkTest is Test {
         ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(veogv), type(uint256).max);
         vm.stopPrank();
+
+        vm.warp(OGN_EPOCH + 100 days);
+
+        if (veogv.balanceOf(ogvWhale) == 0) {
+            revert("Change OGV Whale address");
+        }
     }
 
     function testBalanceMigration() external {
