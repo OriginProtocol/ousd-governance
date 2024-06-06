@@ -2,20 +2,18 @@
 
 pragma solidity 0.8.10;
 
-import "forge-std/Script.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
+import "forge-std/console.sol";
+
+import {Script} from "forge-std/Script.sol";
+import {Vm, VmSafe} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 import {GovProposal, GovProposalHelper} from "contracts/utils/GovProposalHelper.sol";
 
-import "utils/VmHelper.sol";
-
 abstract contract BaseMainnetScript is Script {
-    using VmHelper for Vm;
     using GovProposalHelper for GovProposal;
 
     uint256 public deployBlockNum = type(uint256).max;
-    bool isForked = false;
 
     // DeployerRecord stuff to be extracted as well
     struct DeployRecord {
@@ -42,6 +40,10 @@ abstract contract BaseMainnetScript is Script {
         deployedContracts[name] = addr;
     }
 
+    function isForked() public view returns (bool) {
+        return vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.TestGroup);
+    }
+
     function setUp() external {}
 
     function run() external {
@@ -54,9 +56,7 @@ abstract contract BaseMainnetScript is Script {
             return;
         }
 
-        isForked = vm.isForkEnv();
-
-        if (isForked) {
+        if (this.isForked()) {
             address impersonator = Addresses.INITIAL_DEPLOYER;
             console.log("Running script on mainnet fork impersonating: %s", impersonator);
             vm.startPrank(impersonator);
@@ -69,7 +69,7 @@ abstract contract BaseMainnetScript is Script {
 
         _execute();
 
-        if (isForked) {
+        if (this.isForked()) {
             vm.stopPrank();
             _buildGovernanceProposal();
             _fork();
@@ -79,6 +79,8 @@ abstract contract BaseMainnetScript is Script {
     }
 
     function DEPLOY_NAME() external view virtual returns (string memory);
+
+    function proposalExecuted() external view virtual returns (bool);
 
     function skip() external view virtual returns (bool) {
         return false;
@@ -91,6 +93,10 @@ abstract contract BaseMainnetScript is Script {
     function _buildGovernanceProposal() internal virtual {}
 
     function handleGovernanceProposal() external virtual {
+        if (this.proposalExecuted()) {
+            return;
+        }
+
         _buildGovernanceProposal();
         _fork();
     }

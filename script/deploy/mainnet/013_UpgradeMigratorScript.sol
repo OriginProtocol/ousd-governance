@@ -3,30 +3,21 @@
 pragma solidity 0.8.10;
 
 import "./BaseMainnetScript.sol";
-import {Vm} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
-import {Timelock} from "contracts/Timelock.sol";
-import {Governance} from "contracts/Governance.sol";
-
 import {GovFive} from "contracts/utils/GovFive.sol";
-
-import {VmHelper} from "utils/VmHelper.sol";
 
 import {Migrator} from "contracts/Migrator.sol";
 import {OgvStaking} from "contracts/OgvStaking.sol";
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
-
 contract UpgradeMigratorScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
-    using VmHelper for Vm;
 
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "013_UpgradeMigrator";
+    bool public constant override proposalExecuted = false;
 
     constructor() {}
 

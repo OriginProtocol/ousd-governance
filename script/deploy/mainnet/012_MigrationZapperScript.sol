@@ -12,8 +12,6 @@ import {Governance} from "contracts/Governance.sol";
 
 import {GovFive} from "contracts/utils/GovFive.sol";
 
-import {VmHelper} from "utils/VmHelper.sol";
-
 import {MigrationZapper} from "contracts/MigrationZapper.sol";
 
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
@@ -21,11 +19,11 @@ import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockC
 
 contract MigrationZapperScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
-    using VmHelper for Vm;
 
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "012_MigrationZapper";
+    bool public constant override proposalExecuted = true;
 
     constructor() {}
 

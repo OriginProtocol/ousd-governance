@@ -12,18 +12,16 @@ import {Governance} from "contracts/Governance.sol";
 
 import {GovFive} from "contracts/utils/GovFive.sol";
 
-import {VmHelper} from "utils/VmHelper.sol";
-
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
 contract XOGNGovernanceScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
-    using VmHelper for Vm;
 
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "014_xOGNGovernance";
+    bool public constant override proposalExecuted = false;
 
     uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
@@ -88,6 +86,6 @@ contract XOGNGovernanceScript is BaseMainnetScript {
 
     function skip() external view override returns (bool) {
         // Don't deploy on Mainnet for now
-        return !vm.isForkEnv();
+        return !this.isForked();
     }
 }

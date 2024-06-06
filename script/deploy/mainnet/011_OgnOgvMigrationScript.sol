@@ -20,6 +20,7 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
     using GovProposalHelper for GovProposal;
 
     string public constant override DEPLOY_NAME = "011_OgnOgvMigration";
+    bool public constant override proposalExecuted = true;
 
     GovProposal public govProposal;
 
