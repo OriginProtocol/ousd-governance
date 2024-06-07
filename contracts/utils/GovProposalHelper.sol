@@ -25,7 +25,7 @@ struct GovProposal {
 library GovProposalHelper {
     function id(GovProposal memory prop) internal view returns (uint256 proposalId) {
         bytes32 descriptionHash = keccak256(bytes(prop.description));
-        (address[] memory targets, uint256[] memory values, bytes[] memory calldatas) = getParams(prop);
+        (address[] memory targets, uint256[] memory values,,, bytes[] memory calldatas) = getParams(prop);
 
         proposalId = uint256(keccak256(abi.encode(targets, values, calldatas, descriptionHash)));
     }
@@ -33,20 +33,26 @@ library GovProposalHelper {
     function getParams(GovProposal memory prop)
         internal
         view
-        returns (address[] memory targets, uint256[] memory values, bytes[] memory calldatas)
+        returns (
+            address[] memory targets,
+            uint256[] memory values,
+            string[] memory sigs,
+            bytes[] memory data,
+            bytes[] memory calldatas
+        )
     {
         uint256 actionLen = prop.actions.length;
         targets = new address[](actionLen);
         values = new uint256[](actionLen);
 
-        string[] memory sigs = new string[](actionLen);
-        bytes[] memory data = new bytes[](actionLen);
+        sigs = new string[](actionLen);
+        data = new bytes[](actionLen);
 
         for (uint256 i = 0; i < actionLen; ++i) {
             targets[i] = prop.actions[i].target;
+            values[i] = prop.actions[i].value;
             sigs[i] = prop.actions[i].fullsig;
             data[i] = prop.actions[i].data;
-            values[i] = prop.actions[i].value;
         }
 
         calldatas = _encodeCalldata(sigs, data);
@@ -77,10 +83,11 @@ library GovProposalHelper {
     }
 
     function getProposeCalldata(GovProposal memory prop) internal view returns (bytes memory proposeCalldata) {
-        (address[] memory targets, uint256[] memory values, bytes[] memory calldatas) = getParams(prop);
+        (address[] memory targets, uint256[] memory values, string[] memory sigs, bytes[] memory data,) =
+            getParams(prop);
 
         proposeCalldata = abi.encodeWithSignature(
-            "propose(address[],uint256[],bytes[],string)", targets, values, calldatas, prop.description
+            "propose(address[],uint256[],string[], bytes[],string)", targets, values, sigs, data, prop.description
         );
     }
 
@@ -148,7 +155,7 @@ library GovProposalHelper {
         if (state == IGovernor.ProposalState.Active) {
             console.log("Voting on proposal...");
             // Vote on proposal
-            governance.castVote(proposalId, 1);
+            try governance.castVote(proposalId, 1) {} catch {}
             // Wait for voting to end
             vm.roll(governance.proposalDeadline(proposalId) + 20);
             vm.warp(block.timestamp + 2 days);
