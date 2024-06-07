@@ -12,8 +12,8 @@ import {Governance} from "contracts/Governance.sol";
 
 import {GovFive} from "contracts/utils/GovFive.sol";
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
+import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import {TimelockController} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
 contract XOGNGovernanceScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
@@ -42,9 +42,6 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         Timelock timelock = Timelock(payable(Addresses.TIMELOCK));
 
         address xognGov = deployedContracts["XOGN_GOV"];
-
-        address ognRewardsSourceProxy = deployedContracts["OGN_REWARDS_SOURCE"];
-        address veOgvImpl = deployedContracts["VEOGV_IMPL"];
 
         govProposal.setName("Grant access to OGN Governance");
 

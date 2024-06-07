@@ -26,7 +26,7 @@ contract ZapperForkTest is Test {
     IMintableERC20 public ogv;
     IMintableERC20 public ogn;
 
-    address public ogvWhale = 0x24dD9AEAf497c11eE3A0ac2E6E6e014e12799c4E;
+    address public ogvWhale = 0x12D7EF3C933D091210cD931224Ead45D9cFdDdE0;
 
     constructor() {
         deployManager = new DeployManager();
