@@ -23,7 +23,7 @@ contract MigratorForkTest is Test {
     IMintableERC20 public ogn;
 
     uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
-    address public ogvWhale = 0x24dD9AEAf497c11eE3A0ac2E6E6e014e12799c4E;
+    address public ogvWhale = 0xD066c92d5dD4fD19E7F053Cf63EBB01Aaaa233CE;
 
     constructor() {
         deployManager = new DeployManager();
@@ -44,6 +44,10 @@ contract MigratorForkTest is Test {
         ogv.approve(address(migrator), type(uint256).max);
         ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(veogv), type(uint256).max);
+        vm.stopPrank();
+
+        vm.startPrank(Addresses.TIMELOCK);
+        ogn.mint(ogvWhale, 10_000_000 ether); // Mint some OGV for the whale
         vm.stopPrank();
 
         vm.warp(OGN_EPOCH + 100 days);

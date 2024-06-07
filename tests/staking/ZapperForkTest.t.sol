@@ -51,6 +51,10 @@ contract ZapperForkTest is Test {
         ogv.approve(address(veogv), type(uint256).max);
         vm.stopPrank();
 
+        vm.startPrank(Addresses.TIMELOCK);
+        ogn.mint(ogvWhale, 10_000_000 ether); // Mint some OGV for the whale
+        vm.stopPrank();
+
         vm.warp(OGN_EPOCH + 100 days);
 
         if (veogv.balanceOf(ogvWhale) == 0) {
