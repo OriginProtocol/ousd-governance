@@ -23,7 +23,7 @@ contract MigratorForkTest is Test {
     IMintableERC20 public ogn;
 
     uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
-    address public ogvWhale = 0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137;
+    address public ogvWhale = 0x24dD9AEAf497c11eE3A0ac2E6E6e014e12799c4E;
 
     constructor() {
         deployManager = new DeployManager();
