@@ -43,9 +43,7 @@ contract UpgradeMigratorScript is BaseMainnetScript {
             deployedContracts["MIGRATOR"], "upgradeTo(address)", abi.encode(deployedContracts["MIGRATOR_IMPL"])
         );
 
-        govProposal.action(
-            Addresses.VEOGV, "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"])
-        );
+        govProposal.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"]));
     }
 
     function _fork() internal override {
