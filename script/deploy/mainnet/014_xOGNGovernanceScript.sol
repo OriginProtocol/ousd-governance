@@ -3,7 +3,6 @@
 pragma solidity 0.8.10;
 
 import "./BaseMainnetScript.sol";
-import {Vm} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
@@ -56,23 +55,6 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         );
         govProposal.action(
             Addresses.TIMELOCK, "grantRole(bytes32,address)", abi.encode(timelock.EXECUTOR_ROLE(), xognGov)
-        );
-
-        // Revoke access from Multisig
-        govProposal.action(
-            Addresses.TIMELOCK,
-            "revokeRole(bytes32,address)",
-            abi.encode(timelock.PROPOSER_ROLE(), Addresses.GOV_MULTISIG)
-        );
-        govProposal.action(
-            Addresses.TIMELOCK,
-            "revokeRole(bytes32,address)",
-            abi.encode(timelock.CANCELLER_ROLE(), Addresses.GOV_MULTISIG)
-        );
-        govProposal.action(
-            Addresses.TIMELOCK,
-            "revokeRole(bytes32,address)",
-            abi.encode(timelock.EXECUTOR_ROLE(), Addresses.GOV_MULTISIG)
         );
     }
 
