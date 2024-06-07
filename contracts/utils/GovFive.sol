@@ -113,7 +113,7 @@ library GovFive {
             console.log("Scheduling...");
             (bool success, bytes memory data) = receiver.call(payload);
 
-            if (!success || !timelock.isOperationDone(opHash)) {
+            if (!success || !timelock.isOperation(opHash)) {
                 revert("Failed to schedule");
             }
 
