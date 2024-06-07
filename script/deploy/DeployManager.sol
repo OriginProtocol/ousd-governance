@@ -12,18 +12,23 @@ import {MigrationZapperScript} from "./mainnet/012_MigrationZapperScript.sol";
 import {UpgradeMigratorScript} from "./mainnet/013_UpgradeMigratorScript.sol";
 import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
 
-import "contracts/utils/VmHelper.sol";
+import {VmSafe} from "forge-std/Vm.sol";
 
 contract DeployManager is Script {
-    using VmHelper for Vm;
-
     mapping(string => address) public deployedContracts;
     mapping(string => bool) public scriptsExecuted;
 
     string internal forkFileId = "";
 
+    bool public isForked;
+
+    constructor() {
+        isForked = vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.TestGroup);
+        forkFileId = Strings.toString(block.timestamp);
+    }
+
     function getDeploymentFilePath() public view returns (string memory) {
-        return vm.isForkEnv() ? getForkDeploymentFilePath() : getMainnetDeploymentFilePath();
+        return isForked ? getForkDeploymentFilePath() : getMainnetDeploymentFilePath();
     }
 
     function getMainnetDeploymentFilePath() public view returns (string memory) {
@@ -34,9 +39,11 @@ contract DeployManager is Script {
         return string(abi.encodePacked(vm.projectRoot(), "/build/deployments-fork", forkFileId, ".json"));
     }
 
-    function setUp() external {
-        forkFileId = Strings.toString(block.timestamp);
+    function setForkFileId(string memory _forkFileId) external {
+        forkFileId = _forkFileId;
+    }
 
+    function setUp() external {
         string memory chainIdStr = Strings.toString(block.chainid);
         string memory chainIdKey = string(abi.encodePacked(".", chainIdStr));
 
@@ -54,7 +61,7 @@ contract DeployManager is Script {
             );
         }
 
-        if (vm.isForkEnv()) {
+        if (isForked) {
             // Duplicate Mainnet File
             vm.writeFile(getForkDeploymentFilePath(), vm.readFile(mainnetFilePath));
         }
@@ -70,7 +77,11 @@ contract DeployManager is Script {
     }
 
     function _runDeployFile(BaseMainnetScript deployScript) internal {
-        if (deployScript.skip()) {
+        if (deployScript.proposalExecuted()) {
+            // No action to do
+            return;
+        } else if (deployScript.skip()) {
+            console.log("Skipping deployment (skip() == true)");
             return;
         }
 
@@ -114,9 +125,10 @@ contract DeployManager is Script {
         }
 
         if (scriptsExecuted[deployScript.DEPLOY_NAME()]) {
+            console.log("Skipping deployment (already deployed)");
+
             // Governance handling
             deployScript.handleGovernanceProposal();
-            console.log("Skipping already deployed script");
         } else {
             // Deployment
             deployScript.setUp();

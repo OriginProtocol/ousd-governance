@@ -5,11 +5,10 @@ pragma solidity 0.8.10;
 import {Addresses} from "contracts/utils/Addresses.sol";
 import "forge-std/console.sol";
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 import {IGovernor} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/IGovernor.sol";
 import {Governance} from "../Governance.sol";
 
-import "contracts/utils/VmHelper.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 struct GovAction {
     address target;
@@ -24,8 +23,6 @@ struct GovProposal {
 }
 
 library GovProposalHelper {
-    using VmHelper for Vm;
-
     function id(GovProposal memory prop) internal view returns (uint256 proposalId) {
         bytes32 descriptionHash = keccak256(bytes(prop.description));
         (address[] memory targets, uint256[] memory values,,, bytes[] memory calldatas) = getParams(prop);

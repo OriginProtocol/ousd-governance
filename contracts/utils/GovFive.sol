@@ -7,7 +7,6 @@ import {Addresses} from "contracts/utils/Addresses.sol";
 import "forge-std/console.sol";
 
 import {TimelockController} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 
 library GovFive {
     struct GovFiveAction {
@@ -50,8 +49,7 @@ library GovFive {
             GovFiveAction memory propAction = prop.actions[i];
 
             targets[i] = propAction.receiver;
-            payloads[i] =
-                abi.encodePacked(abi.encodePacked(bytes4(keccak256(bytes(propAction.fullsig)))), propAction.data);
+            payloads[i] = abi.encodePacked(bytes4(keccak256(bytes(propAction.fullsig))), propAction.data);
         }
 
         bytes32 salt = keccak256(bytes(prop.description));
@@ -59,17 +57,19 @@ library GovFive {
         TimelockController timelock = TimelockController(payable(Addresses.TIMELOCK));
         receiver = Addresses.TIMELOCK;
 
-        opHash = timelock.hashOperationBatch(targets, values, payloads, hex"", salt);
+        opHash = timelock.hashOperationBatch(targets, values, payloads, bytes32(0), salt);
 
         if (timelock.isOperation(opHash)) {
             bytes4 executeSig = bytes4(keccak256(bytes("executeBatch(address[],uint256[],bytes[],bytes32,bytes32)")));
 
-            payload = abi.encodePacked(executeSig, abi.encode(targets, values, payloads, hex"", salt));
+            console.log("Yet to be exeucted.");
+            payload = abi.encodePacked(executeSig, abi.encode(targets, values, payloads, bytes32(0), salt));
         } else {
             bytes4 scheduleSig =
-                bytes4(keccak256(bytes("scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,delay)")));
+                bytes4(keccak256(bytes("scheduleBatch(address[],uint256[],bytes[],bytes32,bytes32,uint256)")));
 
-            payload = abi.encodePacked(scheduleSig, abi.encode(targets, values, payloads, hex"", salt, 2 days));
+            console.log("Yet to be scheduled.");
+            payload = abi.encodePacked(scheduleSig, abi.encode(targets, values, payloads, bytes32(0), salt, 2 days));
         }
     }
 
@@ -113,6 +113,10 @@ library GovFive {
             console.log("Scheduling...");
             (bool success, bytes memory data) = receiver.call(payload);
 
+            if (!success || !timelock.isOperation(opHash)) {
+                revert("Failed to schedule");
+            }
+
             (receiver, payload, opHash) = getSafeTxData(prop);
         }
 
@@ -124,6 +128,12 @@ library GovFive {
         console.log("Executing...");
 
         (bool success, bytes memory data) = receiver.call(payload);
+
+        if (!success || !timelock.isOperationDone(opHash)) {
+            revert("Failed to execute");
+        }
+
+        console.log("Executed");
 
         vm.stopPrank();
     }

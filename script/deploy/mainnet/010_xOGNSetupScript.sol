@@ -21,6 +21,7 @@ import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
 
 contract XOGNSetupScript is BaseMainnetScript {
     string public constant override DEPLOY_NAME = "010_xOGNSetup";
+    bool public constant override proposalExecuted = true;
 
     constructor() {}
 

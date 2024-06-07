@@ -34,6 +34,8 @@ contract OGNRewardsSourceForkTest is Test {
     constructor() {
         deployManager = new DeployManager();
 
+        deployManager.setForkFileId(string(abi.encodePacked(vm.toString(block.chainid), "-OGNRewardsSourceForkTest")));
+
         deployManager.setUp();
         deployManager.run();
     }
