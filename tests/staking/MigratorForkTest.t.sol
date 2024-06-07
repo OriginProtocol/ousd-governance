@@ -22,7 +22,8 @@ contract MigratorForkTest is Test {
     IMintableERC20 public ogv;
     IMintableERC20 public ogn;
 
-    address public ogvWhale = Addresses.GOV_MULTISIG;
+    uint256 constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
+    address public ogvWhale = 0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137;
 
     constructor() {
         deployManager = new DeployManager();
@@ -44,6 +45,12 @@ contract MigratorForkTest is Test {
         ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(veogv), type(uint256).max);
         vm.stopPrank();
+
+        vm.warp(OGN_EPOCH + 100 days);
+
+        if (veogv.balanceOf(ogvWhale) == 0) {
+            revert("Change OGV Whale address");
+        }
     }
 
     function testBalanceMigration() external {
@@ -83,18 +90,18 @@ contract MigratorForkTest is Test {
         uint256 ogvBalanceBefore = ogv.balanceOf(ogvWhale);
         uint256 ognBalanceBefore = ogn.balanceOf(ogvWhale);
 
-        (uint128 amount, uint128 end, uint256 points) = veogv.lockups(ogvWhale, 13);
+        (uint128 amount, uint128 end, uint256 points) = veogv.lockups(ogvWhale, 1);
         uint256 ognTransferred = (amount * 9137e8) / 1e13;
 
         uint256[] memory lockupIds = new uint256[](1);
-        lockupIds[0] = 13;
+        lockupIds[0] = 1;
         migrator.migrate(lockupIds, 0, 0, false, 0, 0);
         assertEq(ogv.totalSupply(), ogvSupply - amount, "OGV supply mismatch");
         assertEq(ogn.balanceOf(address(migrator)), migratorOGNReserve - ognTransferred, "OGN reserve balance mismatch");
         assertEq(ogv.balanceOf(ogvWhale), ogvBalanceBefore, "Change in OGV balance");
         assertEq(ogn.balanceOf(ogvWhale), ognBalanceBefore + ognTransferred, "No change in OGN balance");
 
-        (amount, end, points) = veogv.lockups(ogvWhale, 13);
+        (amount, end, points) = veogv.lockups(ogvWhale, 1);
         assertEq(amount, 0, "Amount: Lockup still exists");
         assertEq(end, 0, "End: Lockup still exists");
         assertEq(points, 0, "Points: Lockup still exists");
@@ -106,9 +113,9 @@ contract MigratorForkTest is Test {
         vm.startPrank(ogvWhale);
 
         uint256[] memory lockupIds = new uint256[](1);
-        lockupIds[0] = 13;
+        lockupIds[0] = 1;
 
-        (uint128 amount, uint128 end, uint256 points) = veogv.lockups(ogvWhale, 13);
+        (uint128 amount, uint128 end, uint256 points) = veogv.lockups(ogvWhale, 1);
 
         uint256 stakeAmount = (amount * 9137e8) / 1e13;
 
@@ -118,13 +125,13 @@ contract MigratorForkTest is Test {
         (amount, end, points) = xogn.lockups(ogvWhale, 0);
         assertEq(amount, stakeAmount, "Lockup not migrated");
 
-        (amount, end, points) = veogv.lockups(ogvWhale, 13);
+        (amount, end, points) = veogv.lockups(ogvWhale, 1);
         assertEq(amount, 0, "Amount: Lockup still exists");
         assertEq(end, 0, "End: Lockup still exists");
         assertEq(points, 0, "Points: Lockup still exists");
 
         // Shouldn't have deleted other migration
-        (amount, end, points) = veogv.lockups(ogvWhale, 14);
+        (amount, end, points) = veogv.lockups(ogvWhale, 2);
         assertEq(amount > 0, true, "Other lockup deleted");
 
         vm.stopPrank();
@@ -154,8 +161,8 @@ contract MigratorForkTest is Test {
 
         // Check migrating stakes as well
         uint256[] memory lockupIds = new uint256[](2);
-        lockupIds[0] = 13;
-        lockupIds[1] = 14;
+        lockupIds[0] = 2;
+        lockupIds[1] = 3;
         migrator.migrate(lockupIds, 0, 0, false, 0, 0);
 
         vm.stopPrank();

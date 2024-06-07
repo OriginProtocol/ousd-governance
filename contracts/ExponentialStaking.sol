@@ -21,8 +21,8 @@ contract ExponentialStaking is ERC20Votes {
     RewardsSource public immutable rewardsSource;
     uint256 public immutable minStakeDuration; // in seconds
     uint256 public constant maxStakeDuration = 365 days;
-    uint256 constant YEAR_BASE = 14e17;
-    int256 constant NEW_STAKE = -1;
+    uint256 public constant YEAR_BASE = 14e17;
+    int256 public constant NEW_STAKE = -1;
 
     // 2. Staking and Lockup Storage
     struct Lockup {
@@ -265,8 +265,8 @@ contract ExponentialStaking is ERC20Votes {
         }
         uint256 fullDuration = end - block.timestamp;
         (uint256 fullPoints,) = previewPoints(1e18, fullDuration);
-        (uint256 currentPoints,) = previewPoints(1e36, 0); // 1e36 saves a later multiplication
-        return amount * ((currentPoints / fullPoints)) / 1e18;
+        (uint256 currentPoints,) = previewPoints(1e18, 0);
+        return amount * currentPoints / fullPoints;
     }
 
     /// @notice Returns the total number of lockups the user has

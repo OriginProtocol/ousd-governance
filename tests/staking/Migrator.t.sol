@@ -272,16 +272,6 @@ contract MigratorTest is Test {
         vm.stopPrank();
     }
 
-    function testMigrateRevertOnEmptyLockups() public {
-        vm.startPrank(alice);
-        uint256[] memory lockupIds = new uint256[](0);
-
-        vm.expectRevert(bytes4(keccak256("LockupIdsRequired()")));
-        migrator.migrate(lockupIds, 500 ether, 0, false, 9000 ether, 300 days);
-
-        vm.stopPrank();
-    }
-
     function testMigrateWithRewards() public {
         vm.startPrank(alice);
         ogvStaking.mockStake(10000 ether, 365 days);
@@ -397,6 +387,71 @@ contract MigratorTest is Test {
             assertEq(end, 0, "End: Lockup still exists");
             assertEq(points, 0, "Points: Lockup still exists");
         }
+
+        vm.stopPrank();
+    }
+
+    function testMigrateOnlyRewards() public {
+        vm.startPrank(alice);
+        ogvStaking.mockStake(10000 ether, 365 days);
+        ogvStaking.mockStake(1000 ether, 20 days);
+
+        uint256[] memory lockupIds = new uint256[](0);
+
+        // Arbitrary reward
+        ogvStaking.setRewardShare(2 * 1e11);
+        uint256 expectedRewards = ogvStaking.previewRewards(alice);
+        uint256 expectedOgn = (expectedRewards * 0.09137 ether) / 1 ether;
+
+        uint256 balanceBefore = ogn.balanceOf(alice);
+
+        migrator.migrate(
+            lockupIds,
+            0,
+            0,
+            true, // Include reward
+            0,
+            300 days
+        );
+
+        vm.expectRevert();
+        (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
+
+        assertEq(ogvStaking.previewRewards(alice), 0, "Rewards not claimed");
+        assertEq(ogn.balanceOf(alice), balanceBefore + expectedOgn, "Rewards not migrated");
+
+        vm.stopPrank();
+    }
+
+    function testMigrateOnlyRewardsToLockup() public {
+        vm.startPrank(alice);
+        ogvStaking.mockStake(10000 ether, 365 days);
+        ogvStaking.mockStake(1000 ether, 20 days);
+
+        uint256[] memory lockupIds = new uint256[](0);
+
+        // Arbitrary reward
+        ogvStaking.setRewardShare(2 * 1e11);
+        uint256 expectedRewards = ogvStaking.previewRewards(alice);
+        uint256 stakeAmount = (expectedRewards * 0.09137 ether) / 1 ether;
+
+        migrator.migrate(
+            lockupIds,
+            0,
+            0,
+            true, // Include reward
+            stakeAmount,
+            300 days
+        );
+
+        // Should have merged it in a single OGN lockup
+        (uint128 amount, uint128 end, uint256 points) = ognStaking.lockups(alice, 0);
+        assertEq(amount, stakeAmount, "Lockup not migrated");
+
+        vm.expectRevert();
+        (amount, end, points) = ognStaking.lockups(alice, 1);
+
+        assertEq(ogvStaking.previewRewards(alice), 0, "Rewards not claimed");
 
         vm.stopPrank();
     }

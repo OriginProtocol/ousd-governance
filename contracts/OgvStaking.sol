@@ -21,7 +21,7 @@ contract OgvStaking is ERC20Votes {
     uint256 public immutable minStakeDuration; // in seconds
 
     // 2. Staking and Lockup Storage
-    uint256 constant YEAR_BASE = 18e17;
+    uint256 public constant YEAR_BASE = 18e17;
 
     struct Lockup {
         uint128 amount;
@@ -202,6 +202,12 @@ contract OgvStaking is ERC20Votes {
         ogv.transfer(staker, unstakedAmount);
         // ... and burn veOGV
         _burn(staker, unstakedPoints);
+    }
+
+    /// @notice Collects rewards from an user
+    /// @param staker Address of the user
+    function collectRewardsFrom(address staker) external onlyMigrator returns (uint256 rewardCollected) {
+        rewardCollected = _collectRewards(staker);
     }
 
     /// @notice Extend a stake lockup for additional points.

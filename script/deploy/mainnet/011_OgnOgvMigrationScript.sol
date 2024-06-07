@@ -61,8 +61,6 @@ contract OgnOgvMigrationScript is BaseMainnetScript {
 
         console.log("- Migrator init");
         migratorProxy.initialize(address(migratorImpl), Addresses.TIMELOCK, "");
-
-        // _buildGovernanceProposal();
     }
 
     function _buildGovernanceProposal() internal override {

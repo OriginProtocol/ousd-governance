@@ -23,7 +23,7 @@ contract XOGNGovernanceScript is BaseMainnetScript {
 
     GovFive.GovFiveProposal public govProposal;
 
-    string public constant override DEPLOY_NAME = "012_xOGNGovernance";
+    string public constant override DEPLOY_NAME = "014_xOGNGovernance";
 
     uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
@@ -38,8 +38,6 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         Governance governance = new Governance(ERC20Votes(xOgnProxy), TimelockController(payable(Addresses.TIMELOCK)));
 
         _recordDeploy("XOGN_GOV", address(governance));
-
-        _buildGovernanceProposal();
     }
 
     function _buildGovernanceProposal() internal override {

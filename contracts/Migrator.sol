@@ -1,18 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "./Governable.sol";
+import {ERC20Burnable} from
+    "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {Governable} from "./Governable.sol";
 
-interface IStaking {
-    function delegates(address staker) external view returns (address);
-
-    // From OGVStaking.sol
-    function unstakeFrom(address staker, uint256[] memory lockupIds) external returns (uint256, uint256);
-
-    // From ExponentialStaking.sol
-    function stake(uint256 amountIn, uint256 duration, address to, bool stakeRewards, int256 lockupId) external;
-}
+import {IStaking} from "./interfaces/IStaking.sol";
 
 contract Migrator is Governable {
     ERC20Burnable public immutable ogv;
@@ -32,7 +25,6 @@ contract Migrator is Governable {
 
     error MigrationAlreadyStarted();
     error ContractInsolvent(uint256 expectedOGN, uint256 availableOGN);
-    error LockupIdsRequired();
     error InvalidStakeAmount();
 
     constructor(address _ogv, address _ogn, address _ogvStaking, address _ognStaking) {
@@ -134,19 +126,20 @@ contract Migrator is Governable {
         uint256 newStakeAmount,
         uint256 newStakeDuration
     ) external isSolvent {
-        if (lockupIds.length == 0) {
-            revert LockupIdsRequired();
-        }
+        if (lockupIds.length > 0) {
+            // Unstake if there are any lockups
+            (uint256 ogvAmountUnlocked, uint256 rewardsCollected) = ogvStaking.unstakeFrom(msg.sender, lockupIds);
 
-        // Unstake
-        (uint256 ogvAmountUnlocked, uint256 rewardsCollected) = ogvStaking.unstakeFrom(msg.sender, lockupIds);
+            ogvAmountFromWallet += ogvAmountUnlocked;
 
-        if (migrateRewards) {
-            // Include rewards if needed
+            if (migrateRewards) {
+                // Include rewards if needed
+                ogvAmountFromWallet += rewardsCollected;
+            }
+        } else if (migrateRewards) {
+            uint256 rewardsCollected = ogvStaking.collectRewardsFrom(msg.sender);
             ogvAmountFromWallet += rewardsCollected;
         }
-
-        ogvAmountFromWallet += ogvAmountUnlocked;
 
         if (ognAmountFromWallet > 0) {
             // Transfer in additional OGN to stake from user's wallet
