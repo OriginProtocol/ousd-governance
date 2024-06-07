@@ -26,10 +26,12 @@ contract ZapperForkTest is Test {
     IMintableERC20 public ogv;
     IMintableERC20 public ogn;
 
-    address public ogvWhale = 0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137;
+    address public ogvWhale = 0x12D7EF3C933D091210cD931224Ead45D9cFdDdE0;
 
     constructor() {
         deployManager = new DeployManager();
+
+        deployManager.setForkFileId(string(abi.encodePacked(vm.toString(block.chainid), "-ZapperForkTest")));
 
         deployManager.setUp();
         deployManager.run();
@@ -49,6 +51,10 @@ contract ZapperForkTest is Test {
         ogv.approve(address(zapper), type(uint256).max);
         ogn.approve(address(migrator), type(uint256).max);
         ogv.approve(address(veogv), type(uint256).max);
+        vm.stopPrank();
+
+        vm.startPrank(Addresses.TIMELOCK);
+        ogn.mint(ogvWhale, 10_000_000 ether); // Mint some OGV for the whale
         vm.stopPrank();
 
         vm.warp(OGN_EPOCH + 100 days);
