@@ -28,6 +28,8 @@ contract MigratorForkTest is Test {
     constructor() {
         deployManager = new DeployManager();
 
+        deployManager.setForkFileId(string(abi.encodePacked(vm.toString(block.chainid), "-MigratorForkTest")));
+
         deployManager.setUp();
         deployManager.run();
     }

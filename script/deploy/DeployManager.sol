@@ -24,6 +24,7 @@ contract DeployManager is Script {
 
     constructor() {
         isForked = vm.isContext(VmSafe.ForgeContext.ScriptDryRun) || vm.isContext(VmSafe.ForgeContext.TestGroup);
+        forkFileId = Strings.toString(block.timestamp);
     }
 
     function getDeploymentFilePath() public view returns (string memory) {
@@ -38,9 +39,11 @@ contract DeployManager is Script {
         return string(abi.encodePacked(vm.projectRoot(), "/build/deployments-fork", forkFileId, ".json"));
     }
 
-    function setUp() external {
-        forkFileId = Strings.toString(block.timestamp);
+    function setForkFileId(string memory _forkFileId) external {
+        forkFileId = _forkFileId;
+    }
 
+    function setUp() external {
         string memory chainIdStr = Strings.toString(block.chainid);
         string memory chainIdKey = string(abi.encodePacked(".", chainIdStr));
 

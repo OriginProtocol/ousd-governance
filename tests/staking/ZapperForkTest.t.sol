@@ -31,6 +31,8 @@ contract ZapperForkTest is Test {
     constructor() {
         deployManager = new DeployManager();
 
+        deployManager.setForkFileId(string(abi.encodePacked(vm.toString(block.chainid), "-ZapperForkTest")));
+
         deployManager.setUp();
         deployManager.run();
     }

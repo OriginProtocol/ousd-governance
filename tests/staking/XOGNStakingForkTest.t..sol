@@ -35,6 +35,8 @@ contract XOGNStakingForkTest is Test {
     constructor() {
         deployManager = new DeployManager();
 
+        deployManager.setForkFileId(string(abi.encodePacked(vm.toString(block.chainid), "-XOGNStakingForkTest")));
+
         deployManager.setUp();
         deployManager.run();
     }
