@@ -44,7 +44,7 @@ contract UpgradeMigratorScript is BaseMainnetScript {
         );
 
         govProposal.action(
-            deployedContracts["VEOGV"], "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"])
+            Addresses.VEOGV, "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"])
         );
     }
 
