@@ -17,7 +17,7 @@ contract UpgradeMigratorScript is BaseMainnetScript {
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "013_UpgradeMigrator";
-    bool public constant override proposalExecuted = false;
+    bool public constant override proposalExecuted = true;
 
     constructor() {}
 
