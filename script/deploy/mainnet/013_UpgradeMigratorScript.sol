@@ -36,6 +36,9 @@ contract UpgradeMigratorScript is BaseMainnetScript {
         // Deploy migrator implementation
         Migrator migratorImpl = new Migrator(Addresses.OGV, Addresses.OGN, Addresses.VEOGV, deployedContracts["XOGN"]);
         _recordDeploy("MIGRATOR_IMPL", address(migratorImpl));
+
+        // Transfer Governance
+        migratorImpl.transferGovernance(Addresses.TIMELOCK);
     }
 
     function _buildGovernanceProposal() internal override {
@@ -43,9 +46,9 @@ contract UpgradeMigratorScript is BaseMainnetScript {
             deployedContracts["MIGRATOR"], "upgradeTo(address)", abi.encode(deployedContracts["MIGRATOR_IMPL"])
         );
 
-        govProposal.action(
-            deployedContracts["VEOGV"], "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"])
-        );
+        govProposal.action(Addresses.VEOGV, "upgradeTo(address)", abi.encode(deployedContracts["VEOGV_IMPL"]));
+
+        govProposal.action(deployedContracts["MIGRATOR_IMPL"], "claimGovernance()", "");
     }
 
     function _fork() internal override {
