@@ -62,9 +62,4 @@ contract XOGNGovernanceScript is BaseMainnetScript {
         // Simulate execute on fork by impersonating Timelock
         govProposal.execute();
     }
-
-    function skip() external view override returns (bool) {
-        // Don't deploy on Mainnet for now
-        return !this.isForked();
-    }
 }

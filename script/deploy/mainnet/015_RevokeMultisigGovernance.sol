@@ -11,7 +11,7 @@ import {Governance} from "contracts/Governance.sol";
 
 import {GovFive} from "contracts/utils/GovFive.sol";
 
-contract XOGNGovernanceScript is BaseMainnetScript {
+contract RevokeMultisigGovernanceScript is BaseMainnetScript {
     using GovFive for GovFive.GovFiveProposal;
 
     GovFive.GovFiveProposal public govProposal;
