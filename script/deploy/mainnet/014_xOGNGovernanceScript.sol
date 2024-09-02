@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./BaseMainnetScript.sol";
+import "../AbstractScript.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
@@ -14,12 +14,13 @@ import {GovFive} from "contracts/utils/GovFive.sol";
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {TimelockController} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
-contract XOGNGovernanceScript is BaseMainnetScript {
+contract XOGNGovernanceScript is AbstractScript {
     using GovFive for GovFive.GovFiveProposal;
 
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "014_xOGNGovernance";
+    uint256 public constant override CHAIN_ID = 1;
     bool public constant override proposalExecuted = false;
 
     uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT

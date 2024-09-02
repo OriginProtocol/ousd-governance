@@ -20,3 +20,8 @@ library Addresses {
     address public constant OUSD_BUYBACK_IMPL = 0x386d8fEC5b6d5B5E36a48A376644e36239dB65d6;
     address public constant OETH_BUYBACK_IMPL = 0x4F11d31f781B57051764a3823b24d520626b4833;
 }
+
+library AddressesBase {
+    // 5/8 multisig
+    address public constant GOVERNOR = 0x92A19381444A001d62cE67BaFF066fA1111d7202;
+}

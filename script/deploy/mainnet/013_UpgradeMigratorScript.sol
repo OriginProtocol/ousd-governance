@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./BaseMainnetScript.sol";
+import "../AbstractScript.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
 
@@ -11,12 +11,13 @@ import {GovFive} from "contracts/utils/GovFive.sol";
 import {Migrator} from "contracts/Migrator.sol";
 import {OgvStaking} from "contracts/OgvStaking.sol";
 
-contract UpgradeMigratorScript is BaseMainnetScript {
+contract UpgradeMigratorScript is AbstractScript {
     using GovFive for GovFive.GovFiveProposal;
 
     GovFive.GovFiveProposal public govProposal;
 
     string public constant override DEPLOY_NAME = "013_UpgradeMigrator";
+    uint256 public constant override CHAIN_ID = 1;
     bool public constant override proposalExecuted = true;
 
     constructor() {}

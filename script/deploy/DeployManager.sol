@@ -4,13 +4,15 @@ pragma solidity 0.8.10;
 import "forge-std/Script.sol";
 import "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/utils/Strings.sol";
 
-import {BaseMainnetScript} from "./mainnet/BaseMainnetScript.sol";
+import {AbstractScript} from "./AbstractScript.sol";
 
 import {XOGNSetupScript} from "./mainnet/010_xOGNSetupScript.sol";
 import {OgnOgvMigrationScript} from "./mainnet/011_OgnOgvMigrationScript.sol";
 import {MigrationZapperScript} from "./mainnet/012_MigrationZapperScript.sol";
 import {UpgradeMigratorScript} from "./mainnet/013_UpgradeMigratorScript.sol";
 import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
+
+import {DeployTimelockScript} from "./base/001_Timelock.sol";
 
 import {VmSafe} from "forge-std/Vm.sol";
 
@@ -69,14 +71,18 @@ contract DeployManager is Script {
 
     function run() external {
         // TODO: Use vm.readDir to recursively build this?
-        _runDeployFile(new XOGNSetupScript());
-        _runDeployFile(new OgnOgvMigrationScript());
-        _runDeployFile(new MigrationZapperScript());
-        _runDeployFile(new UpgradeMigratorScript());
-        _runDeployFile(new XOGNGovernanceScript());
+        if (block.chainid == 1) {
+            _runDeployFile(new XOGNSetupScript());
+            _runDeployFile(new OgnOgvMigrationScript());
+            _runDeployFile(new MigrationZapperScript());
+            _runDeployFile(new UpgradeMigratorScript());
+            _runDeployFile(new XOGNGovernanceScript());
+        } else if (block.chainid == 8453) {
+            _runDeployFile(new DeployTimelockScript());
+        }
     }
 
-    function _runDeployFile(BaseMainnetScript deployScript) internal {
+    function _runDeployFile(AbstractScript deployScript) internal {
         if (deployScript.proposalExecuted()) {
             // No action to do
             return;
@@ -137,7 +143,7 @@ contract DeployManager is Script {
             /**
              * Post-deployment
              */
-            BaseMainnetScript.DeployRecord[] memory records = deployScript.getAllDeployRecords();
+            AbstractScript.DeployRecord[] memory records = deployScript.getAllDeployRecords();
 
             for (uint256 i = 0; i < records.length; ++i) {
                 string memory name = records[i].name;
