@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./BaseMainnetScript.sol";
+import "../AbstractScript.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
@@ -19,8 +19,9 @@ import {Timelock} from "contracts/Timelock.sol";
 
 import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
 
-contract XOGNSetupScript is BaseMainnetScript {
+contract XOGNSetupScript is AbstractScript {
     string public constant override DEPLOY_NAME = "010_xOGNSetup";
+    uint256 public constant override CHAIN_ID = 1;
     bool public constant override proposalExecuted = true;
 
     constructor() {}

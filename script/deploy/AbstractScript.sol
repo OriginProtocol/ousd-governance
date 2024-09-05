@@ -10,7 +10,7 @@ import {Vm, VmSafe} from "forge-std/Vm.sol";
 import {Addresses} from "contracts/utils/Addresses.sol";
 import {GovProposal, GovProposalHelper} from "contracts/utils/GovProposalHelper.sol";
 
-abstract contract BaseMainnetScript is Script {
+abstract contract AbstractScript is Script {
     using GovProposalHelper for GovProposal;
 
     uint256 public deployBlockNum = type(uint256).max;
@@ -47,7 +47,7 @@ abstract contract BaseMainnetScript is Script {
     function setUp() external {}
 
     function run() external {
-        if (block.chainid != 1) {
+        if (block.chainid != AbstractScript(address(this)).CHAIN_ID()) {
             revert("Not Mainnet");
         }
         // Will not execute script if after this block number
@@ -79,6 +79,8 @@ abstract contract BaseMainnetScript is Script {
     }
 
     function DEPLOY_NAME() external view virtual returns (string memory);
+
+    function CHAIN_ID() external view virtual returns (uint256);
 
     function proposalExecuted() external view virtual returns (bool);
 

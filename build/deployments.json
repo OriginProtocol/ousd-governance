@@ -18,5 +18,13 @@
       "XOGN_GOV": "0x1D3Fbd4d129Ddd2372EA85c5Fa00b2682081c9EC",
       "XOGN_IMPL": "0x97711c7a5D64A064a95d10e37f786d2bD8b1F3c8"
     }
+  },
+  "8453": {
+    "executions": {
+      "001_Timelock": 1725274861
+    },
+    "contracts": {
+      "TIMELOCK": "0xf817cb3092179083c48c014688D98B72fB61464f"
+    }
   }
 }

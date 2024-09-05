@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.10;
 
-import "./BaseMainnetScript.sol";
+import "../AbstractScript.sol";
 import {Vm} from "forge-std/Vm.sol";
 
 import {Addresses} from "contracts/utils/Addresses.sol";
@@ -16,10 +16,11 @@ import {IMintableERC20} from "contracts/interfaces/IMintableERC20.sol";
 
 import {GovProposal, GovProposalHelper} from "contracts/utils/GovProposalHelper.sol";
 
-contract OgnOgvMigrationScript is BaseMainnetScript {
+contract OgnOgvMigrationScript is AbstractScript {
     using GovProposalHelper for GovProposal;
 
     string public constant override DEPLOY_NAME = "011_OgnOgvMigration";
+    uint256 public constant override CHAIN_ID = 1;
     bool public constant override proposalExecuted = true;
 
     GovProposal public govProposal;
