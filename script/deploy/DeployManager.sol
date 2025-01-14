@@ -14,6 +14,8 @@ import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
 
 import {DeployTimelockScript} from "./base/001_Timelock.sol";
 
+import {SonicDeployTimelockScript} from "./sonic/001_Timelock.sol";
+
 import {VmSafe} from "forge-std/Vm.sol";
 
 contract DeployManager is Script {
@@ -79,6 +81,8 @@ contract DeployManager is Script {
             _runDeployFile(new XOGNGovernanceScript());
         } else if (block.chainid == 8453) {
             _runDeployFile(new DeployTimelockScript());
+        } else if (block.chainid == 146) {
+            _runDeployFile(new SonicDeployTimelockScript());
         }
     }
 
