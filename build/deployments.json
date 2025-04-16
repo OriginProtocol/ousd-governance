@@ -34,5 +34,13 @@
     "contracts": {
       "TIMELOCK": "0x31a91336414d3B955E494E7d485a6B06b55FC8fB"
     }
+  },
+  "98866": {
+    "executions": {
+      "001_Timelock": 1744818136
+    },
+    "contracts": {
+      "TIMELOCK": "0x6C6f8F839A7648949873D3D2beEa936FC2932e5c"
+    }
   }
 }

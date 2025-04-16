@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import "forge-std/Script.sol";
@@ -13,7 +13,7 @@ import {UpgradeMigratorScript} from "./mainnet/013_UpgradeMigratorScript.sol";
 import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
 
 import {DeployTimelockScript} from "./base/001_Timelock.sol";
-
+import {DeployPlumeTimelockScript} from "./plume/001_Timelock.sol";
 import {SonicDeployTimelockScript} from "./sonic/001_Timelock.sol";
 
 import {VmSafe} from "forge-std/Vm.sol";
@@ -83,6 +83,8 @@ contract DeployManager is Script {
             _runDeployFile(new DeployTimelockScript());
         } else if (block.chainid == 146) {
             _runDeployFile(new SonicDeployTimelockScript());
+        } else if (block.chainid == 98866) {
+            _runDeployFile(new DeployPlumeTimelockScript());
         }
     }
 
