@@ -35,3 +35,8 @@ library AddressesPlume {
     // 5/8 multisig
     address public constant ADMIN = 0x92A19381444A001d62cE67BaFF066fA1111d7202;
 }
+
+library AddressesHyperEVM {
+    // 5/8 multisig
+    address public constant ADMIN = 0x92A19381444A001d62cE67BaFF066fA1111d7202;
+}

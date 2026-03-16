@@ -15,6 +15,7 @@ import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
 import {DeployTimelockScript} from "./base/001_Timelock.sol";
 import {DeployPlumeTimelockScript} from "./plume/001_Timelock.sol";
 import {SonicDeployTimelockScript} from "./sonic/001_Timelock.sol";
+import {DeployHyperEVMTimelockScript} from "./hyperevm/001_Timelock.sol";
 
 import {VmSafe} from "forge-std/Vm.sol";
 
@@ -85,6 +86,8 @@ contract DeployManager is Script {
             _runDeployFile(new SonicDeployTimelockScript());
         } else if (block.chainid == 98866) {
             _runDeployFile(new DeployPlumeTimelockScript());
+        } else if (block.chainid == 999) {
+            _runDeployFile(new DeployHyperEVMTimelockScript());
         }
     }
 
