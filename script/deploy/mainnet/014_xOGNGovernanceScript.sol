@@ -12,7 +12,9 @@ import {Governance} from "contracts/Governance.sol";
 import {GovFive} from "contracts/utils/GovFive.sol";
 
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {TimelockController} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
+import {
+    TimelockController
+} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
 contract XOGNGovernanceScript is AbstractScript {
     using GovFive for GovFive.GovFiveProposal;

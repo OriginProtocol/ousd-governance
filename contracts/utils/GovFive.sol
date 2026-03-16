@@ -6,7 +6,9 @@ import {Vm} from "forge-std/Vm.sol";
 import {Addresses} from "contracts/utils/Addresses.sol";
 import "forge-std/console.sol";
 
-import {TimelockController} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
+import {
+    TimelockController
+} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/governance/TimelockController.sol";
 
 library GovFive {
     struct GovFiveAction {
@@ -29,9 +31,7 @@ library GovFive {
         prop.description = description;
     }
 
-    function action(GovFiveProposal storage prop, address receiver, string memory fullsig, bytes memory data)
-        internal
-    {
+    function action(GovFiveProposal storage prop, address receiver, string memory fullsig, bytes memory data) internal {
         prop.actions.push(GovFiveAction({receiver: receiver, fullsig: fullsig, data: data}));
     }
 

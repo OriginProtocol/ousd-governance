@@ -26,6 +26,7 @@ contract Governance is
         GovernorVotesQuorumFraction(20) // Default quorum denominator is 100, so 20/100 or 20%
         GovernorTimelockControl(_timelock)
         GovernorPreventLateQuorum(7208) // ~1 days (86400 / 12)
+
     {}
 
     // The following functions are overrides required by Solidity.

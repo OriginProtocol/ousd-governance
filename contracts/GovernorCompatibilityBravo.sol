@@ -266,7 +266,11 @@ abstract contract GovernorCompatibilityBravo is IGovernorTimelock, IGovernorComp
         uint8 support,
         uint256 weight,
         bytes memory // params
-    ) internal virtual override {
+    )
+        internal
+        virtual
+        override
+    {
         ProposalDetails storage details = _proposalDetails[proposalId];
         Receipt storage receipt = details.receipts[account];
 

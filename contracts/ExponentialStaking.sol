@@ -2,8 +2,9 @@
 pragma solidity 0.8.10;
 
 import {ERC20Votes} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import {ERC20Permit} from
-    "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {
+    ERC20Permit
+} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
 import {ERC20} from "OpenZeppelin/openzeppelin-contracts@4.6.0/contracts/token/ERC20/ERC20.sol";
 import {PRBMathUD60x18} from "paulrberg/prb-math@2.5.0/contracts/PRBMathUD60x18.sol";
 import {RewardsSource} from "./RewardsSource.sol";
@@ -202,7 +203,7 @@ contract ExponentialStaking is ERC20Votes {
         if (supply > 0) {
             uint256 preBalance = asset.balanceOf(address(this));
             try rewardsSource.collectRewards() {}
-            catch {
+                catch {
                 // Governance staking should continue, even if rewards fail
             }
             uint256 collected = asset.balanceOf(address(this)) - preBalance;
