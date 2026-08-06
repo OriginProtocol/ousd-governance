@@ -18,7 +18,7 @@ contract RevokeMultisigGovernanceScript is AbstractScript {
 
     string public constant override DEPLOY_NAME = "015_RevokeMultisigGovernance";
     uint256 public constant override CHAIN_ID = 1;
-    bool public constant override proposalExecuted = false;
+    bool public constant override proposalExecuted = true;
 
     constructor() {}
 
