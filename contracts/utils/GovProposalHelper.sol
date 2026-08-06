@@ -87,7 +87,7 @@ library GovProposalHelper {
             getParams(prop);
 
         proposeCalldata = abi.encodeWithSignature(
-            "propose(address[],uint256[],string[], bytes[],string)", targets, values, sigs, data, prop.description
+            "propose(address[],uint256[],string[],bytes[],string)", targets, values, sigs, data, prop.description
         );
     }
 
@@ -146,8 +146,9 @@ library GovProposalHelper {
         if (state == IGovernor.ProposalState.Pending) {
             console.log("Waiting for voting period...");
             // Wait for voting to start
-            vm.roll(block.number + 10);
-            vm.warp(block.timestamp + 10 minutes);
+            uint256 blocksToVoteStart = governance.proposalSnapshot(proposalId) + 1 - block.number;
+            vm.roll(block.number + blocksToVoteStart);
+            vm.warp(block.timestamp + blocksToVoteStart * 12);
 
             state = governance.state(proposalId);
         }

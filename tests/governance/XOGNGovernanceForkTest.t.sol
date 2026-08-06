@@ -49,7 +49,7 @@ contract XOGNGovernanceForkTest is Test {
         ognRewardsSource = deployManager.getDeployment("OGN_REWARDS_SOURCE");
 
         vm.startPrank(Addresses.TIMELOCK);
-        ogn.mint(alice, 200000 ether);
+        ogn.mint(alice, 600000 ether);
         ogn.mint(bob, 200000 ether);
         ogn.mint(xognWhale, 1000_000_000 ether);
         vm.stopPrank();
@@ -78,7 +78,7 @@ contract XOGNGovernanceForkTest is Test {
     }
 
     function testProposalThreshold() external view {
-        assertEq(xognGov.proposalThreshold(), 100000 ether, "Incorrect voting period");
+        assertEq(xognGov.proposalThreshold(), 250000 ether, "Incorrect voting period");
     }
 
     function testPermissions() external view {
@@ -111,7 +111,7 @@ contract XOGNGovernanceForkTest is Test {
         vm.startPrank(alice);
 
         xogn.stake(
-            100000 ether, // 100k OGN
+            300000 ether, // 300k OGN
             30 days,
             alice,
             false,
