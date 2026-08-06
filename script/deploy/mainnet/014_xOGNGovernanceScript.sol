@@ -23,7 +23,7 @@ contract XOGNGovernanceScript is AbstractScript {
 
     string public constant override DEPLOY_NAME = "014_xOGNGovernance";
     uint256 public constant override CHAIN_ID = 1;
-    bool public constant override proposalExecuted = false;
+    bool public constant override proposalExecuted = true;
 
     uint256 public constant OGN_EPOCH = 1717041600; // May 30, 2024 GMT
 
