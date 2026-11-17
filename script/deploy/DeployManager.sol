@@ -11,6 +11,7 @@ import {OgnOgvMigrationScript} from "./mainnet/011_OgnOgvMigrationScript.sol";
 import {MigrationZapperScript} from "./mainnet/012_MigrationZapperScript.sol";
 import {UpgradeMigratorScript} from "./mainnet/013_UpgradeMigratorScript.sol";
 import {XOGNGovernanceScript} from "./mainnet/014_xOGNGovernanceScript.sol";
+import {UpdateProposalThresholdScript} from "./mainnet/016_UpdateProposalThreshold.sol";
 
 import {DeployTimelockScript} from "./base/001_Timelock.sol";
 import {DeployPlumeTimelockScript} from "./plume/001_Timelock.sol";
@@ -80,6 +81,7 @@ contract DeployManager is Script {
             _runDeployFile(new MigrationZapperScript());
             _runDeployFile(new UpgradeMigratorScript());
             _runDeployFile(new XOGNGovernanceScript());
+            _runDeployFile(new UpdateProposalThresholdScript());
         } else if (block.chainid == 8453) {
             _runDeployFile(new DeployTimelockScript());
         } else if (block.chainid == 146) {
